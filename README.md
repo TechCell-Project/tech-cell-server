@@ -35,6 +35,9 @@ $ yarn install
 ## Running the app
 
 ```bash
+# run the core module (RabbitMQ, ...)
+$ yarn up:core
+
 # development
 $ yarn run start
 
@@ -58,15 +61,16 @@ $ yarn run test:e2e
 $ yarn run test:cov
 ```
 
-## Support
+## Closing the app
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```bash
+# stop the core module
+$ yarn down:core
+```
 
-## Stay in touch
+## Require installed
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+- Docker, docker-compose
 
 ## License
 
