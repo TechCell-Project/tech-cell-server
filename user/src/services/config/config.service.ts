@@ -5,7 +5,7 @@ export class ConfigService {
 
     constructor() {
         this.envConfig = {};
-        this.envConfig.port = process.env.USER_SERVICE_PORT || 8002;
+        this.envConfig.port = process.env.USER_SERVICE_PORT || 8001;
         this.envConfig.host = process.env.USER_SERVICE_HOST || '0.0.0.0';
         this.envConfig.transport = Transport.TCP;
     }
