@@ -11,7 +11,7 @@ export class UsersController {
     @Get()
     public async getUsers() {
         const userResponse: IServiceUserGetManyResponse = await firstValueFrom(
-            this.userServiceClient.send('user_get_many', { id: 1 }),
+            this.userServiceClient.send('user_get_many', {}),
         );
 
         return {

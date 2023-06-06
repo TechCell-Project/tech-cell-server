@@ -11,6 +11,17 @@ services:
     networks:
       - backend
       - frontend
+  user:
+    build: ./user
+    restart: always
+    hostname: user
+    env_file:
+      - .env
+    ports:
+      - "8001:8001"
+    networks:
+      - backend
+      - frontend
 
 networks:
   backend:
