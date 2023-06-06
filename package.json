@@ -18,6 +18,9 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./apps/back-end/test/jest-e2e.json",
+    "up": "docker-compose -f docker-compose.yml up -d",
+    "down": "docker-compose -f docker-compose.yml down",
+    "restart": "yarn down && yarn up",
     "up:core": "docker-compose -f docker-compose.core.yml up -d",
     "down:core": "docker-compose -f docker-compose.core.yml down"
   },

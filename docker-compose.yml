@@ -1,0 +1,60 @@
+version: '3'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - '0.0.0.0:5672:5672'
+      - '0.0.0.0:15672:15672'
+    env_file:
+      - .env
+    volumes:
+      - 'rabbitmq_data:/var/lib/rabbitmq'
+    networks:
+      - backend
+
+  sample:
+    build:
+      context: ./
+      dockerfile: ./apps/sample/Dockerfile
+    environment:
+      - RABBITMQ_HOST=rabbitmq:5672
+    env_file:
+      - .env
+    depends_on:
+      - rabbitmq
+    volumes:
+      - app_data:/usr/src/app
+      - /usr/src/app/node_modules
+    command: yarn start sample
+    networks:
+      - backend
+
+  api:
+    build:
+      context: ./
+      dockerfile: ./apps/api/Dockerfile
+    environment:
+      - RABBITMQ_HOST=rabbitmq:5672
+    env_file:
+      - .env
+    depends_on:
+      - rabbitmq
+      - sample
+    volumes:
+      - app_data:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - 8000:8000
+    command: yarn start api
+    networks:
+      - backend
+
+networks:
+  backend:
+
+volumes:
+  rabbitmq_data:
+    driver: local
+  app_data:
+    driver: local
