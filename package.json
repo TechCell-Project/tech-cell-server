@@ -1,0 +1,27 @@
+{
+  "name": "back-end",
+  "version": "1.0.0",
+  "description": "Back-end microservices application",
+  "scripts": {
+    "up:core": "docker compose -f docker-compose.core.yml up -d",
+    "down:core": "docker compose -f docker-compose.core.yml down",
+    "up": "docker compose -f docker-compose.yml up -d",
+    "down": "docker compose -f docker-compose.yml down"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vtca-project/back-end.git"
+  },
+  "keywords": [
+    "be",
+    "back-end",
+    "microservices",
+    "nestjs"
+  ],
+  "author": "lehuygiang28",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/vtca-project/back-end/issues"
+  },
+  "homepage": "https://github.com/vtca-project/back-end#readme"
+}
