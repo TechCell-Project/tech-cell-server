@@ -4,16 +4,16 @@ import { UserService } from '../services';
 
 @Controller()
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+    constructor(private readonly userService: UserService) {}
 
-  @Get()
-  getHello(): string {
-    return this.userService.getHello();
-  }
+    @Get()
+    getHello(): string {
+        return this.userService.getHello();
+    }
 
-  @MessagePattern('user_get_many')
-  public async getUsers() {
-    const result = await this.userService.getUsers();
-    return result;
-  }
+    @MessagePattern('user_get_many')
+    public async getUsers() {
+        const result = await this.userService.getUsers();
+        return result;
+    }
 }
