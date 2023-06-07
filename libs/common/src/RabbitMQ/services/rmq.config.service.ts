@@ -4,7 +4,7 @@ import { RabbitMQService } from '@app/common';
 
 /**
  * @param app ISNestApplication instance
- * @param queueNameEnv A environment variable which will be used to configure the RabbitMQ service queue
+ * @param queueNameEnv A environment variable which is defined in the .env file that is used to configure the RabbitMQ queue name
  * @returns A promise that resolves when the application is initialized
  */
 export async function configRmqService(app: INestApplication, queueNameEnv: string) {
