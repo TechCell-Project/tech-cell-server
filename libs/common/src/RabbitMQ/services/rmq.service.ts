@@ -9,14 +9,12 @@ export class RabbitMQService implements RabbitMQServiceInterface {
     constructor(private readonly configService: ConfigService) {}
 
     getRmqOptions(queue: string, noAck = false): RmqOptions {
-        const USER = this.configService.get<string>('RABBITMQ_USER');
-        const PASSWORD = this.configService.get<string>('RABBITMQ_PASS');
-        const HOST = this.configService.get<string>('RABBITMQ_HOST');
+        const URLS = this.configService.get('RABBITMQ_URLS');
 
         return {
             transport: Transport.RMQ,
             options: {
-                urls: [`amqp://${USER}:${PASSWORD}@${HOST}`],
+                urls: [URLS],
                 noAck,
                 queue,
                 queueOptions: {

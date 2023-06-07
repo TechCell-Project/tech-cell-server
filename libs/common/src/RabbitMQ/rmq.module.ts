@@ -20,14 +20,12 @@ export class RabbitMQModule {
             {
                 provide: service,
                 useFactory: (configService: ConfigService) => {
-                    const USER = configService.get('RABBITMQ_USER');
-                    const PASSWORD = configService.get('RABBITMQ_PASS');
-                    const HOST = configService.get('RABBITMQ_HOST');
+                    const URLS = configService.get('RABBITMQ_URLS');
 
                     return ClientProxyFactory.create({
                         transport: Transport.RMQ,
                         options: {
-                            urls: [`amqp://${USER}:${PASSWORD}@${HOST}`],
+                            urls: [URLS],
                             queue,
                             queueOptions: {
                                 durable: true, // queue survives broker restart
