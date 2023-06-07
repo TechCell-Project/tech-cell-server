@@ -2,7 +2,7 @@ import { DynamicModule, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ClientProxyFactory, Transport } from '@nestjs/microservices';
 
-import { RabbitMQService } from './rmq.service';
+import { RabbitMQService } from './services';
 
 @Module({
     imports: [

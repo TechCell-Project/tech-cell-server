@@ -2,12 +2,10 @@ version: "3"
 
 services:
   rabbitmq:
-    # image: rabbitmq:3.9.29-management
     image: rabbitmq:3-management
     ports:
-      - '5671:5671'
-      - '5672:5672'
-      - '15672:15672'
+      - '0.0.0.0:5672:5672'
+      - '0.0.0.0:15672:15672'
     env_file:
       - .env
     volumes:
