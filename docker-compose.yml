@@ -1,36 +1,80 @@
 version: '3'
+
 services:
-  gateway:
-    build: ./gateway
-    restart: always
-    hostname: gateway
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - '0.0.0.0:5672:5672'
+      - '0.0.0.0:15672:15672'
     env_file:
       - .env
-    ports:
-      - "8000:8000"
+    volumes:
+      - 'rabbitmq_data:/var/lib/rabbitmq'
     networks:
       - backend
-      - frontend
-  user:
-    build: ./user
-    restart: always
-    hostname: user
+
+  products:
+    build:
+      context: ./
+      dockerfile: ./apps/products/Dockerfile
+    environment:
+      - RABBITMQ_URLS=amqp://admin:admin123@rabbitmq:5672
     env_file:
       - .env
-    ports:
-      - "8001:8001"
+    depends_on:
+      - rabbitmq
+      # - mongodb-primary
+      # - mongodb-secondary
+      # - mongodb-arbiter
+    volumes:
+      - app_data:/usr/src/app
+      - /usr/src/app/node_modules
+    command: yarn start products
     networks:
       - backend
-      - frontend
+
+  sample:
+    build:
+      context: ./
+      dockerfile: ./apps/sample/Dockerfile
+    environment:
+      - RABBITMQ_URLS=amqp://admin:admin123@rabbitmq:5672
+    env_file:
+      - .env
+    depends_on:
+      - rabbitmq
+    volumes:
+      - app_data:/usr/src/app
+      - /usr/src/app/node_modules
+    command: yarn start sample
+    networks:
+      - backend
+
+  api:
+    build:
+      context: ./
+      dockerfile: ./apps/api/Dockerfile
+    environment:
+      - RABBITMQ_URLS=amqp://admin:admin123@rabbitmq:5672
+    env_file:
+      - .env
+    depends_on:
+      - rabbitmq
+      - sample
+    volumes:
+      - app_data:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - 8000:8000
+    command: yarn start api
+    networks:
+      - backend
 
 networks:
   backend:
-    driver: bridge
-  frontend:
-    external: true
-    name: infrastructure
-
 
 volumes:
-  mongo_data:
+  rabbitmq_data:
+    driver: local
+  app_data:
     driver: local

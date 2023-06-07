@@ -1,39 +1,23 @@
 version: "3"
-services:
-  mongodb:
-    image: mongo:latest
-    container_name: mongodb
-    restart: always
-    ports:
-      - "27017:27017"
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: master123
-    volumes:
-      - mongo_data:/data/db
-    networks:
-      - backend
 
-  mysql:
-    image: mysql:latest
-    container_name: mysql
-    restart: always
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
     ports:
-      - "3306:3306"
-    environment:
-      MYSQL_ROOT_PASSWORD: rootmaster123
-      MYSQL_USER: admin
-      MYSQL_PASSWORD: master123
+      - '0.0.0.0:5672:5672'
+      - '0.0.0.0:15672:15672'
+    env_file:
+      - .env
     volumes:
-      - mysql_data:/var/lib/mysql
+      - 'rabbitmq_data:/var/lib/rabbitmq'
     networks:
       - backend
 
 networks:
   backend:
-    driver: bridge
+
 volumes:
-  mongo_data:
-    name: mongo_data
-  mysql_data:
-    name: mysql_data
+  rabbitmq_data:
+    driver: local
+  mongodb_master_data:
+    driver: local
