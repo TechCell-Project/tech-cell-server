@@ -24,7 +24,12 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+A microservices application building with [Nest](https://github.com/nestjs/nest) and [RabbitMQ](https://github.com/rabbitmq)
+
+## Require installed
+
+-   Docker, docker-compose ...
+-   Or custom install RabbitMQ
 
 ## Installation
 
@@ -36,41 +41,21 @@ $ yarn install
 
 ```bash
 # run the core module (RabbitMQ, ...)
-$ yarn up:core
+$ yarn up:core # need docker-compose installed
 
-# development
-$ yarn run start
+# development each service
+$ yarn start <service_name> # ex: yarn start api
 
-# watch mode
-$ yarn run start:dev
-
-# production mode
-$ yarn run start:prod
+# watch mode each service
+$ yarn start:dev <service_name> # ex: yarn start:dev api
 ```
 
-## Test
-
-```bash
-# unit tests
-$ yarn run test
-
-# e2e tests
-$ yarn run test:e2e
-
-# test coverage
-$ yarn run test:cov
-```
-
-## Closing the app
+## Closing the core module service
 
 ```bash
 # stop the core module
 $ yarn down:core
 ```
-
-## Require installed
-
-- Docker, docker-compose
 
 ## License
 
