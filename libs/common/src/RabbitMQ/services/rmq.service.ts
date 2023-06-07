@@ -8,16 +8,16 @@ import { RabbitMQServiceInterface } from '../interfaces';
 export class RabbitMQService implements RabbitMQServiceInterface {
     constructor(private readonly configService: ConfigService) {}
 
-    getRmqOptions(queue: string): RmqOptions {
-        const USER = this.configService.get('RABBITMQ_USER');
-        const PASSWORD = this.configService.get('RABBITMQ_PASS');
-        const HOST = this.configService.get('RABBITMQ_HOST');
+    getRmqOptions(queue: string, noAck = false): RmqOptions {
+        const USER = this.configService.get<string>('RABBITMQ_USER');
+        const PASSWORD = this.configService.get<string>('RABBITMQ_PASS');
+        const HOST = this.configService.get<string>('RABBITMQ_HOST');
 
         return {
             transport: Transport.RMQ,
             options: {
                 urls: [`amqp://${USER}:${PASSWORD}@${HOST}`],
-                noAck: false,
+                noAck,
                 queue,
                 queueOptions: {
                     durable: true,

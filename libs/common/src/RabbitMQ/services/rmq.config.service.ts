@@ -1,6 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { RabbitMQService } from '@app/common';
+import { RmqOptions } from '@nestjs/microservices';
 
 /**
  * @param app ISNestApplication instance
@@ -9,11 +10,11 @@ import { RabbitMQService } from '@app/common';
  */
 export async function configRmqService(app: INestApplication, queueNameEnv: string) {
     const configService = app.get(ConfigService);
-    const rmqService = app.get(RabbitMQService);
+    const rmqService = app.get<RabbitMQService>(RabbitMQService);
 
     const queue = configService.get(queueNameEnv);
 
-    app.connectMicroservice(rmqService.getRmqOptions(queue));
+    app.connectMicroservice<RmqOptions>(rmqService.getRmqOptions(queue));
     await app.startAllMicroservices();
     console.log(`[${queue}] Started listening on queue: ${queue}`);
 }
