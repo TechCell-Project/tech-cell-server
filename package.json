@@ -1,5 +1,5 @@
 {
-  "name": "back-end",
+  "name": "tech-cell-web-server",
   "version": "0.0.1",
   "description": "",
   "author": "",
@@ -22,7 +22,10 @@
     "down": "docker-compose -f docker-compose.yml down",
     "restart": "yarn down && yarn up",
     "up:core": "docker-compose -f docker-compose.core.yml up -d",
-    "down:core": "docker-compose -f docker-compose.core.yml down"
+    "down:core": "docker-compose -f docker-compose.core.yml down",
+    "deploy:sample": "yarn install && yarn start sample",
+    "deploy:products": "yarn install && yarn start products",
+    "deploy:api": "yarn install && yarn start api"
   },
   "dependencies": {
     "@nestjs/common": "^9.0.0",
