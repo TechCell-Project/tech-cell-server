@@ -10,9 +10,9 @@ export class SampleController {
         @Inject(RabbitMQService) private readonly rabbitMqService: RabbitMQService,
     ) {}
 
-    @Get()
-    getHello(): string {
-        return this.sampleService.getHello();
+    @Get('ping')
+    getPing() {
+        return { message: 'pong' };
     }
 
     @MessagePattern('get_sample')
