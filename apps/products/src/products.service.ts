@@ -8,6 +8,10 @@ import { CreateProductRequest } from './dtos';
 export class ProductsService {
     constructor(@InjectModel(Product.name) private productModel: Model<Product>) {}
 
+    async getPing() {
+        return { message: 'pong' };
+    }
+
     async create(createProductRequest: CreateProductRequest) {
         const createdProduct = new this.productModel(createProductRequest);
         return createdProduct.save();
