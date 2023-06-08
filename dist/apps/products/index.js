@@ -749,6 +749,7 @@ const common_1 = __webpack_require__(10);
 async function bootstrap() {
     const app = await core_1.NestFactory.create(products_module_1.ProductsModule);
     (0, common_1.configRmqService)(app, 'RABBITMQ_PRODUCTS_QUEUE');
+    app.listen(1000);
 }
 bootstrap();
 
