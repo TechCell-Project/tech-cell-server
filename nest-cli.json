@@ -22,7 +22,7 @@
     "api": {
       "type": "application",
       "root": "apps/api",
-      "entryFile": "index",
+      "entryFile": "main",
       "sourceRoot": "apps/api/src",
       "compilerOptions": {
         "tsConfigPath": "apps/api/tsconfig.app.json"
@@ -40,7 +40,7 @@
     "products": {
       "type": "application",
       "root": "apps/products",
-      "entryFile": "index",
+      "entryFile": "main",
       "sourceRoot": "apps/products/src",
       "compilerOptions": {
         "tsConfigPath": "apps/products/tsconfig.app.json"
