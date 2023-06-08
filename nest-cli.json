@@ -10,10 +10,19 @@
   "monorepo": true,
   "root": "apps/api",
   "projects": {
+    "common": {
+      "type": "library",
+      "root": "libs/common",
+      "entryFile": "index",
+      "sourceRoot": "libs/common/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/common/tsconfig.lib.json"
+      }
+    },
     "api": {
       "type": "application",
       "root": "apps/api",
-      "entryFile": "main",
+      "entryFile": "index",
       "sourceRoot": "apps/api/src",
       "compilerOptions": {
         "tsConfigPath": "apps/api/tsconfig.app.json"
@@ -28,19 +37,10 @@
         "tsConfigPath": "apps/sample/tsconfig.app.json"
       }
     },
-    "common": {
-      "type": "library",
-      "root": "libs/common",
-      "entryFile": "index",
-      "sourceRoot": "libs/common/src",
-      "compilerOptions": {
-        "tsConfigPath": "libs/common/tsconfig.lib.json"
-      }
-    },
     "products": {
       "type": "application",
       "root": "apps/products",
-      "entryFile": "main",
+      "entryFile": "index",
       "sourceRoot": "apps/products/src",
       "compilerOptions": {
         "tsConfigPath": "apps/products/tsconfig.app.json"
