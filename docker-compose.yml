@@ -7,7 +7,7 @@ services:
       dockerfile: ./apps/products/Dockerfile
     environment:
       - RABBITMQ_URLS=amqp://admin:admin123@rabbitmq:5672
-      - MONGODB_URI=mongodb://root:password123@mongodb-primary:27017/?directConnection=true
+      - MONGODB_URI=mongodb://root:password123@mongodb-primary:27027/?directConnection=true
     env_file:
       - .env
     depends_on:
@@ -81,7 +81,7 @@ services:
     volumes:
       - 'mongodb_master_data:/bitnami/mongodb'
     ports:
-      - '27017:27017'
+      - '27027:27027'
     networks:
       - backend
 
