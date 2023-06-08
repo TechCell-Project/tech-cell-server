@@ -6,7 +6,7 @@ import { RabbitMQModule, RabbitMQService, MongodbModule } from '@app/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Product, ProductSchema } from './schemas/product.schema';
 import { ProductRepository } from './products.repository';
-import {  ValidationModule } from '@app/common';
+import { ValidationModule } from '@app/common';
 
 @Module({
     imports: [
