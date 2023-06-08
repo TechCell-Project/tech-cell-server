@@ -1,0 +1,23 @@
+version: "3"
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - '0.0.0.0:5672:5672'
+      - '0.0.0.0:15672:15672'
+    env_file:
+      - .env
+    volumes:
+      - 'rabbitmq_data:/var/lib/rabbitmq'
+    networks:
+      - backend
+
+networks:
+  backend:
+
+volumes:
+  rabbitmq_data:
+    driver: local
+  mongodb_master_data:
+    driver: local
