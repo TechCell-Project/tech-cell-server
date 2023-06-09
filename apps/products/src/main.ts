@@ -9,6 +9,5 @@ async function bootstrap() {
     configRmqService(app, 'RABBITMQ_PRODUCTS_QUEUE');
     await app.listen(port);
     Logger.log(`⚡️ [products] products listening on http://localhost:${port}`);
-    Logger.log(process.env.MONGODB_URI);
 }
 bootstrap();
