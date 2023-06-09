@@ -1,9 +1,9 @@
-import { Controller, Inject, UseFilters } from '@nestjs/common';
-import { ProductsService } from './products.service';
+import { Controller, Get, Inject, UseFilters } from '@nestjs/common';
+import { ProductsService } from './services';
 import { RabbitMQService } from '@app/common';
 import { MessagePattern, Ctx, RmqContext, Payload } from '@nestjs/microservices';
 import { CreateProductRequest } from './dtos';
-import { ValidationPipe } from './validation.pipe';
+import { ValidationPipe } from '@app/common';
 import { RpcValidationFilter } from './filters';
 
 @Controller()
@@ -12,6 +12,11 @@ export class ProductsController {
         @Inject(RabbitMQService) private readonly rabbitMqService: RabbitMQService,
         private readonly productsService: ProductsService,
     ) {}
+
+    @Get('ping')
+    async getPing() {
+        return this.productsService.getPing();
+    }
 
     @MessagePattern({ cmd: 'get_products' })
     async getProducts(@Ctx() context: RmqContext) {

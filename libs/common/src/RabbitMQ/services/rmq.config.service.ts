@@ -13,6 +13,8 @@ export async function configRmqService(app: INestApplication, queueNameEnv: stri
     const rmqService = app.get<RabbitMQService>(RabbitMQService);
 
     const queue = configService.get(queueNameEnv);
+    console.log('RMQ:: ' + configService.get('RABBITMQ_URLS'));
+    console.log('DB:: ' + configService.get('MONGODB_URI'));
 
     app.connectMicroservice<RmqOptions>(rmqService.getRmqOptions(queue));
     await app.startAllMicroservices();
