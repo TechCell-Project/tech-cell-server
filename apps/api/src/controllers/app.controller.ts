@@ -1,6 +1,6 @@
 import { Controller, Get, Inject } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { SAMPLE_SERVICE } from '../../../constants';
+import { SAMPLE_SERVICE } from '../../../../constants';
 
 @Controller('/')
 export class AppController {

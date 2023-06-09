@@ -1,6 +1,6 @@
 import { Controller, Inject, Body, Get, Post } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { PRODUCTS_SERVICE } from '../../../constants';
+import { PRODUCTS_SERVICE } from '../../../../constants';
 
 @Controller('products')
 export class ProductsController {
