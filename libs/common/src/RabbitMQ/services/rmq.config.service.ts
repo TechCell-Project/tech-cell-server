@@ -8,7 +8,7 @@ import { RmqOptions } from '@nestjs/microservices';
  * @param queueNameEnv A environment variable which is defined in the .env file that is used to configure the RabbitMQ queue name
  * @returns A promise that resolves when the application is initialized
  */
-export async function configRmqService(app: INestApplication, queueNameEnv: string) {
+export async function useRabbitMQ(app: INestApplication, queueNameEnv: string) {
     const configService = app.get(ConfigService);
     const rmqService = app.get<RabbitMQService>(RabbitMQService);
 
