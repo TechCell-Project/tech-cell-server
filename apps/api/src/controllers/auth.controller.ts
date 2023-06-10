@@ -2,6 +2,7 @@ import { Controller, Inject, Body, Post } from '@nestjs/common';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { AUTH_SERVICE } from '../../../../constants';
 import { catchError, throwError } from 'rxjs';
+import { RegisterRequestDTO } from '../../../auth/src/dtos';
 
 @Controller('auth')
 export class AuthController {
@@ -14,12 +15,10 @@ export class AuthController {
             .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
     }
 
-    @Post('signup')
-    async signup(@Body() user: { email: string; password: string }) {
-        console.log('[API] ');
-        console.log(user);
+    @Post('register')
+    async register(@Body() user: RegisterRequestDTO) {
         return this.authService
-            .send({ cmd: 'auth_signup' }, user ? user : undefined)
+            .send({ cmd: 'auth_register' }, user ? user : undefined)
             .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
     }
 }

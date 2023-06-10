@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UsersService } from './users/users.service';
 import { ConfigService } from '@nestjs/config';
 import { LoginRequest } from './users/dtos';
-import { JwtPayloadDto } from './dtos';
+import { JwtPayloadDto, RegisterRequestDTO } from './dtos';
 import * as bcrypt from 'bcrypt';
 import { User } from './users/schemas';
 import { RpcException } from '@nestjs/microservices';
@@ -18,6 +18,10 @@ export class AuthService {
 
     getPing() {
         return { message: 'pong', services: 'auth' };
+    }
+
+    async register(userRegister: RegisterRequestDTO) {
+        return userRegister;
     }
 
     async login({ email, password }: LoginRequest) {
