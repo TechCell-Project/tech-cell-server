@@ -1,11 +1,4 @@
-import {
-    ClassSerializerInterceptor,
-    Controller,
-    Get,
-    Inject,
-    UseFilters,
-    UseInterceptors,
-} from '@nestjs/common';
+import { Controller, Get, Inject, UseFilters } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RabbitMQService, ValidationPipe } from '@app/common';
 import { Ctx, MessagePattern, Payload, RmqContext } from '@nestjs/microservices';
