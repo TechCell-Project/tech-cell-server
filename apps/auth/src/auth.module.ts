@@ -8,7 +8,6 @@ import {
     // , RefreshTokenStrategy
 } from './strategies';
 import { JwtModule } from '@nestjs/jwt';
-
 import { JwtGuard } from './guards';
 
 @Module({

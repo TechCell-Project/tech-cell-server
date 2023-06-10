@@ -6,6 +6,7 @@ import { LoginRequest } from './users/dtos';
 import { JwtPayloadDto } from './dtos';
 import * as bcrypt from 'bcrypt';
 import { User } from './users/schemas';
+import { RpcException } from '@nestjs/microservices';
 
 @Injectable()
 export class AuthService {
@@ -23,7 +24,7 @@ export class AuthService {
         const user = await this.validateUser(email, password);
 
         if (!user) {
-            throw new UnauthorizedException();
+            throw new RpcException(new UnauthorizedException());
         }
         delete user.password;
 
@@ -57,7 +58,7 @@ export class AuthService {
 
     async verifyAccessToken(accessToken: string) {
         if (!accessToken) {
-            throw new UnauthorizedException();
+            throw new RpcException(new UnauthorizedException());
         }
 
         try {
@@ -66,13 +67,13 @@ export class AuthService {
             });
             return { user, exp };
         } catch (error) {
-            throw new UnauthorizedException();
+            throw new RpcException(new UnauthorizedException());
         }
     }
 
     async verifyRefreshToken(refreshToken: string) {
         if (!refreshToken) {
-            throw new UnauthorizedException();
+            throw new RpcException(new UnauthorizedException());
         }
 
         try {
@@ -81,7 +82,7 @@ export class AuthService {
             });
             return { user, exp };
         } catch (error) {
-            throw new UnauthorizedException();
+            throw new RpcException(new UnauthorizedException());
         }
     }
 

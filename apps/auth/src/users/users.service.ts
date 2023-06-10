@@ -3,6 +3,7 @@ import * as bcrypt from 'bcrypt';
 import { UsersRepository } from './users.repository';
 import { CreateUserRequest } from './dtos';
 import { User } from './schemas/user.schema';
+import { RpcException } from '@nestjs/microservices';
 
 @Injectable()
 export class UsersService {
@@ -26,7 +27,7 @@ export class UsersService {
         } catch (err) {}
 
         if (user) {
-            throw new UnprocessableEntityException('Email already exists.');
+            throw new RpcException(new UnprocessableEntityException('Email already exists.'));
         }
     }
 
@@ -34,7 +35,7 @@ export class UsersService {
         const user = await this.usersRepository.findOne({ email });
         const passwordIsValid = await bcrypt.compare(password, user.password);
         if (!passwordIsValid) {
-            throw new UnauthorizedException('Credentials are not valid.');
+            throw new RpcException(new UnauthorizedException('Credentials are not valid.'));
         }
         return user;
     }

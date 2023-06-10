@@ -1,1 +1,1 @@
-export * from './httpException.filter';
+export * from './rpc-exception.filter';

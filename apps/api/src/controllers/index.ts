@@ -1,5 +1,6 @@
 export * from './app.controller';
 export * from './products.controller';
+export * from './app.controller';
 
 import { AppController } from './app.controller';
 import { ProductsController } from './products.controller';
