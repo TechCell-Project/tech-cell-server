@@ -4,7 +4,7 @@ import { RabbitMQService } from '@app/common';
 import { MessagePattern, Ctx, RmqContext, Payload } from '@nestjs/microservices';
 import { CreateProductRequest } from './dtos';
 import { ValidationPipe } from '@app/common';
-import { RpcValidationFilter } from './filters';
+import { RpcValidationFilter } from '@app/common';
 
 @Controller()
 export class ProductsController {
