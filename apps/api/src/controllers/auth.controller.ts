@@ -10,4 +10,9 @@ export class AuthController {
     async login(@Body() user: { email: string; password: string }) {
         return this.authService.send({ cmd: 'auth_login' }, user ? user : undefined);
     }
+
+    @Post('signup')
+    async signup(@Body() user: { email: string; password: string }) {
+        return this.authService.send({ cmd: 'auth_signup' }, user ? user : undefined);
+    }
 }
