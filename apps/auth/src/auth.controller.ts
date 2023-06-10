@@ -1,15 +1,13 @@
 import { Controller, Get, Inject, UseFilters, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { RabbitMQService, ValidationPipe } from '@app/common';
+import { RabbitMQService } from '@app/common';
 import { Ctx, MessagePattern, Payload, RmqContext } from '@nestjs/microservices';
 import { UserDataResponseDto } from './dtos';
 import { CreateUserRequest } from './users/dtos';
-import { RpcValidationFilter } from '@app/common';
 import { UsersService } from './users/users.service';
 import { JwtGuard } from './guards/jwt.guard';
 
 @Controller()
-@UseFilters(new RpcValidationFilter())
 export class AuthController {
     constructor(
         private readonly authService: AuthService,
@@ -25,7 +23,7 @@ export class AuthController {
     @MessagePattern({ cmd: 'auth_login' })
     async login(
         @Ctx() context: RmqContext,
-        @Payload(new ValidationPipe()) user: CreateUserRequest, // : Promise<UserDataResponseDto>
+        @Payload() user: CreateUserRequest, // : Promise<UserDataResponseDto>
     ) {
         this.rabbitMqService.acknowledgeMessage(context);
         const userFound = await this.authService.login({ ...user });
@@ -35,7 +33,7 @@ export class AuthController {
     @MessagePattern({ cmd: 'auth_signup' })
     async signup(
         @Ctx() context: RmqContext,
-        @Payload(new ValidationPipe()) user: CreateUserRequest,
+        @Payload() user: CreateUserRequest,
     ): Promise<UserDataResponseDto> {
         this.rabbitMqService.acknowledgeMessage(context);
         const userCreated = await this.usersService.createUser(user);

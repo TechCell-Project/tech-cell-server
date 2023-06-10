@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { RabbitMQModule, RabbitMQService, ValidationModule } from '@app/common';
+import { RabbitMQModule, RabbitMQService } from '@app/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { UsersModule } from './users/users.module';
@@ -18,7 +18,6 @@ import { JwtGuard } from './guards';
         JwtGuard,
         RabbitMQService,
         AuthService,
-        ValidationModule,
         AccessTokenStrategy,
         // RefreshTokenStrategy,
     ],
