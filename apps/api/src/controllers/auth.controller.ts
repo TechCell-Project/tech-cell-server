@@ -13,6 +13,8 @@ export class AuthController {
 
     @Post('signup')
     async signup(@Body() user: { email: string; password: string }) {
+        console.log('[API] ');
+        console.log(user);
         return this.authService.send({ cmd: 'auth_signup' }, user ? user : undefined);
     }
 }

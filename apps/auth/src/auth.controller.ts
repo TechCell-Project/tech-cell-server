@@ -14,8 +14,8 @@ import { CreateUserRequest } from './users/dtos';
 import { RpcValidationFilter } from '@app/common';
 import { UsersService } from './users/users.service';
 
-@UseInterceptors(ClassSerializerInterceptor)
 @Controller()
+@UseFilters(new RpcValidationFilter())
 export class AuthController {
     constructor(
         private readonly authService: AuthService,
@@ -28,17 +28,16 @@ export class AuthController {
         return this.authService.getPing();
     }
 
-    @UseFilters(new RpcValidationFilter())
     @MessagePattern({ cmd: 'auth_login' })
     async login(
         @Ctx() context: RmqContext,
-        @Payload(new ValidationPipe()) user: CreateUserRequest,
+        @Payload(new ValidationPipe()) user: CreateUserRequest, // : Promise<UserDataResponseDto>
     ) {
         this.rabbitMqService.acknowledgeMessage(context);
-        return { ...user };
+        const userFound = await this.authService.login({ ...user });
+        return userFound;
     }
 
-    @UseFilters(new RpcValidationFilter())
     @MessagePattern({ cmd: 'auth_signup' })
     async signup(
         @Ctx() context: RmqContext,

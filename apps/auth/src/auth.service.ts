@@ -1,9 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from './users/users.service';
 import { ConfigService } from '@nestjs/config';
 import { LoginRequest } from './users/dtos';
 import { JwtPayloadDto } from './dtos';
+import * as bcrypt from 'bcrypt';
+import { User } from './users/schemas';
 
 @Injectable()
 export class AuthService {
@@ -17,11 +19,73 @@ export class AuthService {
         return { message: 'pong', services: 'auth' };
     }
 
-    login({ email, password }: LoginRequest) {
-        return { email, password };
+    async login({ email, password }: LoginRequest) {
+        const user = await this.validateUser(email, password);
+
+        if (!user) {
+            throw new UnauthorizedException();
+        }
+        delete user.password;
+
+        const { _id, email: emailUser, role } = user;
+        const { accessToken, refreshToken } = await this.signTokens({
+            _id,
+            email: emailUser,
+            role,
+        });
+
+        return { accessToken, refreshToken, user };
     }
 
-    async getTokens({ _id, email, role }: JwtPayloadDto) {
+    async validateUser(email: string, password: string): Promise<User> {
+        const user = await this.usersService.getUser({ email });
+
+        const doesUserExist = !!user;
+
+        if (!doesUserExist) return null;
+
+        const doesPasswordMatch = await this.doesPasswordMatch(password, user.password);
+
+        if (!doesPasswordMatch) return null;
+
+        return user;
+    }
+
+    async doesPasswordMatch(password: string, hashedPassword: string): Promise<boolean> {
+        return bcrypt.compare(password, hashedPassword);
+    }
+
+    async verifyAccessToken(accessToken: string) {
+        if (!accessToken) {
+            throw new UnauthorizedException();
+        }
+
+        try {
+            const { user, exp } = await this.jwtService.verifyAsync(accessToken, {
+                secret: this.configService.get<string>('JWT_ACCESS_TOKEN_SECRET'),
+            });
+            return { user, exp };
+        } catch (error) {
+            throw new UnauthorizedException();
+        }
+    }
+
+    async verifyRefreshToken(refreshToken: string) {
+        if (!refreshToken) {
+            throw new UnauthorizedException();
+        }
+
+        try {
+            const { user, exp } = await this.jwtService.verifyAsync(refreshToken, {
+                secret: this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'),
+            });
+            return { user, exp };
+        } catch (error) {
+            throw new UnauthorizedException();
+        }
+    }
+
+    async signTokens({ _id, email, role }: JwtPayloadDto) {
         const [accessToken, refreshToken] = await Promise.all([
             this.jwtService.signAsync(
                 {
@@ -55,11 +119,11 @@ export class AuthService {
         return {
             accessToken: {
                 token: accessToken,
-                expTime: accessTokenExp,
+                expTime: accessTokenExp['exp'] * 1000,
             },
             refreshToken: {
                 token: refreshToken,
-                expTime: refreshToken,
+                expTime: refreshTokenExp['exp'] * 1000,
             },
         };
     }

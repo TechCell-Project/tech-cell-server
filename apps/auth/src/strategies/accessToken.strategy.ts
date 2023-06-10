@@ -1,16 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import { Strategy } from 'passport-jwt';
-import { JwtPayloadDto } from '../dtos';
+import { Strategy, ExtractJwt } from 'passport-jwt';
+import { JwtPayloadDto, JwtRequestDto } from '../dtos';
 
 @Injectable()
 export class AccessTokenStrategy extends PassportStrategy(Strategy, 'jwt') {
     constructor() {
         super({
-            jwtFromRequest: () => {
-                return {};
-            },
-            secretOrKey: process.env.JWT_REFRESH_TOKEN_SECRET,
+            jwtFromRequest: ExtractJwt.fromExtractors([
+                (request: JwtRequestDto) => {
+                    console.log('strategy running access');
+                    return request?.jwt;
+                },
+            ]),
+            secretOrKey: process.env.JWT_ACCESS_TOKEN_SECRET,
             signOptions: {
                 expiresIn: process.env.JWT_ACCESS_TOKEN_EXPIRATION,
             },
@@ -18,6 +21,6 @@ export class AccessTokenStrategy extends PassportStrategy(Strategy, 'jwt') {
     }
 
     validate(payload: JwtPayloadDto) {
-        return payload;
+        return { ...payload };
     }
 }

@@ -1,6 +1,6 @@
 import { Exclude, Type } from 'class-transformer';
 import { IsArray, IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { ObjectId, Types } from 'mongoose';
+import { Types } from 'mongoose';
 
 export class UserDataResponseDto {
     @Type(() => String)
@@ -19,9 +19,6 @@ export class UserDataResponseDto {
     @IsString()
     @IsNotEmpty()
     role?: string;
-
-    @Exclude()
-    password: string;
 
     constructor(partial: Partial<UserDataResponseDto>) {
         Object.assign(this, partial);
