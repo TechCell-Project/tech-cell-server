@@ -1,4 +1,4 @@
-import { Controller, Get, Inject, UseFilters } from '@nestjs/common';
+import { Controller, Get, Inject, UseFilters, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RabbitMQService, ValidationPipe } from '@app/common';
 import { Ctx, MessagePattern, Payload, RmqContext } from '@nestjs/microservices';
@@ -6,6 +6,7 @@ import { UserDataResponseDto } from './dtos';
 import { CreateUserRequest } from './users/dtos';
 import { RpcValidationFilter } from '@app/common';
 import { UsersService } from './users/users.service';
+import { JwtGuard } from './guards/jwt.guard';
 
 @Controller()
 @UseFilters(new RpcValidationFilter())
@@ -39,5 +40,13 @@ export class AuthController {
         this.rabbitMqService.acknowledgeMessage(context);
         const userCreated = await this.usersService.createUser(user);
         return new UserDataResponseDto(userCreated);
+    }
+
+    @MessagePattern({ cmd: 'verify-jwt' })
+    @UseGuards(JwtGuard)
+    async verifyJwt(@Ctx() context: RmqContext, @Payload() payload: { jwt: string }) {
+        this.rabbitMqService.acknowledgeMessage(context);
+
+        return this.authService.verifyAccessToken(payload.jwt);
     }
 }

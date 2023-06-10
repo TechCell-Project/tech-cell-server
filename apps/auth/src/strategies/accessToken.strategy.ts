@@ -9,7 +9,6 @@ export class AccessTokenStrategy extends PassportStrategy(Strategy, 'jwt') {
         super({
             jwtFromRequest: ExtractJwt.fromExtractors([
                 (request: JwtRequestDto) => {
-                    console.log('strategy running access');
                     return request?.jwt;
                 },
             ]),
