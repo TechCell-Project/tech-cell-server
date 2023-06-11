@@ -27,13 +27,17 @@
 - A microservices application building with [Nest](https://github.com/nestjs/nest) and [RabbitMQ](https://github.com/rabbitmq).
 - Using [docker](https://www.docker.com/) and [docker-compose](https://docs.docker.com/compose/) to run locally and automatically
 
-## Require installed
+## ⚡ Require installed
 
 - Docker, docker-compose ...
 - Or custom install:
   * Package Manager: [yarn](https://yarnpkg.com/)
   * Database: [Mongodb](https://www.mongodb.com/) with [replica set mode](https://www.mongodb.com/docs/manual/replication/) or [mongodb atlas](https://www.mongodb.com/docs/atlas/)
   * Message Broker: [RabbitMQ](https://www.rabbitmq.com/)
+
+## ⚠️ Attention:
+- [Ubuntu](https://ubuntu.com/) or [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) (Windows subsystems for Linux) is **recommended** for both development and production
+- Windows is **not** recommended, can use in development **not** for production
 
 # 🚀 Use the app
 
@@ -45,7 +49,7 @@
   * Message Broker
 - Application services
   * Api
-  * ...
+  * etc...
 
 ### Starting
 ```bash
