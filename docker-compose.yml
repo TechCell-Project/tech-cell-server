@@ -18,12 +18,14 @@ services:
         environment:
             - MONGODB_ADVERTISED_HOSTNAME=mongodb-primary
             - MONGODB_REPLICA_SET_MODE=primary
-            - MONGODB_ROOT_PASSWORD=password123
-            - MONGODB_REPLICA_SET_KEY=replicasetkey123
+            - MONGODB_ROOT_PASSWORD=${SET_MONGODB_ROOT_PASSWORD}
+            - MONGODB_REPLICA_SET_KEY=${SET_MONGODB_REPLICA_SET_KEY}
+        env_file:
+            - .env
         volumes:
             - 'mongodb_master_data:/bitnami/mongodb'
         ports:
-            - '0.0.0.0:27027:27017'
+            - '27027:27017'
         networks:
             - backend
 
@@ -35,8 +37,10 @@ services:
             - MONGODB_ADVERTISED_HOSTNAME=mongodb-secondary
             - MONGODB_REPLICA_SET_MODE=secondary
             - MONGODB_INITIAL_PRIMARY_HOST=mongodb-primary
-            - MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=password123
-            - MONGODB_REPLICA_SET_KEY=replicasetkey123
+            - MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=${SET_MONGODB_ROOT_PASSWORD}
+            - MONGODB_REPLICA_SET_KEY=${SET_MONGODB_REPLICA_SET_KEY}
+        env_file:
+            - .env
         networks:
             - backend
 
@@ -48,8 +52,10 @@ services:
             - MONGODB_ADVERTISED_HOSTNAME=mongodb-arbiter
             - MONGODB_REPLICA_SET_MODE=arbiter
             - MONGODB_INITIAL_PRIMARY_HOST=mongodb-primary
-            - MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=password123
-            - MONGODB_REPLICA_SET_KEY=replicasetkey123
+            - MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=${SET_MONGODB_ROOT_PASSWORD}
+            - MONGODB_REPLICA_SET_KEY=${SET_MONGODB_REPLICA_SET_KEY}
+        env_file:
+            - .env
         networks:
             - backend
 
@@ -67,7 +73,7 @@ services:
         volumes:
             - .:/usr/src/techcell_app
             - /usr/src/techcell_app/node_modules
-        command: yarn start auth
+        command: yarn start:prod auth
         networks:
             - backend
 
@@ -88,7 +94,7 @@ services:
         volumes:
             - .:/usr/src/techcell_app
             - /usr/src/techcell_app/node_modules
-        command: yarn start products
+        command: yarn start:prod products
         networks:
             - backend
 
@@ -105,7 +111,7 @@ services:
         volumes:
             - .:/usr/src/techcell_app
             - /usr/src/techcell_app/node_modules
-        command: yarn start sample
+        command: yarn start:prod sample
         networks:
             - backend
 
@@ -127,7 +133,7 @@ services:
             - /usr/src/techcell_app/node_modules
         ports:
             - 8000:8000
-        command: yarn start api
+        command: yarn start:prod api
         networks:
             - backend
 

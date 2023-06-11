@@ -15,11 +15,13 @@ services:
 
     mongodb-primary:
         image: docker.io/bitnami/mongodb:5.0
+        env_file:
+            - .env
         environment:
             - MONGODB_ADVERTISED_HOSTNAME=mongodb-primary
             - MONGODB_REPLICA_SET_MODE=primary
-            - MONGODB_ROOT_PASSWORD=password123
-            - MONGODB_REPLICA_SET_KEY=replicasetkey123
+            - MONGODB_ROOT_PASSWORD=${SET_MONGODB_ROOT_PASSWORD}
+            - MONGODB_REPLICA_SET_KEY=${SET_MONGODB_REPLICA_SET_KEY}
         volumes:
             - 'mongodb_master_data:/bitnami/mongodb'
         ports:
@@ -31,12 +33,14 @@ services:
         image: docker.io/bitnami/mongodb:5.0
         depends_on:
             - mongodb-primary
+        env_file:
+            - .env
         environment:
             - MONGODB_ADVERTISED_HOSTNAME=mongodb-secondary
             - MONGODB_REPLICA_SET_MODE=secondary
             - MONGODB_INITIAL_PRIMARY_HOST=mongodb-primary
-            - MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=password123
-            - MONGODB_REPLICA_SET_KEY=replicasetkey123
+            - MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=${SET_MONGODB_ROOT_PASSWORD}
+            - MONGODB_REPLICA_SET_KEY=${SET_MONGODB_REPLICA_SET_KEY}
         networks:
             - backend
 
@@ -44,12 +48,14 @@ services:
         image: docker.io/bitnami/mongodb:5.0
         depends_on:
             - mongodb-primary
+        env_file:
+            - .env
         environment:
             - MONGODB_ADVERTISED_HOSTNAME=mongodb-arbiter
             - MONGODB_REPLICA_SET_MODE=arbiter
             - MONGODB_INITIAL_PRIMARY_HOST=mongodb-primary
-            - MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=password123
-            - MONGODB_REPLICA_SET_KEY=replicasetkey123
+            - MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=${SET_MONGODB_ROOT_PASSWORD}
+            - MONGODB_REPLICA_SET_KEY=${SET_MONGODB_REPLICA_SET_KEY}
         networks:
             - backend
 
