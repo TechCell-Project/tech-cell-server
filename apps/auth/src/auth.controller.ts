@@ -3,7 +3,7 @@ import { AuthService } from './auth.service';
 import { RabbitMQService } from '@app/common';
 import { Ctx, MessagePattern, Payload, RmqContext } from '@nestjs/microservices';
 import { UserDataResponseDto, RegisterRequestDTO } from './dtos';
-import { CreateUserRequest } from './users/dtos';
+import { CreateUserDTO } from './users/dtos';
 import { UsersService } from './users/users.service';
 import { JwtGuard } from './guards/jwt.guard';
 
@@ -23,7 +23,7 @@ export class AuthController {
     @MessagePattern({ cmd: 'auth_login' })
     async login(
         @Ctx() context: RmqContext,
-        @Payload() user: CreateUserRequest, // : Promise<UserDataResponseDto>
+        @Payload() user: CreateUserDTO, // : Promise<UserDataResponseDto>
     ) {
         this.rabbitMqService.acknowledgeMessage(context);
         const userFound = await this.authService.login({ ...user });

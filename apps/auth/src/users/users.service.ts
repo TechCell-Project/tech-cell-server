@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException, UnprocessableEntityException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { UsersRepository } from './users.repository';
-import { CreateUserRequest } from './dtos';
+import { CreateUserDTO } from './dtos';
 import { User } from './schemas/user.schema';
 import { RpcException } from '@nestjs/microservices';
 
@@ -9,7 +9,7 @@ import { RpcException } from '@nestjs/microservices';
 export class UsersService {
     constructor(private readonly usersRepository: UsersRepository) {}
 
-    async createUser(request: CreateUserRequest) {
+    async createUser(request: CreateUserDTO) {
         await this.validateCreateUserRequest(request);
         const user = await this.usersRepository.create({
             ...request,
@@ -18,7 +18,7 @@ export class UsersService {
         return user;
     }
 
-    private async validateCreateUserRequest(request: CreateUserRequest) {
+    private async validateCreateUserRequest(request: CreateUserDTO) {
         let user: User;
         try {
             user = await this.usersRepository.findOne({

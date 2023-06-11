@@ -58,14 +58,15 @@ services:
             context: ./
             dockerfile: ./apps/auth/Dockerfile
         environment:
-            - RABBITMQ_URLS=amqp://techcell-server:techcell-server-9901@rabbitmq:5672
+            - RABBITMQ_URLS=amqp://techcell_server:techcell_server_9901@rabbitmq:5672
+            - MONGODB_URI=mongodb://root:password123@mongodb-primary:27017/techcell-dev?directConnection=true&authMechanism=SCRAM-SHA-1&replicaSet=replicaset&authSource=admin
         env_file:
             - .env
         depends_on:
             - rabbitmq
         volumes:
-            - .:/usr/src/app
-            - /usr/src/app/node_modules
+            - .:/usr/src/techcell_app
+            - /usr/src/techcell_app/node_modules
         command: yarn start auth
         networks:
             - backend
@@ -75,8 +76,8 @@ services:
             context: ./
             dockerfile: ./apps/products/Dockerfile
         environment:
-            - RABBITMQ_URLS=amqp://techcell-server:techcell-server-9901@rabbitmq:5672
-            - MONGODB_URI=mongodb://root:password123@mongodb-primary:27017/?directConnection=true&authMechanism=SCRAM-SHA-1&replicaSet=replicaset
+            - RABBITMQ_URLS=amqp://techcell_server:techcell_server_9901@rabbitmq:5672
+            - MONGODB_URI=mongodb://root:password123@mongodb-primary:27017/techcell-dev?directConnection=true&authMechanism=SCRAM-SHA-1&replicaSet=replicaset&authSource=admin
         env_file:
             - .env
         depends_on:
@@ -85,8 +86,8 @@ services:
             - mongodb-secondary
             - mongodb-arbiter
         volumes:
-            - .:/usr/src/app
-            - /usr/src/app/node_modules
+            - .:/usr/src/techcell_app
+            - /usr/src/techcell_app/node_modules
         command: yarn start products
         networks:
             - backend
@@ -96,14 +97,14 @@ services:
             context: ./
             dockerfile: ./apps/sample/Dockerfile
         environment:
-            - RABBITMQ_URLS=amqp://techcell-server:techcell-server-9901@rabbitmq:5672
+            - RABBITMQ_URLS=amqp://techcell_server:techcell_server_9901@rabbitmq:5672
         env_file:
             - .env
         depends_on:
             - rabbitmq
         volumes:
-            - .:/usr/src/app
-            - /usr/src/app/node_modules
+            - .:/usr/src/techcell_app
+            - /usr/src/techcell_app/node_modules
         command: yarn start sample
         networks:
             - backend
@@ -113,7 +114,7 @@ services:
             context: ./
             dockerfile: ./apps/api/Dockerfile
         environment:
-            - RABBITMQ_URLS=amqp://techcell-server:techcell-server-9901@rabbitmq:5672
+            - RABBITMQ_URLS=amqp://techcell_server:techcell_server_9901@rabbitmq:5672
         env_file:
             - .env
         depends_on:
@@ -122,8 +123,8 @@ services:
             - products
             - auth
         volumes:
-            - .:/usr/src/app
-            - /usr/src/app/node_modules
+            - .:/usr/src/techcell_app
+            - /usr/src/techcell_app/node_modules
         ports:
             - 8000:8000
         command: yarn start api
@@ -137,4 +138,6 @@ volumes:
     mongodb_master_data:
         driver: local
     rabbitmq_data:
+        driver: local
+    app_data:
         driver: local
