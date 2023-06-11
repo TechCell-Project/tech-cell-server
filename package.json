@@ -41,6 +41,7 @@
     "@nestjs/mongoose": "^9.2.2",
     "@nestjs/passport": "^9.0.3",
     "@nestjs/platform-express": "^9.0.0",
+    "@nestjs/swagger": "^6.3.0",
     "amqp-connection-manager": "^4.1.13",
     "amqplib": "^0.10.3",
     "bcrypt": "^5.1.0",
