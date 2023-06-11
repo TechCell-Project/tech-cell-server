@@ -41,6 +41,11 @@
 
 # 🚀 Use the app
 
+## 📝 Before start
+
+- Copy the .env.example and rename to .env
+- Change the default environment variable values
+
 ## 🐳 With docker, docker-compose
 
 ### 🔨 Services
