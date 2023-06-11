@@ -1,65 +1,69 @@
 version: '3'
 
 services:
-  rabbitmq:
-    image: rabbitmq:3-management
-    ports:
-      - '5672:5672'
-      - '15672:15672'
-    env_file:
-      - .env
-    volumes:
-      - 'rabbitmq_data:/var/lib/rabbitmq'
-    networks:
-      - backend
+    rabbitmq:
+        image: rabbitmq:3-management
+        ports:
+            - '5672:5672'
+            - '15672:15672'
+        env_file:
+            - .env
+        volumes:
+            - 'rabbitmq_data:/var/lib/rabbitmq'
+        networks:
+            - backend
 
-  mongodb-primary:
-    image: docker.io/bitnami/mongodb:5.0
-    container_name: 
-      hostname: mongodb-primary
-    environment:
-      - MONGODB_ADVERTISED_HOSTNAME=mongodb-primary
-      - MONGODB_REPLICA_SET_MODE=primary
-      - MONGODB_ROOT_PASSWORD=password123
-      - MONGODB_REPLICA_SET_KEY=replicasetkey123
-    volumes:
-      - 'mongodb_master_data:/bitnami/mongodb'
-    ports:
-      - '27027:27017'
-    networks:
-      - backend
+    mongodb-primary:
+        image: docker.io/bitnami/mongodb:5.0
+        env_file:
+            - .env
+        environment:
+            - MONGODB_ADVERTISED_HOSTNAME=mongodb-primary
+            - MONGODB_REPLICA_SET_MODE=primary
+            - MONGODB_ROOT_PASSWORD=${SET_MONGODB_ROOT_PASSWORD}
+            - MONGODB_REPLICA_SET_KEY=${SET_MONGODB_REPLICA_SET_KEY}
+        volumes:
+            - 'mongodb_master_data:/bitnami/mongodb'
+        ports:
+            - '27027:27017'
+        networks:
+            - backend
 
-  mongodb-secondary:
-    image: docker.io/bitnami/mongodb:5.0
-    depends_on:
-      - mongodb-primary
-    environment:
-      - MONGODB_ADVERTISED_HOSTNAME=mongodb-secondary
-      - MONGODB_REPLICA_SET_MODE=secondary
-      - MONGODB_INITIAL_PRIMARY_HOST=mongodb-primary
-      - MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=password123
-      - MONGODB_REPLICA_SET_KEY=replicasetkey123
-    networks:
-      - backend
+    mongodb-secondary:
+        image: docker.io/bitnami/mongodb:5.0
+        depends_on:
+            - mongodb-primary
+        env_file:
+            - .env
+        environment:
+            - MONGODB_ADVERTISED_HOSTNAME=mongodb-secondary
+            - MONGODB_REPLICA_SET_MODE=secondary
+            - MONGODB_INITIAL_PRIMARY_HOST=mongodb-primary
+            - MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=${SET_MONGODB_ROOT_PASSWORD}
+            - MONGODB_REPLICA_SET_KEY=${SET_MONGODB_REPLICA_SET_KEY}
+        networks:
+            - backend
 
-  mongodb-arbiter:
-    image: docker.io/bitnami/mongodb:5.0
-    depends_on:
-      - mongodb-primary
-    environment:
-      - MONGODB_ADVERTISED_HOSTNAME=mongodb-arbiter
-      - MONGODB_REPLICA_SET_MODE=arbiter
-      - MONGODB_INITIAL_PRIMARY_HOST=mongodb-primary
-      - MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=password123
-      - MONGODB_REPLICA_SET_KEY=replicasetkey123
-    networks:
-      - backend
+    mongodb-arbiter:
+        image: docker.io/bitnami/mongodb:5.0
+        depends_on:
+            - mongodb-primary
+        env_file:
+            - .env
+        environment:
+            - MONGODB_ADVERTISED_HOSTNAME=mongodb-arbiter
+            - MONGODB_REPLICA_SET_MODE=arbiter
+            - MONGODB_INITIAL_PRIMARY_HOST=mongodb-primary
+            - MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=${SET_MONGODB_ROOT_PASSWORD}
+            - MONGODB_REPLICA_SET_KEY=${SET_MONGODB_REPLICA_SET_KEY}
+        networks:
+            - backend
 
 networks:
-  backend:
+    backend:
 
 volumes:
-  mongodb_master_data:
-    driver: local
-  rabbitmq_data:
-    driver: local
+    mongodb_master_data:
+        driver: local
+    rabbitmq_data:
+        driver: local

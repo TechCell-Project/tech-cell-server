@@ -9,8 +9,11 @@ export class RabbitMQService implements RabbitMQServiceInterface {
     constructor(private readonly configService: ConfigService) {}
 
     getRmqOptions(queue: string, noAck = false): RmqOptions {
-        const URLS = this.configService.get('RABBITMQ_URLS');
-
+        const rabbitmqUrlsEnvName = 'RABBITMQ_URLS';
+        const URLS = this.configService.get(rabbitmqUrlsEnvName);
+        if (!URLS) {
+            throw new Error(`Urls rabbitmq env is not set:: ${rabbitmqUrlsEnvName}`);
+        }
         return {
             transport: Transport.RMQ,
             options: {

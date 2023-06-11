@@ -3,8 +3,8 @@ import { ProductsService } from './services';
 import { RabbitMQService } from '@app/common';
 import { MessagePattern, Ctx, RmqContext, Payload } from '@nestjs/microservices';
 import { CreateProductRequest } from './dtos';
-import { ValidationPipe } from '@app/common';
-import { RpcValidationFilter } from './filters';
+// import { ValidationPipe } from '@app/common';
+// import { RpcValidationFilter } from '@app/common';
 
 @Controller()
 export class ProductsController {
@@ -27,12 +27,9 @@ export class ProductsController {
         };
     }
 
-    @UseFilters(new RpcValidationFilter())
+    // @UseFilters(new RpcValidationFilter())
     @MessagePattern({ cmd: 'create_product' })
-    async createProduct(
-        @Payload(new ValidationPipe()) product: CreateProductRequest,
-        @Ctx() context: RmqContext,
-    ) {
+    async createProduct(@Payload() product: CreateProductRequest, @Ctx() context: RmqContext) {
         this.rabbitMqService.acknowledgeMessage(context);
         const createdProduct = await this.productsService.create(product);
         return createdProduct;
