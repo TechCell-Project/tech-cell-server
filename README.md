@@ -29,11 +29,12 @@
 
 - Docker, docker-compose ...
 - Or custom install:
-  * Package Manager: [yarn](https://yarnpkg.com/)
-  * Database: [Mongodb](https://www.mongodb.com/) with [replica set mode](https://www.mongodb.com/docs/manual/replication/) or [mongodb atlas](https://www.mongodb.com/docs/atlas/)
-  * Message Broker: [RabbitMQ](https://www.rabbitmq.com/)
+  - Package Manager: [yarn](https://yarnpkg.com/)
+  - Database: [Mongodb](https://www.mongodb.com/) with [replica set mode](https://www.mongodb.com/docs/manual/replication/) or [mongodb atlas](https://www.mongodb.com/docs/atlas/)
+  - Message Broker: [RabbitMQ](https://www.rabbitmq.com/)
 
 ## ⚠️ Attention:
+
 - [Ubuntu](https://ubuntu.com/) or [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) (Windows subsystems for Linux) is **recommended** for both development and production
 - Windows is **not** recommended, can use in development **not** for production
 
@@ -47,14 +48,16 @@
 ## 🐳 With docker, docker-compose
 
 ### 🔨 Services
+
 - Core services:
-  * Database
-  * Message Broker
+  - Database
+  - Message Broker
 - Application services
-  * Api
-  * etc...
+  - Api
+  - etc...
 
 ### Starting
+
 ```bash
 yarn up # start all services in production mode
 # or
@@ -62,6 +65,7 @@ yarn up:core # start core services
 ```
 
 ### Stopping
+
 ```bash
 yarn down # stop all services
 # or
@@ -69,8 +73,9 @@ yarn down:core # stop core services
 ```
 
 ### Restart and rebuild
+
 ```bash
-yarn restart # restart and rebuild all services 
+yarn restart # restart and rebuild all services
 # or
 yarn restart:core # restart and rebuild core services
 ```
@@ -78,12 +83,14 @@ yarn restart:core # restart and rebuild core services
 ## 🦽 With manual run
 
 ### Required
+
 - Make sure all the following core services have been installed and run successfully
-  * RabbitMQ: port 5672
-  * Mongodb: port 27017, replica set mode
+  - RabbitMQ: port 5672
+  - Mongodb: port 27017, replica set mode
 - Or you can run core services in docker and run app services manually
 
 ### Starting
+
 ```bash
 # You can run core services in docker and run app services manually
 
@@ -93,6 +100,7 @@ yarn start:prod <service_name> # start the service as production mode
 ```
 
 ### Stopping
+
 ```bash
 # Just CTRL-C to stop the service
 ```
