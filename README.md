@@ -24,39 +24,72 @@
 
 ## Description
 
-A microservices application building with [Nest](https://github.com/nestjs/nest) and [RabbitMQ](https://github.com/rabbitmq)
+- A microservices application building with [Nest](https://github.com/nestjs/nest) and [RabbitMQ](https://github.com/rabbitmq).
+- Using [docker](https://www.docker.com/) and [docker-compose](https://docs.docker.com/compose/) to run locally and automatically
 
 ## Require installed
 
--   Docker, docker-compose ...
--   Or custom install RabbitMQ
+- Docker, docker-compose ...
+- Or custom install:
+  * Package Manager: [yarn](https://yarnpkg.com/)
+  * Database: [Mongodb](https://www.mongodb.com/) with [replica set mode](https://www.mongodb.com/docs/manual/replication/) or [mongodb atlas](https://www.mongodb.com/docs/atlas/)
+  * Message Broker: [RabbitMQ](https://www.rabbitmq.com/)
 
-## Installation
+# 🚀 Use the app
 
+## 🐳 With docker, docker-compose
+
+### 🔨 Services
+- Core services:
+  * Database
+  * Message Broker
+- Application services
+  * Api
+  * ...
+
+### Starting
 ```bash
-$ yarn install
+yarn up # start all services in production mode
+# or
+yarn up:core # start core services
 ```
 
-## Running the app
-
+### Stopping
 ```bash
-# run the core module (RabbitMQ, ...)
-$ yarn up:core # need docker-compose installed
-
-# development each service
-$ yarn start <service_name> # ex: yarn start api
-
-# watch mode each service
-$ yarn start:dev <service_name> # ex: yarn start:dev api
+yarn down # stop all services
+# or
+yarn down:core # stop core services
 ```
 
-## Closing the core module service
-
+### Restart and rebuild
 ```bash
-# stop the core module
-$ yarn down:core
+yarn restart # restart and rebuild all services 
+# or
+yarn restart:core # restart and rebuild core services
 ```
 
-## License
+## 🦽 With manual run
+
+### Required
+- Make sure all the following core services have been installed and run successfully
+  * RabbitMQ: port 5672
+  * Mongodb: port 27017, replica set mode
+- Or you can run core services in docker and run app services manually
+
+### Starting
+```bash
+# You can run core services in docker and run app services manually
+
+yarn start <service_name> # start the service as normal mode
+yarn start:dev <service_name> # start the service as development mode
+yarn start:prod <service_name> # start the service as production mode
+```
+
+### Stopping
+```bash
+# Just CTRL-C to stop the service
+```
+
+## 🦽 License
 
 Nest is [MIT licensed](LICENSE).
