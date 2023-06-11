@@ -2,7 +2,7 @@ import { Controller, Get, Inject, UseFilters, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RabbitMQService } from '@app/common';
 import { Ctx, MessagePattern, Payload, RmqContext } from '@nestjs/microservices';
-import { UserDataResponseDto, RegisterRequestDTO } from './dtos';
+import { UserDataResponseDTO, RegisterRequestDTO } from './dtos';
 import { CreateUserDTO } from './users/dtos';
 import { UsersService } from './users/users.service';
 import { JwtGuard } from './guards/jwt.guard';
@@ -34,10 +34,10 @@ export class AuthController {
     async register(
         @Ctx() context: RmqContext,
         @Payload() user: RegisterRequestDTO,
-    ): Promise<UserDataResponseDto> {
+    ): Promise<UserDataResponseDTO> {
         this.rabbitMqService.acknowledgeMessage(context);
         const userCreated = await this.authService.register(user);
-        return new UserDataResponseDto(userCreated);
+        return new UserDataResponseDTO(userCreated);
     }
 
     @MessagePattern({ cmd: 'verify-jwt' })
