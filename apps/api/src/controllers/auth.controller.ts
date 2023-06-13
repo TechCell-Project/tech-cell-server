@@ -1,4 +1,7 @@
 import { Controller, Inject, Body, Post } from '@nestjs/common';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
+import { AUTH_SERVICE } from '../../../../constants';
+import { catchError, throwError } from 'rxjs';
 import {
     ApiTags,
     ApiBody,
@@ -6,17 +9,21 @@ import {
     ApiCreatedResponse,
     ApiBadRequestResponse,
     ApiUnauthorizedResponse,
+    ApiForbiddenResponse,
+    ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
-import { ClientProxy, RpcException } from '@nestjs/microservices';
-import { AUTH_SERVICE } from '../../../../constants';
-import { catchError, throwError } from 'rxjs';
 import {
     RegisterRequestDTO,
     LoginRequestDTO,
     UserDataResponseDTO,
     NewTokenRequestDTO,
-    BadRequestResponseDTO,
 } from '../../../auth/src/dtos';
+import {
+    BadRequestResponseDTO,
+    UnauthorizedResponseDTO,
+    UnprocessableEntityResponseDTO,
+    ForbiddenResponseDTO,
+} from '../dtos';
 
 @ApiTags('authentication')
 @Controller('auth')
@@ -28,8 +35,13 @@ export class AuthController {
         description: 'Login successfully',
         type: UserDataResponseDTO,
     })
+    @ApiBadRequestResponse({
+        description: 'Your account email or password is invalid',
+        type: BadRequestResponseDTO,
+    })
     @ApiUnauthorizedResponse({
-        description: 'Can not login',
+        description: 'Your account email or password is wrong',
+        type: UnauthorizedResponseDTO,
     })
     @Post('login')
     async login(@Body() user: LoginRequestDTO) {
@@ -44,8 +56,12 @@ export class AuthController {
         type: UserDataResponseDTO,
     })
     @ApiBadRequestResponse({
-        description: 'User create failed',
+        description: 'Your user information is invalid',
         type: BadRequestResponseDTO,
+    })
+    @ApiUnprocessableEntityResponse({
+        description: 'Your account already exists',
+        type: UnprocessableEntityResponseDTO,
     })
     @Post('register')
     async register(@Body() user: RegisterRequestDTO) {
@@ -60,8 +76,12 @@ export class AuthController {
         type: UserDataResponseDTO,
     })
     @ApiBadRequestResponse({
-        description: 'Get new token failed',
+        description: 'Your information is invalid',
         type: BadRequestResponseDTO,
+    })
+    @ApiForbiddenResponse({
+        description: 'Your refreshToken token invalid, can not get new token',
+        type: ForbiddenResponseDTO,
     })
     @Post('refresh-token')
     async getNewToken(@Body() { refreshToken }: NewTokenRequestDTO) {
