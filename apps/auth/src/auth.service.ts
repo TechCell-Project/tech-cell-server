@@ -1,9 +1,20 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+    Injectable,
+    UnauthorizedException,
+    ForbiddenException,
+    UnprocessableEntityException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from './users/users.service';
 import { ConfigService } from '@nestjs/config';
 import { LoginRequestDTO } from './dtos';
-import { JwtPayloadDto, RegisterRequestDTO } from './dtos';
+import {
+    JwtPayloadDto,
+    RegisterRequestDTO,
+    RegisterResponseDTO,
+    NewTokenRequestDTO,
+    UserDataResponseDTO,
+} from './dtos';
 import * as bcrypt from 'bcrypt';
 import { User } from './users/schemas';
 import { RpcException } from '@nestjs/microservices';
@@ -20,26 +31,75 @@ export class AuthService {
         return { message: 'pong', services: 'auth' };
     }
 
-    async register(userRegister: RegisterRequestDTO) {
-        return userRegister;
+    async register(userRegister: RegisterRequestDTO): Promise<RegisterResponseDTO> {
+        const { email, password, re_password } = userRegister;
+
+        if (password !== re_password) {
+            throw new RpcException(new UnprocessableEntityException('Passwords do not match'));
+        }
+
+        const userCreated = await this.usersService.createUser({ email, password });
+
+        if (!userCreated) {
+            throw new RpcException(
+                new UnprocessableEntityException('Error occurred when creating user'),
+            );
+        }
+
+        return {
+            message:
+                'Your registration was successfully, please check your email to verify your registration',
+        };
     }
 
-    async login({ email, password }: LoginRequestDTO) {
-        const user = await this.validateUser(email, password);
+    async login({ email, password }: LoginRequestDTO): Promise<UserDataResponseDTO> {
+        try {
+            const user = await this.validateUser(email, password);
 
-        if (!user) {
+            if (!user) {
+                throw new RpcException(new UnauthorizedException());
+            }
+            delete user.password;
+
+            const { _id, email: emailUser, role } = user;
+            const { accessToken, refreshToken } = await this.signTokens({
+                _id,
+                email: emailUser,
+                role,
+            });
+
+            const userReturn: UserDataResponseDTO = Object.assign(user, {
+                accessToken,
+                refreshToken,
+            });
+
+            return userReturn;
+        } catch (error) {
             throw new RpcException(new UnauthorizedException());
         }
-        delete user.password;
+    }
 
-        const { _id, email: emailUser, role } = user;
-        const { accessToken, refreshToken } = await this.signTokens({
-            _id,
-            email: emailUser,
-            role,
-        });
+    async getNewToken({ refreshToken }: NewTokenRequestDTO): Promise<UserDataResponseDTO> {
+        try {
+            if (!NewTokenRequestDTO) {
+                throw new RpcException(new ForbiddenException());
+            }
 
-        return { accessToken, refreshToken, user };
+            const { user } = await this.verifyRefreshToken(refreshToken);
+            const userFound = await this.usersService.getUser({ email: user.email });
+
+            const { _id, email: emailUser, role } = userFound;
+            const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
+                await this.signTokens({
+                    _id,
+                    email: emailUser,
+                    role,
+                });
+            const userReturn = Object.assign(user, { newAccessToken, newRefreshToken });
+            return userReturn;
+        } catch (error) {
+            throw new RpcException(new ForbiddenException());
+        }
     }
 
     async validateUser(email: string, password: string): Promise<User> {
@@ -116,20 +176,9 @@ export class AuthService {
             ),
         ]);
 
-        const [accessTokenExp, refreshTokenExp] = await Promise.all([
-            this.jwtService.decode(accessToken),
-            this.jwtService.decode(refreshToken),
-        ]);
-
         return {
-            accessToken: {
-                token: accessToken,
-                expTime: accessTokenExp['exp'] * 1000,
-            },
-            refreshToken: {
-                token: refreshToken,
-                expTime: refreshTokenExp['exp'] * 1000,
-            },
+            accessToken,
+            refreshToken,
         };
     }
 }
