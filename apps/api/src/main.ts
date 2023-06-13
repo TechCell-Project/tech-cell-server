@@ -8,6 +8,8 @@ async function bootstrap() {
     const port = process.env.API_PORT;
     const app = await NestFactory.create(AppModule);
 
+    app.enableCors();
+
     // Use to catch exceptions and send them to responses
     app.useGlobalFilters(new RpcExceptionFilter());
     app.useGlobalPipes(new ValidationPipe());
