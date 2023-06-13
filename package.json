@@ -26,11 +26,13 @@
     "down:core": "docker-compose -f docker-compose.core.yml down",
     "restart:core": "yarn down:core && yarn up:core --build",
     "up": "docker-compose -f docker-compose.yml up -d",
+    "up:dev": "docker-compose -f docker-compose.dev.yml up -d",
     "down": "docker-compose -f docker-compose.yml down",
     "restart": "yarn down && yarn up --build",
-    "deploy:sample": "yarn install && yarn start sample",
-    "deploy:products": "yarn install && yarn start products",
-    "deploy:api": "yarn install && yarn start api"
+    "deploy:api": "yarn install && yarn start:prod api",
+    "deploy:auth": "yarn install && yarn start:prod auth",
+    "deploy:sample": "yarn install && yarn start:prod sample",
+    "deploy:products": "yarn install && yarn start:prod products"
   },
   "dependencies": {
     "@nestjs/common": "^9.0.0",
@@ -99,8 +101,7 @@
       "<rootDir>/libs/"
     ],
     "moduleNameMapper": {
-      "^@app/common(|/.*)$": "<rootDir>/libs/common/src/$1",
-      "^@app/constants(|/.*)$": "<rootDir>/libs/constants/src/$1"
+      "^@app/common(|/.*)$": "<rootDir>/libs/common/src/$1"
     }
   }
 }
