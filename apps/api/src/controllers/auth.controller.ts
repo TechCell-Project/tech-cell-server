@@ -7,7 +7,7 @@ import {
     RegisterRequestDTO,
     LoginRequestDTO,
     UserDataResponseDTO,
-    NewAccessTokenRequestDTO,
+    NewTokenRequestDTO,
     BadRequestResponseDTO,
 } from '../../../auth/src/dtos';
 
@@ -52,7 +52,7 @@ export class AuthController {
             .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
     }
 
-    @ApiBody({ type: NewAccessTokenRequestDTO })
+    @ApiBody({ type: NewTokenRequestDTO })
     @ApiResponse({
         status: HttpStatus.CREATED,
         description: 'New token created successfully',
@@ -64,11 +64,11 @@ export class AuthController {
         type: BadRequestResponseDTO,
     })
     @Post('refresh-token')
-    async getNewAccessToken(@Body() { accessToken }: NewAccessTokenRequestDTO) {
+    async getNewToken(@Body() { refreshToken }: NewTokenRequestDTO) {
         return this.authService
             .send(
                 { cmd: 'auth_get_new_access_token' },
-                { accessToken: accessToken ? accessToken : undefined },
+                { refreshToken: refreshToken ? refreshToken : undefined },
             )
             .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
     }

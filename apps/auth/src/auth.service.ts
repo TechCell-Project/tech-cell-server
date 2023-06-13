@@ -1,9 +1,9 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ForbiddenException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from './users/users.service';
 import { ConfigService } from '@nestjs/config';
 import { LoginRequestDTO } from './dtos';
-import { JwtPayloadDto, RegisterRequestDTO } from './dtos';
+import { JwtPayloadDto, RegisterRequestDTO, NewTokenRequestDTO } from './dtos';
 import * as bcrypt from 'bcrypt';
 import { User } from './users/schemas';
 import { RpcException } from '@nestjs/microservices';
@@ -48,6 +48,25 @@ export class AuthService {
             return { user: userReturn };
         } catch (error) {
             throw new RpcException(new UnauthorizedException());
+        }
+    }
+
+    async getNewToken({ refreshToken }: NewTokenRequestDTO) {
+        try {
+            const { user } = await this.verifyRefreshToken(refreshToken);
+            const userFound = await this.usersService.getUser({ email: user.email });
+
+            const { _id, email: emailUser, role } = userFound;
+            const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
+                await this.signTokens({
+                    _id,
+                    email: emailUser,
+                    role,
+                });
+            const userReturn = Object.assign(user, { newAccessToken, newRefreshToken });
+            return { user: userReturn };
+        } catch (error) {
+            throw new RpcException(new ForbiddenException());
         }
     }
 
