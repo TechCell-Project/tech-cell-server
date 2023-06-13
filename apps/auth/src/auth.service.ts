@@ -1,9 +1,14 @@
-import { Injectable, UnauthorizedException, ForbiddenException } from '@nestjs/common';
+import {
+    Injectable,
+    UnauthorizedException,
+    ForbiddenException,
+    UnprocessableEntityException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from './users/users.service';
 import { ConfigService } from '@nestjs/config';
 import { LoginRequestDTO } from './dtos';
-import { JwtPayloadDto, RegisterRequestDTO, NewTokenRequestDTO } from './dtos';
+import { JwtPayloadDto, RegisterRequestDTO, NewTokenRequestDTO, UserDataResponseDTO } from './dtos';
 import * as bcrypt from 'bcrypt';
 import { User } from './users/schemas';
 import { RpcException } from '@nestjs/microservices';
@@ -21,13 +26,27 @@ export class AuthService {
     }
 
     async register(userRegister: RegisterRequestDTO) {
-        const { email, password } = userRegister;
+        const { email, password, re_password } = userRegister;
+
+        if (password !== re_password) {
+            throw new RpcException(new UnprocessableEntityException('Passwords do not match'));
+        }
+
         const userCreated = await this.usersService.createUser({ email, password });
-        delete userCreated.password;
-        return userCreated;
+
+        if (!userCreated) {
+            throw new RpcException(
+                new UnprocessableEntityException('Error occurred when creating user'),
+            );
+        }
+
+        return {
+            message:
+                'Your registration was successfully, please check your email to verify your registration',
+        };
     }
 
-    async login({ email, password }: LoginRequestDTO) {
+    async login({ email, password }: LoginRequestDTO): Promise<UserDataResponseDTO> {
         try {
             const user = await this.validateUser(email, password);
 
@@ -43,16 +62,23 @@ export class AuthService {
                 role,
             });
 
-            const userReturn = Object.assign(user, { accessToken, refreshToken });
+            const userReturn: UserDataResponseDTO = Object.assign(user, {
+                accessToken,
+                refreshToken,
+            });
 
-            return { user: userReturn };
+            return userReturn;
         } catch (error) {
             throw new RpcException(new UnauthorizedException());
         }
     }
 
-    async getNewToken({ refreshToken }: NewTokenRequestDTO) {
+    async getNewToken({ refreshToken }: NewTokenRequestDTO): Promise<UserDataResponseDTO> {
         try {
+            if (!NewTokenRequestDTO) {
+                throw new RpcException(new ForbiddenException());
+            }
+
             const { user } = await this.verifyRefreshToken(refreshToken);
             const userFound = await this.usersService.getUser({ email: user.email });
 
@@ -64,7 +90,7 @@ export class AuthService {
                     role,
                 });
             const userReturn = Object.assign(user, { newAccessToken, newRefreshToken });
-            return { user: userReturn };
+            return userReturn;
         } catch (error) {
             throw new RpcException(new ForbiddenException());
         }

@@ -1,8 +1,8 @@
-import { Controller, Get, Inject, UseFilters, UseGuards } from '@nestjs/common';
+import { Controller, Get, Inject, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RabbitMQService } from '@app/common';
 import { Ctx, MessagePattern, Payload, RmqContext } from '@nestjs/microservices';
-import { UserDataResponseDTO, RegisterRequestDTO } from './dtos';
+import { UserDataResponseDTO, RegisterRequestDTO, NewTokenRequestDTO } from './dtos';
 import { CreateUserDTO } from './users/dtos';
 import { UsersService } from './users/users.service';
 import { JwtGuard } from './guards/jwt.guard';
@@ -23,8 +23,8 @@ export class AuthController {
     @MessagePattern({ cmd: 'auth_login' })
     async login(
         @Ctx() context: RmqContext,
-        @Payload() user: CreateUserDTO, // : Promise<UserDataResponseDto>
-    ) {
+        @Payload() user: CreateUserDTO,
+    ): Promise<UserDataResponseDTO> {
         this.rabbitMqService.acknowledgeMessage(context);
         return this.authService.login({ ...user });
     }
@@ -33,6 +33,15 @@ export class AuthController {
     async register(@Ctx() context: RmqContext, @Payload() user: RegisterRequestDTO) {
         this.rabbitMqService.acknowledgeMessage(context);
         return this.authService.register(user);
+    }
+
+    @MessagePattern({ cmd: 'auth_get_new_access_token' })
+    async getNewToken(
+        @Ctx() context: RmqContext,
+        @Payload() { refreshToken }: NewTokenRequestDTO,
+    ): Promise<UserDataResponseDTO> {
+        this.rabbitMqService.acknowledgeMessage(context);
+        return this.authService.getNewToken({ refreshToken });
     }
 
     @MessagePattern({ cmd: 'verify-jwt' })
