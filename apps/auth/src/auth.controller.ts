@@ -26,18 +26,13 @@ export class AuthController {
         @Payload() user: CreateUserDTO, // : Promise<UserDataResponseDto>
     ) {
         this.rabbitMqService.acknowledgeMessage(context);
-        const userFound = await this.authService.login({ ...user });
-        return userFound;
+        return this.authService.login({ ...user });
     }
 
     @MessagePattern({ cmd: 'auth_register' })
-    async register(
-        @Ctx() context: RmqContext,
-        @Payload() user: RegisterRequestDTO,
-    ): Promise<UserDataResponseDTO> {
+    async register(@Ctx() context: RmqContext, @Payload() user: RegisterRequestDTO) {
         this.rabbitMqService.acknowledgeMessage(context);
-        const userCreated = await this.authService.register(user);
-        return new UserDataResponseDTO(userCreated);
+        return this.authService.register(user);
     }
 
     @MessagePattern({ cmd: 'verify-jwt' })

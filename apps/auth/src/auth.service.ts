@@ -21,25 +21,34 @@ export class AuthService {
     }
 
     async register(userRegister: RegisterRequestDTO) {
-        return userRegister;
+        const { email, password } = userRegister;
+        const userCreated = await this.usersService.createUser({ email, password });
+        delete userCreated.password;
+        return userCreated;
     }
 
     async login({ email, password }: LoginRequestDTO) {
-        const user = await this.validateUser(email, password);
+        try {
+            const user = await this.validateUser(email, password);
 
-        if (!user) {
+            if (!user) {
+                throw new RpcException(new UnauthorizedException());
+            }
+            delete user.password;
+
+            const { _id, email: emailUser, role } = user;
+            const { accessToken, refreshToken } = await this.signTokens({
+                _id,
+                email: emailUser,
+                role,
+            });
+
+            const userReturn = Object.assign(user, { accessToken, refreshToken });
+
+            return { user: userReturn };
+        } catch (error) {
             throw new RpcException(new UnauthorizedException());
         }
-        delete user.password;
-
-        const { _id, email: emailUser, role } = user;
-        const { accessToken, refreshToken } = await this.signTokens({
-            _id,
-            email: emailUser,
-            role,
-        });
-
-        return { accessToken, refreshToken, user };
     }
 
     async validateUser(email: string, password: string): Promise<User> {
@@ -116,20 +125,9 @@ export class AuthService {
             ),
         ]);
 
-        const [accessTokenExp, refreshTokenExp] = await Promise.all([
-            this.jwtService.decode(accessToken),
-            this.jwtService.decode(refreshToken),
-        ]);
-
         return {
-            accessToken: {
-                token: accessToken,
-                expTime: accessTokenExp['exp'] * 1000,
-            },
-            refreshToken: {
-                token: refreshToken,
-                expTime: refreshTokenExp['exp'] * 1000,
-            },
+            accessToken,
+            refreshToken,
         };
     }
 }
