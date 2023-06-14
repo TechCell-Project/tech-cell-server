@@ -13,15 +13,17 @@ if (!SERVICE_NAME) {
 
 async function buildApps() {
     const appDirs = await fs.promises.readdir(SEARCH_DIR, { withFileTypes: true });
+    let isFound = false;
 
     for (const dirent of appDirs) {
         if (dirent.isDirectory()) {
             if (dirent.name === SERVICE_NAME) {
                 const dirName = dirent.name;
                 const pathToMain = `${SEARCH_DIR}${dirName}/main.js`;
-                console.log(`Found ${dirName}, building '${dirName}' services...`);
+                console.log(`Found ${dirName}, running '${dirName}' services in production...`);
 
                 try {
+                    isFound = true;
                     const childProcess = spawn('node', [pathToMain]);
                     childProcess.stdout.on('data', (data) => {
                         console.log(data.toString());
@@ -30,11 +32,17 @@ async function buildApps() {
                         console.error(data.toString());
                     });
                 } catch (error) {
+                    isFound = false;
                     console.error(error.message);
                     console.error(`Can't run production '${SERVICE_NAME}' services`);
                 }
             }
         }
+    }
+
+    if (!isFound) {
+        console.log(`Not found ${SERVICE_NAME} services, exit...`);
+        process.exit(1);
     }
 }
 
