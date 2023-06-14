@@ -131,8 +131,10 @@ services:
         volumes:
             - .:/usr/src/techcell_app
             - /usr/src/techcell_app/node_modules
+            - /etc/letsencrypt/:/etc/letsencrypt
         ports:
-            - 8000:8000
+            - 80:8000
+            - 443:4430
         command: yarn start:dev api
         networks:
             - backend
