@@ -1,3 +1,4 @@
+import fs from 'fs';
 import { NestFactory } from '@nestjs/core';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
@@ -6,7 +7,20 @@ import { SwaggerModule, DocumentBuilder, SwaggerCustomOptions } from '@nestjs/sw
 
 async function bootstrap() {
     const port = process.env.API_PORT;
-    const app = await NestFactory.create(AppModule);
+
+    // Config https
+    let httpsOptions = undefined;
+    const httpsPrivateKeyDir = process.env.HTTPS_PRIVATE_KEY_DIR;
+    const httpsPublicKeyDir = process.env.HTTPS_PUBLIC_KEY_DIR;
+    if (httpsPrivateKeyDir && httpsPublicKeyDir) {
+        console.log(`[HttpServer] Https configured`);
+        httpsOptions = {
+            key: fs.readFileSync(httpsPrivateKeyDir),
+            cert: fs.readFileSync(httpsPublicKeyDir),
+        };
+    }
+
+    const app = await NestFactory.create(AppModule, { httpsOptions });
 
     app.enableCors();
 
