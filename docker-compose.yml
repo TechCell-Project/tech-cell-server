@@ -131,6 +131,7 @@ services:
         volumes:
             - .:/usr/src/techcell_app
             - /usr/src/techcell_app/node_modules
+            - /etc/letsencrypt/:/etc/letsencrypt
         ports:
             - 80:8000
             - 443:4430
