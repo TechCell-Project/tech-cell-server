@@ -11,6 +11,7 @@ import { SwaggerModule, DocumentBuilder, SwaggerCustomOptions } from '@nestjs/sw
 
 async function bootstrap() {
     const port = process.env.API_PORT;
+    const portHttps = process.env.API_PORT_HTTPS;
 
     const server = express();
     const app = await NestFactory.create(AppModule, new ExpressAdapter(server));
@@ -49,8 +50,8 @@ async function bootstrap() {
             key: fs.readFileSync(httpsPrivateKeyDir),
             cert: fs.readFileSync(httpsPublicKeyDir),
         };
-        createHttpsServer(httpsOptions, server).listen(443, () =>
-            Logger.log(`⚡️ [https] ready on https://localhost:${443}`),
+        createHttpsServer(httpsOptions, server).listen(portHttps, () =>
+            Logger.log(`⚡️ [https] ready on https://localhost:${portHttps}`),
         );
     }
 }

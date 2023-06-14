@@ -132,8 +132,8 @@ services:
             - .:/usr/src/techcell_app
             - /usr/src/techcell_app/node_modules
         ports:
-            - 443:443
-            - 8000:8000
+            - 80:8000
+            - 443:4430
         command: yarn start:prod api
         networks:
             - backend
