@@ -44,17 +44,17 @@ async function bootstrap() {
         // Config https
         const portHttps = process.env.API_PORT_HTTPS;
         const httpsPrivateKeyDir = process.env.HTTPS_PRIVATE_KEY_DIR;
-        const httpsPublicKeyDir = process.env.HTTPS_PUBLIC_KEY_DIR;
+        const httpsCertDir = process.env.HTTPS_CERT_DIR;
         if (!portHttps) {
             throw new Error('[env] Missing https port');
         }
-        if (!httpsPrivateKeyDir || !httpsPublicKeyDir) {
+        if (!httpsPrivateKeyDir || !httpsCertDir) {
             throw new Error('[env] Missing certificate paths');
         }
 
         const httpsOptions: ServerOptions = {
             key: fs.readFileSync(httpsPrivateKeyDir),
-            cert: fs.readFileSync(httpsPublicKeyDir),
+            cert: fs.readFileSync(httpsCertDir),
         };
         createHttpsServer(httpsOptions, server).listen(portHttps, () =>
             Logger.log(
