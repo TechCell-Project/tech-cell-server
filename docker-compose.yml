@@ -24,6 +24,7 @@ services:
         command: yarn start:prod api
         networks:
             - backend
+        restart: always
 
     auth:
         build:
@@ -42,6 +43,7 @@ services:
         command: yarn start:prod auth
         networks:
             - backend
+        restart: always
 
     products:
         build:
@@ -63,6 +65,7 @@ services:
         command: yarn start:prod products
         networks:
             - backend
+        restart: always
 
     sample:
         build:
@@ -80,6 +83,7 @@ services:
         command: yarn start:prod sample
         networks:
             - backend
+        restart: always
 
     rabbitmq:
         image: rabbitmq:3-management
@@ -92,6 +96,7 @@ services:
             - 'rabbitmq_data:/var/lib/rabbitmq'
         networks:
             - backend
+        restart: always
 
     mongodb-primary:
         image: docker.io/bitnami/mongodb:5.0
@@ -108,6 +113,7 @@ services:
             - '27027:27017'
         networks:
             - backend
+        restart: always
 
     mongodb-secondary:
         image: docker.io/bitnami/mongodb:5.0
@@ -123,6 +129,7 @@ services:
             - .env
         networks:
             - backend
+        restart: always
 
     mongodb-arbiter:
         image: docker.io/bitnami/mongodb:5.0
@@ -138,6 +145,7 @@ services:
             - .env
         networks:
             - backend
+        restart: always
 
 networks:
     backend:
