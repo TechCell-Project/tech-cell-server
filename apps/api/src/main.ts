@@ -1,6 +1,10 @@
-import fs from 'fs';
+import * as fs from 'fs';
+import * as express from 'express';
+import { createServer as createHttpServer } from 'http';
+import { createServer as createHttpsServer } from 'https';
 import { NestFactory } from '@nestjs/core';
 import { Logger, ValidationPipe } from '@nestjs/common';
+import { ExpressAdapter } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { RpcExceptionFilter } from '@app/common/filters/';
 import { SwaggerModule, DocumentBuilder, SwaggerCustomOptions } from '@nestjs/swagger';
@@ -8,19 +12,8 @@ import { SwaggerModule, DocumentBuilder, SwaggerCustomOptions } from '@nestjs/sw
 async function bootstrap() {
     const port = process.env.API_PORT;
 
-    // Config https
-    let httpsOptions = undefined;
-    const httpsPrivateKeyDir = process.env.HTTPS_PRIVATE_KEY_DIR;
-    const httpsPublicKeyDir = process.env.HTTPS_PUBLIC_KEY_DIR;
-    if (httpsPrivateKeyDir && httpsPublicKeyDir) {
-        console.log(`[HttpServer] Https configured`);
-        httpsOptions = {
-            key: fs.readFileSync(httpsPrivateKeyDir),
-            cert: fs.readFileSync(httpsPublicKeyDir),
-        };
-    }
-
-    const app = await NestFactory.create(AppModule, { httpsOptions });
+    const server = express();
+    const app = await NestFactory.create(AppModule, new ExpressAdapter(server));
 
     app.enableCors();
 
@@ -42,7 +35,23 @@ async function bootstrap() {
     };
     SwaggerModule.setup('/', app, document, swaggerOptions);
 
-    await app.listen(port);
-    Logger.log(`⚡️ [api] Starting api-gateway, listening on http://localhost:${port}`);
+    await app.init();
+    createHttpServer(server).listen(port, () =>
+        Logger.log(`⚡️ [http] ready on http://localhost:${port}`),
+    );
+
+    // Config https
+    const httpsPrivateKeyDir = process.env.HTTPS_PRIVATE_KEY_DIR;
+    const httpsPublicKeyDir = process.env.HTTPS_PUBLIC_KEY_DIR;
+    if (httpsPrivateKeyDir && httpsPublicKeyDir) {
+        Logger.log(`[HttpServer] Https configured`);
+        const httpsOptions = {
+            key: fs.readFileSync(httpsPrivateKeyDir),
+            cert: fs.readFileSync(httpsPublicKeyDir),
+        };
+        createHttpsServer(httpsOptions, server).listen(443, () =>
+            Logger.log(`⚡️ [https] ready on https://localhost:${443}`),
+        );
+    }
 }
 bootstrap();
