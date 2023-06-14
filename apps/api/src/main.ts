@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as express from 'express';
 import { createServer as createHttpServer } from 'http';
-import { createServer as createHttpsServer } from 'https';
+import { createServer as createHttpsServer, ServerOptions } from 'https';
 import { NestFactory } from '@nestjs/core';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { ExpressAdapter } from '@nestjs/platform-express';
@@ -10,8 +10,7 @@ import { RpcExceptionFilter } from '@app/common/filters/';
 import { SwaggerModule, DocumentBuilder, SwaggerCustomOptions } from '@nestjs/swagger';
 
 async function bootstrap() {
-    const port = process.env.API_PORT;
-    const portHttps = process.env.API_PORT_HTTPS;
+    const port = process.env.API_PORT || 8000;
 
     const server = express();
     const app = await NestFactory.create(AppModule, new ExpressAdapter(server));
@@ -38,21 +37,32 @@ async function bootstrap() {
 
     await app.init();
     createHttpServer(server).listen(port, () =>
-        Logger.log(`⚡️ [http] ready on http://localhost:${port}`),
+        Logger.log(`⚡️ [http] ready on port: ${port}, url: http://localhost:${port}`),
     );
 
-    // Config https
-    const httpsPrivateKeyDir = process.env.HTTPS_PRIVATE_KEY_DIR;
-    const httpsPublicKeyDir = process.env.HTTPS_PUBLIC_KEY_DIR;
-    if (httpsPrivateKeyDir && httpsPublicKeyDir) {
-        Logger.log(`[HttpServer] Https configured`);
-        const httpsOptions = {
+    try {
+        // Config https
+        const portHttps = process.env.API_PORT_HTTPS;
+        const httpsPrivateKeyDir = process.env.HTTPS_PRIVATE_KEY_DIR;
+        const httpsCertDir = process.env.HTTPS_CERT_DIR;
+        if (!portHttps) {
+            throw new Error('[env] Missing https port');
+        }
+        if (!httpsPrivateKeyDir || !httpsCertDir) {
+            throw new Error('[env] Missing certificate paths');
+        }
+
+        const httpsOptions: ServerOptions = {
             key: fs.readFileSync(httpsPrivateKeyDir),
-            cert: fs.readFileSync(httpsPublicKeyDir),
+            cert: fs.readFileSync(httpsCertDir),
         };
         createHttpsServer(httpsOptions, server).listen(portHttps, () =>
-            Logger.log(`⚡️ [https] ready on https://localhost:${portHttps}`),
+            Logger.log(
+                `⚡️ [https] ready on port: ${portHttps}, url: https://localhost:${portHttps}`,
+            ),
         );
+    } catch (error) {
+        Logger.warn(`[https] Can not start https server: ${error.message}`);
     }
 }
 bootstrap();

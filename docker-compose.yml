@@ -1,61 +1,27 @@
 version: '3'
 
 services:
-    rabbitmq:
-        image: rabbitmq:3-management
-        ports:
-            - '5672:5672'
-            - '15672:15672'
-        env_file:
-            - .env
-        volumes:
-            - 'rabbitmq_data:/var/lib/rabbitmq'
-        networks:
-            - backend
-
-    mongodb-primary:
-        image: docker.io/bitnami/mongodb:5.0
+    api:
+        build:
+            context: ./
+            dockerfile: ./apps/api/Dockerfile
         environment:
-            - MONGODB_ADVERTISED_HOSTNAME=mongodb-primary
-            - MONGODB_REPLICA_SET_MODE=primary
-            - MONGODB_ROOT_PASSWORD=${SET_MONGODB_ROOT_PASSWORD}
-            - MONGODB_REPLICA_SET_KEY=${SET_MONGODB_REPLICA_SET_KEY}
+            - RABBITMQ_URLS=amqp://techcell_server:techcell_server_9901@rabbitmq:5672
         env_file:
             - .env
-        volumes:
-            - 'mongodb_master_data:/bitnami/mongodb'
-        ports:
-            - '27027:27017'
-        networks:
-            - backend
-
-    mongodb-secondary:
-        image: docker.io/bitnami/mongodb:5.0
         depends_on:
-            - mongodb-primary
-        environment:
-            - MONGODB_ADVERTISED_HOSTNAME=mongodb-secondary
-            - MONGODB_REPLICA_SET_MODE=secondary
-            - MONGODB_INITIAL_PRIMARY_HOST=mongodb-primary
-            - MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=${SET_MONGODB_ROOT_PASSWORD}
-            - MONGODB_REPLICA_SET_KEY=${SET_MONGODB_REPLICA_SET_KEY}
-        env_file:
-            - .env
-        networks:
-            - backend
-
-    mongodb-arbiter:
-        image: docker.io/bitnami/mongodb:5.0
-        depends_on:
-            - mongodb-primary
-        environment:
-            - MONGODB_ADVERTISED_HOSTNAME=mongodb-arbiter
-            - MONGODB_REPLICA_SET_MODE=arbiter
-            - MONGODB_INITIAL_PRIMARY_HOST=mongodb-primary
-            - MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=${SET_MONGODB_ROOT_PASSWORD}
-            - MONGODB_REPLICA_SET_KEY=${SET_MONGODB_REPLICA_SET_KEY}
-        env_file:
-            - .env
+            - rabbitmq
+            - sample
+            - products
+            - auth
+        volumes:
+            - .:/usr/src/techcell_app
+            - /usr/src/techcell_app/node_modules
+            - /etc/letsencrypt/:/etc/letsencrypt
+        ports:
+            - 80:8000
+            - 443:4430
+        command: yarn start:prod api
         networks:
             - backend
 
@@ -115,26 +81,61 @@ services:
         networks:
             - backend
 
-    api:
-        build:
-            context: ./
-            dockerfile: ./apps/api/Dockerfile
-        environment:
-            - RABBITMQ_URLS=amqp://techcell_server:techcell_server_9901@rabbitmq:5672
+    rabbitmq:
+        image: rabbitmq:3-management
+        ports:
+            - '5672:5672'
+            - '15672:15672'
         env_file:
             - .env
-        depends_on:
-            - rabbitmq
-            - sample
-            - products
-            - auth
         volumes:
-            - .:/usr/src/techcell_app
-            - /usr/src/techcell_app/node_modules
+            - 'rabbitmq_data:/var/lib/rabbitmq'
+        networks:
+            - backend
+
+    mongodb-primary:
+        image: docker.io/bitnami/mongodb:5.0
+        environment:
+            - MONGODB_ADVERTISED_HOSTNAME=mongodb-primary
+            - MONGODB_REPLICA_SET_MODE=primary
+            - MONGODB_ROOT_PASSWORD=${SET_MONGODB_ROOT_PASSWORD}
+            - MONGODB_REPLICA_SET_KEY=${SET_MONGODB_REPLICA_SET_KEY}
+        env_file:
+            - .env
+        volumes:
+            - 'mongodb_master_data:/bitnami/mongodb'
         ports:
-            - 80:8000
-            - 443:4430
-        command: yarn start:prod api
+            - '27027:27017'
+        networks:
+            - backend
+
+    mongodb-secondary:
+        image: docker.io/bitnami/mongodb:5.0
+        depends_on:
+            - mongodb-primary
+        environment:
+            - MONGODB_ADVERTISED_HOSTNAME=mongodb-secondary
+            - MONGODB_REPLICA_SET_MODE=secondary
+            - MONGODB_INITIAL_PRIMARY_HOST=mongodb-primary
+            - MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=${SET_MONGODB_ROOT_PASSWORD}
+            - MONGODB_REPLICA_SET_KEY=${SET_MONGODB_REPLICA_SET_KEY}
+        env_file:
+            - .env
+        networks:
+            - backend
+
+    mongodb-arbiter:
+        image: docker.io/bitnami/mongodb:5.0
+        depends_on:
+            - mongodb-primary
+        environment:
+            - MONGODB_ADVERTISED_HOSTNAME=mongodb-arbiter
+            - MONGODB_REPLICA_SET_MODE=arbiter
+            - MONGODB_INITIAL_PRIMARY_HOST=mongodb-primary
+            - MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=${SET_MONGODB_ROOT_PASSWORD}
+            - MONGODB_REPLICA_SET_KEY=${SET_MONGODB_REPLICA_SET_KEY}
+        env_file:
+            - .env
         networks:
             - backend
 
