@@ -3,6 +3,7 @@ import {
     UnauthorizedException,
     ForbiddenException,
     UnprocessableEntityException,
+    Inject,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from './users/users.service';
@@ -11,13 +12,14 @@ import { LoginRequestDTO } from '~/apps/auth/dtos';
 import {
     JwtPayloadDto,
     RegisterRequestDTO,
-    RegisterResponseDTO,
     NewTokenRequestDTO,
     UserDataResponseDTO,
 } from '~/apps/auth/dtos';
 import * as bcrypt from 'bcrypt';
 import { User } from './users/schemas';
-import { RpcException } from '@nestjs/microservices';
+import { RpcException, ClientRMQ } from '@nestjs/microservices';
+import { MAIL_SERVICE } from '~/constants';
+import { catchError, throwError } from 'rxjs';
 
 @Injectable()
 export class AuthService {
@@ -25,13 +27,14 @@ export class AuthService {
         private jwtService: JwtService,
         private usersService: UsersService,
         private configService: ConfigService,
+        @Inject(MAIL_SERVICE) private mailService: ClientRMQ,
     ) {}
 
     getPing() {
         return { message: 'pong', services: 'auth' };
     }
 
-    async register(userRegister: RegisterRequestDTO): Promise<RegisterResponseDTO> {
+    async register(userRegister: RegisterRequestDTO) {
         const { email, password, re_password } = userRegister;
 
         if (password !== re_password) {
@@ -46,10 +49,14 @@ export class AuthService {
             );
         }
 
-        return {
-            message:
-                'Your registration was successfully, please check your email to verify your registration',
-        };
+        // return {
+        //     message:
+        //         'Your registration was successfully, please check your email to verify your registration',
+        // };
+
+        return this.mailService
+            .send({ cmd: 'mail_send_confirm' }, {})
+            .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
     }
 
     async login({ email, password }: LoginRequestDTO): Promise<UserDataResponseDTO> {

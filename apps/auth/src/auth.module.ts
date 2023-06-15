@@ -6,9 +6,15 @@ import { UsersModule } from './users/users.module';
 import { AccessTokenStrategy } from './strategies';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtGuard } from './guards';
+import { MAIL_SERVICE } from '~/constants';
 
 @Module({
-    imports: [RabbitMQModule, UsersModule, JwtModule.register({})],
+    imports: [
+        RabbitMQModule,
+        UsersModule,
+        JwtModule.register({}),
+        RabbitMQModule.registerRmq(MAIL_SERVICE, process.env.RABBITMQ_MAIL_QUEUE),
+    ],
     controllers: [AuthController],
     providers: [JwtGuard, RabbitMQService, AuthService, AccessTokenStrategy],
 })
