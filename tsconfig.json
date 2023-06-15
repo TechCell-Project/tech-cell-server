@@ -23,6 +23,24 @@
       ],
       "@app/common/*": [
         "libs/common/src/*"
+      ],
+      "~/constants": [
+        "constants"
+      ],
+      "~/constants/*": [
+        "constants/*"
+      ],
+      "~/apps/api/*": [
+        "apps/api/src/*"
+      ],
+      "~/apps/auth/*": [
+        "apps/auth/src/*"
+      ],
+      "~/apps/products/*": [
+        "apps/products/src/*"
+      ],
+      "~/apps/sample/*": [
+        "apps/sample/src/*"
       ]
     }
   }
