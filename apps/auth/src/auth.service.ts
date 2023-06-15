@@ -7,14 +7,14 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from './users/users.service';
 import { ConfigService } from '@nestjs/config';
-import { LoginRequestDTO } from './dtos';
+import { LoginRequestDTO } from '~/apps/auth/dtos';
 import {
     JwtPayloadDto,
     RegisterRequestDTO,
     RegisterResponseDTO,
     NewTokenRequestDTO,
     UserDataResponseDTO,
-} from './dtos';
+} from '~/apps/auth/dtos';
 import * as bcrypt from 'bcrypt';
 import { User } from './users/schemas';
 import { RpcException } from '@nestjs/microservices';

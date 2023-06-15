@@ -1,6 +1,6 @@
 import { Controller, Get, Inject, UseGuards } from '@nestjs/common';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
-import { SAMPLE_SERVICE } from '../../../../constants';
+import { SAMPLE_SERVICE } from '~/constants';
 import { catchError, throwError } from 'rxjs';
 import { AuthGuard } from '@app/common';
 

@@ -1,6 +1,6 @@
 import { Controller, Inject, Body, Post } from '@nestjs/common';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
-import { AUTH_SERVICE } from '../../../../constants';
+import { AUTH_SERVICE } from '~/constants';
 import { catchError, throwError } from 'rxjs';
 import {
     ApiTags,
@@ -17,13 +17,13 @@ import {
     LoginRequestDTO,
     UserDataResponseDTO,
     NewTokenRequestDTO,
-} from '../../../auth/src/dtos';
+} from '~/apps/auth/dtos';
 import {
     BadRequestResponseDTO,
     UnauthorizedResponseDTO,
     UnprocessableEntityResponseDTO,
     ForbiddenResponseDTO,
-} from '../dtos';
+} from '~/apps/api/dtos';
 
 @ApiTags('authentication')
 @Controller('auth')
