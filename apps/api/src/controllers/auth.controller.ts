@@ -17,6 +17,7 @@ import {
     LoginRequestDTO,
     UserDataResponseDTO,
     NewTokenRequestDTO,
+    VerifyRegisterRequestDTO,
 } from '~/apps/auth/dtos';
 import {
     BadRequestResponseDTO,
@@ -67,6 +68,13 @@ export class AuthController {
     async register(@Body() user: RegisterRequestDTO) {
         return this.authService
             .send({ cmd: 'auth_register' }, user ? user : undefined)
+            .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
+    }
+
+    @Post('verify-register')
+    async verifyRegister(@Body() { email, otpCode }: VerifyRegisterRequestDTO) {
+        return this.authService
+            .send({ cmd: 'auth_verify_register' }, { email, otpCode })
             .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
     }
 

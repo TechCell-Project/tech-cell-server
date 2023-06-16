@@ -7,6 +7,7 @@ import {
     RegisterRequestDTO,
     NewTokenRequestDTO,
     RegisterResponseDTO,
+    VerifyRegisterRequestDTO,
 } from './dtos';
 import { CreateUserDTO } from './users/dtos';
 import { UsersService } from './users/users.service';
@@ -43,6 +44,14 @@ export class AuthController {
         return this.authService.register(user);
     }
 
+    @MessagePattern({ cmd: 'auth_verify_register' })
+    async verifyRegister(
+        @Ctx() context: RmqContext,
+        @Payload() { email, otpCode }: VerifyRegisterRequestDTO, // : Promise<RegisterResponseDTO>
+    ) {
+        this.rabbitMqService.acknowledgeMessage(context);
+        return this.authService.verifyRegister({ email, otpCode });
+    }
     @MessagePattern({ cmd: 'auth_get_new_access_token' })
     async getNewToken(
         @Ctx() context: RmqContext,
