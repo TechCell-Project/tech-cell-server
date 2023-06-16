@@ -3,21 +3,30 @@ import {
     UnauthorizedException,
     ForbiddenException,
     UnprocessableEntityException,
+    Inject,
+    ConflictException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from './users/users.service';
 import { ConfigService } from '@nestjs/config';
-import { LoginRequestDTO } from '~/apps/auth/dtos';
+import {
+    LoginRequestDTO,
+    ResendVerifyRegisterRequestDTO,
+    VerifyRegisterRequestDTO,
+} from '~/apps/auth/dtos';
 import {
     JwtPayloadDto,
     RegisterRequestDTO,
-    RegisterResponseDTO,
     NewTokenRequestDTO,
     UserDataResponseDTO,
 } from '~/apps/auth/dtos';
 import * as bcrypt from 'bcrypt';
 import { User } from './users/schemas';
-import { RpcException } from '@nestjs/microservices';
+import { RpcException, ClientRMQ } from '@nestjs/microservices';
+import { MAIL_SERVICE } from '~/constants';
+import { catchError, throwError } from 'rxjs';
+import { ConfirmEmailRegisterDTO } from '~/apps/mail/dtos';
+import { OptDTO } from './users/dtos/otp.dto';
 
 @Injectable()
 export class AuthService {
@@ -25,20 +34,29 @@ export class AuthService {
         private jwtService: JwtService,
         private usersService: UsersService,
         private configService: ConfigService,
+        @Inject(MAIL_SERVICE) private mailService: ClientRMQ,
     ) {}
 
     getPing() {
         return { message: 'pong', services: 'auth' };
     }
 
-    async register(userRegister: RegisterRequestDTO): Promise<RegisterResponseDTO> {
-        const { email, password, re_password } = userRegister;
+    async register(userRegister: RegisterRequestDTO) {
+        const { email, password, re_password, firstName, lastName } = userRegister;
 
         if (password !== re_password) {
             throw new RpcException(new UnprocessableEntityException('Passwords do not match'));
         }
 
-        const userCreated = await this.usersService.createUser({ email, password });
+        const otpExpiresMinute = Number(process.env.OTP_EXPIRE_TIME) || 5;
+
+        const userCreated = await this.usersService.createUser({
+            email,
+            password,
+            firstName,
+            lastName,
+            otp: this.createOtp({ expMinutes: otpExpiresMinute }),
+        });
 
         if (!userCreated) {
             throw new RpcException(
@@ -46,10 +64,17 @@ export class AuthService {
             );
         }
 
-        return {
-            message:
-                'Your registration was successfully, please check your email to verify your registration',
+        const emailUser: string = userCreated.email;
+        const emailContext: ConfirmEmailRegisterDTO = {
+            firstName: userCreated.firstName,
+            lastName: userCreated.lastName,
+            verifyCode: userCreated.otp.otpCode,
+            expMinutes: otpExpiresMinute,
         };
+
+        return this.mailService
+            .send({ cmd: 'mail_send_confirm' }, { email: emailUser, emailContext: emailContext })
+            .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
     }
 
     async login({ email, password }: LoginRequestDTO): Promise<UserDataResponseDTO> {
@@ -77,6 +102,104 @@ export class AuthService {
         } catch (error) {
             throw new RpcException(new UnauthorizedException());
         }
+    }
+
+    async verifyRegister({ email, otpCode }: VerifyRegisterRequestDTO) {
+        const user = await this.usersService.getUser({ email });
+        if (!user) {
+            throw new RpcException(new UnauthorizedException());
+        }
+        if (user.emailVerified) {
+            throw new RpcException(new ConflictException('User has already been verified'));
+        }
+        const isValid = this.verifyOtp(otpCode, {
+            otpCode: user.otp.otpCode,
+            otpExpires: user.otp.otpExpires,
+        });
+        if (!isValid) {
+            throw new RpcException(new UnauthorizedException());
+        }
+
+        await this.usersService.findOneAndUpdateUser(user, {
+            emailVerified: true,
+            otp: { otpCode: '', otpExpires: 0 },
+        });
+
+        return {
+            message: 'Verify registration successful',
+        };
+    }
+
+    async resendVerifyRegister({ email }: ResendVerifyRegisterRequestDTO) {
+        const userFound = await this.usersService.getUser({ email });
+        if (!userFound) {
+            throw new RpcException(new UnauthorizedException());
+        }
+        if (userFound.emailVerified) {
+            throw new RpcException(new ConflictException('User has already been verified'));
+        }
+        const otpExpiresMinute = Number(process.env.OTP_EXPIRE_TIME) || 15;
+        const expiresTime = userFound.otp.otpExpires;
+        const currentTime = Date.now();
+        const diffTime = Math.abs(expiresTime - currentTime);
+        const minutesDifference = Math.ceil(diffTime / (1000 * 60));
+        const emailContext: ConfirmEmailRegisterDTO = {
+            firstName: userFound.firstName,
+            lastName: userFound.lastName,
+            verifyCode: userFound.otp.otpCode,
+            expMinutes: otpExpiresMinute,
+        };
+
+        if (minutesDifference < 5) {
+            const newOtp = this.createOtp({
+                expMinutes: otpExpiresMinute,
+                oldOtp: userFound.otp.otpCode,
+            });
+            const userUpdated = await this.usersService.findOneAndUpdateUser(userFound, {
+                otp: newOtp,
+            });
+            Object.assign(emailContext, {
+                verifyCode: userUpdated.otp.otpCode,
+            });
+        }
+
+        return this.mailService
+            .send(
+                { cmd: 'mail_send_confirm' },
+                { email: userFound.email, emailContext: emailContext },
+            )
+            .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
+    }
+
+    // Utils below
+    createOtp({ expMinutes, oldOtp }: { expMinutes: number; oldOtp?: string | undefined }) {
+        // Generate a one-time opt code
+        let otpCode;
+        const otpLength = 6;
+        do {
+            otpCode = Math.random()
+                .toString(36)
+                .substring(2, 2 + otpLength);
+        } while (oldOtp === otpCode);
+
+        // Set an expiration time for the opt code
+        const otpExpires = Date.now() + 1000 * 60 * expMinutes; // expMinutes from now
+
+        return {
+            otpCode,
+            otpExpires,
+        };
+    }
+
+    verifyOtp(otpInput: string, otp: OptDTO) {
+        if (!otp || !otp.otpCode || !otp.otpExpires) {
+            return false;
+        }
+        const { otpCode, otpExpires } = otp;
+        const currentTime = Date.now();
+        const isValid = otpCode === otpInput && otpExpires > currentTime;
+
+        return isValid;
     }
 
     async getNewToken({ refreshToken }: NewTokenRequestDTO): Promise<UserDataResponseDTO> {
