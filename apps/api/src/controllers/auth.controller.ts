@@ -11,6 +11,8 @@ import {
     ApiUnauthorizedResponse,
     ApiForbiddenResponse,
     ApiUnprocessableEntityResponse,
+    ApiNotFoundResponse,
+    ApiConflictResponse,
 } from '@nestjs/swagger';
 import {
     RegisterRequestDTO,
@@ -71,6 +73,11 @@ export class AuthController {
             .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
     }
 
+    @ApiBody({ type: VerifyRegisterRequestDTO })
+    @ApiCreatedResponse({ description: 'User email verified' })
+    @ApiUnauthorizedResponse({ description: 'Verify failed' })
+    @ApiNotFoundResponse({ description: 'User not found.' })
+    @ApiConflictResponse({ description: 'User has already been verified.' })
     @Post('verify-register')
     async verifyRegister(@Body() { email, otpCode }: VerifyRegisterRequestDTO) {
         return this.authService
