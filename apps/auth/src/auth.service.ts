@@ -20,6 +20,7 @@ import { User } from './users/schemas';
 import { RpcException, ClientRMQ } from '@nestjs/microservices';
 import { MAIL_SERVICE } from '~/constants';
 import { catchError, throwError } from 'rxjs';
+import { ConfirmEmailRegisterDTO } from '~/apps/mail/dtos';
 
 @Injectable()
 export class AuthService {
@@ -49,15 +50,17 @@ export class AuthService {
             );
         }
 
-        // return {
-        //     message:
-        //         'Your registration was successfully, please check your email to verify your registration',
-        // };
+        const emailUser: string = userCreated.email;
+        const emailContext: ConfirmEmailRegisterDTO = {
+            firstName: 'userCreated.firstName',
+            lastName: 'userCreated.lastName',
+            verifyCode: 'aaa',
+            expMinutes: 30,
+        };
 
-        const res = this.mailService
-            .send({ cmd: 'mail_send_confirm' }, { email: userCreated.email, message: 'Heloooo' })
+        return this.mailService
+            .send({ cmd: 'mail_send_confirm' }, { email: emailUser, emailContext: emailContext })
             .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
-        return res;
     }
 
     async login({ email, password }: LoginRequestDTO): Promise<UserDataResponseDTO> {
