@@ -6,18 +6,12 @@ import { RpcException } from '@nestjs/microservices';
 export class MailService {
     constructor(private mailerService: MailerService) {}
 
-    getHello(): string {
-        return 'Hello World!';
-    }
-
     async sendMail(email: string, name: string) {
-        console.log(email);
-        console.log(name);
         return await this.mailerService
             .sendMail({
                 to: email,
                 subject: 'Greeting from NestJS NodeMailer',
-                template: './confirm',
+                template: './test',
                 context: {
                     name: name,
                 },
