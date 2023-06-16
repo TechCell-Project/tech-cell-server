@@ -28,6 +28,7 @@ import {
     UnprocessableEntityResponseDTO,
     ForbiddenResponseDTO,
 } from '~/apps/api/dtos';
+import { Throttle } from '@nestjs/throttler';
 
 @ApiTags('authentication')
 @Controller('auth')
@@ -80,6 +81,7 @@ export class AuthController {
     @ApiUnauthorizedResponse({ description: 'Verify failed' })
     @ApiNotFoundResponse({ description: 'User not found.' })
     @ApiConflictResponse({ description: 'User has already been verified.' })
+    @Throttle(5, 60) // limit 5 requests per 60 seconds
     @HttpCode(HttpStatus.OK)
     @Post('verify-register')
     async verifyRegister(@Body() { email, otpCode }: VerifyRegisterRequestDTO) {
@@ -90,6 +92,7 @@ export class AuthController {
 
     @ApiOkResponse({ description: 'Mail sent successfully' })
     @ApiBadRequestResponse({ description: 'Mail send failed' })
+    @Throttle(3, 300) // limit 3 requests per 5 minutes
     @HttpCode(HttpStatus.OK)
     @Post('resend-verify-register')
     async resendVerifyRegister(@Body() { email }: ResendVerifyRegisterRequestDTO) {
