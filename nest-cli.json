@@ -61,7 +61,8 @@
       "entryFile": "main",
       "sourceRoot": "apps/mail/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/mail/tsconfig.app.json"
+        "tsConfigPath": "apps/mail/tsconfig.app.json",
+        "assets": ["**/*.hbs"]
       }
     }
   }

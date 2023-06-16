@@ -37,8 +37,8 @@ export class AuthController {
     @MessagePattern({ cmd: 'auth_register' })
     async register(
         @Ctx() context: RmqContext,
-        @Payload() user: RegisterRequestDTO,
-    ): Promise<RegisterResponseDTO> {
+        @Payload() user: RegisterRequestDTO, // : Promise<RegisterResponseDTO>
+    ) {
         this.rabbitMqService.acknowledgeMessage(context);
         return this.authService.register(user);
     }

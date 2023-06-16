@@ -54,9 +54,10 @@ export class AuthService {
         //         'Your registration was successfully, please check your email to verify your registration',
         // };
 
-        return this.mailService
-            .send({ cmd: 'mail_send_confirm' }, {})
+        const res = this.mailService
+            .send({ cmd: 'mail_send_confirm' }, { email: userCreated.email, message: 'Heloooo' })
             .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
+        return res;
     }
 
     async login({ email, password }: LoginRequestDTO): Promise<UserDataResponseDTO> {

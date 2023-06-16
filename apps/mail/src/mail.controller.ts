@@ -1,7 +1,7 @@
 import { Controller, Inject, Logger } from '@nestjs/common';
 import { MailService } from './mail.service';
 import { RabbitMQService } from '@app/common';
-import { Ctx, MessagePattern, RmqContext } from '@nestjs/microservices';
+import { Ctx, MessagePattern, Payload, RmqContext } from '@nestjs/microservices';
 
 @Controller()
 export class MailController {
@@ -11,8 +11,11 @@ export class MailController {
     ) {}
 
     @MessagePattern({ cmd: 'mail_send_confirm' })
-    async sendConfirmEmail(@Ctx() context: RmqContext) {
+    async sendConfirmEmail(
+        @Ctx() context: RmqContext,
+        @Payload() { email, message }: { email: string; message: string },
+    ) {
         this.rabbitMqService.acknowledgeMessage(context);
-        return 'mail_send_confirm';
+        return this.mailService.sendMail(email, message);
     }
 }
