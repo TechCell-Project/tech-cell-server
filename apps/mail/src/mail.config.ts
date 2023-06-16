@@ -25,7 +25,7 @@ export class MailerConfig implements MailerOptionsFactory {
             transport: sendgridTransport,
             fallbackTransport: gmailTransport,
             defaults: {
-                from: 'TechCell Teams <teams@techcell.cloud>',
+                from: process.env.MAIL_SENDER,
             },
             template: {
                 dir: join(__dirname, 'templates'),
