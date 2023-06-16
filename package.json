@@ -10,31 +10,34 @@
   },
   "scripts": {
     "build": "nest build",
-    "build:all": "sh ./scripts/build-all-service.sh",
+    "build:all": "node ./scripts/build-all-service.js",
     "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "sh ./scripts/start-production.sh",
+    "start:prod": "node ./scripts/start-production.js",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./apps/back-end/test/jest-e2e.json",
-    "up:core": "docker-compose -f docker-compose.core.yml up -d",
-    "down:core": "docker-compose -f docker-compose.core.yml down",
+    "up:core": "docker compose -f docker-compose.core.yml up -d",
+    "down:core": "docker compose -f docker-compose.core.yml down",
     "restart:core": "yarn down:core && yarn up:core --build",
-    "up": "docker-compose -f docker-compose.yml up -d",
-    "down": "docker-compose -f docker-compose.yml down",
+    "up": "docker compose -f docker-compose.yml up -d",
+    "up:dev": "docker compose -f docker-compose.dev.yml up -d",
+    "down": "docker compose -f docker-compose.yml down",
     "restart": "yarn down && yarn up --build",
-    "deploy:sample": "yarn install && yarn start sample",
-    "deploy:products": "yarn install && yarn start products",
-    "deploy:api": "yarn install && yarn start api"
+    "deploy:api": "yarn install && yarn start:prod api",
+    "deploy:auth": "yarn install && yarn start:prod auth",
+    "deploy:sample": "yarn install && yarn start:prod sample",
+    "deploy:products": "yarn install && yarn start:prod products"
   },
   "dependencies": {
+    "@nestjs-modules/mailer": "^1.8.1",
     "@nestjs/common": "^9.0.0",
-    "@nestjs/config": "^2.3.2",
+    "@nestjs/config": "^3.0.0",
     "@nestjs/core": "^9.0.0",
     "@nestjs/jwt": "^10.0.3",
     "@nestjs/microservices": "^9.4.2",
@@ -42,13 +45,17 @@
     "@nestjs/passport": "^9.0.3",
     "@nestjs/platform-express": "^9.0.0",
     "@nestjs/swagger": "^6.3.0",
+    "@types/nodemailer": "^6.4.8",
     "amqp-connection-manager": "^4.1.13",
     "amqplib": "^0.10.3",
     "bcrypt": "^5.1.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
+    "express": "^4.18.2",
+    "handlebars": "^4.7.7",
     "joi": "^17.9.2",
     "mongoose": "^7.2.2",
+    "nodemailer": "^6.9.3",
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.1.13",
@@ -99,8 +106,7 @@
       "<rootDir>/libs/"
     ],
     "moduleNameMapper": {
-      "^@app/common(|/.*)$": "<rootDir>/libs/common/src/$1",
-      "^@app/constants(|/.*)$": "<rootDir>/libs/constants/src/$1"
+      "^@app/common(|/.*)$": "<rootDir>/libs/common/src/$1"
     }
   }
 }

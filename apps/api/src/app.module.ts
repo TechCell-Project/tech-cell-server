@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { RabbitMQModule } from '@app/common';
 import Controller from './controllers';
-import { PRODUCTS_SERVICE, SAMPLE_SERVICE, AUTH_SERVICE } from '../../../constants';
+import { PRODUCTS_SERVICE, SAMPLE_SERVICE, AUTH_SERVICE } from '~/constants';
 
 @Module({
     imports: [

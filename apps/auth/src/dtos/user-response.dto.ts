@@ -2,10 +2,12 @@ import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { Types } from 'mongoose';
 import { IsArray, IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { UserRole } from '../users/types';
+import { UserRole } from '~/apps/auth/users/enums';
 
 export class UserDataResponseDTO {
-    @ApiProperty()
+    @ApiProperty({
+        example: '6487d9e0949d97a9ba8bffff',
+    })
     @Type(() => String)
     @IsNotEmpty()
     _id: string | Types.ObjectId;
@@ -21,16 +23,16 @@ export class UserDataResponseDTO {
     @IsString({ each: true, message: 'Each item should be string' })
     address?: string[];
 
-    @ApiProperty({ enum: UserRole })
+    @ApiProperty({ enum: UserRole, example: UserRole.User })
     @IsEnum(UserRole)
     @IsNotEmpty()
     role?: UserRole;
 
-    @ApiProperty({ type: String })
+    @ApiProperty({ type: String, example: 'the-access-token' })
     @IsString()
     accessToken: string;
 
-    @ApiProperty({ type: String })
+    @ApiProperty({ type: String, example: 'the-refresh-token' })
     @IsString()
     refreshToken: string;
 
