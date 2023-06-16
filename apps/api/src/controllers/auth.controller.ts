@@ -1,4 +1,4 @@
-import { Controller, Inject, Body, Post } from '@nestjs/common';
+import { Controller, Inject, Body, Post, HttpCode, HttpStatus } from '@nestjs/common';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { AUTH_SERVICE } from '~/constants';
 import { catchError, throwError } from 'rxjs';
@@ -46,6 +46,7 @@ export class AuthController {
         description: 'Your account email or password is wrong',
         type: UnauthorizedResponseDTO,
     })
+    @HttpCode(HttpStatus.OK)
     @Post('login')
     async login(@Body() user: LoginRequestDTO) {
         return this.authService
@@ -74,10 +75,11 @@ export class AuthController {
     }
 
     @ApiBody({ type: VerifyRegisterRequestDTO })
-    @ApiCreatedResponse({ description: 'User email verified' })
+    @ApiOkResponse({ description: 'User email verified' })
     @ApiUnauthorizedResponse({ description: 'Verify failed' })
     @ApiNotFoundResponse({ description: 'User not found.' })
     @ApiConflictResponse({ description: 'User has already been verified.' })
+    @HttpCode(HttpStatus.OK)
     @Post('verify-register')
     async verifyRegister(@Body() { email, otpCode }: VerifyRegisterRequestDTO) {
         return this.authService
