@@ -45,6 +45,7 @@
     "@nestjs/passport": "^9.0.3",
     "@nestjs/platform-express": "^9.0.0",
     "@nestjs/swagger": "^6.3.0",
+    "@nestjs/throttler": "^4.1.0",
     "@types/nodemailer": "^6.4.8",
     "amqp-connection-manager": "^4.1.13",
     "amqplib": "^0.10.3",
