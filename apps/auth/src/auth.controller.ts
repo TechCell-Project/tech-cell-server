@@ -6,8 +6,8 @@ import {
     UserDataResponseDTO,
     RegisterRequestDTO,
     NewTokenRequestDTO,
-    RegisterResponseDTO,
     VerifyRegisterRequestDTO,
+    ResendVerifyRegisterRequestDTO,
 } from './dtos';
 import { CreateUserDTO } from './users/dtos';
 import { UsersService } from './users/users.service';
@@ -52,6 +52,17 @@ export class AuthController {
         this.rabbitMqService.acknowledgeMessage(context);
         return this.authService.verifyRegister({ email, otpCode });
     }
+
+    @MessagePattern({ cmd: 'auth_resend_verify_register' })
+    async resendVerifyRegister(
+        @Ctx() context,
+        @Payload() { email }: ResendVerifyRegisterRequestDTO,
+    ) {
+        this.rabbitMqService.acknowledgeMessage(context);
+
+        return this.authService.resendVerifyRegister({ email });
+    }
+
     @MessagePattern({ cmd: 'auth_get_new_access_token' })
     async getNewToken(
         @Ctx() context: RmqContext,

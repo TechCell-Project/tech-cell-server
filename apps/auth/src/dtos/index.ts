@@ -6,3 +6,4 @@ export * from './login-request.dto';
 export * from './new-token-request.dto';
 export * from './register-response.dto';
 export * from './verify-register-request.dto';
+export * from './resend-verify-register-request.dto';

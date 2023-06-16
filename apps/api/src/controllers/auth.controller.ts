@@ -20,6 +20,7 @@ import {
     UserDataResponseDTO,
     NewTokenRequestDTO,
     VerifyRegisterRequestDTO,
+    ResendVerifyRegisterRequestDTO,
 } from '~/apps/auth/dtos';
 import {
     BadRequestResponseDTO,
@@ -84,6 +85,16 @@ export class AuthController {
     async verifyRegister(@Body() { email, otpCode }: VerifyRegisterRequestDTO) {
         return this.authService
             .send({ cmd: 'auth_verify_register' }, { email, otpCode })
+            .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
+    }
+
+    @ApiOkResponse({ description: 'Mail sent successfully' })
+    @ApiBadRequestResponse({ description: 'Mail send failed' })
+    @HttpCode(HttpStatus.OK)
+    @Post('resend-verify-register')
+    async resendVerifyRegister(@Body() { email }: ResendVerifyRegisterRequestDTO) {
+        return this.authService
+            .send({ cmd: 'auth_resend_verify_register' }, { email })
             .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
     }
 

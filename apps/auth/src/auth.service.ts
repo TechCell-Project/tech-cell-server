@@ -9,7 +9,11 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from './users/users.service';
 import { ConfigService } from '@nestjs/config';
-import { LoginRequestDTO, VerifyRegisterRequestDTO } from '~/apps/auth/dtos';
+import {
+    LoginRequestDTO,
+    ResendVerifyRegisterRequestDTO,
+    VerifyRegisterRequestDTO,
+} from '~/apps/auth/dtos';
 import {
     JwtPayloadDto,
     RegisterRequestDTO,
@@ -124,6 +128,47 @@ export class AuthService {
         return {
             message: 'Verify registration successful',
         };
+    }
+
+    async resendVerifyRegister({ email }: ResendVerifyRegisterRequestDTO) {
+        const userFound = await this.usersService.getUser({ email });
+        if (!userFound) {
+            throw new RpcException(new UnauthorizedException());
+        }
+        if (userFound.emailVerified) {
+            throw new RpcException(new ConflictException('User has already been verified'));
+        }
+        const otpExpiresMinute = Number(process.env.OTP_EXPIRE_TIME) || 15;
+        const expiresTime = userFound.otp.otpExpires;
+        const currentTime = Date.now();
+        const diffTime = Math.abs(expiresTime - currentTime);
+        const minutesDifference = Math.ceil(diffTime / (1000 * 60));
+        const emailContext: ConfirmEmailRegisterDTO = {
+            firstName: userFound.firstName,
+            lastName: userFound.lastName,
+            verifyCode: userFound.otp.otpCode,
+            expMinutes: otpExpiresMinute,
+        };
+
+        if (minutesDifference < 5) {
+            const newOtp = this.createOtp({
+                expMinutes: otpExpiresMinute,
+                oldOtp: userFound.otp.otpCode,
+            });
+            const userUpdated = await this.usersService.findOneAndUpdateUser(userFound, {
+                otp: newOtp,
+            });
+            Object.assign(emailContext, {
+                verifyCode: userUpdated.otp.otpCode,
+            });
+        }
+
+        return this.mailService
+            .send(
+                { cmd: 'mail_send_confirm' },
+                { email: userFound.email, emailContext: emailContext },
+            )
+            .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
     }
 
     // Utils below

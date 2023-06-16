@@ -45,6 +45,25 @@ services:
             - backend
         restart: always
 
+    mail:
+        build:
+            context: ./
+            dockerfile: ./apps/mail/Dockerfile
+        environment:
+            - RABBITMQ_URLS=amqp://techcell_server:techcell_server_9901@rabbitmq:5672
+        env_file:
+            - .env
+        depends_on:
+            - rabbitmq
+            - auth
+        volumes:
+            - .:/usr/src/techcell_app
+            - /usr/src/techcell_app/node_modules
+        command: yarn start:prod mail
+        networks:
+            - backend
+        restart: always
+
     products:
         build:
             context: ./

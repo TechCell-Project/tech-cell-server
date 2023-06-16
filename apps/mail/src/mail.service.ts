@@ -30,7 +30,7 @@ export class MailService {
     }
 
     async sendConfirmMail(email: string, emailContext: ConfirmEmailRegisterDTO) {
-        const message = `Your registration was successfully, please check your email to verify your registration`;
+        const message = `Mail sent: ${email}`;
         return await this.mailerService
             .sendMail({
                 to: email,
@@ -39,7 +39,7 @@ export class MailService {
                 context: emailContext,
             })
             .then(() => {
-                Logger.log(`Mail sent:: ${email}`);
+                Logger.log(`Mail sent: ${email}`);
                 return {
                     message: message,
                 };
