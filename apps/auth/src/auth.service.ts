@@ -171,6 +171,29 @@ export class AuthService {
             .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
     }
 
+    async getNewToken({ refreshToken }: NewTokenRequestDTO): Promise<UserDataResponseDTO> {
+        try {
+            if (!NewTokenRequestDTO) {
+                throw new RpcException(new ForbiddenException());
+            }
+
+            const { user } = await this.verifyRefreshToken(refreshToken);
+            const userFound = await this.usersService.getUser({ email: user.email });
+
+            const { _id, email: emailUser, role } = userFound;
+            const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
+                await this.signTokens({
+                    _id,
+                    email: emailUser,
+                    role,
+                });
+            const userReturn = Object.assign(user, { newAccessToken, newRefreshToken });
+            return userReturn;
+        } catch (error) {
+            throw new RpcException(new ForbiddenException());
+        }
+    }
+
     // Utils below
     createOtp({ expMinutes, oldOtp }: { expMinutes: number; oldOtp?: string | undefined }) {
         // Generate a one-time opt code
@@ -200,29 +223,6 @@ export class AuthService {
         const isValid = otpCode === otpInput && otpExpires > currentTime;
 
         return isValid;
-    }
-
-    async getNewToken({ refreshToken }: NewTokenRequestDTO): Promise<UserDataResponseDTO> {
-        try {
-            if (!NewTokenRequestDTO) {
-                throw new RpcException(new ForbiddenException());
-            }
-
-            const { user } = await this.verifyRefreshToken(refreshToken);
-            const userFound = await this.usersService.getUser({ email: user.email });
-
-            const { _id, email: emailUser, role } = userFound;
-            const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
-                await this.signTokens({
-                    _id,
-                    email: emailUser,
-                    role,
-                });
-            const userReturn = Object.assign(user, { newAccessToken, newRefreshToken });
-            return userReturn;
-        } catch (error) {
-            throw new RpcException(new ForbiddenException());
-        }
     }
 
     async validateUser(email: string, password: string): Promise<User> {
