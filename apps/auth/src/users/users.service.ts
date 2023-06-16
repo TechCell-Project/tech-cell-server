@@ -4,7 +4,6 @@ import { UsersRepository } from './users.repository';
 import { CreateUserDTO } from './dtos';
 import { User } from './schemas/user.schema';
 import { RpcException } from '@nestjs/microservices';
-import { FilterQuery } from 'mongoose';
 
 @Injectable()
 export class UsersService {
@@ -43,9 +42,5 @@ export class UsersService {
 
     async getUser(getUserArgs: Partial<User>) {
         return this.usersRepository.findOne(getUserArgs);
-    }
-
-    async findOneAndUpdateUser(filterQuery: FilterQuery<User>, updateUserArgs: Partial<User>) {
-        return this.usersRepository.findOneAndUpdate(filterQuery, updateUserArgs);
     }
 }

@@ -2,7 +2,7 @@ import { Controller, Get, Inject, UseFilters } from '@nestjs/common';
 import { ProductsService } from './services';
 import { RabbitMQService } from '@app/common';
 import { MessagePattern, Ctx, RmqContext, Payload } from '@nestjs/microservices';
-import { CreateProductRequest } from '~/apps/products/dtos';
+import { CreateProductRequest } from './dtos';
 // import { ValidationPipe } from '@app/common';
 // import { RpcValidationFilter } from '@app/common';
 

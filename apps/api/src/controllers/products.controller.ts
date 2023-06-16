@@ -1,6 +1,6 @@
 import { Controller, Inject, Body, Get, Post, UseGuards } from '@nestjs/common';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
-import { PRODUCTS_SERVICE } from '~/constants';
+import { PRODUCTS_SERVICE } from '../../../../constants';
 import { AuthGuard } from '@app/common';
 import { catchError, throwError } from 'rxjs';
 

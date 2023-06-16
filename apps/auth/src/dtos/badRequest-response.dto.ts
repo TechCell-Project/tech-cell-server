@@ -17,8 +17,12 @@ export class BadRequestResponseDTO {
     error: string;
 
     @ApiProperty({
-        description: 'Array or string of error message',
-        example: ['data must be a string', 'data must be longer than or equal to 8 characters'],
+        description: 'Array of error message',
+        example: [
+            'password must be longer than or equal to 8 characters',
+            're_password must be longer than or equal to 8 characters',
+            're_password must be a string',
+        ],
         type: [String],
     })
     @IsString()

@@ -1,33 +1,15 @@
-import { Controller, Inject, Body, Post, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Inject, Body, Post, HttpStatus } from '@nestjs/common';
+import { ApiTags, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
-import { AUTH_SERVICE } from '~/constants';
+import { AUTH_SERVICE } from '../../../../constants';
 import { catchError, throwError } from 'rxjs';
-import {
-    ApiTags,
-    ApiBody,
-    ApiOkResponse,
-    ApiCreatedResponse,
-    ApiBadRequestResponse,
-    ApiUnauthorizedResponse,
-    ApiForbiddenResponse,
-    ApiUnprocessableEntityResponse,
-    ApiNotFoundResponse,
-    ApiConflictResponse,
-} from '@nestjs/swagger';
 import {
     RegisterRequestDTO,
     LoginRequestDTO,
     UserDataResponseDTO,
-    NewTokenRequestDTO,
-    VerifyRegisterRequestDTO,
-    ResendVerifyRegisterRequestDTO,
-} from '~/apps/auth/dtos';
-import {
+    NewAccessTokenRequestDTO,
     BadRequestResponseDTO,
-    UnauthorizedResponseDTO,
-    UnprocessableEntityResponseDTO,
-    ForbiddenResponseDTO,
-} from '~/apps/api/dtos';
+} from '../../../auth/src/dtos';
 
 @ApiTags('authentication')
 @Controller('auth')
@@ -35,19 +17,16 @@ export class AuthController {
     constructor(@Inject(AUTH_SERVICE) private readonly authService: ClientProxy) {}
 
     @ApiBody({ type: LoginRequestDTO })
-    @ApiOkResponse({
+    @ApiResponse({
+        status: HttpStatus.OK,
         description: 'Login successfully',
         type: UserDataResponseDTO,
     })
-    @ApiBadRequestResponse({
-        description: 'Your account email or password is invalid',
-        type: BadRequestResponseDTO,
+    @ApiResponse({
+        status: HttpStatus.FOUND,
+        description: 'Login successfully',
+        type: UserDataResponseDTO,
     })
-    @ApiUnauthorizedResponse({
-        description: 'Your account email or password is wrong',
-        type: UnauthorizedResponseDTO,
-    })
-    @HttpCode(HttpStatus.OK)
     @Post('login')
     async login(@Body() user: LoginRequestDTO) {
         return this.authService
@@ -56,17 +35,15 @@ export class AuthController {
     }
 
     @ApiBody({ type: RegisterRequestDTO })
-    @ApiCreatedResponse({
+    @ApiResponse({
+        status: HttpStatus.CREATED,
         description: 'User created successfully',
         type: UserDataResponseDTO,
     })
-    @ApiBadRequestResponse({
-        description: 'Your user information is invalid',
+    @ApiResponse({
+        status: HttpStatus.BAD_REQUEST,
+        description: 'User create failed',
         type: BadRequestResponseDTO,
-    })
-    @ApiUnprocessableEntityResponse({
-        description: 'Your account already exists',
-        type: UnprocessableEntityResponseDTO,
     })
     @Post('register')
     async register(@Body() user: RegisterRequestDTO) {
@@ -75,48 +52,23 @@ export class AuthController {
             .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
     }
 
-    @ApiBody({ type: VerifyRegisterRequestDTO })
-    @ApiOkResponse({ description: 'User email verified' })
-    @ApiUnauthorizedResponse({ description: 'Verify failed' })
-    @ApiNotFoundResponse({ description: 'User not found.' })
-    @ApiConflictResponse({ description: 'User has already been verified.' })
-    @HttpCode(HttpStatus.OK)
-    @Post('verify-register')
-    async verifyRegister(@Body() { email, otpCode }: VerifyRegisterRequestDTO) {
-        return this.authService
-            .send({ cmd: 'auth_verify_register' }, { email, otpCode })
-            .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
-    }
-
-    @ApiOkResponse({ description: 'Mail sent successfully' })
-    @ApiBadRequestResponse({ description: 'Mail send failed' })
-    @HttpCode(HttpStatus.OK)
-    @Post('resend-verify-register')
-    async resendVerifyRegister(@Body() { email }: ResendVerifyRegisterRequestDTO) {
-        return this.authService
-            .send({ cmd: 'auth_resend_verify_register' }, { email })
-            .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
-    }
-
-    @ApiBody({ type: NewTokenRequestDTO })
-    @ApiCreatedResponse({
+    @ApiBody({ type: NewAccessTokenRequestDTO })
+    @ApiResponse({
+        status: HttpStatus.CREATED,
         description: 'New token created successfully',
         type: UserDataResponseDTO,
     })
-    @ApiBadRequestResponse({
-        description: 'Your information is invalid',
+    @ApiResponse({
+        status: HttpStatus.BAD_REQUEST,
+        description: 'Get new token failed',
         type: BadRequestResponseDTO,
     })
-    @ApiForbiddenResponse({
-        description: 'Your refreshToken token invalid, can not get new token',
-        type: ForbiddenResponseDTO,
-    })
     @Post('refresh-token')
-    async getNewToken(@Body() { refreshToken }: NewTokenRequestDTO) {
+    async getNewAccessToken(@Body() { accessToken }: NewAccessTokenRequestDTO) {
         return this.authService
             .send(
                 { cmd: 'auth_get_new_access_token' },
-                { refreshToken: refreshToken ? refreshToken : undefined },
+                { accessToken: accessToken ? accessToken : undefined },
             )
             .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
     }

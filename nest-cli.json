@@ -54,16 +54,6 @@
       "compilerOptions": {
         "tsConfigPath": "apps/auth/tsconfig.app.json"
       }
-    },
-    "mail": {
-      "type": "application",
-      "root": "apps/mail",
-      "entryFile": "main",
-      "sourceRoot": "apps/mail/src",
-      "compilerOptions": {
-        "tsConfigPath": "apps/mail/tsconfig.app.json",
-        "assets": ["**/*.hbs"]
-      }
     }
   }
 }

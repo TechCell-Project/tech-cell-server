@@ -1,1 +1,1 @@
-export * from './rmq.service.interface';
+export * from './rmq.service.interace';

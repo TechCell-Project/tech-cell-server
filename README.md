@@ -99,31 +99,6 @@ yarn start:prod <service_name> # start the service as production mode
 # Just CTRL-C to stop the service
 ```
 
-### Use Docker
-
-- Check what is running on docker:
-```bash
-docker ps -a
-```
-
-- Get the log of a container:
-```bash
-docker logs <CONTAINER_ID> # get logs
-
-docker logs -f <CONTAINER_ID> # get logs realtime
-# Remember to replace `<CONTAINER_ID>` with the actual ID of the container you want to inspect.
-```
-
-- To remove all containers, volumes, and images that are not currently running, you can use the following commands:
-```bash
-docker container prune # remove all stopped containers
-docker volume prune # remove all unused volumes
-docker image prune # remove all unused images
-# or just one
-docker system prune # remove all stopped containers and unused volumes, images
-```
-
-
 ## 🦽 License
 
 Nest is [MIT licensed](LICENSE).

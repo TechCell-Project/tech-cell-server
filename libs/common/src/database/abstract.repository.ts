@@ -23,8 +23,8 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
         const document = await this.model.findOne(filterQuery, {}, { lean: true });
 
         if (!document) {
-            this.logger.warn(`${this.model.modelName} not found with filterQuery`, filterQuery);
-            throw new RpcException(new NotFoundException(`${this.model.modelName} not found.`));
+            this.logger.warn('Document not found with filterQuery', filterQuery);
+            throw new RpcException(new NotFoundException('Document not found.'));
         }
 
         return document;
@@ -37,8 +37,8 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
         });
 
         if (!document) {
-            this.logger.warn(`${this.model.modelName} not found with filterQuery:`, filterQuery);
-            throw new RpcException(new NotFoundException(`${this.model.modelName} not found.`));
+            this.logger.warn(`Document not found with filterQuery:`, filterQuery);
+            throw new RpcException(new NotFoundException('Document not found.'));
         }
 
         return document;

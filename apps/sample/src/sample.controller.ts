@@ -20,10 +20,4 @@ export class SampleController {
         this.rabbitMqService.acknowledgeMessage(context);
         return { message: 'hello from sample' };
     }
-
-    @MessagePattern('get_sample_auth')
-    async getSampleAuth(@Ctx() context: RmqContext) {
-        this.rabbitMqService.acknowledgeMessage(context);
-        return { message: 'you only see this if you already auth success' };
-    }
 }

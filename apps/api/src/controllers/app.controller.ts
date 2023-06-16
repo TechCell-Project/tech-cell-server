@@ -1,8 +1,7 @@
-import { Controller, Get, Inject, UseGuards } from '@nestjs/common';
+import { Controller, Get, Inject } from '@nestjs/common';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
-import { SAMPLE_SERVICE } from '~/constants';
+import { SAMPLE_SERVICE } from '../../../../constants';
 import { catchError, throwError } from 'rxjs';
-import { AuthGuard } from '@app/common';
 
 @Controller('/')
 export class AppController {
@@ -17,14 +16,6 @@ export class AppController {
     async getSample() {
         return this.sampleService
             .send('get_sample', {})
-            .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
-    }
-
-    @Get('sample-auth')
-    @UseGuards(AuthGuard)
-    async getSampleAuth() {
-        return this.sampleService
-            .send('get_sample_auth', {})
             .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
     }
 }
