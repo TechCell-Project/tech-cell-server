@@ -5,8 +5,10 @@ import {
     UnprocessableEntityException,
     Inject,
     ConflictException,
+    BadRequestException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { TokenExpiredError } from 'jsonwebtoken';
 import { UsersService } from './users/users.service';
 import { ConfigService } from '@nestjs/config';
 import {
@@ -107,7 +109,7 @@ export class AuthService {
     async verifyRegister({ email, otpCode }: VerifyRegisterRequestDTO) {
         const user = await this.usersService.getUser({ email });
         if (!user) {
-            throw new RpcException(new UnauthorizedException());
+            throw new RpcException(new UnauthorizedException('User not found'));
         }
         if (user.emailVerified) {
             throw new RpcException(new ConflictException('User has already been verified'));
@@ -117,7 +119,7 @@ export class AuthService {
             otpExpires: user.otp.otpExpires,
         });
         if (!isValid) {
-            throw new RpcException(new UnauthorizedException());
+            throw new RpcException(new UnauthorizedException('Invalid otp code'));
         }
 
         await this.usersService.findOneAndUpdateUser(user, {
@@ -133,16 +135,14 @@ export class AuthService {
     async resendVerifyRegister({ email }: ResendVerifyRegisterRequestDTO) {
         const userFound = await this.usersService.getUser({ email });
         if (!userFound) {
-            throw new RpcException(new UnauthorizedException());
+            throw new RpcException(new UnauthorizedException('User not found'));
         }
         if (userFound.emailVerified) {
             throw new RpcException(new ConflictException('User has already been verified'));
         }
         const otpExpiresMinute = Number(process.env.OTP_EXPIRE_TIME) || 15;
-        const expiresTime = userFound.otp.otpExpires;
-        const currentTime = Date.now();
-        const diffTime = Math.abs(expiresTime - currentTime);
-        const minutesDifference = Math.ceil(diffTime / (1000 * 60));
+
+        // Pre-defined email data
         const emailContext: ConfirmEmailRegisterDTO = {
             firstName: userFound.firstName,
             lastName: userFound.lastName,
@@ -150,7 +150,14 @@ export class AuthService {
             expMinutes: otpExpiresMinute,
         };
 
-        if (minutesDifference < 5) {
+        // calculate expiration
+        const expiresTime = userFound.otp.otpExpires;
+        const currentTime = Date.now();
+        const diffTime = Math.abs(expiresTime - currentTime);
+        const minutesDifference = Math.ceil(diffTime / (1000 * 60));
+
+        // If expMinutes of otp is less than 3 minutes, create a new one
+        if (minutesDifference < 3) {
             const newOtp = this.createOtp({
                 expMinutes: otpExpiresMinute,
                 oldOtp: userFound.otp.otpCode,
@@ -171,34 +178,36 @@ export class AuthService {
             .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
     }
 
-    async getNewToken({ refreshToken }: NewTokenRequestDTO): Promise<UserDataResponseDTO> {
+    async getNewToken({
+        refreshToken: oldRefreshToken,
+    }: NewTokenRequestDTO): Promise<UserDataResponseDTO> {
         try {
-            if (!NewTokenRequestDTO) {
-                throw new RpcException(new ForbiddenException());
+            if (!oldRefreshToken) {
+                throw new RpcException(new BadRequestException('Refresh token is required'));
             }
 
-            const { user } = await this.verifyRefreshToken(refreshToken);
+            const { user } = await this.verifyRefreshToken(oldRefreshToken);
             const userFound = await this.usersService.getUser({ email: user.email });
 
             const { _id, email: emailUser, role } = userFound;
-            const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
-                await this.signTokens({
-                    _id,
-                    email: emailUser,
-                    role,
-                });
-            const userReturn = Object.assign(user, { newAccessToken, newRefreshToken });
-            return userReturn;
+            const { accessToken, refreshToken } = await this.signTokens({
+                _id,
+                email: emailUser,
+                role,
+            });
+            // const userReturn = Object.assign(user, { newAccessToken, newRefreshToken });
+            return { ...user, accessToken, refreshToken };
         } catch (error) {
             throw new RpcException(new ForbiddenException());
         }
     }
 
     // Utils below
-    createOtp({ expMinutes, oldOtp }: { expMinutes: number; oldOtp?: string | undefined }) {
+    createOtp({ expMinutes, oldOtp }: { expMinutes: number; oldOtp?: string | undefined }): OptDTO {
         // Generate a one-time opt code
         let otpCode;
         const otpLength = 6;
+        // Loop to generate the new opt is not same as the old one
         do {
             otpCode = Math.random()
                 .toString(36)
@@ -211,7 +220,7 @@ export class AuthService {
         return {
             otpCode,
             otpExpires,
-        };
+        } as OptDTO;
     }
 
     verifyOtp(otpInput: string, otp: OptDTO) {
@@ -245,31 +254,39 @@ export class AuthService {
 
     async verifyAccessToken(accessToken: string) {
         if (!accessToken) {
-            throw new RpcException(new UnauthorizedException());
+            throw new RpcException(new BadRequestException('Access token missing.'));
         }
 
-        try {
-            const { user, exp } = await this.jwtService.verifyAsync(accessToken, {
-                secret: this.configService.get<string>('JWT_ACCESS_TOKEN_SECRET'),
-            });
-            return { user, exp };
-        } catch (error) {
-            throw new RpcException(new UnauthorizedException());
-        }
+        return await this.verifyToken(
+            accessToken,
+            this.configService.get<string>('JWT_ACCESS_TOKEN_SECRET'),
+        );
     }
 
     async verifyRefreshToken(refreshToken: string) {
         if (!refreshToken) {
-            throw new RpcException(new UnauthorizedException());
+            throw new RpcException(new BadRequestException('Refresh token missing.'));
         }
 
+        return await this.verifyToken(
+            refreshToken,
+            this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'),
+        );
+    }
+
+    async verifyToken(token: string, secret: string) {
         try {
-            const { user, exp } = await this.jwtService.verifyAsync(refreshToken, {
-                secret: this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'),
+            const { user, exp } = await this.jwtService.verifyAsync(token, {
+                secret,
             });
             return { user, exp };
         } catch (error) {
-            throw new RpcException(new UnauthorizedException());
+            if (error instanceof TokenExpiredError) {
+                throw new RpcException(
+                    new UnauthorizedException('Token has expired, please login again.'),
+                );
+            }
+            throw new RpcException(new UnauthorizedException('Invalid token, please login again.'));
         }
     }
 

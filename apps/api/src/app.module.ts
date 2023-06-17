@@ -13,6 +13,7 @@ import { APP_GUARD } from '@nestjs/core';
             envFilePath: './.env',
         }),
         ThrottlerModule.forRoot({
+            // Global rate limit
             ttl: 60 * 5, // 5 minutes
             limit: 500, // request per ttl
         }),

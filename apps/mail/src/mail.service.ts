@@ -45,10 +45,7 @@ export class MailService {
                 };
             })
             .catch((error) => {
-                Logger.error(error.message);
-                return {
-                    message: message,
-                };
+                Logger.error(`Send mail failed: ${error.message}`);
             })
             .finally(() => {
                 return {

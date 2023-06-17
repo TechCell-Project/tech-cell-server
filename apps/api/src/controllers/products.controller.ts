@@ -3,7 +3,9 @@ import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { PRODUCTS_SERVICE } from '~/constants';
 import { AuthGuard } from '@app/common';
 import { catchError, throwError } from 'rxjs';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('products')
 @Controller('products')
 export class ProductsController {
     constructor(@Inject(PRODUCTS_SERVICE) private readonly productsService: ClientProxy) {}
