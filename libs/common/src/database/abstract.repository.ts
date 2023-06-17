@@ -61,4 +61,8 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
         session.startTransaction();
         return session;
     }
+
+    async count(filterQuery: FilterQuery<TDocument>) {
+        return this.model.countDocuments(filterQuery);
+    }
 }

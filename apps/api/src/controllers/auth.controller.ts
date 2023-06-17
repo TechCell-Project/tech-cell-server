@@ -50,9 +50,9 @@ export class AuthController {
     })
     @HttpCode(HttpStatus.OK)
     @Post('login')
-    async login(@Body() user: LoginRequestDTO) {
+    async login(@Body() { email, password }: LoginRequestDTO) {
         return this.authService
-            .send({ cmd: 'auth_login' }, user ? user : undefined)
+            .send({ cmd: 'auth_login' }, { email, password })
             .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
     }
 
@@ -70,9 +70,11 @@ export class AuthController {
         type: UnprocessableEntityResponseDTO,
     })
     @Post('register')
-    async register(@Body() user: RegisterRequestDTO) {
+    async register(
+        @Body() { email, firstName, lastName, password, re_password }: RegisterRequestDTO,
+    ) {
         return this.authService
-            .send({ cmd: 'auth_register' }, user ? user : undefined)
+            .send({ cmd: 'auth_register' }, { email, firstName, lastName, password, re_password })
             .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
     }
 
@@ -114,14 +116,11 @@ export class AuthController {
         description: 'Your refreshToken token invalid, can not get new token',
         type: ForbiddenResponseDTO,
     })
-    @Throttle(6, 60) // limit 3 requests per 60 seconds
+    @Throttle(6, 60) // limit 6 requests per 60 seconds
     @Post('refresh-token')
     async getNewToken(@Body() { refreshToken }: NewTokenRequestDTO) {
         return this.authService
-            .send(
-                { cmd: 'auth_get_new_access_token' },
-                { refreshToken: refreshToken ? refreshToken : undefined },
-            )
+            .send({ cmd: 'auth_get_new_access_token' }, { refreshToken })
             .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
     }
 }

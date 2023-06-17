@@ -20,14 +20,11 @@ export class UsersService {
     }
 
     private async validateCreateUserRequest(request: CreateUserDTO) {
-        let user: User;
-        try {
-            user = await this.usersRepository.findOne({
-                email: request.email,
-            });
-        } catch (err) {}
+        const userCount = await this.usersRepository.count({
+            email: request.email,
+        });
 
-        if (user) {
+        if (userCount > 0) {
             throw new RpcException(new UnprocessableEntityException('Email already exists.'));
         }
     }
