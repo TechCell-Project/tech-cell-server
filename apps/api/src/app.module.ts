@@ -19,7 +19,11 @@ import { ThrottlerStorageRedisService } from 'nestjs-throttler-storage-redis';
             useFactory: (config: ConfigService) => ({
                 ttl: config.get('THROTTLE_GLOBAL_TTL'),
                 limit: config.get('THROTTLE_GLOBAL_LIMIT'),
-                storage: new ThrottlerStorageRedisService(config.get('REDIS_URI')),
+                storage: new ThrottlerStorageRedisService({
+                    host: process.env.REDIS_HOST,
+                    port: +process.env.REDIS_PORT,
+                    password: process.env.REDIS_PASSWORD,
+                }),
             }),
         }),
         RabbitMQModule.registerRmq(SAMPLE_SERVICE, process.env.RABBITMQ_SAMPLE_QUEUE),
