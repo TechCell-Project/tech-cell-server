@@ -6,14 +6,17 @@ import {
     Inject,
     ConflictException,
     BadRequestException,
+    NotFoundException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { TokenExpiredError } from 'jsonwebtoken';
 import { UsersService } from './users/users.service';
 import { ConfigService } from '@nestjs/config';
 import {
+    ForgotPasswordDTO,
     LoginRequestDTO,
     ResendVerifyRegisterRequestDTO,
+    VerifyForgotPasswordDTO,
     VerifyRegisterRequestDTO,
 } from '~/apps/auth/dtos';
 import {
@@ -27,8 +30,8 @@ import { User } from './users/schemas';
 import { RpcException, ClientRMQ } from '@nestjs/microservices';
 import { MAIL_SERVICE } from '~/constants';
 import { catchError, throwError } from 'rxjs';
-import { ConfirmEmailRegisterDTO } from '~/apps/mail/dtos';
-import { OptDTO } from './users/dtos/otp.dto';
+import { ConfirmEmailRegisterDTO, ForgotPasswordEmailDTO } from '~/apps/mail/dtos';
+import { OtpDTO } from './users/dtos/otp.dto';
 
 @Injectable()
 export class AuthService {
@@ -150,25 +153,16 @@ export class AuthService {
             expMinutes: otpExpiresMinute,
         };
 
-        // calculate expiration
-        const expiresTime = userFound.otp.otpExpires;
-        const currentTime = Date.now();
-        const diffTime = Math.abs(expiresTime - currentTime);
-        const minutesDifference = Math.ceil(diffTime / (1000 * 60));
-
-        // If expMinutes of otp is less than 3 minutes, create a new one
-        if (minutesDifference < 3) {
-            const newOtp = this.createOtp({
-                expMinutes: otpExpiresMinute,
-                oldOtp: userFound.otp.otpCode,
-            });
-            const userUpdated = await this.usersService.findOneAndUpdateUser(userFound, {
-                otp: newOtp,
-            });
-            Object.assign(emailContext, {
-                verifyCode: userUpdated.otp.otpCode,
-            });
-        }
+        const newOtp = this.createOtp({
+            expMinutes: otpExpiresMinute,
+            oldOtp: userFound.otp.otpCode,
+        });
+        const userUpdated = await this.usersService.findOneAndUpdateUser(userFound, {
+            otp: newOtp,
+        });
+        Object.assign(emailContext, {
+            verifyCode: userUpdated.otp.otpCode,
+        });
 
         return this.mailService
             .send(
@@ -202,8 +196,67 @@ export class AuthService {
         }
     }
 
+    async forgotPassword({ email }: ForgotPasswordDTO) {
+        const userFound = await this.usersService.getUser({ email });
+        if (!userFound) {
+            throw new RpcException(new UnauthorizedException('User not found'));
+        }
+        if (!userFound.emailVerified) {
+            throw new RpcException(new UnprocessableEntityException('Verify you email first'));
+        }
+        const otpExpiresMinute = Number(process.env.OTP_EXPIRE_TIME) || 5;
+
+        const { otpCode, otpExpires } = this.createOtp({
+            expMinutes: otpExpiresMinute,
+            oldOtp: userFound.otp.otpCode,
+        });
+        const userUpdated = await this.usersService.findOneAndUpdateUser(userFound, {
+            otp: { otpCode, otpExpires },
+        });
+        const emailContext: ForgotPasswordEmailDTO = {
+            userEmail: userUpdated.email,
+            firstName: userUpdated.firstName,
+            verifyCode: userUpdated.otp.otpCode,
+            expMinutes: otpExpiresMinute,
+        };
+
+        return this.mailService
+            .send({ cmd: 'mail_send_forgot_password' }, { ...emailContext })
+            .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
+    }
+
+    async verifyForgotPassword({ email, otpCode, password, re_password }: VerifyForgotPasswordDTO) {
+        if (password !== re_password) {
+            throw new RpcException(new BadRequestException('Password does not match'));
+        }
+        const userFound = await this.usersService.getUser({ email });
+        if (!userFound) {
+            throw new RpcException(new NotFoundException('User not found'));
+        }
+        const isValidOtp = this.verifyOtp(otpCode, userFound.otp as OtpDTO);
+        if (!isValidOtp) {
+            throw new RpcException(new UnauthorizedException('Can not verify you otp'));
+        }
+
+        await this.usersService.changeUserPassword(userFound.email, password);
+        await this.usersService.findOneAndUpdateUser(
+            { email: userFound.email },
+            {
+                otp: {
+                    otpCode: '',
+                    otpExpires: 0,
+                },
+            },
+        );
+
+        return {
+            message: 'Your password has been changed',
+        };
+    }
+
     // Utils below
-    createOtp({ expMinutes, oldOtp }: { expMinutes: number; oldOtp?: string | undefined }): OptDTO {
+
+    createOtp({ expMinutes, oldOtp }: { expMinutes: number; oldOtp?: string | undefined }): OtpDTO {
         // Generate a one-time opt code
         let otpCode;
         const otpLength = 6;
@@ -220,18 +273,20 @@ export class AuthService {
         return {
             otpCode,
             otpExpires,
-        } as OptDTO;
+        } as OtpDTO;
     }
 
-    verifyOtp(otpInput: string, otp: OptDTO) {
+    verifyOtp(otpInput: string, otp: OtpDTO) {
         if (!otp || !otp.otpCode || !otp.otpExpires) {
             return false;
         }
         const { otpCode, otpExpires } = otp;
         const currentTime = Date.now();
-        const isValid = otpCode === otpInput && otpExpires > currentTime;
 
-        return isValid;
+        if (otpCode === otpInput && otpExpires > currentTime) {
+            return true;
+        }
+        return false;
     }
 
     async validateUser(email: string, password: string): Promise<User> {

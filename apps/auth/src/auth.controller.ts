@@ -8,6 +8,8 @@ import {
     NewTokenRequestDTO,
     VerifyRegisterRequestDTO,
     ResendVerifyRegisterRequestDTO,
+    ForgotPasswordDTO,
+    VerifyForgotPasswordDTO,
 } from './dtos';
 import { CreateUserDTO } from './users/dtos';
 import { UsersService } from './users/users.service';
@@ -78,5 +80,20 @@ export class AuthController {
         this.rabbitMqService.acknowledgeMessage(context);
 
         return this.authService.verifyAccessToken(payload.jwt);
+    }
+
+    @MessagePattern({ cmd: 'auth_forgot_password' })
+    async forgotPassword(@Ctx() context: RmqContext, @Payload() { email }: ForgotPasswordDTO) {
+        this.rabbitMqService.acknowledgeMessage(context);
+        return this.authService.forgotPassword({ email });
+    }
+
+    @MessagePattern({ cmd: 'auth_verify_forgot_password' })
+    async verifyForgotPassword(
+        @Ctx() context: RmqContext,
+        @Payload() { email, otpCode, password, re_password }: VerifyForgotPasswordDTO,
+    ) {
+        this.rabbitMqService.acknowledgeMessage(context);
+        return this.authService.verifyForgotPassword({ email, otpCode, password, re_password });
     }
 }
