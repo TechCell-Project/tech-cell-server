@@ -7,7 +7,7 @@ services:
             dockerfile: ./apps/api/Dockerfile
         environment:
             - RABBITMQ_URLS=amqp://techcell_server:techcell_server_9901@rabbitmq:5672
-            - REDIS_URI=redis://:techcell_server_redis_password_9901@redis:6379
+            - REDIS_HOST=redis
         env_file:
             - .env
         depends_on:
@@ -98,10 +98,12 @@ services:
             dockerfile: ./apps/sample/Dockerfile
         environment:
             - RABBITMQ_URLS=amqp://techcell_server:techcell_server_9901@rabbitmq:5672
+            - REDIS_HOST=redis
         env_file:
             - .env
         depends_on:
             - rabbitmq
+            - redis
         volumes:
             - .:/usr/src/techcell_app
             - /usr/src/techcell_app/node_modules
@@ -176,7 +178,7 @@ services:
         image: docker.io/bitnami/redis:7.0
         environment:
             - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL,CONFIG
-            - REDIS_PASSWORD=${REDIS_DEFAULT_PASSWORD}
+            - REDIS_PASSWORD=${REDIS_PASSWORD}
         ports:
             - '6379:6379'
         networks:

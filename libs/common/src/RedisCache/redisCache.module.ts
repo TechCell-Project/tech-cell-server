@@ -1,24 +1,20 @@
-import { Global, Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { Module } from '@nestjs/common';
 import { redisStore } from 'cache-manager-redis-yet';
 import { REDIS_CACHE } from '~/constants';
 
-@Global()
 @Module({
-    imports: [ConfigModule],
     providers: [
         {
             provide: REDIS_CACHE,
-            useFactory: async (configService: ConfigService) =>
+            useFactory: async () =>
                 await redisStore({
                     socket: {
-                        host: configService.get('REDIS_HOST'),
-                        port: +configService.get('REDIS_PORT'),
+                        host: process.env.REDIS_HOST,
+                        port: +process.env.REDIS_PORT, // '+' means convert to string
                     },
-                    password: configService.get('REDIS_DEFAULT_PASSWORD'),
-                    ttl: 5000,
+                    password: process.env.REDIS_PASSWORD,
+                    ttl: 5000, // 5 secs
                 }),
-            inject: [ConfigService],
         },
     ],
     exports: [REDIS_CACHE],
