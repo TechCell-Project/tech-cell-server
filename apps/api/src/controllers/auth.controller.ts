@@ -13,6 +13,7 @@ import {
     ApiUnprocessableEntityResponse,
     ApiNotFoundResponse,
     ApiConflictResponse,
+    ApiTooManyRequestsResponse,
 } from '@nestjs/swagger';
 import {
     RegisterRequestDTO,
@@ -33,6 +34,7 @@ import {
 import { Throttle } from '@nestjs/throttler';
 
 @ApiTags('authentication')
+@ApiTooManyRequestsResponse({ description: 'Too many requests, please try again later' })
 @Controller('auth')
 export class AuthController {
     constructor(@Inject(AUTH_SERVICE) private readonly authService: ClientProxy) {}
@@ -128,6 +130,8 @@ export class AuthController {
 
     @ApiBody({ type: ForgotPasswordDTO })
     @ApiOkResponse({ description: 'Check your email to verify your password' })
+    @ApiBadRequestResponse({ description: 'Your info is invalid' })
+    @ApiNotFoundResponse({ description: 'User not found' })
     @HttpCode(HttpStatus.OK)
     @Post('forgot-password')
     async forgotPassword(@Body() { email }: ForgotPasswordDTO) {
@@ -138,6 +142,8 @@ export class AuthController {
 
     @ApiBody({ type: VerifyForgotPasswordDTO })
     @ApiOkResponse({ description: 'Password change successful' })
+    @ApiNotFoundResponse({ description: 'Your information is not found' })
+    @ApiBadRequestResponse({ description: 'Your information is invalid' })
     @HttpCode(HttpStatus.OK)
     @Post('verify-forgot-password')
     async verifyForgotPassword(

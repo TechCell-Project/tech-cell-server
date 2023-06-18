@@ -185,6 +185,7 @@ services:
             - backend
         volumes:
             - 'redis_data:/redis/data'
+        # sysctl -w vm.overcommit_memory=1
 
 networks:
     backend:
