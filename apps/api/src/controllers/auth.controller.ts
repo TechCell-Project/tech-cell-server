@@ -21,6 +21,8 @@ import {
     NewTokenRequestDTO,
     VerifyRegisterRequestDTO,
     ResendVerifyRegisterRequestDTO,
+    ForgotPasswordDTO,
+    VerifyForgotPasswordDTO,
 } from '~/apps/auth/dtos';
 import {
     BadRequestResponseDTO,
@@ -121,6 +123,28 @@ export class AuthController {
     async getNewToken(@Body() { refreshToken }: NewTokenRequestDTO) {
         return this.authService
             .send({ cmd: 'auth_get_new_access_token' }, { refreshToken })
+            .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
+    }
+
+    @ApiBody({ type: ForgotPasswordDTO })
+    @ApiOkResponse({ description: 'Check your email to verify your password' })
+    @HttpCode(HttpStatus.OK)
+    @Post('forgot-password')
+    async forgotPassword(@Body() { email }: ForgotPasswordDTO) {
+        return this.authService
+            .send({ cmd: 'auth_forgot_password' }, { email })
+            .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
+    }
+
+    @ApiBody({ type: VerifyForgotPasswordDTO })
+    @ApiOkResponse({ description: 'Password change successful' })
+    @HttpCode(HttpStatus.OK)
+    @Post('verify-forgot-password')
+    async verifyForgotPassword(
+        @Body() { email, otpCode, password, re_password }: VerifyForgotPasswordDTO,
+    ) {
+        return this.authService
+            .send({ cmd: 'auth_verify_forgot_password' }, { email, otpCode, password, re_password })
             .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
     }
 }

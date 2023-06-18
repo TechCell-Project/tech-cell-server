@@ -45,4 +45,13 @@ export class UsersService {
     async findOneAndUpdateUser(filterQuery: FilterQuery<User>, updateUserArgs: Partial<User>) {
         return this.usersRepository.findOneAndUpdate(filterQuery, updateUserArgs);
     }
+
+    async changeUserPassword(email: string, password: string) {
+        return this.usersRepository.findOneAndUpdate(
+            { email },
+            {
+                password: await bcrypt.hash(password, 10),
+            },
+        );
+    }
 }

@@ -1,6 +1,6 @@
 import { IsNumber, IsString } from 'class-validator';
 
-export class OptDTO {
+export class OtpDTO {
     @IsString()
     otpCode: string;
 

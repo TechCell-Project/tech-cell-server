@@ -1,6 +1,6 @@
 import { IsEmail, IsNotEmpty, IsString, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
-import { OptDTO } from './otp.dto';
+import { OtpDTO } from './otp.dto';
 
 export class CreateUserDTO {
     @IsEmail()
@@ -19,7 +19,7 @@ export class CreateUserDTO {
     @IsNotEmpty()
     lastName: string;
 
-    @Type(() => OptDTO)
+    @Type(() => OtpDTO)
     @ValidateNested()
-    otp: OptDTO;
+    otp: OtpDTO;
 }
