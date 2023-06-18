@@ -7,10 +7,12 @@ services:
             dockerfile: ./apps/api/Dockerfile
         environment:
             - RABBITMQ_URLS=amqp://techcell_server:techcell_server_9901@rabbitmq:5672
+            - REDIS_URI=redis://:techcell_server_redis_password_9901@redis:6379
         env_file:
             - .env
         depends_on:
             - rabbitmq
+            - redis
             - sample
             - products
             - auth
@@ -21,6 +23,7 @@ services:
         ports:
             - 80:8000
             - 443:4430
+            - 8000:8000
         command: yarn start:prod api
         networks:
             - backend
@@ -37,6 +40,9 @@ services:
             - .env
         depends_on:
             - rabbitmq
+            - mongodb-primary
+            - mongodb-secondary
+            - mongodb-arbiter
         volumes:
             - .:/usr/src/techcell_app
             - /usr/src/techcell_app/node_modules
@@ -166,6 +172,18 @@ services:
             - backend
         restart: always
 
+    redis:
+        image: docker.io/bitnami/redis:7.0
+        environment:
+            - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL,CONFIG
+            - REDIS_PASSWORD=${REDIS_DEFAULT_PASSWORD}
+        ports:
+            - '6379:6379'
+        networks:
+            - backend
+        volumes:
+            - 'redis_data:/redis/data'
+
 networks:
     backend:
 
@@ -175,4 +193,6 @@ volumes:
     rabbitmq_data:
         driver: local
     app_data:
+        driver: local
+    redis_data:
         driver: local

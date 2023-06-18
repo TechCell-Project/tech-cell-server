@@ -59,6 +59,18 @@ services:
         networks:
             - backend
 
+    redis:
+        image: docker.io/bitnami/redis:7.0
+        environment:
+            - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL,CONFIG
+            - REDIS_PASSWORD=${REDIS_DEFAULT_PASSWORD}
+        ports:
+            - '6379:6379'
+        networks:
+            - backend
+        volumes:
+            - 'redis_data:/redis/data'
+
 networks:
     backend:
 
@@ -66,4 +78,6 @@ volumes:
     mongodb_master_data:
         driver: local
     rabbitmq_data:
+        driver: local
+    redis_data:
         driver: local
