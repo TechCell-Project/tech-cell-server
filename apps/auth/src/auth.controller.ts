@@ -7,13 +7,11 @@ import {
     RegisterRequestDTO,
     NewTokenRequestDTO,
     VerifyRegisterRequestDTO,
-    ResendVerifyRegisterRequestDTO,
-    ForgotPasswordDTO,
     VerifyForgotPasswordDTO,
     UpdateRegisterRequestDTO,
     LoginRequestDTO,
+    ForgotPasswordDTO,
 } from './dtos';
-import { CreateUserDTO } from './users/dtos';
 import { UsersService } from './users/users.service';
 import { JwtGuard } from './guards/jwt.guard';
 

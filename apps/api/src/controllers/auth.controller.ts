@@ -26,12 +26,6 @@ import {
     VerifyForgotPasswordDTO,
     UpdateRegisterRequestDTO,
 } from '~/apps/auth/dtos';
-import {
-    BadRequestResponseDTO,
-    UnauthorizedResponseDTO,
-    UnprocessableEntityResponseDTO,
-    ForbiddenResponseDTO,
-} from '~/apps/api/dtos';
 import { Throttle } from '@nestjs/throttler';
 
 @ApiTags('authentication')
@@ -47,11 +41,9 @@ export class AuthController {
     })
     @ApiBadRequestResponse({
         description: 'Your account email or password is invalid',
-        type: BadRequestResponseDTO,
     })
     @ApiUnauthorizedResponse({
         description: 'Your account email or password is wrong',
-        type: UnauthorizedResponseDTO,
     })
     @ApiNotAcceptableResponse({ description: 'User need to update their information' })
     @HttpCode(HttpStatus.OK)
@@ -69,11 +61,9 @@ export class AuthController {
     })
     @ApiBadRequestResponse({
         description: 'Your user information is invalid',
-        type: BadRequestResponseDTO,
     })
     @ApiUnprocessableEntityResponse({
         description: 'Your account already exists',
-        type: UnprocessableEntityResponseDTO,
     })
     @Post('register')
     async register(@Body() { email }: RegisterRequestDTO) {
@@ -89,11 +79,9 @@ export class AuthController {
     })
     @ApiBadRequestResponse({
         description: 'Your user information is invalid',
-        type: BadRequestResponseDTO,
     })
     @ApiUnprocessableEntityResponse({
         description: 'Your account already verified',
-        type: UnprocessableEntityResponseDTO,
     })
     @Post('resend-register')
     async resendRegister(@Body() { email }: RegisterRequestDTO) {
@@ -138,11 +126,9 @@ export class AuthController {
     })
     @ApiBadRequestResponse({
         description: 'Your information is invalid',
-        type: BadRequestResponseDTO,
     })
     @ApiForbiddenResponse({
         description: 'Your refreshToken token invalid, can not get new token',
-        type: ForbiddenResponseDTO,
     })
     @Throttle(3, 60) // limit 3 requests per 60 seconds
     @Post('refresh-token')
