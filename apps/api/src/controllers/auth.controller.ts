@@ -14,6 +14,7 @@ import {
     ApiNotFoundResponse,
     ApiConflictResponse,
     ApiTooManyRequestsResponse,
+    ApiNotAcceptableResponse,
 } from '@nestjs/swagger';
 import {
     RegisterRequestDTO,
@@ -21,9 +22,9 @@ import {
     UserDataResponseDTO,
     NewTokenRequestDTO,
     VerifyRegisterRequestDTO,
-    ResendVerifyRegisterRequestDTO,
     ForgotPasswordDTO,
     VerifyForgotPasswordDTO,
+    UpdateRegisterRequestDTO,
 } from '~/apps/auth/dtos';
 import {
     BadRequestResponseDTO,
@@ -52,6 +53,7 @@ export class AuthController {
         description: 'Your account email or password is wrong',
         type: UnauthorizedResponseDTO,
     })
+    @ApiNotAcceptableResponse({ description: 'User need to update their information' })
     @HttpCode(HttpStatus.OK)
     @Post('login')
     async login(@Body() { email, password }: LoginRequestDTO) {
@@ -74,11 +76,29 @@ export class AuthController {
         type: UnprocessableEntityResponseDTO,
     })
     @Post('register')
-    async register(
-        @Body() { email, firstName, lastName, password, re_password }: RegisterRequestDTO,
-    ) {
+    async register(@Body() { email }: RegisterRequestDTO) {
         return this.authService
-            .send({ cmd: 'auth_register' }, { email, firstName, lastName, password, re_password })
+            .send({ cmd: 'auth_register' }, { email })
+            .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
+    }
+
+    @ApiBody({ type: RegisterRequestDTO })
+    @ApiCreatedResponse({
+        description: 'Mail sent',
+        type: UserDataResponseDTO,
+    })
+    @ApiBadRequestResponse({
+        description: 'Your user information is invalid',
+        type: BadRequestResponseDTO,
+    })
+    @ApiUnprocessableEntityResponse({
+        description: 'Your account already verified',
+        type: UnprocessableEntityResponseDTO,
+    })
+    @Post('resend-register')
+    async resendRegister(@Body() { email }: RegisterRequestDTO) {
+        return this.authService
+            .send({ cmd: 'auth_resend_register' }, { email })
             .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
     }
 
@@ -96,14 +116,18 @@ export class AuthController {
             .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
     }
 
-    @ApiOkResponse({ description: 'Mail sent successfully' })
-    @ApiBadRequestResponse({ description: 'Mail send failed' })
-    @Throttle(3, 300) // limit 3 requests per 5 minutes
-    @HttpCode(HttpStatus.OK)
-    @Post('resend-verify-register')
-    async resendVerifyRegister(@Body() { email }: ResendVerifyRegisterRequestDTO) {
+    @ApiBody({ type: UpdateRegisterRequestDTO })
+    @ApiCreatedResponse({ description: 'Update registration successful' })
+    @ApiBadRequestResponse({ description: 'Something error' })
+    @Post('update-register')
+    async updateRegister(
+        @Body() { email, firstName, lastName, password, re_password }: UpdateRegisterRequestDTO,
+    ) {
         return this.authService
-            .send({ cmd: 'auth_resend_verify_register' }, { email })
+            .send(
+                { cmd: 'auth_update_register' },
+                { email, firstName, lastName, password, re_password },
+            )
             .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
     }
 

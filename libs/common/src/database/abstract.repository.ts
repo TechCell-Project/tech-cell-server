@@ -63,6 +63,7 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
     }
 
     async count(filterQuery: FilterQuery<TDocument>) {
-        return this.model.countDocuments(filterQuery);
+        const countNum = await this.model.countDocuments(filterQuery);
+        return countNum;
     }
 }

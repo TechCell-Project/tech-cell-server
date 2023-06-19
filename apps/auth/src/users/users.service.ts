@@ -10,18 +10,15 @@ import { FilterQuery } from 'mongoose';
 export class UsersService {
     constructor(private readonly usersRepository: UsersRepository) {}
 
-    async createUser(request: CreateUserDTO) {
-        await this.validateCreateUserRequest(request);
-        const user = await this.usersRepository.create({
-            ...request,
-            password: await bcrypt.hash(request.password, 10),
-        });
+    async createUser({ email }: CreateUserDTO) {
+        await this.validateCreateUserRequest({ email });
+        const user = await this.usersRepository.create({ email, requireUpdateInfo: true });
         return user;
     }
 
-    private async validateCreateUserRequest(request: CreateUserDTO) {
+    private async validateCreateUserRequest({ email }: CreateUserDTO) {
         const userCount = await this.usersRepository.count({
-            email: request.email,
+            email: email,
         });
 
         if (userCount > 0) {
@@ -50,8 +47,16 @@ export class UsersService {
         return this.usersRepository.findOneAndUpdate(
             { email },
             {
-                password: await bcrypt.hash(password, 10),
+                password: this.hashPassword(password),
             },
         );
+    }
+
+    async countUser(filterQuery: FilterQuery<User>) {
+        return await this.usersRepository.count(filterQuery);
+    }
+
+    async hashPassword(password: string) {
+        return await bcrypt.hash(password, 10);
     }
 }

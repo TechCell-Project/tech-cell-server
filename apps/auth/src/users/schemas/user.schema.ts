@@ -10,8 +10,11 @@ export class User extends AbstractDocument {
     @Prop({ default: false })
     emailVerified?: boolean;
 
-    @Prop({ required: true })
-    password: string;
+    @Prop({ default: true })
+    requireUpdateInfo?: boolean;
+
+    @Prop({ default: '' })
+    password?: string;
 
     @Prop({ type: String, enum: UserRole, default: UserRole.User })
     role?: UserRole;
@@ -19,31 +22,11 @@ export class User extends AbstractDocument {
     @Prop({ default: [] })
     address?: string[];
 
-    @Prop({ required: true })
-    firstName: string;
+    @Prop({ default: '' })
+    firstName?: string;
 
-    @Prop({ required: true })
-    lastName: string;
-
-    @Prop({
-        _id: false,
-        type: {
-            otpCode: {
-                type: String,
-            },
-            otpExpires: {
-                type: Number,
-            },
-        },
-        default: {
-            otpCode: '',
-            otpExpires: 0,
-        },
-    })
-    otp?: {
-        otpCode?: string;
-        otpExpires?: number;
-    };
+    @Prop({ default: '' })
+    lastName?: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
