@@ -114,7 +114,13 @@
       "<rootDir>/libs/"
     ],
     "moduleNameMapper": {
-      "^@app/common(|/.*)$": "<rootDir>/libs/common/src/$1"
+      "^@app/common(|/.*)$": "<rootDir>/libs/common/src/$1",
+      "^~/constants(|/.*)$": "<rootDir>/constants/$1",
+      "^~/apps/api(|/.*)$": "<rootDir>/apps/api/src/$1",
+      "^~/apps/auth(|/.*)$": "<rootDir>/apps/auth/src/$1",
+      "^~/apps/mail(|/.*)$": "<rootDir>/apps/mail/src/$1",
+      "^~/apps/products(|/.*)$": "<rootDir>/apps/products/src/$1",
+      "^~/apps/sample(|/.*)$": "<rootDir>/apps/sample/src/$1"
     }
   }
 }
