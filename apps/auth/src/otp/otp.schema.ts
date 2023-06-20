@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { AbstractDocument } from '@app/common';
+import { OtpType } from './otp.enum';
 
 @Schema({ versionKey: false })
 export class Otp extends AbstractDocument {
@@ -11,6 +12,9 @@ export class Otp extends AbstractDocument {
 
     @Prop({ default: 0 })
     wrongCount?: number;
+
+    @Prop({ type: String, enum: OtpType, required: true })
+    otpType!: OtpType;
 
     @Prop({ default: Date.now })
     createdAt?: Date;

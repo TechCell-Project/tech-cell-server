@@ -21,10 +21,11 @@ import {
     LoginRequestDTO,
     UserDataResponseDTO,
     NewTokenRequestDTO,
-    VerifyRegisterRequestDTO,
+    VerifyEmailRequestDTO,
     ForgotPasswordDTO,
     VerifyForgotPasswordDTO,
     UpdateRegisterRequestDTO,
+    CheckEmailRequestDTO,
 } from '~/apps/auth/dtos';
 import { Throttle } from '@nestjs/throttler';
 
@@ -54,6 +55,20 @@ export class AuthController {
             .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
     }
 
+    @ApiBody({ type: CheckEmailRequestDTO })
+    @ApiOkResponse({ description: 'Email is not in use. Can register' })
+    @ApiConflictResponse({
+        description: 'User already registered',
+        type: UserDataResponseDTO,
+    })
+    @HttpCode(HttpStatus.OK)
+    @Post('check-email')
+    async checkEmail(@Body() { email }: CheckEmailRequestDTO) {
+        return this.authService
+            .send({ cmd: 'auth_check_email' }, { email })
+            .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
+    }
+
     @ApiBody({ type: RegisterRequestDTO })
     @ApiCreatedResponse({
         description: 'User created successfully',
@@ -66,38 +81,25 @@ export class AuthController {
         description: 'Your account already exists',
     })
     @Post('register')
-    async register(@Body() { email }: RegisterRequestDTO) {
-        return this.authService
-            .send({ cmd: 'auth_register' }, { email })
-            .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
-    }
-
-    @ApiBody({ type: VerifyRegisterRequestDTO })
-    @ApiOkResponse({ description: 'User email verified' })
-    @ApiUnauthorizedResponse({ description: 'Verify failed' })
-    @ApiNotFoundResponse({ description: 'User not found.' })
-    @ApiConflictResponse({ description: 'User has already been verified.' })
-    @Throttle(5, 60) // limit 5 requests per 60 seconds
-    @HttpCode(HttpStatus.OK)
-    @Post('verify-register')
-    async verifyRegister(@Body() { email, otpCode }: VerifyRegisterRequestDTO) {
-        return this.authService
-            .send({ cmd: 'auth_verify_register' }, { email, otpCode })
-            .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
-    }
-
-    @ApiBody({ type: UpdateRegisterRequestDTO })
-    @ApiCreatedResponse({ description: 'Update registration successful' })
-    @ApiBadRequestResponse({ description: 'Something error' })
-    @Post('update-register')
-    async updateRegister(
-        @Body() { email, firstName, lastName, password, re_password }: UpdateRegisterRequestDTO,
+    async register(
+        @Body() { email, firstName, lastName, password, re_password }: RegisterRequestDTO,
     ) {
         return this.authService
-            .send(
-                { cmd: 'auth_update_register' },
-                { email, firstName, lastName, password, re_password },
-            )
+            .send({ cmd: 'auth_register' }, { email, firstName, lastName, password, re_password })
+            .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
+    }
+
+    @ApiBody({ type: VerifyEmailRequestDTO })
+    @ApiOkResponse({ description: 'Email verified' })
+    @ApiUnauthorizedResponse({ description: 'Email verify failed' })
+    @ApiNotFoundResponse({ description: 'Email not found.' })
+    @ApiConflictResponse({ description: 'Email has already been verified.' })
+    @Throttle(5, 60) // limit 5 requests per 60 seconds
+    @HttpCode(HttpStatus.OK)
+    @Post('verify-email')
+    async verifyEmail(@Body() { email, otpCode }: VerifyEmailRequestDTO) {
+        return this.authService
+            .send({ cmd: 'auth_verify_email' }, { email, otpCode })
             .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
     }
 

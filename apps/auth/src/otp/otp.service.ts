@@ -32,21 +32,21 @@ export class OtpService {
         return { otpCode, hashedOtp };
     }
 
-    async createOrRenewOtp({ email }: CreateOtpDTO): Promise<Otp> {
+    async createOrRenewOtp({ email, otpType }: CreateOtpDTO): Promise<Otp> {
         const { otpCode, hashedOtp } = await this.generateOtp();
-        const emailOtpFound = await this.otpRepository.count({ email });
+        const emailOtpFound = await this.otpRepository.count({ email, otpType });
         let otp: Otp;
 
         if (emailOtpFound > 0) {
-            otp = await this.otpRepository.renewOtp({ email, hashedOtp });
+            otp = await this.otpRepository.renewOtp({ email, hashedOtp, otpType });
         } else {
-            otp = await this.otpRepository.createOtp({ email, hashedOtp });
+            otp = await this.otpRepository.createOtp({ email, hashedOtp, otpType });
         }
         return { ...otp, otpCode };
     }
 
-    async verifyOtp({ email, otpCode }: VerifyOtpDTO) {
-        const otp = await this.otpRepository.findOne({ email });
+    async verifyOtp({ email, otpCode, otpType }: VerifyOtpDTO) {
+        const otp = await this.otpRepository.findOne({ email, otpType });
         const isValid = await bcrypt.compare(otpCode, otp.otpCode);
         if (isValid) {
             return true;
