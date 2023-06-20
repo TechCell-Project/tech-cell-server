@@ -23,7 +23,7 @@ import * as bcrypt from 'bcrypt';
 import { User } from './users/schemas';
 import { RpcException, ClientRMQ } from '@nestjs/microservices';
 import { MAIL_SERVICE } from '~/constants';
-import { catchError, throwError } from 'rxjs';
+import { catchError, throwError, firstValueFrom } from 'rxjs';
 import { ConfirmEmailRegisterDTO } from '~/apps/mail/dtos';
 import { OtpService, OtpType } from '~/apps/auth/otp';
 
@@ -44,7 +44,7 @@ export class AuthService {
         };
     }
 
-    async login({ email, password }: LoginRequestDTO): Promise<UserDataResponseDTO> {
+    async login({ email, password }: LoginRequestDTO) {
         const user = await this.validateUser(email, password);
 
         if (!user) {
@@ -53,6 +53,30 @@ export class AuthService {
             );
         }
         delete user.password;
+
+        if (!user.emailVerified) {
+            const otp = await this.otpService.createOrRenewOtp({
+                email,
+                otpType: OtpType.VerifyEmail,
+            });
+            const emailContext: ConfirmEmailRegisterDTO = {
+                otpCode: otp.otpCode,
+            };
+
+            await firstValueFrom(
+                this.mailService
+                    .send({ cmd: 'mail_send_confirm' }, { email, emailContext })
+                    .pipe(
+                        catchError((error) => throwError(() => new RpcException(error.response))),
+                    ),
+            );
+
+            throw new RpcException(
+                new NotAcceptableException(
+                    'Email is not verified, please check your email to verify it.',
+                ),
+            );
+        }
 
         const { _id, email: emailUser, role } = user;
         const { accessToken, refreshToken } = await this.signTokens({
@@ -174,15 +198,11 @@ export class AuthService {
             .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
     }
 
-    async validateUser(email: string, password: string): Promise<User> {
+    async validateUser(email: string, password: string) {
         const user = await this.usersService.getUser({ email });
 
         const doesUserExist = !!user;
         if (!doesUserExist) return null;
-
-        if (!user.emailVerified) {
-            throw new RpcException(new NotAcceptableException('Email is not verified'));
-        }
 
         const doesPasswordMatch = await this.doesPasswordMatch(password, user.password);
         if (!doesPasswordMatch) return null;

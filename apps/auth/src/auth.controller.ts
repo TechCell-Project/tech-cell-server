@@ -27,10 +27,7 @@ export class AuthController {
     }
 
     @MessagePattern({ cmd: 'auth_login' })
-    async login(
-        @Ctx() context: RmqContext,
-        @Payload() { email, password }: LoginRequestDTO,
-    ): Promise<UserDataResponseDTO> {
+    async login(@Ctx() context: RmqContext, @Payload() { email, password }: LoginRequestDTO) {
         this.rabbitMqService.acknowledgeMessage(context);
         return this.authService.login({ email, password });
     }
