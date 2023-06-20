@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RabbitMQModule } from '@app/common';
 import Controller from './controllers';
@@ -6,6 +6,7 @@ import { PRODUCTS_SERVICE, SAMPLE_SERVICE, AUTH_SERVICE } from '~/constants';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerStorageRedisService } from 'nestjs-throttler-storage-redis';
+import { MorganMiddleware } from './middlewares';
 
 @Module({
     imports: [
@@ -38,4 +39,8 @@ import { ThrottlerStorageRedisService } from 'nestjs-throttler-storage-redis';
         },
     ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+    configure(consumer: MiddlewareConsumer) {
+        consumer.apply(MorganMiddleware).forRoutes('*');
+    }
+}
