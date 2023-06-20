@@ -12,8 +12,7 @@ export class UsersService {
 
     async createUser({ email }: CreateUserDTO) {
         await this.validateCreateUserRequest({ email });
-        const user = await this.usersRepository.create({ email, requireUpdateInfo: true });
-        return user;
+        return this.usersRepository.create({ email, requireUpdateInfo: true });
     }
 
     private async validateCreateUserRequest({ email }: CreateUserDTO) {
