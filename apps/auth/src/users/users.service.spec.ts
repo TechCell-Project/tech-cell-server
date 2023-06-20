@@ -55,7 +55,7 @@ describe('UsersService', () => {
             (usersRepository.count as jest.Mock).mockReturnValue(1);
 
             await expect(usersService.createUser({ email: 'test@example.com' })).rejects.toThrow(
-                new RpcException('Email already exists.'),
+                new RpcException(new UnprocessableEntityException('Email already exists.')),
             );
 
             expect(usersRepository.count).toHaveBeenCalledWith({ email: 'test@example.com' });
