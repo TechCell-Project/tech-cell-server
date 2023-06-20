@@ -8,6 +8,7 @@ import { ExpressAdapter } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { RpcExceptionFilter } from '@app/common/filters/';
 import { SwaggerModule, DocumentBuilder, SwaggerCustomOptions } from '@nestjs/swagger';
+import helmet from 'helmet';
 
 async function bootstrap() {
     const port = process.env.API_PORT || 8000;
@@ -16,6 +17,7 @@ async function bootstrap() {
     const app = await NestFactory.create(AppModule, new ExpressAdapter(server));
 
     app.enableCors();
+    app.use(helmet());
 
     // Use to catch exceptions and send them to responses
     app.useGlobalFilters(new RpcExceptionFilter());
