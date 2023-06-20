@@ -262,6 +262,10 @@ export class AuthService {
         const doesUserExist = !!user;
         if (!doesUserExist) return null;
 
+        if (!user.emailVerified) {
+            throw new RpcException(new NotAcceptableException('Email is not verified'));
+        }
+
         if (user.requireUpdateInfo || user.password === '') {
             throw new RpcException(new NotAcceptableException('User requires update info'));
         }
