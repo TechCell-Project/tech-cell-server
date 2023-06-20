@@ -2,11 +2,12 @@ import {
     Injectable,
     UnauthorizedException,
     ForbiddenException,
-    UnprocessableEntityException,
     Inject,
     ConflictException,
     BadRequestException,
     NotFoundException,
+    NotAcceptableException,
+    UnprocessableEntityException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { TokenExpiredError } from 'jsonwebtoken';
@@ -16,6 +17,7 @@ import {
     ForgotPasswordDTO,
     LoginRequestDTO,
     ResendVerifyRegisterRequestDTO,
+    UpdateRegisterRequestDTO,
     VerifyForgotPasswordDTO,
     VerifyRegisterRequestDTO,
 } from '~/apps/auth/dtos';
@@ -31,7 +33,7 @@ import { RpcException, ClientRMQ } from '@nestjs/microservices';
 import { MAIL_SERVICE } from '~/constants';
 import { catchError, throwError } from 'rxjs';
 import { ConfirmEmailRegisterDTO, ForgotPasswordEmailDTO } from '~/apps/mail/dtos';
-import { OtpDTO } from './users/dtos/otp.dto';
+import { OtpService } from '~/apps/auth/otp';
 
 @Injectable()
 export class AuthService {
@@ -40,135 +42,133 @@ export class AuthService {
         private usersService: UsersService,
         private configService: ConfigService,
         @Inject(MAIL_SERVICE) private mailService: ClientRMQ,
+        private readonly otpService: OtpService,
     ) {}
 
     getPing() {
-        return { message: 'pong', services: 'auth' };
-    }
-
-    async register(userRegister: RegisterRequestDTO) {
-        const { email, password, re_password, firstName, lastName } = userRegister;
-
-        if (password !== re_password) {
-            throw new RpcException(new UnprocessableEntityException('Passwords do not match'));
-        }
-
-        const otpExpiresMinute = Number(process.env.OTP_EXPIRE_TIME) || 5;
-
-        const userCreated = await this.usersService.createUser({
-            email,
-            password,
-            firstName,
-            lastName,
-            otp: this.createOtp({ expMinutes: otpExpiresMinute }),
-        });
-
-        if (!userCreated) {
-            throw new RpcException(
-                new UnprocessableEntityException('Error occurred when creating user'),
-            );
-        }
-
-        const emailUser: string = userCreated.email;
-        const emailContext: ConfirmEmailRegisterDTO = {
-            firstName: userCreated.firstName,
-            lastName: userCreated.lastName,
-            verifyCode: userCreated.otp.otpCode,
-            expMinutes: otpExpiresMinute,
+        return {
+            message: 'pong',
+            services: 'auth',
         };
-
-        return this.mailService
-            .send({ cmd: 'mail_send_confirm' }, { email: emailUser, emailContext: emailContext })
-            .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
     }
 
     async login({ email, password }: LoginRequestDTO): Promise<UserDataResponseDTO> {
-        try {
-            const user = await this.validateUser(email, password);
+        const user = await this.validateUser(email, password);
 
-            if (!user) {
-                throw new RpcException(new UnauthorizedException());
-            }
-            delete user.password;
-
-            const { _id, email: emailUser, role } = user;
-            const { accessToken, refreshToken } = await this.signTokens({
-                _id,
-                email: emailUser,
-                role,
-            });
-
-            const userReturn: UserDataResponseDTO = Object.assign(user, {
-                accessToken,
-                refreshToken,
-            });
-
-            return userReturn;
-        } catch (error) {
-            throw new RpcException(new UnauthorizedException());
+        if (!user) {
+            throw new RpcException(
+                new UnauthorizedException('Your username or password is incorrect'),
+            );
         }
+        delete user.password;
+
+        const { _id, email: emailUser, role } = user;
+        const { accessToken, refreshToken } = await this.signTokens({
+            _id,
+            email: emailUser,
+            role,
+        });
+
+        const userReturn: UserDataResponseDTO = Object.assign(user, {
+            accessToken,
+            refreshToken,
+        });
+
+        return userReturn;
+    }
+
+    async register({ email }: RegisterRequestDTO) {
+        const userFound = await this.usersService.countUser({
+            email,
+        });
+
+        if (userFound > 0) {
+            throw new RpcException(new ConflictException('Email is already registered'));
+        }
+
+        const otp = await this.otpService.createOrRenewOtp({ email });
+        await this.usersService.createUser({ email });
+
+        const emailContext: ConfirmEmailRegisterDTO = {
+            otpCode: otp.otpCode,
+        };
+
+        return this.mailService
+            .send({ cmd: 'mail_send_confirm' }, { email, emailContext })
+            .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
     }
 
     async verifyRegister({ email, otpCode }: VerifyRegisterRequestDTO) {
-        const user = await this.usersService.getUser({ email });
-        if (!user) {
-            throw new RpcException(new UnauthorizedException('User not found'));
-        }
-        if (user.emailVerified) {
-            throw new RpcException(new ConflictException('User has already been verified'));
-        }
-        const isValid = this.verifyOtp(otpCode, {
-            otpCode: user.otp.otpCode,
-            otpExpires: user.otp.otpExpires,
-        });
-        if (!isValid) {
-            throw new RpcException(new UnauthorizedException('Invalid otp code'));
+        const userFound = await this.usersService.getUser({ email });
+
+        if (userFound.emailVerified) {
+            throw new RpcException(new BadRequestException('Email is already verified'));
         }
 
-        await this.usersService.findOneAndUpdateUser(user, {
-            emailVerified: true,
-            otp: { otpCode: '', otpExpires: 0 },
-        });
+        const isVerified = await this.otpService.verifyOtp({ email, otpCode });
+
+        if (!isVerified) {
+            throw new RpcException(new BadRequestException('Email is not verified'));
+        }
+
+        await this.usersService.findOneAndUpdateUser(
+            { email },
+            { emailVerified: isVerified, requireUpdateInfo: true },
+        );
 
         return {
-            message: 'Verify registration successful',
+            message: 'Email is verified, update your information now',
         };
     }
 
-    async resendVerifyRegister({ email }: ResendVerifyRegisterRequestDTO) {
-        const userFound = await this.usersService.getUser({ email });
-        if (!userFound) {
-            throw new RpcException(new UnauthorizedException('User not found'));
+    async updateRegister({
+        email,
+        firstName,
+        lastName,
+        password,
+        re_password,
+    }: UpdateRegisterRequestDTO) {
+        const isRequireUpdate = (await this.usersService.getUser({ email })).requireUpdateInfo;
+        if (!isRequireUpdate) {
+            throw new RpcException(new BadRequestException('No need to update'));
         }
-        if (userFound.emailVerified) {
-            throw new RpcException(new ConflictException('User has already been verified'));
-        }
-        const otpExpiresMinute = Number(process.env.OTP_EXPIRE_TIME) || 15;
 
-        // Pre-defined email data
+        if (password !== re_password) {
+            throw new RpcException(new BadRequestException('Password does not match'));
+        }
+
+        await this.usersService.findOneAndUpdateUser(
+            { email },
+            {
+                firstName,
+                lastName,
+                password: await this.usersService.hashPassword(password),
+                requireUpdateInfo: false,
+            },
+        );
+
+        return {
+            message: 'Update registration successful',
+        };
+    }
+
+    async resendRegister({ email }) {
+        const userFound = await this.usersService.getUser({
+            email,
+        });
+
+        if (userFound && !userFound.requireUpdateInfo) {
+            throw new RpcException(new UnprocessableEntityException('Email is already verified'));
+        }
+
+        const otp = await this.otpService.createOrRenewOtp({ email });
+
         const emailContext: ConfirmEmailRegisterDTO = {
-            firstName: userFound.firstName,
-            lastName: userFound.lastName,
-            verifyCode: userFound.otp.otpCode,
-            expMinutes: otpExpiresMinute,
+            otpCode: otp.otpCode,
         };
 
-        const newOtp = this.createOtp({
-            expMinutes: otpExpiresMinute,
-            oldOtp: userFound.otp.otpCode,
-        });
-        const userUpdated = await this.usersService.findOneAndUpdateUser(userFound, {
-            otp: newOtp,
-        });
-        Object.assign(emailContext, {
-            verifyCode: userUpdated.otp.otpCode,
-        });
-
         return this.mailService
-            .send(
-                { cmd: 'mail_send_confirm' },
-                { email: userFound.email, emailContext: emailContext },
-            )
+            .send({ cmd: 'mail_send_confirm' }, { email, emailContext })
             .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
     }
 
@@ -196,34 +196,34 @@ export class AuthService {
         }
     }
 
-    async forgotPassword({ email }: ForgotPasswordDTO) {
-        const userFound = await this.usersService.getUser({ email });
-        if (!userFound) {
-            throw new RpcException(new UnauthorizedException('User not found'));
-        }
-        if (!userFound.emailVerified) {
-            throw new RpcException(new UnprocessableEntityException('Verify you email first'));
-        }
-        const otpExpiresMinute = Number(process.env.OTP_EXPIRE_TIME) || 5;
+    // async forgotPassword({ email }: ForgotPasswordDTO) {
+    //     const userFound = await this.usersService.getUser({ email });
+    //     if (!userFound) {
+    //         throw new RpcException(new UnauthorizedException('User not found'));
+    //     }
+    //     if (!userFound.emailVerified) {
+    //         throw new RpcException(new UnprocessableEntityException('Verify you email first'));
+    //     }
+    //     const otpExpiresMinute = Number(process.env.OTP_EXPIRE_TIME) || 5;
 
-        const { otpCode, otpExpires } = this.createOtp({
-            expMinutes: otpExpiresMinute,
-            oldOtp: userFound.otp.otpCode,
-        });
-        const userUpdated = await this.usersService.findOneAndUpdateUser(userFound, {
-            otp: { otpCode, otpExpires },
-        });
-        const emailContext: ForgotPasswordEmailDTO = {
-            userEmail: userUpdated.email,
-            firstName: userUpdated.firstName,
-            verifyCode: userUpdated.otp.otpCode,
-            expMinutes: otpExpiresMinute,
-        };
+    //     const { otpCode, otpExpires } = this.createOtp({
+    //         expMinutes: otpExpiresMinute,
+    //         oldOtp: userFound.otp.otpCode,
+    //     });
+    //     const userUpdated = await this.usersService.findOneAndUpdateUser(userFound, {
+    //         otp: { otpCode, otpExpires },
+    //     });
+    //     const emailContext: ForgotPasswordEmailDTO = {
+    //         userEmail: userUpdated.email,
+    //         firstName: userUpdated.firstName,
+    //         verifyCode: userUpdated.otp.otpCode,
+    //         expMinutes: otpExpiresMinute,
+    //     };
 
-        return this.mailService
-            .send({ cmd: 'mail_send_forgot_password' }, { ...emailContext })
-            .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
-    }
+    //     return this.mailService
+    //         .send({ cmd: 'mail_send_forgot_password' }, { ...emailContext })
+    //         .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
+    // }
 
     async verifyForgotPassword({ email, otpCode, password, re_password }: VerifyForgotPasswordDTO) {
         if (password !== re_password) {
@@ -233,21 +233,21 @@ export class AuthService {
         if (!userFound) {
             throw new RpcException(new NotFoundException('User not found'));
         }
-        const isValidOtp = this.verifyOtp(otpCode, userFound.otp as OtpDTO);
-        if (!isValidOtp) {
-            throw new RpcException(new UnauthorizedException('Can not verify you otp'));
-        }
+        // const isValidOtp = this.verifyOtp(otpCode, userFound.otp as OtpDTO);
+        // if (!isValidOtp) {
+        //     throw new RpcException(new UnauthorizedException('Can not verify you otp'));
+        // }
 
         await this.usersService.changeUserPassword(userFound.email, password);
-        await this.usersService.findOneAndUpdateUser(
-            { email: userFound.email },
-            {
-                otp: {
-                    otpCode: '',
-                    otpExpires: 0,
-                },
-            },
-        );
+        // await this.usersService.findOneAndUpdateUser(
+        //     { email: userFound.email },
+        //     {
+        //         otp: {
+        //             otpCode: '',
+        //             otpExpires: 0,
+        //         },
+        //     },
+        // );
 
         return {
             message: 'Your password has been changed',
@@ -256,48 +256,17 @@ export class AuthService {
 
     // Utils below
 
-    createOtp({ expMinutes, oldOtp }: { expMinutes: number; oldOtp?: string | undefined }): OtpDTO {
-        // Generate a one-time opt code
-        let otpCode;
-        const otpLength = 6;
-        // Loop to generate the new opt is not same as the old one
-        do {
-            otpCode = Math.random()
-                .toString(36)
-                .substring(2, 2 + otpLength);
-        } while (oldOtp === otpCode);
-
-        // Set an expiration time for the opt code
-        const otpExpires = Date.now() + 1000 * 60 * expMinutes; // expMinutes from now
-
-        return {
-            otpCode,
-            otpExpires,
-        } as OtpDTO;
-    }
-
-    verifyOtp(otpInput: string, otp: OtpDTO) {
-        if (!otp || !otp.otpCode || !otp.otpExpires) {
-            return false;
-        }
-        const { otpCode, otpExpires } = otp;
-        const currentTime = Date.now();
-
-        if (otpCode === otpInput && otpExpires > currentTime) {
-            return true;
-        }
-        return false;
-    }
-
     async validateUser(email: string, password: string): Promise<User> {
         const user = await this.usersService.getUser({ email });
 
         const doesUserExist = !!user;
-
         if (!doesUserExist) return null;
 
-        const doesPasswordMatch = await this.doesPasswordMatch(password, user.password);
+        if (user.requireUpdateInfo || user.password === '') {
+            throw new RpcException(new NotAcceptableException('User requires update info'));
+        }
 
+        const doesPasswordMatch = await this.doesPasswordMatch(password, user.password);
         if (!doesPasswordMatch) return null;
 
         return user;

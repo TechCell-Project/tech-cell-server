@@ -7,11 +7,11 @@ import {
     RegisterRequestDTO,
     NewTokenRequestDTO,
     VerifyRegisterRequestDTO,
-    ResendVerifyRegisterRequestDTO,
-    ForgotPasswordDTO,
     VerifyForgotPasswordDTO,
+    UpdateRegisterRequestDTO,
+    LoginRequestDTO,
+    ForgotPasswordDTO,
 } from './dtos';
-import { CreateUserDTO } from './users/dtos';
 import { UsersService } from './users/users.service';
 import { JwtGuard } from './guards/jwt.guard';
 
@@ -31,38 +31,46 @@ export class AuthController {
     @MessagePattern({ cmd: 'auth_login' })
     async login(
         @Ctx() context: RmqContext,
-        @Payload() user: CreateUserDTO,
+        @Payload() { email, password }: LoginRequestDTO,
     ): Promise<UserDataResponseDTO> {
         this.rabbitMqService.acknowledgeMessage(context);
-        return this.authService.login({ ...user });
+        return this.authService.login({ email, password });
     }
 
     @MessagePattern({ cmd: 'auth_register' })
-    async register(
-        @Ctx() context: RmqContext,
-        @Payload() user: RegisterRequestDTO, // : Promise<RegisterResponseDTO>
-    ) {
+    async register(@Ctx() context: RmqContext, @Payload() { email }: RegisterRequestDTO) {
         this.rabbitMqService.acknowledgeMessage(context);
-        return this.authService.register(user);
+        return this.authService.register({ email });
+    }
+
+    @MessagePattern({ cmd: 'auth_resend_register' })
+    async resendRegister(@Ctx() context: RmqContext, @Payload() { email }: RegisterRequestDTO) {
+        this.rabbitMqService.acknowledgeMessage(context);
+        return this.authService.resendRegister({ email });
     }
 
     @MessagePattern({ cmd: 'auth_verify_register' })
     async verifyRegister(
         @Ctx() context: RmqContext,
-        @Payload() { email, otpCode }: VerifyRegisterRequestDTO, // : Promise<RegisterResponseDTO>
+        @Payload() { email, otpCode }: VerifyRegisterRequestDTO,
     ) {
         this.rabbitMqService.acknowledgeMessage(context);
         return this.authService.verifyRegister({ email, otpCode });
     }
 
-    @MessagePattern({ cmd: 'auth_resend_verify_register' })
-    async resendVerifyRegister(
-        @Ctx() context,
-        @Payload() { email }: ResendVerifyRegisterRequestDTO,
+    @MessagePattern({ cmd: 'auth_update_register' })
+    async updateRegister(
+        @Ctx() context: RmqContext,
+        @Payload() { email, firstName, lastName, password, re_password }: UpdateRegisterRequestDTO,
     ) {
         this.rabbitMqService.acknowledgeMessage(context);
-
-        return this.authService.resendVerifyRegister({ email });
+        return this.authService.updateRegister({
+            email,
+            firstName,
+            lastName,
+            password,
+            re_password,
+        });
     }
 
     @MessagePattern({ cmd: 'auth_get_new_access_token' })
@@ -82,11 +90,11 @@ export class AuthController {
         return this.authService.verifyAccessToken(payload.jwt);
     }
 
-    @MessagePattern({ cmd: 'auth_forgot_password' })
-    async forgotPassword(@Ctx() context: RmqContext, @Payload() { email }: ForgotPasswordDTO) {
-        this.rabbitMqService.acknowledgeMessage(context);
-        return this.authService.forgotPassword({ email });
-    }
+    // @MessagePattern({ cmd: 'auth_forgot_password' })
+    // async forgotPassword(@Ctx() context: RmqContext, @Payload() { email }: ForgotPasswordDTO) {
+    //     this.rabbitMqService.acknowledgeMessage(context);
+    //     return this.authService.forgotPassword({ email });
+    // }
 
     @MessagePattern({ cmd: 'auth_verify_forgot_password' })
     async verifyForgotPassword(
