@@ -16,7 +16,6 @@ import { ConfigService } from '@nestjs/config';
 import {
     ForgotPasswordDTO,
     LoginRequestDTO,
-    ResendVerifyRegisterRequestDTO,
     UpdateRegisterRequestDTO,
     VerifyForgotPasswordDTO,
     VerifyRegisterRequestDTO,
@@ -108,7 +107,7 @@ export class AuthService {
         const isVerified = await this.otpService.verifyOtp({ email, otpCode });
 
         if (!isVerified) {
-            throw new RpcException(new BadRequestException('Email is not verified'));
+            throw new RpcException(new UnprocessableEntityException('Email verify failed'));
         }
 
         await this.usersService.findOneAndUpdateUser(
@@ -152,12 +151,12 @@ export class AuthService {
         };
     }
 
-    async resendRegister({ email }) {
+    async resendRegister({ email }: RegisterRequestDTO) {
         const userFound = await this.usersService.getUser({
             email,
         });
 
-        if (userFound && !userFound.requireUpdateInfo) {
+        if (userFound && userFound.emailVerified) {
             throw new RpcException(new UnprocessableEntityException('Email is already verified'));
         }
 
@@ -201,9 +200,11 @@ export class AuthService {
     //     if (!userFound) {
     //         throw new RpcException(new UnauthorizedException('User not found'));
     //     }
+
     //     if (!userFound.emailVerified) {
     //         throw new RpcException(new UnprocessableEntityException('Verify you email first'));
     //     }
+
     //     const otpExpiresMinute = Number(process.env.OTP_EXPIRE_TIME) || 5;
 
     //     const { otpCode, otpExpires } = this.createOtp({
@@ -216,7 +217,7 @@ export class AuthService {
     //     const emailContext: ForgotPasswordEmailDTO = {
     //         userEmail: userUpdated.email,
     //         firstName: userUpdated.firstName,
-    //         verifyCode: userUpdated.otp.otpCode,
+    //         verifyCode: 'userUpdated.otp.otpCode',
     //         expMinutes: otpExpiresMinute,
     //     };
 
@@ -225,34 +226,34 @@ export class AuthService {
     //         .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
     // }
 
-    async verifyForgotPassword({ email, otpCode, password, re_password }: VerifyForgotPasswordDTO) {
-        if (password !== re_password) {
-            throw new RpcException(new BadRequestException('Password does not match'));
-        }
-        const userFound = await this.usersService.getUser({ email });
-        if (!userFound) {
-            throw new RpcException(new NotFoundException('User not found'));
-        }
-        // const isValidOtp = this.verifyOtp(otpCode, userFound.otp as OtpDTO);
-        // if (!isValidOtp) {
-        //     throw new RpcException(new UnauthorizedException('Can not verify you otp'));
-        // }
+    // async verifyForgotPassword({ email, otpCode, password, re_password }: VerifyForgotPasswordDTO) {
+    //     if (password !== re_password) {
+    //         throw new RpcException(new BadRequestException('Password does not match'));
+    //     }
+    //     const userFound = await this.usersService.getUser({ email });
+    //     if (!userFound) {
+    //         throw new RpcException(new NotFoundException('User not found'));
+    //     }
+    //     // const isValidOtp = this.verifyOtp(otpCode, userFound.otp as OtpDTO);
+    //     // if (!isValidOtp) {
+    //     //     throw new RpcException(new UnauthorizedException('Can not verify you otp'));
+    //     // }
 
-        await this.usersService.changeUserPassword(userFound.email, password);
-        // await this.usersService.findOneAndUpdateUser(
-        //     { email: userFound.email },
-        //     {
-        //         otp: {
-        //             otpCode: '',
-        //             otpExpires: 0,
-        //         },
-        //     },
-        // );
+    //     await this.usersService.changeUserPassword(userFound.email, password);
+    //     // await this.usersService.findOneAndUpdateUser(
+    //     //     { email: userFound.email },
+    //     //     {
+    //     //         otp: {
+    //     //             otpCode: '',
+    //     //             otpExpires: 0,
+    //     //         },
+    //     //     },
+    //     // );
 
-        return {
-            message: 'Your password has been changed',
-        };
-    }
+    //     return {
+    //         message: 'Your password has been changed',
+    //     };
+    // }
 
     // Utils below
 

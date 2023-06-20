@@ -96,12 +96,12 @@ export class AuthController {
     //     return this.authService.forgotPassword({ email });
     // }
 
-    @MessagePattern({ cmd: 'auth_verify_forgot_password' })
-    async verifyForgotPassword(
-        @Ctx() context: RmqContext,
-        @Payload() { email, otpCode, password, re_password }: VerifyForgotPasswordDTO,
-    ) {
-        this.rabbitMqService.acknowledgeMessage(context);
-        return this.authService.verifyForgotPassword({ email, otpCode, password, re_password });
-    }
+    // @MessagePattern({ cmd: 'auth_verify_forgot_password' })
+    // async verifyForgotPassword(
+    //     @Ctx() context: RmqContext,
+    //     @Payload() { email, otpCode, password, re_password }: VerifyForgotPasswordDTO,
+    // ) {
+    //     this.rabbitMqService.acknowledgeMessage(context);
+    //     return this.authService.verifyForgotPassword({ email, otpCode, password, re_password });
+    // }
 }
