@@ -77,17 +77,24 @@ export class AuthService {
     }
 
     async register({ email }: RegisterRequestDTO) {
-        const userFound = await this.usersService.countUser({
-            email,
-        });
+        let userFound: User;
+        try {
+            userFound = await this.usersService.getUser({
+                email,
+            });
+        } catch (error) {
+            userFound = undefined;
+        }
 
-        if (userFound > 0) {
+        if (userFound && userFound.emailVerified) {
             throw new RpcException(new ConflictException('Email is already registered'));
         }
 
-        const otp = await this.otpService.createOrRenewOtp({ email });
-        await this.usersService.createUser({ email });
+        if (!userFound) {
+            userFound = await this.usersService.createUser({ email });
+        }
 
+        const otp = await this.otpService.createOrRenewOtp({ email });
         const emailContext: ConfirmEmailRegisterDTO = {
             otpCode: otp.otpCode,
         };
@@ -149,26 +156,6 @@ export class AuthService {
         return {
             message: 'Update registration successful',
         };
-    }
-
-    async resendRegister({ email }: RegisterRequestDTO) {
-        const userFound = await this.usersService.getUser({
-            email,
-        });
-
-        if (userFound && userFound.emailVerified) {
-            throw new RpcException(new UnprocessableEntityException('Email is already verified'));
-        }
-
-        const otp = await this.otpService.createOrRenewOtp({ email });
-
-        const emailContext: ConfirmEmailRegisterDTO = {
-            otpCode: otp.otpCode,
-        };
-
-        return this.mailService
-            .send({ cmd: 'mail_send_confirm' }, { email, emailContext })
-            .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
     }
 
     async getNewToken({

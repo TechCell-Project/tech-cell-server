@@ -72,24 +72,6 @@ export class AuthController {
             .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
     }
 
-    @ApiBody({ type: RegisterRequestDTO })
-    @ApiCreatedResponse({
-        description: 'Mail sent',
-        type: UserDataResponseDTO,
-    })
-    @ApiBadRequestResponse({
-        description: 'Your user information is invalid',
-    })
-    @ApiUnprocessableEntityResponse({
-        description: 'Your account already verified',
-    })
-    @Post('resend-register')
-    async resendRegister(@Body() { email }: RegisterRequestDTO) {
-        return this.authService
-            .send({ cmd: 'auth_resend_register' }, { email })
-            .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
-    }
-
     @ApiBody({ type: VerifyRegisterRequestDTO })
     @ApiOkResponse({ description: 'User email verified' })
     @ApiUnauthorizedResponse({ description: 'Verify failed' })

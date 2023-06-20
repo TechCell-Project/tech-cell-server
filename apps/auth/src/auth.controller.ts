@@ -43,12 +43,6 @@ export class AuthController {
         return this.authService.register({ email });
     }
 
-    @MessagePattern({ cmd: 'auth_resend_register' })
-    async resendRegister(@Ctx() context: RmqContext, @Payload() { email }: RegisterRequestDTO) {
-        this.rabbitMqService.acknowledgeMessage(context);
-        return this.authService.resendRegister({ email });
-    }
-
     @MessagePattern({ cmd: 'auth_verify_register' })
     async verifyRegister(
         @Ctx() context: RmqContext,
