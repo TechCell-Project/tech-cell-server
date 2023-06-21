@@ -49,6 +49,7 @@ export class OtpService {
         const otp = await this.otpRepository.findOne({ email, otpType });
         const isValid = await bcrypt.compare(otpCode, otp.otpCode);
         if (isValid) {
+            await this.otpRepository.removeOtp({ email, otpType });
             return true;
         }
         return false;
