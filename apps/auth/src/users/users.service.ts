@@ -10,12 +10,17 @@ import { FilterQuery } from 'mongoose';
 export class UsersService {
     constructor(private readonly usersRepository: UsersRepository) {}
 
-    async createUser({ email }: CreateUserDTO) {
+    async createUser({ email, firstName, lastName, password }: CreateUserDTO) {
         await this.validateCreateUserRequest({ email });
-        return this.usersRepository.create({ email, requireUpdateInfo: true });
+        return this.usersRepository.create({
+            email,
+            firstName,
+            lastName,
+            password: await this.hashPassword({ password }),
+        });
     }
 
-    private async validateCreateUserRequest({ email }: CreateUserDTO) {
+    private async validateCreateUserRequest({ email }: { email: string }) {
         const userCount = await this.usersRepository.count({
             email: email,
         });
@@ -34,6 +39,11 @@ export class UsersService {
         return user;
     }
 
+    /**
+     *
+     * @param getUserArgs
+     * @returns User if the user exists, otherwise throw an exception
+     */
     async getUser(getUserArgs: Partial<User>) {
         return this.usersRepository.findOne(getUserArgs);
     }
@@ -42,11 +52,11 @@ export class UsersService {
         return this.usersRepository.findOneAndUpdate(filterQuery, updateUserArgs);
     }
 
-    async changeUserPassword(email: string, password: string) {
+    async changeUserPassword({ email, password }: { email: string; password: string }) {
         return this.usersRepository.findOneAndUpdate(
             { email },
             {
-                password: this.hashPassword(password),
+                password: await this.hashPassword({ password }),
             },
         );
     }
@@ -55,7 +65,7 @@ export class UsersService {
         return await this.usersRepository.count(filterQuery);
     }
 
-    async hashPassword(password: string) {
+    async hashPassword({ password }: { password: string }) {
         return await bcrypt.hash(password, 10);
     }
 }

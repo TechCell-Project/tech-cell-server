@@ -5,7 +5,6 @@ import {
     Inject,
     ConflictException,
     BadRequestException,
-    NotFoundException,
     NotAcceptableException,
     UnprocessableEntityException,
 } from '@nestjs/common';
@@ -14,12 +13,11 @@ import { TokenExpiredError } from 'jsonwebtoken';
 import { UsersService } from './users/users.service';
 import { ConfigService } from '@nestjs/config';
 import {
+    CheckEmailRequestDTO,
     ForgotPasswordDTO,
     LoginRequestDTO,
-    ResendVerifyRegisterRequestDTO,
-    UpdateRegisterRequestDTO,
+    VerifyEmailRequestDTO,
     VerifyForgotPasswordDTO,
-    VerifyRegisterRequestDTO,
 } from '~/apps/auth/dtos';
 import {
     JwtPayloadDto,
@@ -31,9 +29,9 @@ import * as bcrypt from 'bcrypt';
 import { User } from './users/schemas';
 import { RpcException, ClientRMQ } from '@nestjs/microservices';
 import { MAIL_SERVICE } from '~/constants';
-import { catchError, throwError } from 'rxjs';
+import { catchError, throwError, firstValueFrom } from 'rxjs';
 import { ConfirmEmailRegisterDTO, ForgotPasswordEmailDTO } from '~/apps/mail/dtos';
-import { OtpService } from '~/apps/auth/otp';
+import { OtpService, OtpType } from '~/apps/auth/otp';
 
 @Injectable()
 export class AuthService {
@@ -52,7 +50,7 @@ export class AuthService {
         };
     }
 
-    async login({ email, password }: LoginRequestDTO): Promise<UserDataResponseDTO> {
+    async login({ email, password }: LoginRequestDTO) {
         const user = await this.validateUser(email, password);
 
         if (!user) {
@@ -61,6 +59,30 @@ export class AuthService {
             );
         }
         delete user.password;
+
+        if (!user.emailVerified) {
+            const otp = await this.otpService.createOrRenewOtp({
+                email,
+                otpType: OtpType.VerifyEmail,
+            });
+            const emailContext: ConfirmEmailRegisterDTO = {
+                otpCode: otp.otpCode,
+            };
+
+            await firstValueFrom(
+                this.mailService
+                    .send({ cmd: 'mail_send_confirm' }, { email, emailContext })
+                    .pipe(
+                        catchError((error) => throwError(() => new RpcException(error.response))),
+                    ),
+            );
+
+            throw new RpcException(
+                new NotAcceptableException(
+                    'Email is not verified, please check your email to verify it.',
+                ),
+            );
+        }
 
         const { _id, email: emailUser, role } = user;
         const { accessToken, refreshToken } = await this.signTokens({
@@ -77,99 +99,72 @@ export class AuthService {
         return userReturn;
     }
 
-    async register({ email }: RegisterRequestDTO) {
-        const userFound = await this.usersService.countUser({
-            email,
-        });
+    async checkEmail({ email }: CheckEmailRequestDTO) {
+        const userFound = await this.usersService.countUser({ email });
 
         if (userFound > 0) {
-            throw new RpcException(new ConflictException('Email is already registered'));
+            throw new RpcException(new ConflictException('Email is already exists'));
         }
-
-        const otp = await this.otpService.createOrRenewOtp({ email });
-        await this.usersService.createUser({ email });
-
-        const emailContext: ConfirmEmailRegisterDTO = {
-            otpCode: otp.otpCode,
-        };
-
-        return this.mailService
-            .send({ cmd: 'mail_send_confirm' }, { email, emailContext })
-            .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
-    }
-
-    async verifyRegister({ email, otpCode }: VerifyRegisterRequestDTO) {
-        const userFound = await this.usersService.getUser({ email });
-
-        if (userFound.emailVerified) {
-            throw new RpcException(new BadRequestException('Email is already verified'));
-        }
-
-        const isVerified = await this.otpService.verifyOtp({ email, otpCode });
-
-        if (!isVerified) {
-            throw new RpcException(new BadRequestException('Email is not verified'));
-        }
-
-        await this.usersService.findOneAndUpdateUser(
-            { email },
-            { emailVerified: isVerified, requireUpdateInfo: true },
-        );
 
         return {
-            message: 'Email is verified, update your information now',
+            message: 'Email is not in use',
         };
     }
 
-    async updateRegister({
-        email,
-        firstName,
-        lastName,
-        password,
-        re_password,
-    }: UpdateRegisterRequestDTO) {
-        const isRequireUpdate = (await this.usersService.getUser({ email })).requireUpdateInfo;
-        if (!isRequireUpdate) {
-            throw new RpcException(new BadRequestException('No need to update'));
+    async register({ email, firstName, lastName, password, re_password }: RegisterRequestDTO) {
+        let userFound: User;
+        try {
+            userFound = await this.usersService.getUser({
+                email,
+            });
+        } catch (error) {
+            userFound = undefined;
+        }
+
+        if (userFound || (userFound && userFound.emailVerified)) {
+            throw new RpcException(new ConflictException('Email is already registered'));
         }
 
         if (password !== re_password) {
             throw new RpcException(new BadRequestException('Password does not match'));
         }
 
-        await this.usersService.findOneAndUpdateUser(
-            { email },
-            {
-                firstName,
-                lastName,
-                password: await this.usersService.hashPassword(password),
-                requireUpdateInfo: false,
-            },
-        );
-
-        return {
-            message: 'Update registration successful',
-        };
-    }
-
-    async resendRegister({ email }) {
-        const userFound = await this.usersService.getUser({
+        userFound = await this.usersService.createUser({
             email,
+            firstName,
+            lastName,
+            password,
         });
 
-        if (userFound && !userFound.requireUpdateInfo) {
-            throw new RpcException(new UnprocessableEntityException('Email is already verified'));
+        return await this.sendMailOtp({
+            email,
+            otpType: OtpType.VerifyEmail,
+            cmd: 'mail_send_confirm',
+        });
+    }
+
+    async verifyEmail({ email, otpCode }: VerifyEmailRequestDTO) {
+        const userFound = await this.usersService.getUser({ email });
+
+        if (userFound.emailVerified) {
+            throw new RpcException(new BadRequestException('Email is already verified'));
         }
 
-        const otp = await this.otpService.createOrRenewOtp({ email });
+        const isVerified = await this.otpService.verifyOtp({
+            email,
+            otpCode,
+            otpType: OtpType.VerifyEmail,
+        });
 
-        const emailContext: ConfirmEmailRegisterDTO = {
-            otpCode: otp.otpCode,
+        if (!isVerified) {
+            throw new RpcException(new UnprocessableEntityException('Email verify failed'));
+        }
+
+        await this.usersService.findOneAndUpdateUser({ email }, { emailVerified: isVerified });
+
+        return {
+            message: 'Email is verified, update your information now',
         };
-
-        return this.mailService
-            .send({ cmd: 'mail_send_confirm' }, { email, emailContext })
-            .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
     }
 
     async getNewToken({
@@ -196,75 +191,78 @@ export class AuthService {
         }
     }
 
-    // async forgotPassword({ email }: ForgotPasswordDTO) {
-    //     const userFound = await this.usersService.getUser({ email });
-    //     if (!userFound) {
-    //         throw new RpcException(new UnauthorizedException('User not found'));
-    //     }
-    //     if (!userFound.emailVerified) {
-    //         throw new RpcException(new UnprocessableEntityException('Verify you email first'));
-    //     }
-    //     const otpExpiresMinute = Number(process.env.OTP_EXPIRE_TIME) || 5;
+    async forgotPassword({ email }: ForgotPasswordDTO) {
+        // If not found, auto throw the exception
+        const userFound = await this.usersService.getUser({ email });
 
-    //     const { otpCode, otpExpires } = this.createOtp({
-    //         expMinutes: otpExpiresMinute,
-    //         oldOtp: userFound.otp.otpCode,
-    //     });
-    //     const userUpdated = await this.usersService.findOneAndUpdateUser(userFound, {
-    //         otp: { otpCode, otpExpires },
-    //     });
-    //     const emailContext: ForgotPasswordEmailDTO = {
-    //         userEmail: userUpdated.email,
-    //         firstName: userUpdated.firstName,
-    //         verifyCode: userUpdated.otp.otpCode,
-    //         expMinutes: otpExpiresMinute,
-    //     };
+        const otp = await this.otpService.createOrRenewOtp({
+            email,
+            otpType: OtpType.ForgotPassword,
+        });
 
-    //     return this.mailService
-    //         .send({ cmd: 'mail_send_forgot_password' }, { ...emailContext })
-    //         .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
-    // }
+        const emailContext: ForgotPasswordEmailDTO = {
+            userEmail: userFound.email,
+            otpCode: otp.otpCode,
+            firstName: userFound.firstName,
+        };
+
+        await firstValueFrom(
+            this.mailService
+                .send({ cmd: 'mail_send_forgot_password' }, { ...emailContext })
+                .pipe(catchError((error) => throwError(() => new RpcException(error.response)))),
+        );
+
+        return {
+            message: 'An email has already been sent to you email address, please check your email',
+        };
+    }
 
     async verifyForgotPassword({ email, otpCode, password, re_password }: VerifyForgotPasswordDTO) {
+        await this.usersService.getUser({ email });
+
         if (password !== re_password) {
             throw new RpcException(new BadRequestException('Password does not match'));
         }
-        const userFound = await this.usersService.getUser({ email });
-        if (!userFound) {
-            throw new RpcException(new NotFoundException('User not found'));
-        }
-        // const isValidOtp = this.verifyOtp(otpCode, userFound.otp as OtpDTO);
-        // if (!isValidOtp) {
-        //     throw new RpcException(new UnauthorizedException('Can not verify you otp'));
-        // }
 
-        await this.usersService.changeUserPassword(userFound.email, password);
-        // await this.usersService.findOneAndUpdateUser(
-        //     { email: userFound.email },
-        //     {
-        //         otp: {
-        //             otpCode: '',
-        //             otpExpires: 0,
-        //         },
-        //     },
-        // );
+        const isVerified = await this.otpService.verifyOtp({
+            email,
+            otpCode,
+            otpType: OtpType.ForgotPassword,
+        });
+        if (!isVerified) {
+            throw new RpcException(new UnprocessableEntityException('Otp code does not match'));
+        }
+
+        const userUpdated = await this.usersService.changeUserPassword({ email, password });
+        if (!userUpdated) {
+            throw new RpcException(
+                new BadRequestException('Something went wrong, please try again'),
+            );
+        }
 
         return {
-            message: 'Your password has been changed',
+            message: 'Password changed successfully',
         };
     }
 
     // Utils below
 
-    async validateUser(email: string, password: string): Promise<User> {
+    async sendMailOtp({ email, otpType, cmd }: { email: string; otpType: OtpType; cmd: string }) {
+        const otp = await this.otpService.createOrRenewOtp({ email, otpType });
+        const emailContext: ConfirmEmailRegisterDTO = {
+            otpCode: otp.otpCode,
+        };
+
+        return this.mailService
+            .send({ cmd }, { email, emailContext })
+            .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
+    }
+
+    async validateUser(email: string, password: string) {
         const user = await this.usersService.getUser({ email });
 
         const doesUserExist = !!user;
         if (!doesUserExist) return null;
-
-        if (user.requireUpdateInfo || user.password === '') {
-            throw new RpcException(new NotAcceptableException('User requires update info'));
-        }
 
         const doesPasswordMatch = await this.doesPasswordMatch(password, user.password);
         if (!doesPasswordMatch) return null;

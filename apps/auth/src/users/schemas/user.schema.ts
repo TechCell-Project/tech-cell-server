@@ -10,11 +10,8 @@ export class User extends AbstractDocument {
     @Prop({ default: false })
     emailVerified?: boolean;
 
-    @Prop({ default: true })
-    requireUpdateInfo?: boolean;
-
-    @Prop({ default: '' })
-    password?: string;
+    @Prop({ required: true })
+    password: string;
 
     @Prop({ type: String, enum: UserRole, default: UserRole.User })
     role?: UserRole;
