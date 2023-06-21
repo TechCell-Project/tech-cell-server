@@ -1,4 +1,14 @@
-import { Controller, Inject, Body, Post, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+    Controller,
+    Inject,
+    Body,
+    Post,
+    HttpCode,
+    HttpStatus,
+    Get,
+    UseGuards,
+    Request,
+} from '@nestjs/common';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { AUTH_SERVICE } from '~/constants';
 import { catchError, throwError } from 'rxjs';
@@ -28,6 +38,7 @@ import {
     CheckEmailRequestDTO,
 } from '~/apps/auth/dtos';
 import { Throttle } from '@nestjs/throttler';
+import { GoogleOAuthGuard } from '~/apps/auth/guards';
 
 @ApiTags('authentication')
 @ApiTooManyRequestsResponse({ description: 'Too many requests, please try again later' })
@@ -145,6 +156,22 @@ export class AuthController {
     ) {
         return this.authService
             .send({ cmd: 'auth_verify_forgot_password' }, { email, otpCode, password, re_password })
+            .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
+    }
+
+    @Get('google')
+    @UseGuards(GoogleOAuthGuard)
+    googleAuth(@Request() req) {
+        return {
+            message: 'waiting for google',
+        };
+    }
+
+    @Get('google-redirect')
+    @UseGuards(GoogleOAuthGuard)
+    googleAuthRedirect(@Request() req) {
+        return this.authService
+            .send({ cmd: 'auth_google_login' }, { user: req.user })
             .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
     }
 }

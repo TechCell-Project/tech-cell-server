@@ -89,4 +89,10 @@ export class AuthController {
         this.rabbitMqService.acknowledgeMessage(context);
         return this.authService.verifyForgotPassword({ email, otpCode, password, re_password });
     }
+
+    @MessagePattern({ cmd: 'auth_google_login' })
+    googleAuthRedirect(@Ctx() context, @Payload() { user }) {
+        this.rabbitMqService.acknowledgeMessage(context);
+        return this.authService.googleLogin({ user });
+    }
 }

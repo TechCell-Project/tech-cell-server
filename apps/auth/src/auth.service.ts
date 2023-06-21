@@ -225,4 +225,15 @@ export class AuthService extends AuthUtilService {
             message: 'Password changed successfully',
         };
     }
+
+    googleLogin(user) {
+        if (!user) {
+            return 'No user from google';
+        }
+
+        return {
+            message: 'User information from google',
+            user: user,
+        };
+    }
 }
