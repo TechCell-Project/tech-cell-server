@@ -2,9 +2,9 @@
   "name": "tech-cell-web-server",
   "version": "0.0.1",
   "description": "",
-  "author": "",
+  "author": "TechCell Teams <teams@techcell.cloud>",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "MIT",
   "engines": {
     "node": ">=18.x <=20.x"
   },
@@ -32,7 +32,8 @@
     "deploy:api": "yarn install && yarn start:prod api",
     "deploy:auth": "yarn install && yarn start:prod auth",
     "deploy:sample": "yarn install && yarn start:prod sample",
-    "deploy:products": "yarn install && yarn start:prod products"
+    "deploy:products": "yarn install && yarn start:prod products",
+    "compodoc": "npx @compodoc/compodoc -p tsconfig.json -s"
   },
   "dependencies": {
     "@nestjs-modules/mailer": "^1.8.1",
@@ -70,6 +71,7 @@
     "rxjs": "^7.2.0"
   },
   "devDependencies": {
+    "@compodoc/compodoc": "^1.1.21",
     "@nestjs/cli": "^9.0.0",
     "@nestjs/schematics": "^9.0.0",
     "@nestjs/testing": "^9.0.0",
