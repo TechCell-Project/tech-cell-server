@@ -8,12 +8,7 @@ export class ForgotPasswordEmailDTO {
 
     @IsNotEmpty()
     @IsString()
-    verifyCode: string;
-
-    @IsNotEmpty()
-    @Type(() => Number)
-    @IsNumber()
-    expMinutes: number;
+    otpCode: string;
 
     @IsNotEmpty()
     @IsEmail()

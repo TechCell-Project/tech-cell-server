@@ -54,12 +54,7 @@ export class MailService {
             });
     }
 
-    async sendForgotPasswordMail({
-        userEmail,
-        firstName,
-        verifyCode,
-        expMinutes,
-    }: ForgotPasswordEmailDTO) {
+    async sendForgotPasswordMail({ userEmail, firstName, otpCode }: ForgotPasswordEmailDTO) {
         const message = `Mail sent: ${userEmail}`;
         return await this.mailerService
             .sendMail({
@@ -69,8 +64,7 @@ export class MailService {
                 context: {
                     userEmail,
                     firstName,
-                    verifyCode,
-                    expMinutes,
+                    otpCode,
                 },
                 attachments: [
                     {

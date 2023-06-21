@@ -9,6 +9,8 @@ import {
     VerifyEmailRequestDTO,
     LoginRequestDTO,
     CheckEmailRequestDTO,
+    ForgotPasswordDTO,
+    VerifyForgotPasswordDTO,
 } from './dtos';
 import { UsersService } from './users/users.service';
 import { JwtGuard } from './guards/jwt.guard';
@@ -73,18 +75,18 @@ export class AuthController {
         return this.authService.verifyAccessToken(payload.jwt);
     }
 
-    // @MessagePattern({ cmd: 'auth_forgot_password' })
-    // async forgotPassword(@Ctx() context: RmqContext, @Payload() { email }: ForgotPasswordDTO) {
-    //     this.rabbitMqService.acknowledgeMessage(context);
-    //     return this.authService.forgotPassword({ email });
-    // }
+    @MessagePattern({ cmd: 'auth_forgot_password' })
+    async forgotPassword(@Ctx() context: RmqContext, @Payload() { email }: ForgotPasswordDTO) {
+        this.rabbitMqService.acknowledgeMessage(context);
+        return this.authService.forgotPassword({ email });
+    }
 
-    // @MessagePattern({ cmd: 'auth_verify_forgot_password' })
-    // async verifyForgotPassword(
-    //     @Ctx() context: RmqContext,
-    //     @Payload() { email, otpCode, password, re_password }: VerifyForgotPasswordDTO,
-    // ) {
-    //     this.rabbitMqService.acknowledgeMessage(context);
-    //     return this.authService.verifyForgotPassword({ email, otpCode, password, re_password });
-    // }
+    @MessagePattern({ cmd: 'auth_verify_forgot_password' })
+    async verifyForgotPassword(
+        @Ctx() context: RmqContext,
+        @Payload() { email, otpCode, password, re_password }: VerifyForgotPasswordDTO,
+    ) {
+        this.rabbitMqService.acknowledgeMessage(context);
+        return this.authService.verifyForgotPassword({ email, otpCode, password, re_password });
+    }
 }

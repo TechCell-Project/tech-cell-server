@@ -44,4 +44,8 @@ export class OtpRepository extends AbstractRepository<Otp> {
             },
         );
     }
+
+    async removeOtp({ email, otpType }: { email: string; otpType: OtpType }) {
+        return await this.model.findOneAndRemove({ email, otpType });
+    }
 }

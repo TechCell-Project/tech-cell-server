@@ -39,6 +39,11 @@ export class UsersService {
         return user;
     }
 
+    /**
+     *
+     * @param getUserArgs
+     * @returns User if the user exists, otherwise throw an exception
+     */
     async getUser(getUserArgs: Partial<User>) {
         return this.usersRepository.findOne(getUserArgs);
     }
@@ -47,11 +52,11 @@ export class UsersService {
         return this.usersRepository.findOneAndUpdate(filterQuery, updateUserArgs);
     }
 
-    async changeUserPassword(email: string, password: string) {
+    async changeUserPassword({ email, password }: { email: string; password: string }) {
         return this.usersRepository.findOneAndUpdate(
             { email },
             {
-                password: this.hashPassword({ password }),
+                password: await this.hashPassword({ password }),
             },
         );
     }

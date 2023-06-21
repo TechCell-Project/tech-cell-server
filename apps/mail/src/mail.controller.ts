@@ -24,14 +24,13 @@ export class MailController {
     @MessagePattern({ cmd: 'mail_send_forgot_password' })
     async sendForgotPasswordEmail(
         @Ctx() context: RmqContext,
-        @Payload() { userEmail, firstName, verifyCode, expMinutes }: ForgotPasswordEmailDTO,
+        @Payload() { userEmail, firstName, otpCode }: ForgotPasswordEmailDTO,
     ) {
         this.rabbitMqService.acknowledgeMessage(context);
         return this.mailService.sendForgotPasswordMail({
             userEmail,
             firstName,
-            verifyCode,
-            expMinutes,
+            otpCode,
         });
     }
 }

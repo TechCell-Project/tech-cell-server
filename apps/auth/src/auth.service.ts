@@ -12,7 +12,13 @@ import { JwtService } from '@nestjs/jwt';
 import { TokenExpiredError } from 'jsonwebtoken';
 import { UsersService } from './users/users.service';
 import { ConfigService } from '@nestjs/config';
-import { CheckEmailRequestDTO, LoginRequestDTO, VerifyEmailRequestDTO } from '~/apps/auth/dtos';
+import {
+    CheckEmailRequestDTO,
+    ForgotPasswordDTO,
+    LoginRequestDTO,
+    VerifyEmailRequestDTO,
+    VerifyForgotPasswordDTO,
+} from '~/apps/auth/dtos';
 import {
     JwtPayloadDto,
     RegisterRequestDTO,
@@ -24,7 +30,7 @@ import { User } from './users/schemas';
 import { RpcException, ClientRMQ } from '@nestjs/microservices';
 import { MAIL_SERVICE } from '~/constants';
 import { catchError, throwError, firstValueFrom } from 'rxjs';
-import { ConfirmEmailRegisterDTO } from '~/apps/mail/dtos';
+import { ConfirmEmailRegisterDTO, ForgotPasswordEmailDTO } from '~/apps/mail/dtos';
 import { OtpService, OtpType } from '~/apps/auth/otp';
 
 @Injectable()
@@ -183,6 +189,60 @@ export class AuthService {
         } catch (error) {
             throw new RpcException(new ForbiddenException());
         }
+    }
+
+    async forgotPassword({ email }: ForgotPasswordDTO) {
+        // If not found, auto throw the exception
+        const userFound = await this.usersService.getUser({ email });
+
+        const otp = await this.otpService.createOrRenewOtp({
+            email,
+            otpType: OtpType.ForgotPassword,
+        });
+
+        const emailContext: ForgotPasswordEmailDTO = {
+            userEmail: userFound.email,
+            otpCode: otp.otpCode,
+            firstName: userFound.firstName,
+        };
+
+        await firstValueFrom(
+            this.mailService
+                .send({ cmd: 'mail_send_forgot_password' }, { ...emailContext })
+                .pipe(catchError((error) => throwError(() => new RpcException(error.response)))),
+        );
+
+        return {
+            message: 'An email has already been sent to you email address, please check your email',
+        };
+    }
+
+    async verifyForgotPassword({ email, otpCode, password, re_password }: VerifyForgotPasswordDTO) {
+        await this.usersService.getUser({ email });
+
+        if (password !== re_password) {
+            throw new RpcException(new BadRequestException('Password does not match'));
+        }
+
+        const isVerified = await this.otpService.verifyOtp({
+            email,
+            otpCode,
+            otpType: OtpType.ForgotPassword,
+        });
+        if (!isVerified) {
+            throw new RpcException(new UnprocessableEntityException('Otp code does not match'));
+        }
+
+        const userUpdated = await this.usersService.changeUserPassword({ email, password });
+        if (!userUpdated) {
+            throw new RpcException(
+                new BadRequestException('Something went wrong, please try again'),
+            );
+        }
+
+        return {
+            message: 'Password changed successfully',
+        };
     }
 
     // Utils below
