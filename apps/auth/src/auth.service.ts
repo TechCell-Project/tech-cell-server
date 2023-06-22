@@ -1,17 +1,13 @@
+import { AuthUtilService } from './auth.util.service';
 import {
     Injectable,
     UnauthorizedException,
     ForbiddenException,
-    Inject,
     ConflictException,
     BadRequestException,
     NotAcceptableException,
     UnprocessableEntityException,
 } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { TokenExpiredError } from 'jsonwebtoken';
-import { UsersService } from './users/users.service';
-import { ConfigService } from '@nestjs/config';
 import {
     CheckEmailRequestDTO,
     ForgotPasswordDTO,
@@ -19,30 +15,18 @@ import {
     VerifyEmailRequestDTO,
     VerifyForgotPasswordDTO,
 } from '~/apps/auth/dtos';
-import {
-    JwtPayloadDto,
-    RegisterRequestDTO,
-    NewTokenRequestDTO,
-    UserDataResponseDTO,
-} from '~/apps/auth/dtos';
-import * as bcrypt from 'bcrypt';
+import { RegisterRequestDTO, NewTokenRequestDTO, UserDataResponseDTO } from '~/apps/auth/dtos';
 import { User } from './users/schemas';
-import { RpcException, ClientRMQ } from '@nestjs/microservices';
-import { MAIL_SERVICE } from '~/constants';
+import { RpcException } from '@nestjs/microservices';
 import { catchError, throwError, firstValueFrom } from 'rxjs';
 import { ConfirmEmailRegisterDTO, ForgotPasswordEmailDTO } from '~/apps/mail/dtos';
-import { OtpService, OtpType } from '~/apps/auth/otp';
+import { OtpType } from '~/apps/auth/otp';
+import { IUserGoogleResponse } from './interfaces';
+import { generateRandomString } from '@app/common';
+import { MAX_PASSWORD_LENGTH } from '~/constants';
 
 @Injectable()
-export class AuthService {
-    constructor(
-        private jwtService: JwtService,
-        private usersService: UsersService,
-        private configService: ConfigService,
-        @Inject(MAIL_SERVICE) private mailService: ClientRMQ,
-        private readonly otpService: OtpService,
-    ) {}
-
+export class AuthService extends AuthUtilService {
     getPing() {
         return {
             message: 'pong',
@@ -58,7 +42,6 @@ export class AuthService {
                 new UnauthorizedException('Your username or password is incorrect'),
             );
         }
-        delete user.password;
 
         if (!user.emailVerified) {
             const otp = await this.otpService.createOrRenewOtp({
@@ -84,19 +67,7 @@ export class AuthService {
             );
         }
 
-        const { _id, email: emailUser, role } = user;
-        const { accessToken, refreshToken } = await this.signTokens({
-            _id,
-            email: emailUser,
-            role,
-        });
-
-        const userReturn: UserDataResponseDTO = Object.assign(user, {
-            accessToken,
-            refreshToken,
-        });
-
-        return userReturn;
+        return await this.buildUserTokenResponse(user);
     }
 
     async checkEmail({ email }: CheckEmailRequestDTO) {
@@ -175,8 +146,8 @@ export class AuthService {
                 throw new RpcException(new BadRequestException('Refresh token is required'));
             }
 
-            const { user } = await this.verifyRefreshToken(oldRefreshToken);
-            const userFound = await this.usersService.getUser({ email: user.email });
+            const { email } = await this.verifyRefreshToken(oldRefreshToken);
+            const userFound = await this.usersService.getUser({ email });
 
             const { _id, email: emailUser, role } = userFound;
             const { accessToken, refreshToken } = await this.signTokens({
@@ -184,10 +155,9 @@ export class AuthService {
                 email: emailUser,
                 role,
             });
-            // const userReturn = Object.assign(user, { newAccessToken, newRefreshToken });
-            return { ...user, accessToken, refreshToken };
+            return { ...this.cleanUserBeforeResponse(userFound), accessToken, refreshToken };
         } catch (error) {
-            throw new RpcException(new ForbiddenException());
+            throw new RpcException(new ForbiddenException(error.message));
         }
     }
 
@@ -245,102 +215,38 @@ export class AuthService {
         };
     }
 
-    // Utils below
-
-    async sendMailOtp({ email, otpType, cmd }: { email: string; otpType: OtpType; cmd: string }) {
-        const otp = await this.otpService.createOrRenewOtp({ email, otpType });
-        const emailContext: ConfirmEmailRegisterDTO = {
-            otpCode: otp.otpCode,
-        };
-
-        return this.mailService
-            .send({ cmd }, { email, emailContext })
-            .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
-    }
-
-    async validateUser(email: string, password: string) {
-        const user = await this.usersService.getUser({ email });
-
-        const doesUserExist = !!user;
-        if (!doesUserExist) return null;
-
-        const doesPasswordMatch = await this.doesPasswordMatch(password, user.password);
-        if (!doesPasswordMatch) return null;
-
-        return user;
-    }
-
-    async doesPasswordMatch(password: string, hashedPassword: string): Promise<boolean> {
-        return bcrypt.compare(password, hashedPassword);
-    }
-
-    async verifyAccessToken(accessToken: string) {
-        if (!accessToken) {
-            throw new RpcException(new BadRequestException('Access token missing.'));
+    async googleLogin({ user }: { user: IUserGoogleResponse }) {
+        if (!user) {
+            throw new RpcException(new BadRequestException('Login with Google failed'));
         }
 
-        return await this.verifyToken(
-            accessToken,
-            this.configService.get<string>('JWT_ACCESS_TOKEN_SECRET'),
-        );
-    }
-
-    async verifyRefreshToken(refreshToken: string) {
-        if (!refreshToken) {
-            throw new RpcException(new BadRequestException('Refresh token missing.'));
-        }
-
-        return await this.verifyToken(
-            refreshToken,
-            this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'),
-        );
-    }
-
-    async verifyToken(token: string, secret: string) {
+        let userFound: User | undefined = undefined;
+        let newUser: User | undefined = undefined;
         try {
-            const { user, exp } = await this.jwtService.verifyAsync(token, {
-                secret,
-            });
-            return { user, exp };
+            // will throw exception if not found
+            userFound = await this.usersService.getUser({ email: user.email });
         } catch (error) {
-            if (error instanceof TokenExpiredError) {
-                throw new RpcException(
-                    new UnauthorizedException('Token has expired, please login again.'),
-                );
-            }
-            throw new RpcException(new UnauthorizedException('Invalid token, please login again.'));
+            // if not found, create new user
+            newUser = await this.usersService.createUser({
+                email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                password: `${user.openid}${generateRandomString(
+                    MAX_PASSWORD_LENGTH - user.openid.length,
+                )}`,
+            });
         }
-    }
 
-    async signTokens({ _id, email, role }: JwtPayloadDto) {
-        const [accessToken, refreshToken] = await Promise.all([
-            this.jwtService.signAsync(
-                {
-                    _id,
-                    email,
-                    role,
-                },
-                {
-                    secret: this.configService.get<string>('JWT_ACCESS_TOKEN_SECRET'),
-                    expiresIn: '15m',
-                },
-            ),
-            this.jwtService.signAsync(
-                {
-                    _id,
-                    email,
-                    role,
-                },
-                {
-                    secret: this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'),
-                    expiresIn: '7d',
-                },
-            ),
-        ]);
+        if (!userFound && !newUser) {
+            throw new RpcException(new BadRequestException('Login with Google failed'));
+        }
 
-        return {
-            accessToken,
-            refreshToken,
-        };
+        if (userFound) {
+            return this.buildUserTokenResponse(userFound);
+        }
+
+        if (newUser) {
+            return this.buildUserTokenResponse(newUser);
+        }
     }
 }

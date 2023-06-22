@@ -14,6 +14,7 @@ import {
 } from './dtos';
 import { UsersService } from './users/users.service';
 import { JwtGuard } from './guards/jwt.guard';
+import { IUserGoogleResponse } from './interfaces';
 
 @Controller()
 export class AuthController {
@@ -88,5 +89,11 @@ export class AuthController {
     ) {
         this.rabbitMqService.acknowledgeMessage(context);
         return this.authService.verifyForgotPassword({ email, otpCode, password, re_password });
+    }
+
+    @MessagePattern({ cmd: 'auth_google_login' })
+    async googleAuthRedirect(@Ctx() context, @Payload() { user }: { user: IUserGoogleResponse }) {
+        this.rabbitMqService.acknowledgeMessage(context);
+        return this.authService.googleLogin({ user });
     }
 }
