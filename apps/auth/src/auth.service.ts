@@ -1,4 +1,4 @@
-import { AuthServiceUtil } from './auth.service.util';
+import { AuthUtilService } from './auth.util.service';
 import {
     Injectable,
     UnauthorizedException,
@@ -23,7 +23,7 @@ import { ConfirmEmailRegisterDTO, ForgotPasswordEmailDTO } from '~/apps/mail/dto
 import { OtpType } from '~/apps/auth/otp';
 
 @Injectable()
-export class AuthService extends AuthServiceUtil {
+export class AuthService extends AuthUtilService {
     getPing() {
         return {
             message: 'pong',
