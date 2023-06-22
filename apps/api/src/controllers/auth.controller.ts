@@ -37,7 +37,7 @@ import {
     CheckEmailRequestDTO,
 } from '~/apps/auth/dtos';
 import { Throttle } from '@nestjs/throttler';
-import { GoogleOAuthGuard } from '~/apps/auth/guards';
+import { GoogleOAuthGuard, FacebookOAuthGuard } from '~/apps/auth/guards';
 import { IUserGoogleResponse } from '~/apps/auth/interfaces';
 
 @ApiTags('authentication')
@@ -161,7 +161,7 @@ export class AuthController {
 
     @Get('google')
     @UseGuards(GoogleOAuthGuard)
-    googleAuth() {
+    async googleAuth() {
         return {
             message: 'waiting for google',
         };
@@ -169,9 +169,26 @@ export class AuthController {
 
     @Get('google-redirect')
     @UseGuards(GoogleOAuthGuard)
-    googleAuthRedirect(@Request() { user }: { user: IUserGoogleResponse }) {
+    async googleAuthRedirect(@Request() { user }: { user: IUserGoogleResponse }) {
         return this.authService
             .send({ cmd: 'auth_google_login' }, { user })
             .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
+    }
+
+    @Get('facebook')
+    @UseGuards(FacebookOAuthGuard)
+    async facebookAuth() {
+        return {
+            message: 'waiting for facebook',
+        };
+    }
+
+    @Get('facebook-redirect')
+    @UseGuards(FacebookOAuthGuard)
+    facebookLoginRedirect(@Request() req) {
+        return {
+            statusCode: HttpStatus.OK,
+            data: req.user,
+        };
     }
 }
