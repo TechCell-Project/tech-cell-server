@@ -12,7 +12,7 @@ import { ConfirmEmailRegisterDTO } from '~/apps/mail/dtos';
 import { OtpService, OtpType } from '~/apps/auth/otp';
 
 @Injectable()
-export class AuthUtilService {
+export class AuthServiceUtil {
     constructor(
         protected jwtService: JwtService,
         protected usersService: UsersService,
