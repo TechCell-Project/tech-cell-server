@@ -14,7 +14,7 @@ import {
 } from './dtos';
 import { UsersService } from './users/users.service';
 import { JwtGuard } from './guards/jwt.guard';
-import { IUserGoogleResponse } from './interfaces';
+import { IUserFacebookResponse, IUserGoogleResponse } from './interfaces';
 
 @Controller()
 export class AuthController {
@@ -95,5 +95,14 @@ export class AuthController {
     async googleAuthRedirect(@Ctx() context, @Payload() { user }: { user: IUserGoogleResponse }) {
         this.rabbitMqService.acknowledgeMessage(context);
         return this.authService.googleLogin({ user });
+    }
+
+    @MessagePattern({ cmd: 'auth_facebook_login' })
+    async facebookAuthRedirect(
+        @Ctx() context,
+        @Payload() { user }: { user: IUserFacebookResponse },
+    ) {
+        this.rabbitMqService.acknowledgeMessage(context);
+        return this.authService.facebookLogin({ user });
     }
 }

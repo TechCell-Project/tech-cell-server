@@ -25,6 +25,7 @@ import {
     ApiConflictResponse,
     ApiTooManyRequestsResponse,
     ApiNotAcceptableResponse,
+    ApiOAuth2,
 } from '@nestjs/swagger';
 import {
     RegisterRequestDTO,
@@ -38,7 +39,7 @@ import {
 } from '~/apps/auth/dtos';
 import { Throttle } from '@nestjs/throttler';
 import { GoogleOAuthGuard, FacebookOAuthGuard } from '~/apps/auth/guards';
-import { IUserGoogleResponse } from '~/apps/auth/interfaces';
+import { IUserFacebookResponse, IUserGoogleResponse } from '~/apps/auth/interfaces';
 
 @ApiTags('authentication')
 @ApiTooManyRequestsResponse({ description: 'Too many requests, please try again later' })
@@ -185,10 +186,9 @@ export class AuthController {
 
     @Get('facebook-redirect')
     @UseGuards(FacebookOAuthGuard)
-    facebookLoginRedirect(@Request() req) {
-        return {
-            statusCode: HttpStatus.OK,
-            data: req.user,
-        };
+    facebookLoginRedirect(@Request() { user }: { user: IUserFacebookResponse }) {
+        return this.authService
+            .send({ cmd: 'auth_facebook_login' }, { user })
+            .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
     }
 }

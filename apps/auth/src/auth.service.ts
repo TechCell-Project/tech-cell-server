@@ -21,7 +21,7 @@ import { RpcException } from '@nestjs/microservices';
 import { catchError, throwError, firstValueFrom } from 'rxjs';
 import { ConfirmEmailRegisterDTO, ForgotPasswordEmailDTO } from '~/apps/mail/dtos';
 import { OtpType } from '~/apps/auth/otp';
-import { IUserGoogleResponse } from './interfaces';
+import { IUserFacebookResponse, IUserGoogleResponse } from './interfaces';
 import { generateRandomString } from '@app/common';
 import { MAX_PASSWORD_LENGTH } from '~/constants';
 
@@ -239,6 +239,41 @@ export class AuthService extends AuthUtilService {
 
         if (!userFound && !newUser) {
             throw new RpcException(new BadRequestException('Login with Google failed'));
+        }
+
+        if (userFound) {
+            return this.buildUserTokenResponse(userFound);
+        }
+
+        if (newUser) {
+            return this.buildUserTokenResponse(newUser);
+        }
+    }
+
+    async facebookLogin({ user }: { user: IUserFacebookResponse }) {
+        if (!user) {
+            throw new RpcException(new BadRequestException('Login with Facebook failed'));
+        }
+
+        let userFound: User | undefined = undefined;
+        let newUser: User | undefined = undefined;
+        try {
+            // will throw exception if not found
+            userFound = await this.usersService.getUser({ email: user.email });
+        } catch (error) {
+            // if not found, create new user
+            newUser = await this.usersService.createUser({
+                email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                password: `${user.email}${generateRandomString(
+                    MAX_PASSWORD_LENGTH - user.email.length,
+                )}`,
+            });
+        }
+
+        if (!userFound && !newUser) {
+            throw new RpcException(new BadRequestException('Login with Facebook failed'));
         }
 
         if (userFound) {
