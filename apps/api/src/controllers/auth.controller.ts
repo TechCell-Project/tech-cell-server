@@ -34,11 +34,11 @@ import {
     VerifyEmailRequestDTO,
     ForgotPasswordDTO,
     VerifyForgotPasswordDTO,
-    UpdateRegisterRequestDTO,
     CheckEmailRequestDTO,
 } from '~/apps/auth/dtos';
 import { Throttle } from '@nestjs/throttler';
 import { GoogleOAuthGuard } from '~/apps/auth/guards';
+import { IUserGoogleResponse } from '~/apps/auth/interfaces';
 
 @ApiTags('authentication')
 @ApiTooManyRequestsResponse({ description: 'Too many requests, please try again later' })
@@ -161,7 +161,7 @@ export class AuthController {
 
     @Get('google')
     @UseGuards(GoogleOAuthGuard)
-    googleAuth(@Request() req) {
+    googleAuth() {
         return {
             message: 'waiting for google',
         };
@@ -169,9 +169,9 @@ export class AuthController {
 
     @Get('google-redirect')
     @UseGuards(GoogleOAuthGuard)
-    googleAuthRedirect(@Request() req) {
+    googleAuthRedirect(@Request() { user }: { user: IUserGoogleResponse }) {
         return this.authService
-            .send({ cmd: 'auth_google_login' }, { user: req.user })
+            .send({ cmd: 'auth_google_login' }, { user })
             .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
     }
 }

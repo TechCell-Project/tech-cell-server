@@ -21,6 +21,9 @@ import { RpcException } from '@nestjs/microservices';
 import { catchError, throwError, firstValueFrom } from 'rxjs';
 import { ConfirmEmailRegisterDTO, ForgotPasswordEmailDTO } from '~/apps/mail/dtos';
 import { OtpType } from '~/apps/auth/otp';
+import { IUserGoogleResponse } from './interfaces';
+import { generateRandomString } from '@app/common';
+import { MAX_PASSWORD_LENGTH } from '~/constants';
 
 @Injectable()
 export class AuthService extends AuthUtilService {
@@ -39,7 +42,6 @@ export class AuthService extends AuthUtilService {
                 new UnauthorizedException('Your username or password is incorrect'),
             );
         }
-        delete user.password;
 
         if (!user.emailVerified) {
             const otp = await this.otpService.createOrRenewOtp({
@@ -65,19 +67,7 @@ export class AuthService extends AuthUtilService {
             );
         }
 
-        const { _id, email: emailUser, role } = user;
-        const { accessToken, refreshToken } = await this.signTokens({
-            _id,
-            email: emailUser,
-            role,
-        });
-
-        const userReturn: UserDataResponseDTO = Object.assign(user, {
-            accessToken,
-            refreshToken,
-        });
-
-        return userReturn;
+        return await this.buildUserTokenResponse(user);
     }
 
     async checkEmail({ email }: CheckEmailRequestDTO) {
@@ -156,8 +146,8 @@ export class AuthService extends AuthUtilService {
                 throw new RpcException(new BadRequestException('Refresh token is required'));
             }
 
-            const { user } = await this.verifyRefreshToken(oldRefreshToken);
-            const userFound = await this.usersService.getUser({ email: user.email });
+            const { email } = await this.verifyRefreshToken(oldRefreshToken);
+            const userFound = await this.usersService.getUser({ email });
 
             const { _id, email: emailUser, role } = userFound;
             const { accessToken, refreshToken } = await this.signTokens({
@@ -165,10 +155,9 @@ export class AuthService extends AuthUtilService {
                 email: emailUser,
                 role,
             });
-            // const userReturn = Object.assign(user, { newAccessToken, newRefreshToken });
-            return { ...user, accessToken, refreshToken };
+            return { ...this.cleanUserBeforeResponse(userFound), accessToken, refreshToken };
         } catch (error) {
-            throw new RpcException(new ForbiddenException());
+            throw new RpcException(new ForbiddenException(error.message));
         }
     }
 
@@ -226,14 +215,38 @@ export class AuthService extends AuthUtilService {
         };
     }
 
-    googleLogin(user) {
+    async googleLogin({ user }: { user: IUserGoogleResponse }) {
         if (!user) {
-            return 'No user from google';
+            throw new RpcException(new BadRequestException('Login with Google failed'));
         }
 
-        return {
-            message: 'User information from google',
-            user: user,
-        };
+        let userFound: User | undefined = undefined;
+        let newUser: User | undefined = undefined;
+        try {
+            // will throw exception if not found
+            userFound = await this.usersService.getUser({ email: user.email });
+        } catch (error) {
+            // if not found, create new user
+            newUser = await this.usersService.createUser({
+                email: user.email,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                password: `${user.openid}${generateRandomString(
+                    MAX_PASSWORD_LENGTH - user.openid.length,
+                )}`,
+            });
+        }
+
+        if (!userFound && !newUser) {
+            throw new RpcException(new BadRequestException('Login with Google failed'));
+        }
+
+        if (userFound) {
+            return this.buildUserTokenResponse(userFound);
+        }
+
+        if (newUser) {
+            return this.buildUserTokenResponse(newUser);
+        }
     }
 }

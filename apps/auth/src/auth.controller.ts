@@ -14,6 +14,7 @@ import {
 } from './dtos';
 import { UsersService } from './users/users.service';
 import { JwtGuard } from './guards/jwt.guard';
+import { IUserGoogleResponse } from './interfaces';
 
 @Controller()
 export class AuthController {
@@ -91,7 +92,7 @@ export class AuthController {
     }
 
     @MessagePattern({ cmd: 'auth_google_login' })
-    googleAuthRedirect(@Ctx() context, @Payload() { user }) {
+    async googleAuthRedirect(@Ctx() context, @Payload() { user }: { user: IUserGoogleResponse }) {
         this.rabbitMqService.acknowledgeMessage(context);
         return this.authService.googleLogin({ user });
     }
