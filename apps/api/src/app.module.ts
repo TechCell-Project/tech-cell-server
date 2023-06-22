@@ -7,7 +7,7 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerStorageRedisService } from 'nestjs-throttler-storage-redis';
 import { MorganMiddleware } from './middlewares';
-import { GoogleStrategy, AccessTokenStrategy } from '~/apps/auth/strategies';
+import { GoogleStrategy, AccessTokenStrategy, FacebookStrategy } from '~/apps/auth/strategies';
 
 @Module({
     imports: [
@@ -40,6 +40,7 @@ import { GoogleStrategy, AccessTokenStrategy } from '~/apps/auth/strategies';
         },
         GoogleStrategy,
         AccessTokenStrategy,
+        FacebookStrategy,
     ],
 })
 export class AppModule implements NestModule {
