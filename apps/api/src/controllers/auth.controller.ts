@@ -9,7 +9,7 @@ import {
     UseGuards,
     Request,
 } from '@nestjs/common';
-import { ClientProxy, RpcException } from '@nestjs/microservices';
+import { RpcException, ClientRMQ } from '@nestjs/microservices';
 import { AUTH_SERVICE } from '~/constants';
 import { catchError, throwError } from 'rxjs';
 import {
@@ -25,7 +25,6 @@ import {
     ApiConflictResponse,
     ApiTooManyRequestsResponse,
     ApiNotAcceptableResponse,
-    ApiOAuth2,
 } from '@nestjs/swagger';
 import {
     RegisterRequestDTO,
@@ -45,7 +44,7 @@ import { IUserFacebookResponse, IUserGoogleResponse } from '~/apps/auth/interfac
 @ApiTooManyRequestsResponse({ description: 'Too many requests, please try again later' })
 @Controller('auth')
 export class AuthController {
-    constructor(@Inject(AUTH_SERVICE) private readonly authService: ClientProxy) {}
+    constructor(@Inject(AUTH_SERVICE) private readonly authService: ClientRMQ) {}
 
     @ApiBody({ type: LoginRequestDTO })
     @ApiOkResponse({
