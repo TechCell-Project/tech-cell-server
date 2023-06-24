@@ -87,8 +87,6 @@ export class AuthUtilService {
             this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'),
         );
 
-        console.log(a);
-
         return a;
     }
 
