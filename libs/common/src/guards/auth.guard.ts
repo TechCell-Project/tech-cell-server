@@ -5,12 +5,12 @@ import {
     Injectable,
     UnauthorizedException,
 } from '@nestjs/common';
-import { ClientProxy, RpcException } from '@nestjs/microservices';
+import { ClientRMQ, RpcException } from '@nestjs/microservices';
 import { catchError, Observable, of, switchMap } from 'rxjs';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-    constructor(@Inject('AUTH_SERVICE') private readonly authService: ClientProxy) {}
+    constructor(@Inject('AUTH_SERVICE') private readonly authService: ClientRMQ) {}
 
     canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
         if (context.getType() !== 'http') {

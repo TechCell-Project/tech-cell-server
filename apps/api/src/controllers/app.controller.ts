@@ -1,5 +1,5 @@
 import { Controller, Get, Inject, UseGuards } from '@nestjs/common';
-import { ClientProxy, RpcException } from '@nestjs/microservices';
+import { ClientRMQ, RpcException } from '@nestjs/microservices';
 import { SAMPLE_SERVICE } from '~/constants';
 import { catchError, throwError } from 'rxjs';
 import { AuthGuard } from '@app/common';
@@ -8,7 +8,7 @@ import { ApiTags } from '@nestjs/swagger';
 @ApiTags('commons')
 @Controller('/')
 export class AppController {
-    constructor(@Inject(SAMPLE_SERVICE) private readonly sampleService: ClientProxy) {}
+    constructor(@Inject(SAMPLE_SERVICE) private readonly sampleService: ClientRMQ) {}
 
     @Get('ping')
     async getPing() {
