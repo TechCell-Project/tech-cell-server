@@ -44,6 +44,7 @@ jobs:
                       else
                           if [ $(gh pr view $pr_number --json baseRefName --jq '.baseRefName') == 'stable' ]; then
                               echo "Closing pull request #$pr_number as it directly commits to stable..."
+                              gh pr label $pr_number --add auto-close actions
                               gh pr close $pr_number --comment "$comment"
                           fi
                       fi
