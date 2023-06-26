@@ -19,7 +19,7 @@ jobs:
             - name: Close pull requests that directly commit to stable
               run: |
                   comment="
-                  You can not directly commit to the [\`stable\`](https://github.com/TechCell-Project/.git-docs#-l%C6%B0u-%C3%BD) branch, read the contribution guide and only commit to [\`dev\`](https://github.com/Atlas-OS/docs/tree/dev).
+                  You can not directly commit to the [\`stable\`](https://github.com/TechCell-Project/tech-cell-web-server/tree/stable) branch, read the [contribution guide](https://github.com/TechCell-Project/.git-docs#-l%C6%B0u-%C3%BD) and only commit to [\`development\`](https://github.com/TechCell-Project/tech-cell-web-server/tree/development).
                   "
 
                   exclude_labels="
