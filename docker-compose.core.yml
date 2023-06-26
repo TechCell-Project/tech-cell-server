@@ -11,53 +11,57 @@ services:
         volumes:
             - 'rabbitmq_data:/var/lib/rabbitmq'
         networks:
-            - backend
+            - techcell_backend
+        restart: always
 
     mongodb-primary:
         image: docker.io/bitnami/mongodb:5.0
-        env_file:
-            - .env
         environment:
             - MONGODB_ADVERTISED_HOSTNAME=mongodb-primary
             - MONGODB_REPLICA_SET_MODE=primary
             - MONGODB_ROOT_PASSWORD=${SET_MONGODB_ROOT_PASSWORD}
             - MONGODB_REPLICA_SET_KEY=${SET_MONGODB_REPLICA_SET_KEY}
+        env_file:
+            - .env
         volumes:
             - 'mongodb_master_data:/bitnami/mongodb'
         ports:
             - '27027:27017'
         networks:
-            - backend
+            - techcell_backend
+        restart: always
 
     mongodb-secondary:
         image: docker.io/bitnami/mongodb:5.0
         depends_on:
             - mongodb-primary
-        env_file:
-            - .env
         environment:
             - MONGODB_ADVERTISED_HOSTNAME=mongodb-secondary
             - MONGODB_REPLICA_SET_MODE=secondary
             - MONGODB_INITIAL_PRIMARY_HOST=mongodb-primary
             - MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=${SET_MONGODB_ROOT_PASSWORD}
             - MONGODB_REPLICA_SET_KEY=${SET_MONGODB_REPLICA_SET_KEY}
+        env_file:
+            - .env
         networks:
-            - backend
+            - techcell_backend
+        restart: always
 
     mongodb-arbiter:
         image: docker.io/bitnami/mongodb:5.0
         depends_on:
             - mongodb-primary
-        env_file:
-            - .env
         environment:
             - MONGODB_ADVERTISED_HOSTNAME=mongodb-arbiter
             - MONGODB_REPLICA_SET_MODE=arbiter
             - MONGODB_INITIAL_PRIMARY_HOST=mongodb-primary
             - MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=${SET_MONGODB_ROOT_PASSWORD}
             - MONGODB_REPLICA_SET_KEY=${SET_MONGODB_REPLICA_SET_KEY}
+        env_file:
+            - .env
         networks:
-            - backend
+            - techcell_backend
+        restart: always
 
     redis:
         image: docker.io/bitnami/redis:7.0
@@ -67,13 +71,13 @@ services:
         ports:
             - '6379:6379'
         networks:
-            - backend
+            - techcell_backend
         volumes:
             - 'redis_data:/redis/data'
         # sysctl -w vm.overcommit_memory=1
 
 networks:
-    backend:
+    techcell_techcell_backend:
 
 volumes:
     mongodb_master_data:
