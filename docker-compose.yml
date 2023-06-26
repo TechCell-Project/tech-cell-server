@@ -11,8 +11,6 @@ services:
         env_file:
             - .env
         depends_on:
-            - rabbitmq
-            - redis
             - sample
             - products
             - auth
@@ -26,7 +24,7 @@ services:
             - 8000:8000
         command: yarn start:prod api
         networks:
-            - backend
+            - techcell_backend
         restart: always
 
     auth:
@@ -39,16 +37,13 @@ services:
         env_file:
             - .env
         depends_on:
-            - rabbitmq
-            - mongodb-primary
-            - mongodb-secondary
-            - mongodb-arbiter
+            - mail
         volumes:
             - .:/usr/src/techcell_app
             - /usr/src/techcell_app/node_modules
         command: yarn start:prod auth
         networks:
-            - backend
+            - techcell_backend
         restart: always
 
     mail:
@@ -59,15 +54,12 @@ services:
             - RABBITMQ_URLS=amqp://techcell_server:techcell_server_9901@rabbitmq:5672
         env_file:
             - .env
-        depends_on:
-            - rabbitmq
-            - auth
         volumes:
             - .:/usr/src/techcell_app
             - /usr/src/techcell_app/node_modules
         command: yarn start:prod mail
         networks:
-            - backend
+            - techcell_backend
         restart: always
 
     products:
@@ -79,17 +71,12 @@ services:
             - MONGODB_URI=mongodb://root:password123@mongodb-primary:27017/techcell-dev?directConnection=true&authMechanism=SCRAM-SHA-1&replicaSet=replicaset&authSource=admin
         env_file:
             - .env
-        depends_on:
-            - rabbitmq
-            - mongodb-primary
-            - mongodb-secondary
-            - mongodb-arbiter
         volumes:
             - .:/usr/src/techcell_app
             - /usr/src/techcell_app/node_modules
         command: yarn start:prod products
         networks:
-            - backend
+            - techcell_backend
         restart: always
 
     sample:
@@ -101,101 +88,17 @@ services:
             - REDIS_HOST=redis
         env_file:
             - .env
-        depends_on:
-            - rabbitmq
-            - redis
         volumes:
             - .:/usr/src/techcell_app
             - /usr/src/techcell_app/node_modules
         command: yarn start:prod sample
         networks:
-            - backend
+            - techcell_backend
         restart: always
-
-    rabbitmq:
-        image: rabbitmq:3-management
-        ports:
-            - '5672:5672'
-            - '15672:15672'
-        env_file:
-            - .env
-        volumes:
-            - 'rabbitmq_data:/var/lib/rabbitmq'
-        networks:
-            - backend
-        restart: always
-
-    mongodb-primary:
-        image: docker.io/bitnami/mongodb:5.0
-        environment:
-            - MONGODB_ADVERTISED_HOSTNAME=mongodb-primary
-            - MONGODB_REPLICA_SET_MODE=primary
-            - MONGODB_ROOT_PASSWORD=${SET_MONGODB_ROOT_PASSWORD}
-            - MONGODB_REPLICA_SET_KEY=${SET_MONGODB_REPLICA_SET_KEY}
-        env_file:
-            - .env
-        volumes:
-            - 'mongodb_master_data:/bitnami/mongodb'
-        ports:
-            - '27027:27017'
-        networks:
-            - backend
-        restart: always
-
-    mongodb-secondary:
-        image: docker.io/bitnami/mongodb:5.0
-        depends_on:
-            - mongodb-primary
-        environment:
-            - MONGODB_ADVERTISED_HOSTNAME=mongodb-secondary
-            - MONGODB_REPLICA_SET_MODE=secondary
-            - MONGODB_INITIAL_PRIMARY_HOST=mongodb-primary
-            - MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=${SET_MONGODB_ROOT_PASSWORD}
-            - MONGODB_REPLICA_SET_KEY=${SET_MONGODB_REPLICA_SET_KEY}
-        env_file:
-            - .env
-        networks:
-            - backend
-        restart: always
-
-    mongodb-arbiter:
-        image: docker.io/bitnami/mongodb:5.0
-        depends_on:
-            - mongodb-primary
-        environment:
-            - MONGODB_ADVERTISED_HOSTNAME=mongodb-arbiter
-            - MONGODB_REPLICA_SET_MODE=arbiter
-            - MONGODB_INITIAL_PRIMARY_HOST=mongodb-primary
-            - MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD=${SET_MONGODB_ROOT_PASSWORD}
-            - MONGODB_REPLICA_SET_KEY=${SET_MONGODB_REPLICA_SET_KEY}
-        env_file:
-            - .env
-        networks:
-            - backend
-        restart: always
-
-    redis:
-        image: docker.io/bitnami/redis:7.0
-        environment:
-            - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL,CONFIG
-            - REDIS_PASSWORD=${REDIS_PASSWORD}
-        ports:
-            - '6379:6379'
-        networks:
-            - backend
-        volumes:
-            - 'redis_data:/redis/data'
-        # sysctl -w vm.overcommit_memory=1
 
 networks:
-    backend:
+    techcell_techcell_backend:
 
 volumes:
-    mongodb_master_data:
-        driver: local
-    rabbitmq_data:
-        driver: local
     app_data:
-        driver: local
-    redis_data:
         driver: local
