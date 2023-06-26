@@ -25,6 +25,8 @@ import {
     ApiConflictResponse,
     ApiTooManyRequestsResponse,
     ApiNotAcceptableResponse,
+    ApiOAuth2,
+    ApiFoundResponse,
 } from '@nestjs/swagger';
 import {
     RegisterRequestDTO,
@@ -159,33 +161,19 @@ export class AuthController {
             .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
     }
 
+    @ApiOAuth2(['openid', 'profile', 'email'], 'login with google')
     @Get('google')
     @UseGuards(GoogleOAuthGuard)
-    async googleAuth() {
-        return {
-            message: 'waiting for google',
-        };
-    }
-
-    @Get('google-redirect')
-    @UseGuards(GoogleOAuthGuard)
-    async googleAuthRedirect(@Request() { user }: { user: IUserGoogleResponse }) {
+    async googleAuth(@Request() { user }: { user: IUserGoogleResponse }) {
         return this.authService
             .send({ cmd: 'auth_google_login' }, { user })
             .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
     }
 
+    @ApiOAuth2(['email'], 'login with facebook')
     @Get('facebook')
     @UseGuards(FacebookOAuthGuard)
-    async facebookAuth() {
-        return {
-            message: 'waiting for facebook',
-        };
-    }
-
-    @Get('facebook-redirect')
-    @UseGuards(FacebookOAuthGuard)
-    facebookLoginRedirect(@Request() { user }: { user: IUserFacebookResponse }) {
+    async facebookAuth(@Request() { user }: { user: IUserFacebookResponse }) {
         return this.authService
             .send({ cmd: 'auth_facebook_login' }, { user })
             .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
