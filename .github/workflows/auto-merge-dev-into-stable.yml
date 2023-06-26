@@ -29,7 +29,7 @@ jobs:
                   **Last commit to [\`development\`](https://github.com/TechCell-Project/tech-cell-web-server/tree/development):** https://github.com/TechCell-Project/tech-cell-web-server/commit/$(git rev-parse remotes/origin/development)
                   "
 
-                  gitLog=$(git log stable..remotes/origin/development)
+                  gitLog=$(git log remotes/origin/stable..remotes/origin/development)
 
                   if [ -n "$gitLog" ]; then
                       gh pr create -B "stable" -H "development" --title "$title" -l "auto-pr" --body "$body"
