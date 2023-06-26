@@ -1,0 +1,10 @@
+readme:
+    - '**/README.md'
+
+actions:
+    - .github/workflows/**/*
+    - .github/labeler.yml
+
+github:
+    - .github/*
+    - .git*
