@@ -97,7 +97,7 @@ services:
         restart: always
 
 networks:
-    techcell_techcell_backend:
+    techcell_backend:
 
 volumes:
     app_data:

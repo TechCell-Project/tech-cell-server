@@ -77,7 +77,7 @@ services:
         # sysctl -w vm.overcommit_memory=1
 
 networks:
-    techcell_techcell_backend:
+    techcell_backend:
 
 volumes:
     mongodb_master_data:
