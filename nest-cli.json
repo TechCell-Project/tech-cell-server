@@ -62,7 +62,19 @@
       "sourceRoot": "apps/mail/src",
       "compilerOptions": {
         "tsConfigPath": "apps/mail/tsconfig.app.json",
-        "assets": ["**/*.hbs", "**/images/*"]
+        "assets": [
+          "**/*.hbs",
+          "**/images/*"
+        ]
+      }
+    },
+    "managaments": {
+      "type": "application",
+      "root": "apps/managaments",
+      "entryFile": "main",
+      "sourceRoot": "apps/managaments/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/managaments/tsconfig.app.json"
       }
     }
   }

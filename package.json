@@ -124,7 +124,8 @@
       "^~/apps/auth(|/.*)$": "<rootDir>/apps/auth/src/$1",
       "^~/apps/mail(|/.*)$": "<rootDir>/apps/mail/src/$1",
       "^~/apps/products(|/.*)$": "<rootDir>/apps/products/src/$1",
-      "^~/apps/sample(|/.*)$": "<rootDir>/apps/sample/src/$1"
+      "^~/apps/sample(|/.*)$": "<rootDir>/apps/sample/src/$1",
+      "^~/apps/managaments(|/.*)$": "<rootDir>/apps/managaments/src/$1"
     }
   }
 }

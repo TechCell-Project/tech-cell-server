@@ -44,6 +44,9 @@
       ],
       "~/apps/mail/*": [
         "apps/mail/src/*"
+      ],
+      "~/apps/managaments/*": [
+        "apps/managaments/src/*"
       ]
     }
   }
