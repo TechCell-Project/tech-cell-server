@@ -66,30 +66,6 @@ export class AuthUtilService {
         return bcrypt.compare(password, hashedPassword);
     }
 
-    async verifyAccessToken(accessToken: string) {
-        if (!accessToken) {
-            throw new RpcException(new BadRequestException('Access token missing.'));
-        }
-
-        return await this.verifyToken(
-            accessToken,
-            this.configService.get<string>('JWT_ACCESS_TOKEN_SECRET'),
-        );
-    }
-
-    async verifyRefreshToken(refreshToken: string) {
-        if (!refreshToken) {
-            throw new RpcException(new BadRequestException('Refresh token missing.'));
-        }
-
-        const a = await this.verifyToken(
-            refreshToken,
-            this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'),
-        );
-
-        return a;
-    }
-
     async verifyToken(token: string, secret: string) {
         try {
             const dataVerified = await this.jwtService.verifyAsync(token, {

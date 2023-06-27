@@ -21,7 +21,7 @@ import { RpcException } from '@nestjs/microservices';
 import { catchError, throwError, firstValueFrom } from 'rxjs';
 import { ConfirmEmailRegisterDTO, ForgotPasswordEmailDTO } from '~/apps/mail/dtos';
 import { OtpType } from '~/apps/auth/otp';
-import { IUserFacebookResponse, IUserGoogleResponse } from './interfaces';
+import { IUserFacebookResponse, IUserGoogleResponse, ITokenVerifiedResponse } from './interfaces';
 import { generateRandomString } from '@app/common';
 import { MAX_PASSWORD_LENGTH } from '~/constants';
 
@@ -213,6 +213,28 @@ export class AuthService extends AuthUtilService {
         return {
             message: 'Password changed successfully',
         };
+    }
+
+    async verifyAccessToken(accessToken: string): Promise<ITokenVerifiedResponse> {
+        if (!accessToken) {
+            throw new RpcException(new BadRequestException('Access token missing.'));
+        }
+
+        return (await this.verifyToken(
+            accessToken,
+            this.configService.get<string>('JWT_ACCESS_TOKEN_SECRET'),
+        )) as ITokenVerifiedResponse;
+    }
+
+    async verifyRefreshToken(refreshToken: string): Promise<ITokenVerifiedResponse> {
+        if (!refreshToken) {
+            throw new RpcException(new BadRequestException('Refresh token missing.'));
+        }
+
+        return (await this.verifyToken(
+            refreshToken,
+            this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'),
+        )) as ITokenVerifiedResponse;
     }
 
     async googleLogin({ user }: { user: IUserGoogleResponse }) {
