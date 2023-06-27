@@ -1,9 +1,9 @@
-import { Injectable, UnauthorizedException, Inject, BadRequestException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { TokenExpiredError } from 'jsonwebtoken';
 import { UsersService } from './users/users.service';
 import { ConfigService } from '@nestjs/config';
-import { JwtPayloadDto, UserDataResponseDTO } from '~/apps/auth/dtos';
+import { JwtPayloadDto } from '~/apps/auth/dtos';
 import * as bcrypt from 'bcrypt';
 import { RpcException, ClientRMQ } from '@nestjs/microservices';
 import { MAIL_SERVICE } from '~/constants';
