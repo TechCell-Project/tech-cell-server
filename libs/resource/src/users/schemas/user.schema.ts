@@ -14,7 +14,7 @@ export class User extends AbstractDocument {
     password: string;
 
     @Prop({ type: String, enum: UserRole, default: UserRole.User })
-    role?: UserRole;
+    role?: string;
 
     @Prop({ default: [] })
     address?: string[];
