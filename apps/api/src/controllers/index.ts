@@ -5,5 +5,6 @@ export * from './app.controller';
 import { AppController } from './app.controller';
 import { ProductsController } from './products.controller';
 import { AuthController } from './auth.controller';
+import { ManagamentsController } from './managaments.controller';
 
-export default [AppController, ProductsController, AuthController];
+export default [AppController, ProductsController, AuthController, ManagamentsController];

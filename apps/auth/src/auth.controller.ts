@@ -12,7 +12,7 @@ import {
     ForgotPasswordDTO,
     VerifyForgotPasswordDTO,
 } from './dtos';
-import { UsersService } from './users/users.service';
+import { UsersService } from '@app/resource/users';
 import { JwtGuard } from './guards/jwt.guard';
 import { IUserFacebookResponse, IUserGoogleResponse } from './interfaces';
 

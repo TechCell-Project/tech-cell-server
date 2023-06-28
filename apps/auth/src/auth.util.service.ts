@@ -1,16 +1,16 @@
-import { Injectable, UnauthorizedException, Inject, BadRequestException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { TokenExpiredError } from 'jsonwebtoken';
-import { UsersService } from './users/users.service';
+import { UsersService } from '@app/resource/users';
+import { User } from '@app/resource/users/schemas';
 import { ConfigService } from '@nestjs/config';
-import { JwtPayloadDto, UserDataResponseDTO } from '~/apps/auth/dtos';
+import { JwtPayloadDto } from '~/apps/auth/dtos';
 import * as bcrypt from 'bcrypt';
 import { RpcException, ClientRMQ } from '@nestjs/microservices';
 import { MAIL_SERVICE } from '~/constants';
 import { catchError, throwError } from 'rxjs';
 import { ConfirmEmailRegisterDTO } from '~/apps/mail/dtos';
-import { OtpService, OtpType } from '~/apps/auth/otp';
-import { User } from './users/schemas';
+import { OtpService, OtpType } from '@app/resource/otp';
 
 @Injectable()
 export class AuthUtilService {
@@ -64,30 +64,6 @@ export class AuthUtilService {
 
     async doesPasswordMatch(password: string, hashedPassword: string): Promise<boolean> {
         return bcrypt.compare(password, hashedPassword);
-    }
-
-    async verifyAccessToken(accessToken: string) {
-        if (!accessToken) {
-            throw new RpcException(new BadRequestException('Access token missing.'));
-        }
-
-        return await this.verifyToken(
-            accessToken,
-            this.configService.get<string>('JWT_ACCESS_TOKEN_SECRET'),
-        );
-    }
-
-    async verifyRefreshToken(refreshToken: string) {
-        if (!refreshToken) {
-            throw new RpcException(new BadRequestException('Refresh token missing.'));
-        }
-
-        const a = await this.verifyToken(
-            refreshToken,
-            this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'),
-        );
-
-        return a;
     }
 
     async verifyToken(token: string, secret: string) {
