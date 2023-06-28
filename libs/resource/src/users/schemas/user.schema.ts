@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { AbstractDocument } from '@app/common';
-import { UserRole } from '~/apps/auth/users/enums';
+import { UserRole } from '@app/resource/users/enums';
 
 @Schema({ versionKey: false })
 export class User extends AbstractDocument {

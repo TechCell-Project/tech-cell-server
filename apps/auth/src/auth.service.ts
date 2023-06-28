@@ -16,11 +16,11 @@ import {
     VerifyForgotPasswordDTO,
 } from '~/apps/auth/dtos';
 import { RegisterRequestDTO, NewTokenRequestDTO, UserDataResponseDTO } from '~/apps/auth/dtos';
-import { User } from './users/schemas';
+import { User } from '@app/resource/users/schemas';
 import { RpcException } from '@nestjs/microservices';
 import { catchError, throwError, firstValueFrom } from 'rxjs';
 import { ConfirmEmailRegisterDTO, ForgotPasswordEmailDTO } from '~/apps/mail/dtos';
-import { OtpType } from '~/apps/auth/otp';
+import { OtpType } from '@app/resource/otp';
 import { IUserFacebookResponse, IUserGoogleResponse, ITokenVerifiedResponse } from './interfaces';
 import { generateRandomString } from '@app/common';
 import { MAX_PASSWORD_LENGTH } from '~/constants';

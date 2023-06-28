@@ -9,7 +9,7 @@ import {
 import { ClientRMQ, RpcException } from '@nestjs/microservices';
 import { catchError, firstValueFrom } from 'rxjs';
 import { ITokenVerifiedResponse } from '~/apps/auth/interfaces';
-import { UserRole } from '~/apps/auth/users/enums';
+import { UserRole } from '@app/resource/users/enums';
 import { AUTH_SERVICE } from '~/constants';
 
 @Injectable()

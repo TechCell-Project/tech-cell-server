@@ -2,7 +2,7 @@ import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { Types } from 'mongoose';
 import { IsArray, IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { UserRole } from '~/apps/auth/users/enums';
+import { UserRole } from '@app/resource/users/enums';
 
 export class UserDataResponseDTO {
     @ApiProperty({

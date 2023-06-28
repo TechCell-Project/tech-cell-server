@@ -1,7 +1,8 @@
 import { Injectable, UnauthorizedException, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { TokenExpiredError } from 'jsonwebtoken';
-import { UsersService } from './users/users.service';
+import { UsersService } from '@app/resource/users';
+import { User } from '@app/resource/users/schemas';
 import { ConfigService } from '@nestjs/config';
 import { JwtPayloadDto } from '~/apps/auth/dtos';
 import * as bcrypt from 'bcrypt';
@@ -9,8 +10,7 @@ import { RpcException, ClientRMQ } from '@nestjs/microservices';
 import { MAIL_SERVICE } from '~/constants';
 import { catchError, throwError } from 'rxjs';
 import { ConfirmEmailRegisterDTO } from '~/apps/mail/dtos';
-import { OtpService, OtpType } from '~/apps/auth/otp';
-import { User } from './users/schemas';
+import { OtpService, OtpType } from '@app/resource/otp';
 
 @Injectable()
 export class AuthUtilService {

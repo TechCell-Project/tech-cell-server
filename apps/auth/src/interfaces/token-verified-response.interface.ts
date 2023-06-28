@@ -1,4 +1,4 @@
-import { UserRole } from '~/apps/auth/users/enums';
+import { UserRole } from '@app/resource/users/enums';
 
 export interface ITokenVerifiedResponse {
     readonly _id: string;

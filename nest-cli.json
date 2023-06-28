@@ -76,6 +76,15 @@
       "compilerOptions": {
         "tsConfigPath": "apps/managaments/tsconfig.app.json"
       }
+    },
+    "resource": {
+      "type": "library",
+      "root": "libs/resource",
+      "entryFile": "index",
+      "sourceRoot": "libs/resource/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/resource/tsconfig.lib.json"
+      }
     }
   }
 }
