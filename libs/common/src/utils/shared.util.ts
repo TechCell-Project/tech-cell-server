@@ -8,3 +8,7 @@ export function generateRandomString(length: number) {
     }
     return result;
 }
+
+export function capitalize(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
