@@ -1,8 +1,7 @@
 import { Controller, Inject, Body, Get, Post, UseGuards } from '@nestjs/common';
-import { ClientProxy, RpcException } from '@nestjs/microservices';
+import { ClientProxy } from '@nestjs/microservices';
 import { PRODUCTS_SERVICE } from '~/constants';
-import { AuthGuard } from '@app/common';
-import { catchError, throwError } from 'rxjs';
+import { AuthGuard, catchException } from '@app/common';
 import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('products')
@@ -12,9 +11,7 @@ export class ProductsController {
 
     @Get()
     async getProducts() {
-        return this.productsService
-            .send({ cmd: 'get_products' }, {})
-            .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
+        return this.productsService.send({ cmd: 'get_products' }, {}).pipe(catchException());
     }
 
     @UseGuards(AuthGuard)
@@ -22,6 +19,6 @@ export class ProductsController {
     async createProduct(@Body() productsData: { name: string; price: number; desc: string }) {
         return this.productsService
             .send({ cmd: 'create_product' }, productsData ? productsData : undefined)
-            .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
+            .pipe(catchException());
     }
 }

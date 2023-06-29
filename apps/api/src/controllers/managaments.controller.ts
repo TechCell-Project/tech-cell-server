@@ -1,10 +1,10 @@
 import { Controller, Get, Inject, Request, UseGuards } from '@nestjs/common';
-import { ClientRMQ, RpcException } from '@nestjs/microservices';
+import { ClientRMQ } from '@nestjs/microservices';
 import { MANAGAMENTS_SERVICE } from '~/constants';
-import { catchError, throwError } from 'rxjs';
 import { ModGuard } from '@app/common/guards';
 import { ApiTags } from '@nestjs/swagger';
 import { GetUsersDTO } from '~/apps/managaments/users-mnt/dtos';
+import { catchException } from '@app/common';
 
 @ApiTags('managaments')
 @Controller('mnt')
@@ -22,7 +22,7 @@ export class ManagamentsController {
         const reqQuery: GetUsersDTO = req.query;
         return this.managamentsService
             .send({ cmd: 'mnt_get_users' }, { ...reqQuery })
-            .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
+            .pipe(catchException());
     }
 
     @Get('users/:id')
@@ -30,6 +30,6 @@ export class ManagamentsController {
         const { id } = req.params;
         return this.managamentsService
             .send({ cmd: 'mnt_get_user_by_id' }, { id })
-            .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
+            .pipe(catchException());
     }
 }
