@@ -88,6 +88,7 @@ declare namespace NodeJS {
         /**
          * Sender of email server
          * @description This value is used for `nodemailer` module
+         * @default 'TechCell Teams <teams@techcell.cloud>'
          * @example
          * EMAIL_SENDER = 'Example <example@techcell.cloud>'
          */
