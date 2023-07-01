@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { ManagementsModule } from './manegaments.module';
+import { ManagementsModule } from './managements.module';
 import { RpcExceptionFilter, useRabbitMQ } from '@app/common';
 import { Logger } from '@nestjs/common';
 
