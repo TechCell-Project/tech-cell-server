@@ -45,8 +45,8 @@
       "~/apps/mail/*": [
         "apps/mail/src/*"
       ],
-      "~/apps/managaments/*": [
-        "apps/managaments/src/*"
+      "~/apps/managements/*": [
+        "apps/managements/src/*"
       ],
       "@app/resource": [
         "libs/resource/src"

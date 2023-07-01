@@ -1,5 +1,14 @@
 import { Logger, NotFoundException } from '@nestjs/common';
-import { FilterQuery, Model, Types, UpdateQuery, SaveOptions, Connection } from 'mongoose';
+import {
+    FilterQuery,
+    Model,
+    Types,
+    UpdateQuery,
+    SaveOptions,
+    Connection,
+    QueryOptions,
+    ProjectionType,
+} from 'mongoose';
 import { AbstractDocument } from './abstract.schema';
 import { RpcException } from '@nestjs/microservices';
 
@@ -19,8 +28,15 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
         return (await createdDocument.save(options)).toJSON() as unknown as TDocument;
     }
 
-    async findOne(filterQuery: FilterQuery<TDocument>): Promise<TDocument> {
-        const document = await this.model.findOne(filterQuery, {}, { lean: true });
+    async findOne(
+        filterQuery: FilterQuery<TDocument>,
+        options?: Partial<QueryOptions<TDocument>>,
+        projection?: ProjectionType<TDocument>,
+    ): Promise<TDocument> {
+        const document = await this.model.findOne(filterQuery, projection, {
+            lean: true,
+            ...options,
+        });
 
         if (!document) {
             this.logger.warn(`${this.model.modelName} not found with filterQuery`, filterQuery);
@@ -52,8 +68,19 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
         });
     }
 
-    async find(filterQuery: FilterQuery<TDocument>) {
-        return this.model.find(filterQuery, {}, { lean: true });
+    async find(
+        filterQuery: FilterQuery<TDocument>,
+        options?: Partial<QueryOptions<TDocument>>,
+        projection?: ProjectionType<TDocument>,
+    ) {
+        const document = await this.model.find(filterQuery, projection, { lean: true, ...options });
+
+        if (!document || document.length <= 0) {
+            this.logger.warn(`${this.model.modelName}s not found with filterQuery:`, filterQuery);
+            throw new RpcException(new NotFoundException(`${this.model.modelName}s not found.`));
+        }
+
+        return document;
     }
 
     async startTransaction() {

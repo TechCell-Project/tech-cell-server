@@ -26,7 +26,7 @@ export class UserDataResponseDTO {
     @ApiProperty({ enum: UserRole, example: UserRole.User })
     @IsEnum(UserRole)
     @IsNotEmpty()
-    role?: UserRole;
+    role?: UserRole | string;
 
     @ApiProperty({ type: String, example: 'the-access-token' })
     @IsString()

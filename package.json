@@ -16,7 +16,7 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node ./scripts/start-production.js",
-    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+    "lint": "eslint \"{src,apps,libs,test,types}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
@@ -29,6 +29,8 @@
     "up:build": "docker compose build --no-cache && docker compose -f docker-compose.yml up -d --force-recreate",
     "down": "docker compose -f docker-compose.yml down",
     "restart": "yarn down && yarn up:build",
+    "up:all": "yarn up:core && yarn up",
+    "down:all": "yarn down:core && yarn down",
     "compodoc": "npx @compodoc/compodoc -p tsconfig.json -s"
   },
   "dependencies": {
@@ -129,7 +131,7 @@
       "^~/apps/mail(|/.*)$": "<rootDir>/apps/mail/src/$1",
       "^~/apps/products(|/.*)$": "<rootDir>/apps/products/src/$1",
       "^~/apps/sample(|/.*)$": "<rootDir>/apps/sample/src/$1",
-      "^~/apps/managaments(|/.*)$": "<rootDir>/apps/managaments/src/$1",
+      "^~/apps/managements(|/.*)$": "<rootDir>/apps/managements/src/$1",
       "^@app/resource(|/.*)$": "<rootDir>/libs/resource/src/$1"
     }
   }

@@ -68,13 +68,13 @@
         ]
       }
     },
-    "managaments": {
+    "managements": {
       "type": "application",
-      "root": "apps/managaments",
+      "root": "apps/managements",
       "entryFile": "main",
-      "sourceRoot": "apps/managaments/src",
+      "sourceRoot": "apps/managements/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/managaments/tsconfig.app.json"
+        "tsConfigPath": "apps/managements/tsconfig.app.json"
       }
     },
     "resource": {

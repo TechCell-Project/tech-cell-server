@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { ManagamentsController } from './managaments.controller';
-import { ManagamentsService } from './managaments.service';
-import { RabbitMQModule, RabbitMQService } from '@app/common';
 import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from '@app/resource/users';
+import { UsersMntController } from './users-mnt.controller';
+import { UsersMntService } from './users-mnt.service';
+import { RabbitMQModule, RabbitMQService } from '@app/common';
 
 @Module({
     imports: [
@@ -14,7 +14,7 @@ import { UsersModule } from '@app/resource/users';
         }),
         UsersModule,
     ],
-    controllers: [ManagamentsController],
-    providers: [ManagamentsService, RabbitMQService],
+    controllers: [UsersMntController],
+    providers: [RabbitMQService, UsersMntService],
 })
-export class ManagamentsModule {}
+export class UsersMntModule {}
