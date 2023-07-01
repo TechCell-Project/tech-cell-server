@@ -1,4 +1,4 @@
-import { Controller, Get, Inject, Request, UseGuards } from '@nestjs/common';
+import { Controller, Get, Inject, Request, UseGuards, Patch } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import { MANAGEMENTS_SERVICE } from '~/constants';
 import { ModGuard } from '@app/common/guards';
@@ -30,6 +30,24 @@ export class ManagementsController {
         const { id } = req.params;
         return this.managementsService
             .send({ cmd: 'mnt_get_user_by_id' }, { id })
+            .pipe(catchException());
+    }
+
+    @Patch('users/:id/block')
+    async blockUser(@Request() req) {
+        const { id: victimUserId } = req.params;
+        const { blockUserId } = req.body;
+        return this.managementsService
+            .send({ cmd: 'mnt_block_user' }, { victimUserId, blockUserId })
+            .pipe(catchException());
+    }
+
+    @Patch('users/:id/unblock')
+    async unblockUser(@Request() req) {
+        const { id: victimUserId } = req.params;
+        const { unblockUserId } = req.body;
+        return this.managementsService
+            .send({ cmd: 'mnt_unblock_user' }, { victimUserId, unblockUserId })
             .pipe(catchException());
     }
 }

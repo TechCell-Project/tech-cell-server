@@ -35,4 +35,7 @@ export class GetUsersDTO {
 
     @IsOptional()
     isVerified?: boolean;
+
+    @IsOptional()
+    emailVerified?: boolean;
 }
