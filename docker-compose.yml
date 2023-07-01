@@ -86,10 +86,10 @@ services:
             - techcell_backend
         restart: always
 
-    managaments:
+    managements:
         build:
             context: ./
-            dockerfile: ./apps/managaments/Dockerfile
+            dockerfile: ./apps/managements/Dockerfile
         environment:
             - REDIS_HOST=redis
             - RABBITMQ_URLS=amqp://techcell_server:techcell_server_9901@rabbitmq:5672

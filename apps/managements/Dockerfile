@@ -8,7 +8,7 @@ RUN yarn install
 
 COPY . . 
 
-RUN yarn run build managaments
+RUN yarn run build managements
 
 FROM node:18 as production
 
@@ -22,4 +22,4 @@ COPY . .
 
 COPY --from=development /usr/src/app/dist ./dist
 
-CMD ["node", "dist/apps/managaments/main"]
+CMD ["node", "dist/apps/managements/main"]

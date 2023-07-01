@@ -1,16 +1,16 @@
 import { Controller, Get, Inject, Request, UseGuards } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
-import { MANAGAMENTS_SERVICE } from '~/constants';
+import { MANAGEMENTS_SERVICE } from '~/constants';
 import { ModGuard } from '@app/common/guards';
 import { ApiTags } from '@nestjs/swagger';
-import { GetUsersDTO } from '~/apps/managaments/users-mnt/dtos';
+import { GetUsersDTO } from '~/apps/managements/users-mnt/dtos';
 import { catchException } from '@app/common';
 
-@ApiTags('managaments')
+@ApiTags('managements')
 @Controller('mnt')
 @UseGuards(ModGuard)
-export class ManagamentsController {
-    constructor(@Inject(MANAGAMENTS_SERVICE) private readonly managamentsService: ClientRMQ) {}
+export class ManagementsController {
+    constructor(@Inject(MANAGEMENTS_SERVICE) private readonly managementsService: ClientRMQ) {}
 
     @Get('ping')
     async getPing() {
@@ -20,7 +20,7 @@ export class ManagamentsController {
     @Get('users')
     async getUser(@Request() req) {
         const reqQuery: GetUsersDTO = req.query;
-        return this.managamentsService
+        return this.managementsService
             .send({ cmd: 'mnt_get_users' }, { ...reqQuery })
             .pipe(catchException());
     }
@@ -28,7 +28,7 @@ export class ManagamentsController {
     @Get('users/:id')
     async getUserById(@Request() req) {
         const { id } = req.params;
-        return this.managamentsService
+        return this.managementsService
             .send({ cmd: 'mnt_get_user_by_id' }, { id })
             .pipe(catchException());
     }
