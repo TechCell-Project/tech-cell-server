@@ -36,18 +36,24 @@ export class ManagementsController {
     @Patch('users/:id/block')
     async blockUser(@Request() req) {
         const { id: victimUserId } = req.params;
-        const { blockUserId } = req.body;
+        const { blockReason = '', blockNote = '', userId } = req.body;
         return this.managementsService
-            .send({ cmd: 'mnt_block_user' }, { victimUserId, blockUserId })
+            .send(
+                { cmd: 'mnt_block_user' },
+                { victimUserId, blockUserId: userId, blockReason, blockNote },
+            )
             .pipe(catchException());
     }
 
     @Patch('users/:id/unblock')
     async unblockUser(@Request() req) {
         const { id: victimUserId } = req.params;
-        const { unblockUserId } = req.body;
+        const { userId, unblockReason = '', unblockNote = '' } = req.body;
         return this.managementsService
-            .send({ cmd: 'mnt_unblock_user' }, { victimUserId, unblockUserId })
+            .send(
+                { cmd: 'mnt_unblock_user' },
+                { victimUserId, unblockUserId: userId, unblockReason, unblockNote },
+            )
             .pipe(catchException());
     }
 }

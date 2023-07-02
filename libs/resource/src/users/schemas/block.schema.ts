@@ -1,29 +1,30 @@
 import { Prop } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { BlockActivity } from '../enums';
 
-class BlockLogs {
-    @Prop({ required: true })
-    blockedBy: string;
+class BlockActivitySchema {
+    @Prop({ type: String, enum: BlockActivity, default: BlockActivity.Unblock })
+    activity: string;
 
-    @Prop({ default: Date.now })
-    blockedAt: Date;
-}
-
-class UnblockLogs {
-    @Prop({ required: true })
-    unblockedBy: string;
+    @Prop({ default: '' })
+    activityBy: string;
 
     @Prop({ default: Date.now })
-    unblockedAt: Date;
+    activityAt?: Date;
+
+    @Prop({ default: '' })
+    activityReason?: string;
+
+    @Prop({ default: '' })
+    activityNote?: string;
+
+    @Prop({ default: '' })
+    activityIp?: string;
 }
 
-export class Block extends Document {
+export class BlockSchema {
     @Prop({ default: false })
     isBlocked: boolean;
 
-    @Prop({ default: [], type: Array<BlockLogs> })
-    blockLogs?: Array<BlockLogs>;
-
-    @Prop({ default: [], type: Array<UnblockLogs> })
-    unblockLogs?: Array<UnblockLogs>;
+    @Prop({ default: [], type: Array<BlockActivitySchema> })
+    activityLogs?: Array<BlockActivitySchema>;
 }

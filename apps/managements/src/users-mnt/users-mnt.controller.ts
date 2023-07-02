@@ -32,17 +32,27 @@ export class UsersMntController {
     async blockUser(@Ctx() context: RmqContext, @Payload() payload) {
         this.rabbitMqService.acknowledgeMessage(context);
 
-        const { victimUserId, blockUserId } = payload;
+        const { victimUserId, blockUserId, blockReason, blockNote } = payload;
 
-        return await this.usersMntService.blockUser({ victimUserId, blockUserId });
+        return await this.usersMntService.blockUser({
+            victimUserId,
+            blockUserId,
+            blockReason,
+            blockNote,
+        });
     }
 
     @MessagePattern({ cmd: 'mnt_unblock_user' })
     async unblockUser(@Ctx() context: RmqContext, @Payload() payload) {
         this.rabbitMqService.acknowledgeMessage(context);
 
-        const { victimUserId, unblockUserId } = payload;
+        const { victimUserId, unblockUserId, unblockReason, unblockNote } = payload;
 
-        return await this.usersMntService.unblockUser({ victimUserId, unblockUserId });
+        return await this.usersMntService.unblockUser({
+            victimUserId,
+            unblockUserId,
+            unblockReason,
+            unblockNote,
+        });
     }
 }
