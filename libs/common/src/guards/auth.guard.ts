@@ -7,10 +7,11 @@ import {
 } from '@nestjs/common';
 import { ClientRMQ, RpcException } from '@nestjs/microservices';
 import { catchError, Observable, of, switchMap } from 'rxjs';
+import { AUTH_SERVICE } from '~/constants';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-    constructor(@Inject('AUTH_SERVICE') private readonly authService: ClientRMQ) {}
+    constructor(@Inject(AUTH_SERVICE) private readonly authService: ClientRMQ) {}
 
     canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
         if (context.getType() !== 'http') {

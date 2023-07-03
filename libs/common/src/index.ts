@@ -4,3 +4,4 @@ export * from './filters';
 export * from './guards';
 export * from './RedisCache';
 export * from './utils';
+export * from './HealthCheck';

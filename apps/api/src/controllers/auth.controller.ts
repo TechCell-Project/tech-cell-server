@@ -9,9 +9,8 @@ import {
     UseGuards,
     Request,
 } from '@nestjs/common';
-import { RpcException, ClientRMQ } from '@nestjs/microservices';
+import { ClientRMQ } from '@nestjs/microservices';
 import { AUTH_SERVICE } from '~/constants';
-import { catchError, throwError } from 'rxjs';
 import {
     ApiTags,
     ApiBody,
@@ -25,6 +24,7 @@ import {
     ApiConflictResponse,
     ApiTooManyRequestsResponse,
     ApiNotAcceptableResponse,
+    ApiOAuth2,
 } from '@nestjs/swagger';
 import {
     RegisterRequestDTO,
@@ -39,6 +39,7 @@ import {
 import { Throttle } from '@nestjs/throttler';
 import { GoogleOAuthGuard, FacebookOAuthGuard } from '~/apps/auth/guards';
 import { IUserFacebookResponse, IUserGoogleResponse } from '~/apps/auth/interfaces';
+import { catchException } from '@app/common';
 
 @ApiTags('authentication')
 @ApiTooManyRequestsResponse({ description: 'Too many requests, please try again later' })
@@ -63,7 +64,7 @@ export class AuthController {
     async login(@Body() { email, password }: LoginRequestDTO) {
         return this.authService
             .send({ cmd: 'auth_login' }, { email, password })
-            .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
+            .pipe(catchException());
     }
 
     @ApiBody({ type: CheckEmailRequestDTO })
@@ -75,9 +76,7 @@ export class AuthController {
     @HttpCode(HttpStatus.OK)
     @Post('check-email')
     async checkEmail(@Body() { email }: CheckEmailRequestDTO) {
-        return this.authService
-            .send({ cmd: 'auth_check_email' }, { email })
-            .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
+        return this.authService.send({ cmd: 'auth_check_email' }, { email }).pipe(catchException());
     }
 
     @ApiBody({ type: RegisterRequestDTO })
@@ -97,7 +96,7 @@ export class AuthController {
     ) {
         return this.authService
             .send({ cmd: 'auth_register' }, { email, firstName, lastName, password, re_password })
-            .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
+            .pipe(catchException());
     }
 
     @ApiBody({ type: VerifyEmailRequestDTO })
@@ -111,7 +110,7 @@ export class AuthController {
     async verifyEmail(@Body() { email, otpCode }: VerifyEmailRequestDTO) {
         return this.authService
             .send({ cmd: 'auth_verify_email' }, { email, otpCode })
-            .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
+            .pipe(catchException());
     }
 
     @ApiBody({ type: NewTokenRequestDTO })
@@ -130,7 +129,7 @@ export class AuthController {
     async getNewToken(@Body() { refreshToken }: NewTokenRequestDTO) {
         return this.authService
             .send({ cmd: 'auth_get_new_access_token' }, { refreshToken })
-            .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
+            .pipe(catchException());
     }
 
     @ApiBody({ type: ForgotPasswordDTO })
@@ -142,7 +141,7 @@ export class AuthController {
     async forgotPassword(@Body() { email }: ForgotPasswordDTO) {
         return this.authService
             .send({ cmd: 'auth_forgot_password' }, { email })
-            .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
+            .pipe(catchException());
     }
 
     @ApiBody({ type: VerifyForgotPasswordDTO })
@@ -156,38 +155,22 @@ export class AuthController {
     ) {
         return this.authService
             .send({ cmd: 'auth_verify_forgot_password' }, { email, otpCode, password, re_password })
-            .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
+            .pipe(catchException());
     }
 
+    @ApiOAuth2(['openid', 'profile', 'email'], 'login with google')
     @Get('google')
     @UseGuards(GoogleOAuthGuard)
-    async googleAuth() {
-        return {
-            message: 'waiting for google',
-        };
+    async googleAuth(@Request() { user }: { user: IUserGoogleResponse }) {
+        return this.authService.send({ cmd: 'auth_google_login' }, { user }).pipe(catchException());
     }
 
-    @Get('google-redirect')
-    @UseGuards(GoogleOAuthGuard)
-    async googleAuthRedirect(@Request() { user }: { user: IUserGoogleResponse }) {
-        return this.authService
-            .send({ cmd: 'auth_google_login' }, { user })
-            .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
-    }
-
+    @ApiOAuth2(['email'], 'login with facebook')
     @Get('facebook')
     @UseGuards(FacebookOAuthGuard)
-    async facebookAuth() {
-        return {
-            message: 'waiting for facebook',
-        };
-    }
-
-    @Get('facebook-redirect')
-    @UseGuards(FacebookOAuthGuard)
-    facebookLoginRedirect(@Request() { user }: { user: IUserFacebookResponse }) {
+    async facebookAuth(@Request() { user }: { user: IUserFacebookResponse }) {
         return this.authService
             .send({ cmd: 'auth_facebook_login' }, { user })
-            .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
+            .pipe(catchException());
     }
 }

@@ -44,6 +44,15 @@
       ],
       "~/apps/mail/*": [
         "apps/mail/src/*"
+      ],
+      "~/apps/managements/*": [
+        "apps/managements/src/*"
+      ],
+      "@app/resource": [
+        "libs/resource/src"
+      ],
+      "@app/resource/*": [
+        "libs/resource/src/*"
       ]
     }
   }

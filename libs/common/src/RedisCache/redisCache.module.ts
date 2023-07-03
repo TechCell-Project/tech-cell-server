@@ -10,7 +10,7 @@ import { REDIS_CACHE } from '~/constants';
                 await redisStore({
                     socket: {
                         host: process.env.REDIS_HOST,
-                        port: +process.env.REDIS_PORT, // '+' means convert to string
+                        port: +process.env.REDIS_PORT, // '+' means convert string to number
                     },
                     password: process.env.REDIS_PASSWORD,
                     ttl: 5000, // 5 secs
