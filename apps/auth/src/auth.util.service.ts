@@ -25,6 +25,7 @@ export class AuthUtilService {
     // Utils below
     cleanUserBeforeResponse(user: User) {
         delete user.password;
+        if (user.block) delete user.block;
         return user;
     }
 

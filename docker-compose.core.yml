@@ -74,6 +74,7 @@ services:
             - techcell_backend
         volumes:
             - 'redis_data:/redis/data'
+        restart: always
         # sysctl -w vm.overcommit_memory=1
 
 networks:
