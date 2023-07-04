@@ -17,7 +17,7 @@ export class ModGuard implements CanActivate {
     constructor(@Inject(AUTH_SERVICE) private readonly authService: ClientRMQ) {}
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
-        const acceptRoles: string[] = [UserRole.Admin, UserRole.Mod];
+        const acceptRoles: string[] = [UserRole.Admin, UserRole.Mod, UserRole.SuperAdmin];
 
         if (context.getType() !== 'http') {
             return false;

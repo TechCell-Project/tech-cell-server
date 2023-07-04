@@ -17,7 +17,7 @@ export class AdminGuard implements CanActivate {
     constructor(@Inject(AUTH_SERVICE) private readonly authService: ClientRMQ) {}
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
-        const acceptRoles: string[] = [UserRole.Admin];
+        const acceptRoles: string[] = [UserRole.Admin, UserRole.SuperAdmin];
 
         if (context.getType() !== 'http') {
             return false;

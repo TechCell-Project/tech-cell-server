@@ -1,15 +1,13 @@
-import { UsersService } from '@app/resource';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 import { Types } from 'mongoose';
 import { GetUsersDTO } from './dtos';
-import { capitalize, isAdmin, isMod, isSuperAdmin, isUser } from '@app/common/utils';
+import { capitalize } from '@app/common/utils';
 import { RpcException } from '@nestjs/microservices';
-import { BlockActivity } from '@app/resource/users/enums';
+import { BlockActivity, CommonActivity, UserRole } from '@app/resource/users/enums';
+import { UsersMntUtilService } from './users-mnt.util.service';
 
 @Injectable()
-export class UsersMntService {
-    constructor(private readonly usersService: UsersService) {}
-
+export class UsersMntService extends UsersMntUtilService {
     async getUsers(payload: GetUsersDTO) {
         const {
             email,
@@ -100,35 +98,16 @@ export class UsersMntService {
             throw new RpcException(new BadRequestException('User is already blocked'));
         }
 
-        if (isSuperAdmin(victimUser)) {
-            throw new RpcException(new BadRequestException('Cannot block SuperAdmin'));
-        }
-
-        if (isAdmin(victimUser) && !isSuperAdmin(blockByUser)) {
-            throw new RpcException(
-                new BadRequestException('Cannot block Admin from other SuperAdmin'),
-            );
-        }
-
-        if (isMod(victimUser) && !isSuperAdmin(blockByUser) && !isAdmin(blockByUser)) {
-            throw new RpcException(
-                new BadRequestException('Cannot block Mod from other Admin or SuperAdmin'),
-            );
-        }
-
         if (
-            isUser(victimUser) &&
-            !isSuperAdmin(blockByUser) &&
-            !isAdmin(blockByUser) &&
-            !isMod(blockByUser)
+            !this.verifyPermission({
+                victimUser,
+                actorUser: blockByUser,
+                actions: BlockActivity.Block,
+            })
         ) {
             throw new RpcException(
-                new BadRequestException('Cannot block User if not Admin or Mod'),
+                new ForbiddenException('You do not have permission to block this user'),
             );
-        }
-
-        if (isUser(blockByUser)) {
-            throw new RpcException(new BadRequestException('User can not block other user'));
         }
 
         const actLogs = (victimUser.block && victimUser.block.activityLogs) || [];
@@ -175,35 +154,16 @@ export class UsersMntService {
             throw new RpcException(new BadRequestException('User is not blocked'));
         }
 
-        if (isSuperAdmin(victimUser)) {
-            throw new RpcException(new BadRequestException('Cannot unblock SuperAdmin'));
-        }
-
-        if (isAdmin(victimUser) && !isSuperAdmin(unblockByUser)) {
-            throw new RpcException(
-                new BadRequestException('Cannot unblock Admin from other SuperAdmin'),
-            );
-        }
-
-        if (isMod(victimUser) && !isSuperAdmin(unblockByUser) && !isAdmin(unblockByUser)) {
-            throw new RpcException(
-                new BadRequestException('Cannot unblock Mod from other Admin or SuperAdmin'),
-            );
-        }
-
         if (
-            isUser(victimUser) &&
-            !isSuperAdmin(unblockByUser) &&
-            !isAdmin(unblockByUser) &&
-            !isMod(unblockByUser)
+            !this.verifyPermission({
+                victimUser,
+                actorUser: unblockByUser,
+                actions: BlockActivity.Block,
+            })
         ) {
             throw new RpcException(
-                new BadRequestException('Cannot unblock User if not Admin or Mod'),
+                new ForbiddenException('You do not have permission to unblock this user'),
             );
-        }
-
-        if (isUser(unblockByUser)) {
-            throw new RpcException(new BadRequestException('User can not unblock other user'));
         }
 
         const actLogs = (victimUser.block && victimUser.block.activityLogs) || [];
@@ -224,5 +184,39 @@ export class UsersMntService {
                 },
             },
         );
+    }
+
+    async updateRole({
+        victimId,
+        role,
+        actorId,
+    }: {
+        victimId: string;
+        role: string;
+        actorId: string;
+    }) {
+        const [user, updatedByUser] = await Promise.all([
+            this.usersService.getUser({ _id: new Types.ObjectId(victimId) }),
+            this.usersService.getUser({ _id: new Types.ObjectId(actorId) }),
+        ]);
+
+        if (role.toLowerCase() === UserRole.SuperAdmin.toLowerCase()) {
+            throw new RpcException(
+                new BadRequestException('You cannot grant Super Admin role to anyone'),
+            );
+        }
+
+        await this.verifyPermission({
+            victimUser: user,
+            actorUser: updatedByUser,
+            actions: CommonActivity.ChangeRole,
+        });
+
+        const [changeRole] = await Promise.all([
+            this.usersService.findOneAndUpdateUser({ _id: victimId }, { role: role }),
+            this.setUserToCache({ user }),
+        ]);
+
+        return changeRole;
     }
 }

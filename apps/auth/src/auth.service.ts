@@ -43,6 +43,14 @@ export class AuthService extends AuthUtilService {
             );
         }
 
+        if (user.block && user.block.isBlocked) {
+            throw new RpcException(
+                new ForbiddenException(
+                    'Your account has been locked, please contact the administrator',
+                ),
+            );
+        }
+
         if (!user.emailVerified) {
             const otp = await this.otpService.createOrRenewOtp({
                 email,
@@ -220,10 +228,16 @@ export class AuthService extends AuthUtilService {
             throw new RpcException(new BadRequestException('Access token missing.'));
         }
 
-        return (await this.verifyToken(
+        const dataVerified = (await this.verifyToken(
             accessToken,
             this.configService.get<string>('JWT_ACCESS_TOKEN_SECRET'),
         )) as ITokenVerifiedResponse;
+
+        if (await this.checkIsRequiredRefresh(dataVerified._id)) {
+            throw new RpcException(new ForbiddenException('Access token is expired.'));
+        }
+
+        return dataVerified;
     }
 
     async verifyRefreshToken(refreshToken: string): Promise<ITokenVerifiedResponse> {

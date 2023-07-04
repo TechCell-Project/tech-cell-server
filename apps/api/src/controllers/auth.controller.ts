@@ -58,7 +58,13 @@ export class AuthController {
     @ApiUnauthorizedResponse({
         description: 'Your account email or password is wrong',
     })
-    @ApiNotAcceptableResponse({ description: 'User need to update their information' })
+    @ApiForbiddenResponse({
+        description: 'Your account has been locked, please contact the administrator',
+    })
+    @ApiNotFoundResponse({ description: 'Your account email or password is wrong' })
+    @ApiNotAcceptableResponse({
+        description: 'Email is not verified, please check your email to verify it.',
+    })
     @HttpCode(HttpStatus.OK)
     @Post('login')
     async login(@Body() { email, password }: LoginRequestDTO) {

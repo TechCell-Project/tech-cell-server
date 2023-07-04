@@ -55,4 +55,17 @@ export class UsersMntController {
             unblockNote,
         });
     }
+
+    @MessagePattern({ cmd: 'mnt_change_role_user' })
+    async changeRoleUser(@Ctx() context: RmqContext, @Payload() payload) {
+        this.rabbitMqService.acknowledgeMessage(context);
+
+        const { victimId, actorId, role } = payload;
+
+        return await this.usersMntService.updateRole({
+            victimId,
+            actorId,
+            role,
+        });
+    }
 }

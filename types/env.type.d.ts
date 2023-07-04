@@ -146,6 +146,22 @@ declare namespace NodeJS {
         JWT_REFRESH_TOKEN_SECRET: string;
 
         /**
+         * The expire time of `accessToken`
+         * @description This value is used for `JWT` module
+         * @example
+         * JWT_ACCESS_TOKEN_EXPIRE_TIME = 15m // means 15 mins
+         */
+        JWT_ACCESS_TOKEN_EXPIRE_TIME_STRING: string;
+
+        /**
+         * The expire time of `refreshToken`
+         * @description This value is used for `JWT` module
+         * @example
+         * JWT_REFRESH_TOKEN_EXPIRE_TIME = 7d // means 7 days
+         */
+        JWT_REFRESH_TOKEN_EXPIRE_TIME_STRING: string;
+
+        /**
          * The mongodb uri
          * @description This value is used for `mongoose` module
          * @example

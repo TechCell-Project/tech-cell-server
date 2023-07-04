@@ -3,7 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from '@app/resource/users';
 import { UsersMntController } from './users-mnt.controller';
 import { UsersMntService } from './users-mnt.service';
-import { RabbitMQModule, RabbitMQService } from '@app/common';
+import { RabbitMQModule, RabbitMQService, RedisCacheModule } from '@app/common';
 
 @Module({
     imports: [
@@ -13,6 +13,7 @@ import { RabbitMQModule, RabbitMQService } from '@app/common';
             envFilePath: './.env',
         }),
         UsersModule,
+        RedisCacheModule,
     ],
     controllers: [UsersMntController],
     providers: [RabbitMQService, UsersMntService],

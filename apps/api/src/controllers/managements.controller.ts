@@ -1,9 +1,9 @@
-import { Controller, Get, Inject, Request, UseGuards, Patch } from '@nestjs/common';
+import { Controller, Get, Inject, Request, UseGuards, Patch, Body } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import { MANAGEMENTS_SERVICE } from '~/constants';
 import { ModGuard } from '@app/common/guards';
 import { ApiTags } from '@nestjs/swagger';
-import { GetUsersDTO } from '~/apps/managements/users-mnt/dtos';
+import { ChangeRoleRequestDTO, GetUsersDTO } from '~/apps/managements/users-mnt/dtos';
 import { catchException } from '@app/common';
 
 @ApiTags('managements')
@@ -54,6 +54,14 @@ export class ManagementsController {
                 { cmd: 'mnt_unblock_user' },
                 { victimUserId, unblockUserId: userId, unblockReason, unblockNote },
             )
+            .pipe(catchException());
+    }
+
+    @Patch('users/:id/change-role')
+    async changeRoleUser(@Request() req, @Body() { userId, role }: ChangeRoleRequestDTO) {
+        const { id: victimId } = req.params;
+        return this.managementsService
+            .send({ cmd: 'mnt_change_role_user' }, { victimId, actorId: userId, role })
             .pipe(catchException());
     }
 }
