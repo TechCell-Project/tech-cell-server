@@ -1,13 +1,18 @@
 import { UsersService } from '@app/resource';
-import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
-import { isAdmin, isMod, isSuperAdmin, isUser } from '@app/common/utils';
+import { BadRequestException, ForbiddenException, Inject, Injectable } from '@nestjs/common';
+import { isAdmin, isMod, isSuperAdmin, isUser, timeStringToMs } from '@app/common/utils';
 import { RpcException } from '@nestjs/microservices';
 import { BlockActivity, CommonActivity } from '@app/resource/users/enums';
 import { User } from '@app/resource/users/schemas';
+import { REDIS_CACHE, REQUIRE_USER_REFRESH } from '~/constants';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class UsersMntUtilService {
-    constructor(protected readonly usersService: UsersService) {}
+    constructor(
+        protected readonly usersService: UsersService,
+        @Inject(REDIS_CACHE) private cacheManager: Cache,
+    ) {}
 
     /**
      * Verify the permission of the actor user to perform the action on the victim user
@@ -34,6 +39,23 @@ export class UsersMntUtilService {
         }
     }
 
+    /**
+     * After update user, set user to cache to require user refresh their token
+     * @param param0 - { user } - user to be set to cache
+     * @returns return true if set successfully, otherwise throw an error
+     * @example
+     * REQUIRE_USER_REFRESH_{userId}
+     *
+     */
+    protected async setUserToCache({ user }: { user: User }) {
+        await this.cacheManager.set(
+            `${REQUIRE_USER_REFRESH}_${user._id}`,
+            true,
+            timeStringToMs(process.env.JWT_ACCESS_TOKEN_EXPIRE_TIME_STRING),
+        );
+        return true;
+    }
+
     private canBlockAndUnblockUser({
         victimUser,
         actorUser,
@@ -42,11 +64,11 @@ export class UsersMntUtilService {
         actorUser: User;
     }) {
         if (victimUser._id.toString() === actorUser._id.toString()) {
-            throw new BadRequestException('You cannot block yourself');
+            throw new RpcException(new BadRequestException('You cannot block yourself'));
         }
 
         if (!this.requiredHigherRole({ victimUser, actorUser })) {
-            throw new BadRequestException('You cannot block this user');
+            throw new RpcException(new BadRequestException('You cannot block this user'));
         }
 
         return true;
@@ -54,7 +76,7 @@ export class UsersMntUtilService {
 
     private canChangeRole({ victimUser, actorUser }: { victimUser: User; actorUser: User }) {
         if (victimUser._id.toString() === actorUser._id.toString()) {
-            throw new BadRequestException('You cannot change your role');
+            throw new RpcException(new BadRequestException('You cannot change your role'));
         }
 
         // Actor's role must be higher than victim's role

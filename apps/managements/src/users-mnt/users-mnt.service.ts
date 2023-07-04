@@ -200,18 +200,23 @@ export class UsersMntService extends UsersMntUtilService {
             this.usersService.getUser({ _id: new Types.ObjectId(actorId) }),
         ]);
 
-        if (role === UserRole.SuperAdmin) {
+        if (role.toLowerCase() === UserRole.SuperAdmin.toLowerCase()) {
             throw new RpcException(
                 new BadRequestException('You cannot grant Super Admin role to anyone'),
             );
         }
 
-        this.verifyPermission({
+        await this.verifyPermission({
             victimUser: user,
             actorUser: updatedByUser,
             actions: CommonActivity.ChangeRole,
         });
 
-        return await this.usersService.findOneAndUpdateUser({ _id: victimId }, { role: role });
+        const [changeRole] = await Promise.all([
+            this.usersService.findOneAndUpdateUser({ _id: victimId }, { role: role }),
+            this.setUserToCache({ user }),
+        ]);
+
+        return changeRole;
     }
 }

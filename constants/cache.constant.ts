@@ -1,1 +1,3 @@
 export const REDIS_CACHE = 'REDIS_CACHE';
+
+export const REQUIRE_USER_REFRESH = 'REQUIRE_USER_REFRESH';

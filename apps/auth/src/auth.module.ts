@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { RabbitMQModule, RabbitMQService } from '@app/common';
+import { RabbitMQModule, RabbitMQService, RedisCacheModule } from '@app/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { UsersModule } from '@app/resource/users';
@@ -16,6 +16,7 @@ import { OtpModule } from '@app/resource/otp';
         OtpModule,
         JwtModule.register({}),
         RabbitMQModule.registerRmq(MAIL_SERVICE, process.env.RABBITMQ_MAIL_QUEUE),
+        RedisCacheModule,
     ],
     controllers: [AuthController],
     providers: [
