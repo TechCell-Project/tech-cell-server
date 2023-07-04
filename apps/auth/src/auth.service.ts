@@ -43,6 +43,14 @@ export class AuthService extends AuthUtilService {
             );
         }
 
+        if (user.block.isBlocked) {
+            throw new RpcException(
+                new ForbiddenException(
+                    'Your account has been locked, please contact the administrator',
+                ),
+            );
+        }
+
         if (!user.emailVerified) {
             const otp = await this.otpService.createOrRenewOtp({
                 email,
