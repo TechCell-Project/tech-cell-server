@@ -43,7 +43,7 @@ export class AuthService extends AuthUtilService {
             );
         }
 
-        if (user.block.isBlocked) {
+        if (user.block && user.block.isBlocked) {
             throw new RpcException(
                 new ForbiddenException(
                     'Your account has been locked, please contact the administrator',
