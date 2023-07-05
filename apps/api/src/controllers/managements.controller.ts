@@ -4,7 +4,9 @@ import { MANAGEMENTS_SERVICE } from '~/constants';
 import { ModGuard } from '@app/common/guards';
 import {
     ApiBadRequestResponse,
+    ApiBearerAuth,
     ApiForbiddenResponse,
+    ApiHeader,
     ApiNotFoundResponse,
     ApiOkResponse,
     ApiTags,
@@ -14,6 +16,13 @@ import { catchException } from '@app/common';
 import { UserMntResponseDto } from '@app/resource/users/dtos';
 
 @ApiTags('managements')
+@ApiBearerAuth('authorization')
+@ApiHeader({
+    required: true,
+    name: 'authorization',
+    description: 'Bearer access token',
+    example: 'Bearer your-access-token',
+})
 @ApiForbiddenResponse({ description: 'Forbidden permission, required Mod or Admin' })
 @Controller('mnt')
 @UseGuards(ModGuard)
