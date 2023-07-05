@@ -2,11 +2,19 @@ import { Controller, Get, Inject, Request, UseGuards, Patch, Body } from '@nestj
 import { ClientRMQ } from '@nestjs/microservices';
 import { MANAGEMENTS_SERVICE } from '~/constants';
 import { ModGuard } from '@app/common/guards';
-import { ApiTags } from '@nestjs/swagger';
+import {
+    ApiBadRequestResponse,
+    ApiForbiddenResponse,
+    ApiNotFoundResponse,
+    ApiOkResponse,
+    ApiTags,
+} from '@nestjs/swagger';
 import { ChangeRoleRequestDTO, GetUsersDTO } from '~/apps/managements/users-mnt/dtos';
 import { catchException } from '@app/common';
+import { UserMntResponseDto } from '@app/resource/users/dtos';
 
 @ApiTags('managements')
+@ApiForbiddenResponse({ description: 'Forbidden permission, required Mod or Admin' })
 @Controller('mnt')
 @UseGuards(ModGuard)
 export class ManagementsController {
@@ -17,14 +25,18 @@ export class ManagementsController {
         return { message: 'pong' };
     }
 
+    @ApiOkResponse({ description: 'Get users success', type: [UserMntResponseDto] })
+    @ApiNotFoundResponse({ description: 'No users found' })
     @Get('users')
-    async getUser(@Request() req) {
+    async getUsers(@Request() req) {
         const reqQuery: GetUsersDTO = req.query;
         return this.managementsService
             .send({ cmd: 'mnt_get_users' }, { ...reqQuery })
             .pipe(catchException());
     }
 
+    @ApiOkResponse({ description: 'Get users success', type: UserMntResponseDto })
+    @ApiNotFoundResponse({ description: 'No users found' })
     @Get('users/:id')
     async getUserById(@Request() req) {
         const { id } = req.params;
@@ -33,6 +45,10 @@ export class ManagementsController {
             .pipe(catchException());
     }
 
+    @ApiOkResponse({ description: 'Block user success', type: UserMntResponseDto })
+    @ApiBadRequestResponse({
+        description: 'Invalid request',
+    })
     @Patch('users/:id/block')
     async blockUser(@Request() req) {
         const { id: victimUserId } = req.params;
@@ -45,6 +61,10 @@ export class ManagementsController {
             .pipe(catchException());
     }
 
+    @ApiOkResponse({ description: 'Unblock user success', type: UserMntResponseDto })
+    @ApiBadRequestResponse({
+        description: 'Invalid request',
+    })
     @Patch('users/:id/unblock')
     async unblockUser(@Request() req) {
         const { id: victimUserId } = req.params;
@@ -57,6 +77,10 @@ export class ManagementsController {
             .pipe(catchException());
     }
 
+    @ApiOkResponse({ description: 'Change role user success', type: UserMntResponseDto })
+    @ApiBadRequestResponse({
+        description: 'Invalid request',
+    })
     @Patch('users/:id/change-role')
     async changeRoleUser(@Request() req, @Body() { userId, role }: ChangeRoleRequestDTO) {
         const { id: victimId } = req.params;
