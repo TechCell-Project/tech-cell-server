@@ -29,6 +29,17 @@ async function bootstrap() {
         .setContact('TechCell Teams', 'https://techcell.cloud', 'admin@techcell.cloud')
         .setDescription('The documentations of the TechCell RESTful API')
         .setVersion('1.0')
+        .addBearerAuth(
+            {
+                description: `[just text field] Please enter your access token`,
+                name: 'Authorization',
+                bearerFormat: 'Bearer',
+                scheme: 'Bearer',
+                type: 'http', // 'apiKey' too
+                in: 'Header',
+            },
+            'accessToken', // This name here is important for matching up with @ApiBearerAuth() in your controller!
+        )
         .build();
     const document = SwaggerModule.createDocument(app, config);
     const swaggerOptions: SwaggerCustomOptions = {

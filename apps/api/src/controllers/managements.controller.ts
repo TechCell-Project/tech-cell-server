@@ -6,9 +6,9 @@ import {
     ApiBadRequestResponse,
     ApiBearerAuth,
     ApiForbiddenResponse,
-    ApiHeader,
     ApiNotFoundResponse,
     ApiOkResponse,
+    ApiQuery,
     ApiTags,
 } from '@nestjs/swagger';
 import { ChangeRoleRequestDTO, GetUsersDTO } from '~/apps/managements/users-mnt/dtos';
@@ -16,13 +16,7 @@ import { catchException } from '@app/common';
 import { UserMntResponseDto } from '@app/resource/users/dtos';
 
 @ApiTags('managements')
-@ApiBearerAuth('authorization')
-@ApiHeader({
-    required: true,
-    name: 'authorization',
-    description: 'Bearer access token',
-    example: 'Bearer your-access-token',
-})
+@ApiBearerAuth('accessToken')
 @ApiForbiddenResponse({ description: 'Forbidden permission, required Mod or Admin' })
 @Controller('mnt')
 @UseGuards(ModGuard)
@@ -34,6 +28,7 @@ export class ManagementsController {
         return { message: 'pong' };
     }
 
+    @ApiQuery({ type: GetUsersDTO })
     @ApiOkResponse({ description: 'Get users success', type: [UserMntResponseDto] })
     @ApiNotFoundResponse({ description: 'No users found' })
     @Get('users')

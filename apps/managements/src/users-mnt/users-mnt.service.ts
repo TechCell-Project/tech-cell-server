@@ -11,10 +11,9 @@ export class UsersMntService extends UsersMntUtilService {
     async getUsers(payload: QueryUserParamsDTO) {
         // TODO: Refactor this search query
         const {
-            email,
             emailVerified,
             isBlocked,
-            isDeleted,
+            // isDeleted,
             isVerified,
             role,
             search,
@@ -26,17 +25,13 @@ export class UsersMntService extends UsersMntUtilService {
         } = payload;
         const query: GetUsersDTO = {};
 
-        if (email) {
-            query.email = email;
-        }
-
         if (typeof isBlocked !== 'undefined') {
             query.block.isBlocked = isBlocked;
         }
 
-        if (typeof isDeleted !== 'undefined') {
-            query.isDeleted = isDeleted;
-        }
+        // if (typeof isDeleted !== 'undefined') {
+        //     query.isDeleted = isDeleted;
+        // }
 
         if (typeof isVerified !== 'undefined') {
             query.isVerified = isVerified;
@@ -60,11 +55,9 @@ export class UsersMntService extends UsersMntUtilService {
             // e.g., query.search = search;
         }
 
-        return await this.usersService.getUsers(
-            { role: query.role },
-            { limit, offset, order, sort },
-            ['-password'],
-        );
+        return await this.usersService.getUsers({ ...query }, { limit, offset, order, sort }, [
+            '-password',
+        ]);
     }
 
     async getUserById(id: string | Types.ObjectId | any) {
