@@ -25,6 +25,7 @@ import {
     ApiTooManyRequestsResponse,
     ApiNotAcceptableResponse,
     ApiOAuth2,
+    ApiResponse,
 } from '@nestjs/swagger';
 import {
     RegisterRequestDTO,
@@ -165,6 +166,9 @@ export class AuthController {
     }
 
     @ApiOAuth2(['openid', 'profile', 'email'], 'login with google')
+    @ApiResponse({
+        type: UserDataResponseDTO,
+    })
     @Get('google')
     @UseGuards(GoogleOAuthGuard)
     async googleAuth(@Request() { user }: { user: IUserGoogleResponse }) {
@@ -172,6 +176,9 @@ export class AuthController {
     }
 
     @ApiOAuth2(['email'], 'login with facebook')
+    @ApiResponse({
+        type: UserDataResponseDTO,
+    })
     @Get('facebook')
     @UseGuards(FacebookOAuthGuard)
     async facebookAuth(@Request() { user }: { user: IUserFacebookResponse }) {

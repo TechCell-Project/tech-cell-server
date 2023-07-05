@@ -1,12 +1,7 @@
 import { UserRole } from '@app/resource/users/enums';
 import { IsEmail, IsOptional } from 'class-validator';
 
-class BlockSchema {
-    @IsOptional()
-    isBlocked?: boolean;
-}
-
-export class GetUsersDTO {
+export class QueryUserParamsDTO {
     @IsEmail()
     @IsOptional()
     email?: string;
@@ -36,7 +31,7 @@ export class GetUsersDTO {
     isDeleted?: boolean;
 
     @IsOptional()
-    block?: BlockSchema;
+    isBlocked?: boolean;
 
     @IsOptional()
     isVerified?: boolean;

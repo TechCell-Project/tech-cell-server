@@ -1,6 +1,6 @@
 import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 import { Types } from 'mongoose';
-import { GetUsersDTO } from './dtos';
+import { GetUsersDTO, QueryUserParamsDTO } from './dtos';
 import { capitalize } from '@app/common/utils';
 import { RpcException } from '@nestjs/microservices';
 import { BlockActivity, CommonActivity, UserRole } from '@app/resource/users/enums';
@@ -8,7 +8,8 @@ import { UsersMntUtilService } from './users-mnt.util.service';
 
 @Injectable()
 export class UsersMntService extends UsersMntUtilService {
-    async getUsers(payload: GetUsersDTO) {
+    async getUsers(payload: QueryUserParamsDTO) {
+        // TODO: Refactor this search query
         const {
             email,
             emailVerified,
@@ -30,7 +31,7 @@ export class UsersMntService extends UsersMntUtilService {
         }
 
         if (typeof isBlocked !== 'undefined') {
-            query.isBlocked = isBlocked;
+            query.block.isBlocked = isBlocked;
         }
 
         if (typeof isDeleted !== 'undefined') {
@@ -54,12 +55,13 @@ export class UsersMntService extends UsersMntUtilService {
         }
 
         if (search) {
+            // TODO: Add any specific logic for search filtering, if needed
             // Add any specific logic for search filtering, if needed
             // e.g., query.search = search;
         }
 
         return await this.usersService.getUsers(
-            { role: query.role, ...query },
+            { role: query.role },
             { limit, offset, order, sort },
             ['-password'],
         );
