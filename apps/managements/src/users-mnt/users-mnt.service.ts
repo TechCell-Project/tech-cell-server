@@ -1,68 +1,39 @@
-import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, Logger } from '@nestjs/common';
 import { Types } from 'mongoose';
 import { GetUsersDTO, QueryUserParamsDTO } from './dtos';
-import { capitalize } from '@app/common/utils';
 import { RpcException } from '@nestjs/microservices';
 import { BlockActivity, CommonActivity, UserRole } from '@app/resource/users/enums';
 import { UsersMntUtilService } from './users-mnt.util.service';
+import { timeStringToMs } from '@app/common';
 
 @Injectable()
 export class UsersMntService extends UsersMntUtilService {
     async getUsers(payload: QueryUserParamsDTO) {
-        // TODO: Refactor this search query
-        const {
-            emailVerified,
-            isBlocked,
-            // isDeleted,
-            isVerified,
-            role,
-            search,
-            status,
-            limit = 10,
-            offset = 0,
-            order = 'asc',
-            sort = 'createdAt',
-            all = false,
-        } = payload;
+        const { all, limit = 1, offset = 0 } = payload;
+
         const query: GetUsersDTO = {};
+        const options = { limit, skip: offset };
 
-        if (typeof isBlocked !== 'undefined') {
-            query.block.isBlocked = isBlocked;
-        }
-
-        // if (typeof isDeleted !== 'undefined') {
-        //     query.isDeleted = isDeleted;
-        // }
-
-        if (typeof isVerified !== 'undefined') {
-            query.isVerified = isVerified;
-        }
-
-        if (typeof emailVerified !== 'undefined') {
-            query.emailVerified = emailVerified;
-        }
-
-        if (status) {
-            query.status = status;
-        }
-
-        if (role) {
-            query.role = capitalize(role);
-        }
-
-        if (search) {
-            // TODO: Add any specific logic for search filtering, if needed
-            // Add any specific logic for search filtering, if needed
-            // e.g., query.search = search;
+        const cacheKey = this.buildCacheKeyUsers({ limit, offset, all });
+        const usersFromCache = await this.cacheManager.get(cacheKey);
+        if (usersFromCache) {
+            Logger.log(`CACHE HIT: ${cacheKey}`);
+            return usersFromCache;
         }
 
         if (all) {
-            return await this.usersService.getUsers({}, {}, ['-password']);
+            delete options.limit;
+            delete options.skip;
         }
 
-        return await this.usersService.getUsers({ ...query }, { limit, offset, order, sort }, [
+        Logger.warn(`CACHE MISS: ${cacheKey}`);
+        const usersFromDb = await this.usersService.getUsers({ ...query }, { ...options }, [
             '-password',
         ]);
+
+        await this.cacheManager.set(cacheKey, usersFromDb, timeStringToMs('1h'));
+
+        return usersFromDb;
     }
 
     async getUserById(id: string | Types.ObjectId | any) {
