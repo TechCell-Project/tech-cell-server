@@ -1,3 +1,7 @@
 export const REDIS_CACHE = 'REDIS_CACHE';
 
 export const REQUIRE_USER_REFRESH = 'REQUIRE_USER_REFRESH';
+
+export const ALL_USERS_CACHE = 'ALL_USERS_CACHE';
+export const USERS_LIMIT = 'USERS_LIMIT';
+export const USERS_OFFSET = 'USERS_OFFSET';

@@ -16,7 +16,7 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node ./scripts/start-production.js",
-    "lint": "eslint \"{src,apps,libs,test,types}/**/*.ts\" --fix",
+    "lint": "eslint \"{src,apps,libs,test,types,constants}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
