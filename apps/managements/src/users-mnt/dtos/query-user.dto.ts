@@ -7,6 +7,9 @@ export class QueryUserParamsDTO {
     email?: string;
 
     @IsOptional()
+    all?: boolean;
+
+    @IsOptional()
     limit?: number;
 
     @IsOptional()

@@ -8,6 +8,10 @@ class BlockSchema {
 }
 
 export class GetUsersDTO {
+    @ApiProperty({ type: Boolean, description: 'All of users to be returned', required: false })
+    @IsOptional()
+    all?: boolean;
+
     @ApiProperty({ type: Number, description: 'Limit of users to be returned', required: false })
     @IsOptional()
     limit?: number;
@@ -16,27 +20,27 @@ export class GetUsersDTO {
     @IsOptional()
     offset?: number;
 
-    @ApiProperty({ type: String, description: 'Sort of users to be returned', required: false })
+    // @ApiProperty({ type: String, description: 'Sort of users to be returned', required: false })
     @IsOptional()
     sort?: string;
 
-    @ApiProperty({ type: String, description: 'Order of users to be returned', required: false })
+    // @ApiProperty({ type: String, description: 'Order of users to be returned', required: false })
     @IsOptional()
     order?: string;
 
-    @ApiProperty({
-        type: String,
-        description: 'Search key of users to be returned',
-        required: false,
-    })
+    // @ApiProperty({
+    //     type: String,
+    //     description: 'Search key of users to be returned',
+    //     required: false,
+    // })
     @IsOptional()
     search?: string;
 
-    @ApiProperty({ type: String, description: 'Status of users to be returned', required: false })
+    // @ApiProperty({ type: String, description: 'Status of users to be returned', required: false })
     @IsOptional()
     status?: string;
 
-    @ApiProperty({ enum: UserRole, description: 'Role of users to be returned', required: false })
+    // @ApiProperty({ enum: UserRole, description: 'Role of users to be returned', required: false })
     @IsOptional()
     @IsEnum(UserRole)
     role?: string;
@@ -50,7 +54,7 @@ export class GetUsersDTO {
     @IsOptional()
     isVerified?: boolean;
 
-    @ApiProperty({ type: Boolean, description: 'User with email verified', required: false })
+    // @ApiProperty({ type: Boolean, description: 'User with email verified', required: false })
     @IsOptional()
     emailVerified?: boolean;
 }
