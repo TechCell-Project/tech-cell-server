@@ -5,14 +5,41 @@ import { RpcException } from '@nestjs/microservices';
 import { BlockActivity, CommonActivity } from '@app/resource/users/enums';
 import { User } from '@app/resource/users/schemas';
 import { REDIS_CACHE, REQUIRE_USER_REFRESH } from '~/constants';
-import { Cache } from 'cache-manager';
+import { ALL_USERS_CACHE, USERS_OFFSET, USERS_LIMIT } from '~/constants';
+import { CacheManager } from '@app/common';
 
 @Injectable()
 export class UsersMntUtilService {
     constructor(
         protected readonly usersService: UsersService,
-        @Inject(REDIS_CACHE) private cacheManager: Cache,
+        @Inject(REDIS_CACHE) protected cacheManager: CacheManager,
     ) {}
+
+    protected buildCacheKeyUsers({
+        limit,
+        offset,
+        all,
+    }: {
+        limit?: number;
+        offset?: number;
+        all?: boolean;
+    }) {
+        const arrCacheKey = [];
+
+        if (all) {
+            return ALL_USERS_CACHE;
+        }
+
+        if (limit) {
+            arrCacheKey.push(`${USERS_LIMIT}_${limit}`);
+        }
+
+        if (offset) {
+            arrCacheKey.push(`${USERS_OFFSET}_${offset}`);
+        }
+
+        return arrCacheKey.join('_');
+    }
 
     /**
      * Verify the permission of the actor user to perform the action on the victim user
