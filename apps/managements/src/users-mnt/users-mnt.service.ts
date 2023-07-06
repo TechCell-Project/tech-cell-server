@@ -22,6 +22,7 @@ export class UsersMntService extends UsersMntUtilService {
             offset = 0,
             order = 'asc',
             sort = 'createdAt',
+            all = false,
         } = payload;
         const query: GetUsersDTO = {};
 
@@ -53,6 +54,10 @@ export class UsersMntService extends UsersMntUtilService {
             // TODO: Add any specific logic for search filtering, if needed
             // Add any specific logic for search filtering, if needed
             // e.g., query.search = search;
+        }
+
+        if (all) {
+            return await this.usersService.getUsers({}, {}, ['-password']);
         }
 
         return await this.usersService.getUsers({ ...query }, { limit, offset, order, sort }, [
