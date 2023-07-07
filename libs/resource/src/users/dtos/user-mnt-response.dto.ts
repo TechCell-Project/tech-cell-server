@@ -1,70 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { UserRole } from '../enums';
 import { Types } from 'mongoose';
-
-class BlockActivitySchemaDTO {
-    activity: string;
-
-    @ApiProperty({ description: 'The user who performed the activity', example: 'John Doe' })
-    activityBy: string;
-
-    @ApiProperty({
-        description: 'The date and time of the activity',
-        example: '2020-01-01T00:00:00Z',
-    })
-    activityAt?: Date;
-
-    @ApiProperty({
-        description: 'The reason for the activity',
-        example: 'User violated terms of service',
-    })
-    activityReason?: string;
-
-    @ApiProperty({
-        description: 'Additional notes about the activity',
-        example: 'User was warned previously',
-    })
-    activityNote?: string;
-
-    @ApiProperty({
-        description: 'The IP address of the user when the activity was performed',
-        example: '127.0.0.1',
-    })
-    activityIp?: string;
-}
-
-class BlockSchemaDTO {
-    @ApiProperty({ description: 'Whether the user is blocked or not', example: true })
-    isBlocked: boolean;
-
-    @ApiProperty({
-        description: 'An array of activities performed on the user',
-        type: [BlockActivitySchemaDTO],
-        example: [
-            {
-                activity: 'Block',
-                activityBy: '6493c67dc0ab97f5eb2beca5',
-                activityReason: 'User violated terms of service',
-                activityNote: 'User was warned previously',
-            },
-        ],
-    })
-    activityLogs?: Array<BlockActivitySchemaDTO>;
-}
-
-class AddressSchemaDTO {
-    @ApiProperty({ description: 'The province level address', example: 'Ha Noi' })
-    provinceLevel: string;
-
-    @ApiProperty({ description: 'The district level address', example: 'Hoang Mai' })
-    districtLevel: string;
-
-    @ApiProperty({ description: 'The commune level address', example: 'Mai Dong' })
-    communeLevel: string;
-
-    @ApiProperty({ description: 'The detailed address', example: '18 Tam Trinh' })
-    detail?: string;
-}
+import { AddressSchemaDTO } from './address.schema.dto';
+import { BlockSchemaDTO } from './block.schema.dto';
 
 export class UserMntResponseDto {
     @ApiProperty({
