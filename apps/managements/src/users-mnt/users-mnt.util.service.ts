@@ -4,8 +4,8 @@ import { isAdmin, isMod, isSuperAdmin, isUser, timeStringToMs } from '@app/commo
 import { RpcException } from '@nestjs/microservices';
 import { BlockActivity, CommonActivity } from '@app/resource/users/enums';
 import { User } from '@app/resource/users/schemas';
-import { REDIS_CACHE, REQUIRE_USER_REFRESH } from '~/constants';
-import { ALL_USERS_CACHE, USERS_OFFSET, USERS_LIMIT } from '~/constants';
+import { REDIS_CACHE, REQUIRE_USER_REFRESH, USERS_CACHE_PREFIX } from '~/constants';
+import { USERS_ALL, USERS_OFFSET, USERS_LIMIT } from '~/constants';
 import { CacheManager } from '@app/common';
 
 @Injectable()
@@ -27,7 +27,7 @@ export class UsersMntUtilService {
         const arrCacheKey = [];
 
         if (all) {
-            return ALL_USERS_CACHE;
+            return USERS_ALL;
         }
 
         if (limit) {
@@ -64,6 +64,10 @@ export class UsersMntUtilService {
             default:
                 throw new RpcException(new BadRequestException('Invalid action'));
         }
+    }
+
+    protected async delCacheUsers() {
+        await this.cacheManager.delStartWith(USERS_CACHE_PREFIX);
     }
 
     /**
