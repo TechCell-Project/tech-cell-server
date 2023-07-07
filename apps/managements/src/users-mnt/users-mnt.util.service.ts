@@ -13,13 +13,13 @@ import { BlockActivity, CommonActivity } from '@app/resource/users/enums';
 import { User } from '@app/resource/users/schemas';
 import { REDIS_CACHE, REQUIRE_USER_REFRESH, USERS_CACHE_PREFIX } from '~/constants';
 import { USERS_ALL, USERS_OFFSET, USERS_LIMIT } from '~/constants';
-import { Cache } from 'cache-manager';
+import { Store } from 'cache-manager';
 
 @Injectable()
 export class UsersMntUtilService {
     constructor(
         protected readonly usersService: UsersService,
-        @Inject(REDIS_CACHE) protected cacheManager: Cache,
+        @Inject(REDIS_CACHE) protected cacheManager: Store,
     ) {}
 
     protected buildCacheKeyUsers({
