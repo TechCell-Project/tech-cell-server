@@ -13,13 +13,13 @@ import { BlockActivity, CommonActivity } from '@app/resource/users/enums';
 import { User } from '@app/resource/users/schemas';
 import { REDIS_CACHE, REQUIRE_USER_REFRESH, USERS_CACHE_PREFIX } from '~/constants';
 import { USERS_ALL, USERS_OFFSET, USERS_LIMIT } from '~/constants';
-import { Cache } from 'cache-manager';
+import { Store } from 'cache-manager';
 
 @Injectable()
 export class UsersMntUtilService {
     constructor(
         protected readonly usersService: UsersService,
-        @Inject(REDIS_CACHE) protected cacheManager: Cache,
+        @Inject(REDIS_CACHE) protected cacheManager: Store,
     ) {}
 
     protected buildCacheKeyUsers({
@@ -73,6 +73,10 @@ export class UsersMntUtilService {
         }
     }
 
+    /**
+     *
+     * @returns remove all users cache
+     */
     protected async delCacheUsers() {
         return await delStartWith(USERS_CACHE_PREFIX, this.cacheManager);
     }
@@ -94,6 +98,11 @@ export class UsersMntUtilService {
         return true;
     }
 
+    /**
+     * Check if actorUser can block or unblock victimUser
+     * @param param0 - { victimUser, actorUser } - victimUser is the user to be blocked, actorUser is the user who block victimUser
+     * @returns return true if actorUser can block victimUser, otherwise throw an error
+     */
     private canBlockAndUnblockUser({
         victimUser,
         actorUser,
@@ -112,6 +121,11 @@ export class UsersMntUtilService {
         return true;
     }
 
+    /**
+     * Check if actorUser can change victimUser role
+     * @param param0 - { victimUser, actorUser } - victimUser is the user to be changed role, actorUser is the user who change victimUser role
+     * @returns return true if actorUser can change victimUser role, otherwise throw an error
+     */
     private canChangeRole({ victimUser, actorUser }: { victimUser: User; actorUser: User }) {
         if (victimUser._id.toString() === actorUser._id.toString()) {
             throw new RpcException(new BadRequestException('You cannot change your role'));
@@ -135,6 +149,11 @@ export class UsersMntUtilService {
         return true;
     }
 
+    /**
+     * Check if actorUser is higher role than victimUser
+     * @param param0 - { victimUser, actorUser } - victimUser is the user to be blocked, actorUser is the user who block victimUser
+     * @returns return true if actorUser is higher role than victimUser, otherwise return false
+     */
     private requiredHigherRole({ victimUser, actorUser }: { victimUser: User; actorUser: User }) {
         if (isSuperAdmin(victimUser)) {
             return false;
@@ -164,6 +183,11 @@ export class UsersMntUtilService {
         return true;
     }
 
+    /**
+     * Check if actorUser is Admin or Super Admin
+     * @param param0 actorUser
+     * @returns return true if actorUser is Admin or Super Admin, otherwise return false
+     */
     private requiredAdminOrHigherRole({ actorUser }: { actorUser: User }) {
         if (!isAdmin(actorUser) && !isSuperAdmin(actorUser)) {
             return false;
@@ -172,6 +196,11 @@ export class UsersMntUtilService {
         return true;
     }
 
+    /**
+     * Check if actorUser is Super Admin
+     * @param param0 actorUser
+     * @returns return true if actorUser is Super Admin, otherwise return false
+     */
     private requiredSuperAdminRole({ actorUser }: { actorUser: User }) {
         if (!isSuperAdmin(actorUser)) {
             return false;

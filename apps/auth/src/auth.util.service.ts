@@ -11,7 +11,7 @@ import { MAIL_SERVICE, REDIS_CACHE, REQUIRE_USER_REFRESH } from '~/constants';
 import { catchError, throwError } from 'rxjs';
 import { ConfirmEmailRegisterDTO } from '~/apps/mail/dtos';
 import { OtpService, OtpType } from '@app/resource/otp';
-import { Cache } from 'cache-manager';
+import { Store } from 'cache-manager';
 
 @Injectable()
 export class AuthUtilService {
@@ -21,7 +21,7 @@ export class AuthUtilService {
         protected configService: ConfigService,
         @Inject(MAIL_SERVICE) protected mailService: ClientRMQ,
         protected readonly otpService: OtpService,
-        @Inject(REDIS_CACHE) private cacheManager: Cache,
+        @Inject(REDIS_CACHE) protected cacheManager: Store,
     ) {}
 
     // Utils below
