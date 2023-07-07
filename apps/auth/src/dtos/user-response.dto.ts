@@ -3,6 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Types } from 'mongoose';
 import { IsArray, IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { UserRole } from '@app/resource/users/enums';
+import { AddressSchemaDTO } from '@app/resource/users/dtos';
 
 export class UserDataResponseDTO {
     @ApiProperty({
@@ -17,11 +18,10 @@ export class UserDataResponseDTO {
     @IsNotEmpty()
     email: string;
 
-    @ApiProperty({ type: [String], minLength: 1 })
+    @ApiProperty({ type: [AddressSchemaDTO] })
     @IsArray()
     @IsOptional()
-    @IsString({ each: true, message: 'Each item should be string' })
-    address?: string[];
+    address?: AddressSchemaDTO[];
 
     @ApiProperty({ enum: UserRole, example: UserRole.User })
     @IsEnum(UserRole)
