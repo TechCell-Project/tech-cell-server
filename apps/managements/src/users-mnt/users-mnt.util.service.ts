@@ -1,18 +1,25 @@
 import { UsersService } from '@app/resource';
 import { BadRequestException, ForbiddenException, Inject, Injectable } from '@nestjs/common';
-import { isAdmin, isMod, isSuperAdmin, isUser, timeStringToMs } from '@app/common/utils';
+import {
+    isAdmin,
+    isMod,
+    isSuperAdmin,
+    isUser,
+    timeStringToMs,
+    delStartWith,
+} from '@app/common/utils';
 import { RpcException } from '@nestjs/microservices';
 import { BlockActivity, CommonActivity } from '@app/resource/users/enums';
 import { User } from '@app/resource/users/schemas';
 import { REDIS_CACHE, REQUIRE_USER_REFRESH, USERS_CACHE_PREFIX } from '~/constants';
 import { USERS_ALL, USERS_OFFSET, USERS_LIMIT } from '~/constants';
-import { CacheManager } from '@app/common';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class UsersMntUtilService {
     constructor(
         protected readonly usersService: UsersService,
-        @Inject(REDIS_CACHE) protected cacheManager: CacheManager,
+        @Inject(REDIS_CACHE) protected cacheManager: Cache,
     ) {}
 
     protected buildCacheKeyUsers({
@@ -67,7 +74,7 @@ export class UsersMntUtilService {
     }
 
     protected async delCacheUsers() {
-        await this.cacheManager.delStartWith(USERS_CACHE_PREFIX);
+        return await delStartWith(USERS_CACHE_PREFIX, this.cacheManager);
     }
 
     /**
