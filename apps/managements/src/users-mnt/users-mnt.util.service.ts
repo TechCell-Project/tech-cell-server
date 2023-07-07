@@ -74,7 +74,7 @@ export class UsersMntUtilService {
      * REQUIRE_USER_REFRESH_{userId}
      *
      */
-    protected async setUserToCache({ user }: { user: User }) {
+    protected async setUserRequiredRefresh({ user }: { user: User }) {
         await this.cacheManager.set(
             `${REQUIRE_USER_REFRESH}_${user._id}`,
             true,

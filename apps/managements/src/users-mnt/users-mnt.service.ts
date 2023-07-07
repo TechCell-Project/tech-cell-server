@@ -90,15 +90,20 @@ export class UsersMntService extends UsersMntUtilService {
             activityNote: blockNote ? blockNote : '',
         });
 
-        return await this.usersService.findOneAndUpdateUser(
-            { _id: victimUserId },
-            {
-                block: {
-                    isBlocked: true,
-                    activityLogs: actLogs,
+        const [userReturn] = await Promise.all([
+            this.usersService.findOneAndUpdateUser(
+                { _id: victimUserId },
+                {
+                    block: {
+                        isBlocked: true,
+                        activityLogs: actLogs,
+                    },
                 },
-            },
-        );
+            ),
+            this.setUserRequiredRefresh({ user: victimUser }),
+        ]);
+
+        return userReturn;
     }
 
     async unblockUser({
@@ -146,15 +151,20 @@ export class UsersMntService extends UsersMntUtilService {
             activityNote: unblockNote ? unblockNote : '',
         });
 
-        return await this.usersService.findOneAndUpdateUser(
-            { _id: victimUserId },
-            {
-                block: {
-                    isBlocked: false,
-                    activityLogs: actLogs,
+        const [userReturn] = await Promise.all([
+            this.usersService.findOneAndUpdateUser(
+                { _id: victimUserId },
+                {
+                    block: {
+                        isBlocked: false,
+                        activityLogs: actLogs,
+                    },
                 },
-            },
-        );
+            ),
+            this.setUserRequiredRefresh({ user: victimUser }),
+        ]);
+
+        return userReturn;
     }
 
     async updateRole({
@@ -185,7 +195,7 @@ export class UsersMntService extends UsersMntUtilService {
 
         const [changeRole] = await Promise.all([
             this.usersService.findOneAndUpdateUser({ _id: victimId }, { role: role }),
-            this.setUserToCache({ user }),
+            this.setUserRequiredRefresh({ user }),
         ]);
 
         return changeRole;
