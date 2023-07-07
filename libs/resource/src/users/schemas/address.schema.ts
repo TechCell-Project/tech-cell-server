@@ -8,7 +8,7 @@ export class AddressSchema {
     districtLevel: string;
 
     @Prop({ type: String })
-    communeLevel: string;
+    wardLevel: string;
 
     @Prop({ type: String })
     detail?: string;
