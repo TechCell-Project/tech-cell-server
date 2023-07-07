@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { AbstractDocument } from '@app/common';
 import { UserRole } from '@app/resource/users/enums';
 import { BlockSchema } from './block.schema';
+import { AddressSchema } from './address.schema';
 
 @Schema({ versionKey: false })
 export class User extends AbstractDocument {
@@ -18,7 +19,7 @@ export class User extends AbstractDocument {
     role?: string;
 
     @Prop({ default: [] })
-    address?: string[];
+    address?: AddressSchema[];
 
     @Prop({ default: '' })
     firstName?: string;
