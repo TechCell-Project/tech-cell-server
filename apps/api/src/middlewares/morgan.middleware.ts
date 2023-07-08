@@ -7,6 +7,7 @@ import * as path from 'path';
 import { SAMPLE_SERVICE } from '~/constants';
 import { ClientRMQ } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
+import { formatLogsDiscord } from '@app/common';
 
 @Injectable()
 export class MorganMiddleware implements NestMiddleware {
@@ -28,13 +29,18 @@ export class MorganMiddleware implements NestMiddleware {
             flags: 'a',
         });
 
+        console.log(req.body);
+
         morgan('combined', {
             stream: {
                 write: async (message: string) => {
                     this.logger.log(message.trim());
                     logStream.write(message.trim() + '\n');
                     await firstValueFrom(
-                        this.sampleService.send({ cmd: 'write_logs_to_discord' }, { message }),
+                        this.sampleService.send(
+                            { cmd: 'write_logs_to_discord' },
+                            { message: formatLogsDiscord(message, req, res) },
+                        ),
                     );
                 },
             },

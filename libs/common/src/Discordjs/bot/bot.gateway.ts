@@ -17,7 +17,7 @@ export class BotGateway {
         this.logger.log(`Bot ${this.client.user.tag} was started!`);
     }
 
-    async writeLogs(message: string) {
+    async writeLogs(message: any) {
         const channel = this.client.channels.cache.get(configChannelId.serverLogs) as TextChannel;
         return await channel.send(message);
     }
