@@ -29,20 +29,34 @@ export class MorganMiddleware implements NestMiddleware {
             flags: 'a',
         });
 
-        console.log(req.body);
+        let writeFc;
+        if (
+            process.env.DISCORD_IS_ENABLE === 'false' ||
+            process.env.DISCORD_IS_ENABLE === '0' ||
+            !process.env.DISCORD_TOKEN ||
+            !process.env.DISCORD_LOGS_CHANNEL_ID
+        ) {
+            writeFc = (message: string) => {
+                this.logger.log(message.trim());
+                logStream.write(message.trim() + '\n');
+            };
+        } else {
+            writeFc = async (message: string) => {
+                this.logger.log(message.trim());
+                logStream.write(message.trim() + '\n');
+
+                await firstValueFrom(
+                    this.sampleService.send(
+                        { cmd: 'write_logs_to_discord' },
+                        { message: formatLogsDiscord(message, req, res) },
+                    ),
+                );
+            };
+        }
 
         morgan('combined', {
             stream: {
-                write: async (message: string) => {
-                    this.logger.log(message.trim());
-                    logStream.write(message.trim() + '\n');
-                    await firstValueFrom(
-                        this.sampleService.send(
-                            { cmd: 'write_logs_to_discord' },
-                            { message: formatLogsDiscord(message, req, res) },
-                        ),
-                    );
-                },
+                write: writeFc,
             },
         })(req, res, next);
     }
