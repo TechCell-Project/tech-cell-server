@@ -317,5 +317,29 @@ declare namespace NodeJS {
          * @see https://developers.facebook.com/docs/facebook-login
          */
         FACEBOOK_REDIRECT_URL: string;
+
+        /**
+         * The env to enable `Discord` logs
+         * @description Use for enable logs for `Discord` module
+         * @example
+         * DISCORD_IS_ENABLE = true
+         */
+        DISCORD_IS_ENABLE: string | boolean;
+
+        /**
+         * The `Discord` token
+         * @description This value is used for `discord.js` module
+         * @example
+         * DISCORD_TOKEN = 'example'
+         */
+        DISCORD_TOKEN: string;
+
+        /**
+         * The `Discord` logs channel id
+         * @description This value is used for `discord.js` module
+         * @example
+         * DISCORD_LOGS_CHANNEL_ID = example
+         */
+        DISCORD_LOGS_CHANNEL_ID: string;
     }
 }
