@@ -1,12 +1,17 @@
-import { Injectable, NestMiddleware } from '@nestjs/common';
+import { Inject, Injectable, NestMiddleware } from '@nestjs/common';
 import { NextFunction, Request, Response } from 'express';
 import * as morgan from 'morgan';
 import { Logger } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
+import { SAMPLE_SERVICE } from '~/constants';
+import { ClientRMQ } from '@nestjs/microservices';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class MorganMiddleware implements NestMiddleware {
+    constructor(@Inject(SAMPLE_SERVICE) private readonly sampleService: ClientRMQ) {}
+
     private readonly logger = new Logger(MorganMiddleware.name);
 
     use(req: Request, res: Response, next: NextFunction) {
@@ -25,9 +30,12 @@ export class MorganMiddleware implements NestMiddleware {
 
         morgan('combined', {
             stream: {
-                write: (message: string) => {
+                write: async (message: string) => {
                     this.logger.log(message.trim());
                     logStream.write(message.trim() + '\n');
+                    await firstValueFrom(
+                        this.sampleService.send({ cmd: 'write_logs_to_discord' }, { message }),
+                    );
                 },
             },
         })(req, res, next);
