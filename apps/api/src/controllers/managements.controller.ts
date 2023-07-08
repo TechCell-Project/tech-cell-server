@@ -86,10 +86,10 @@ export class ManagementsController {
         description: 'Invalid request',
     })
     @Patch('users/:id/change-role')
-    async changeRoleUser(@Request() req, @Body() { userId, role }: ChangeRoleRequestDTO) {
+    async changeRoleUser(@Request() req, @Body() { role, userId: actorId }: ChangeRoleRequestDTO) {
         const { id: victimId } = req.params;
         return this.managementsService
-            .send({ cmd: 'mnt_change_role_user' }, { victimId, actorId: userId, role })
+            .send({ cmd: 'mnt_change_role_user' }, { victimId, actorId, role })
             .pipe(catchException());
     }
 }
