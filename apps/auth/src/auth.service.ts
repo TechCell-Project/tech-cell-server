@@ -19,7 +19,7 @@ import { RegisterRequestDTO, NewTokenRequestDTO, UserDataResponseDTO } from '~/a
 import { User } from '@app/resource/users/schemas';
 import { RpcException } from '@nestjs/microservices';
 import { catchError, throwError, firstValueFrom } from 'rxjs';
-import { ConfirmEmailRegisterDTO, ForgotPasswordEmailDTO } from '~/apps/mail/dtos';
+import { ConfirmEmailRegisterDTO, ForgotPasswordEmailDTO, MailMessagePattern } from '~/apps/mail';
 import { OtpType } from '@app/resource/otp';
 import { IUserFacebookResponse, IUserGoogleResponse, ITokenVerifiedResponse } from './interfaces';
 import { generateRandomString } from '@app/common';
@@ -62,7 +62,7 @@ export class AuthService extends AuthUtilService {
 
             await firstValueFrom(
                 this.mailService
-                    .send({ cmd: 'mail_send_confirm' }, { email, emailContext })
+                    .send(MailMessagePattern.sendMailConfirm, { email, emailContext })
                     .pipe(
                         catchError((error) => throwError(() => new RpcException(error.response))),
                     ),
@@ -186,7 +186,7 @@ export class AuthService extends AuthUtilService {
 
         await firstValueFrom(
             this.mailService
-                .send({ cmd: 'mail_send_forgot_password' }, { ...emailContext })
+                .send(MailMessagePattern, { ...emailContext })
                 .pipe(catchError((error) => throwError(() => new RpcException(error.response)))),
         );
 
