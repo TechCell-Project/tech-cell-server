@@ -9,10 +9,15 @@ import {
     delStartWith,
 } from '@app/common/utils';
 import { RpcException } from '@nestjs/microservices';
-import { BlockActivity, CommonActivity } from '@app/resource/users/enums';
 import { User } from '@app/resource/users/schemas';
-import { REDIS_CACHE, REQUIRE_USER_REFRESH, USERS_CACHE_PREFIX } from '~/constants';
-import { USERS_ALL, USERS_OFFSET, USERS_LIMIT } from '~/constants';
+import {
+    REDIS_CACHE,
+    REQUIRE_USER_REFRESH,
+    USERS_CACHE_PREFIX,
+    USERS_ALL,
+    USERS_OFFSET,
+    USERS_LIMIT,
+} from '~/constants';
 import { Store } from 'cache-manager';
 
 @Injectable()
@@ -49,31 +54,6 @@ export class UsersMntUtilService {
     }
 
     /**
-     * Verify the permission of the actor user to perform the action on the victim user
-     * @param - { victimUser, actorUser, actions}
-     * @returns return true if permission is granted, otherwise throw an error
-     */
-    protected async verifyPermission({
-        victimUser,
-        actorUser,
-        actions,
-    }: {
-        victimUser: User;
-        actorUser: User;
-        actions: string;
-    }) {
-        switch (actions) {
-            case BlockActivity.Block:
-            case BlockActivity.Unblock:
-                return this.canBlockAndUnblockUser({ victimUser, actorUser });
-            case CommonActivity.ChangeRole:
-                return this.canChangeRole({ victimUser, actorUser });
-            default:
-                throw new RpcException(new BadRequestException('Invalid action'));
-        }
-    }
-
-    /**
      *
      * @returns remove all users cache
      */
@@ -103,7 +83,7 @@ export class UsersMntUtilService {
      * @param param0 - { victimUser, actorUser } - victimUser is the user to be blocked, actorUser is the user who block victimUser
      * @returns return true if actorUser can block victimUser, otherwise throw an error
      */
-    private canBlockAndUnblockUser({
+    protected canBlockAndUnblockUser({
         victimUser,
         actorUser,
     }: {
@@ -111,11 +91,11 @@ export class UsersMntUtilService {
         actorUser: User;
     }) {
         if (victimUser._id.toString() === actorUser._id.toString()) {
-            throw new RpcException(new BadRequestException('You cannot block yourself'));
+            throw new RpcException(new BadRequestException('You cannot block/unblock yourself'));
         }
 
         if (!this.requiredHigherRole({ victimUser, actorUser })) {
-            throw new RpcException(new BadRequestException('You cannot block this user'));
+            throw new RpcException(new BadRequestException('You cannot block/unblock this user'));
         }
 
         return true;
@@ -126,7 +106,7 @@ export class UsersMntUtilService {
      * @param param0 - { victimUser, actorUser } - victimUser is the user to be changed role, actorUser is the user who change victimUser role
      * @returns return true if actorUser can change victimUser role, otherwise throw an error
      */
-    private canChangeRole({ victimUser, actorUser }: { victimUser: User; actorUser: User }) {
+    protected canChangeRole({ victimUser, actorUser }: { victimUser: User; actorUser: User }) {
         if (victimUser._id.toString() === actorUser._id.toString()) {
             throw new RpcException(new BadRequestException('You cannot change your role'));
         }
