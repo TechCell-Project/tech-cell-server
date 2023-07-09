@@ -36,6 +36,9 @@
       "~/apps/auth/*": [
         "apps/auth/src/*"
       ],
+      "~/apps/auth": [
+        "apps/auth/src"
+      ],
       "~/apps/products/*": [
         "apps/products/src/*"
       ],
