@@ -42,6 +42,9 @@
       "~/apps/products/*": [
         "apps/products/src/*"
       ],
+      "~/apps/sample": [
+        "apps/sample/src"
+      ],
       "~/apps/sample/*": [
         "apps/sample/src/*"
       ],

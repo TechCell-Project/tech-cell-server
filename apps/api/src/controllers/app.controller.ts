@@ -3,6 +3,7 @@ import { ClientRMQ } from '@nestjs/microservices';
 import { SAMPLE_SERVICE } from '~/constants';
 import { AuthGuard, catchException } from '@app/common';
 import { ApiTags } from '@nestjs/swagger';
+import { SampleMessagePattern } from '~/apps/sample';
 
 @ApiTags('commons')
 @Controller('/')
@@ -16,12 +17,14 @@ export class AppController {
 
     @Get('sample')
     async getSample() {
-        return this.sampleService.send('get_sample', {}).pipe(catchException());
+        return this.sampleService.send(SampleMessagePattern.getSample, {}).pipe(catchException());
     }
 
     @Get('sample-auth')
     @UseGuards(AuthGuard)
     async getSampleAuth() {
-        return this.sampleService.send('get_sample_auth', {}).pipe(catchException());
+        return this.sampleService
+            .send(SampleMessagePattern.getSampleAuth, {})
+            .pipe(catchException());
     }
 }
