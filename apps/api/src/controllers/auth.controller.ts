@@ -27,6 +27,7 @@ import {
     ApiOAuth2,
     ApiResponse,
 } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import {
     RegisterRequestDTO,
     LoginRequestDTO,
@@ -37,9 +38,13 @@ import {
     VerifyForgotPasswordDTO,
     CheckEmailRequestDTO,
 } from '~/apps/auth/dtos';
-import { Throttle } from '@nestjs/throttler';
-import { GoogleOAuthGuard, FacebookOAuthGuard } from '~/apps/auth/guards';
-import { IUserFacebookResponse, IUserGoogleResponse } from '~/apps/auth/interfaces';
+import {
+    GoogleOAuthGuard,
+    FacebookOAuthGuard,
+    IUserFacebookResponse,
+    IUserGoogleResponse,
+    AuthMessagePattern,
+} from '~/apps/auth';
 import { catchException } from '@app/common';
 
 @ApiTags('authentication')
@@ -70,7 +75,7 @@ export class AuthController {
     @Post('login')
     async login(@Body() { email, password }: LoginRequestDTO) {
         return this.authService
-            .send({ cmd: 'auth_login' }, { email, password })
+            .send(AuthMessagePattern.login, { email, password })
             .pipe(catchException());
     }
 
@@ -83,7 +88,9 @@ export class AuthController {
     @HttpCode(HttpStatus.OK)
     @Post('check-email')
     async checkEmail(@Body() { email }: CheckEmailRequestDTO) {
-        return this.authService.send({ cmd: 'auth_check_email' }, { email }).pipe(catchException());
+        return this.authService
+            .send(AuthMessagePattern.checkEmail, { email })
+            .pipe(catchException());
     }
 
     @ApiBody({ type: RegisterRequestDTO })
@@ -102,7 +109,13 @@ export class AuthController {
         @Body() { email, firstName, lastName, password, re_password }: RegisterRequestDTO,
     ) {
         return this.authService
-            .send({ cmd: 'auth_register' }, { email, firstName, lastName, password, re_password })
+            .send(AuthMessagePattern.register, {
+                email,
+                firstName,
+                lastName,
+                password,
+                re_password,
+            })
             .pipe(catchException());
     }
 
@@ -116,7 +129,7 @@ export class AuthController {
     @Post('verify-email')
     async verifyEmail(@Body() { email, otpCode }: VerifyEmailRequestDTO) {
         return this.authService
-            .send({ cmd: 'auth_verify_email' }, { email, otpCode })
+            .send(AuthMessagePattern.verifyEmail, { email, otpCode })
             .pipe(catchException());
     }
 
@@ -135,7 +148,7 @@ export class AuthController {
     @Post('refresh-token')
     async getNewToken(@Body() { refreshToken }: NewTokenRequestDTO) {
         return this.authService
-            .send({ cmd: 'auth_get_new_access_token' }, { refreshToken })
+            .send(AuthMessagePattern.getNewToken, { refreshToken })
             .pipe(catchException());
     }
 
@@ -147,7 +160,7 @@ export class AuthController {
     @Post('forgot-password')
     async forgotPassword(@Body() { email }: ForgotPasswordDTO) {
         return this.authService
-            .send({ cmd: 'auth_forgot_password' }, { email })
+            .send(AuthMessagePattern.forgotPassword, { email })
             .pipe(catchException());
     }
 
@@ -161,7 +174,12 @@ export class AuthController {
         @Body() { email, otpCode, password, re_password }: VerifyForgotPasswordDTO,
     ) {
         return this.authService
-            .send({ cmd: 'auth_verify_forgot_password' }, { email, otpCode, password, re_password })
+            .send(AuthMessagePattern.verifyForgotPassword, {
+                email,
+                otpCode,
+                password,
+                re_password,
+            })
             .pipe(catchException());
     }
 
@@ -172,7 +190,9 @@ export class AuthController {
     @Get('google')
     @UseGuards(GoogleOAuthGuard)
     async googleAuth(@Request() { user }: { user: IUserGoogleResponse }) {
-        return this.authService.send({ cmd: 'auth_google_login' }, { user }).pipe(catchException());
+        return this.authService
+            .send(AuthMessagePattern.googleAuth, { user })
+            .pipe(catchException());
     }
 
     @ApiOAuth2(['email'], 'login with facebook')
@@ -183,7 +203,7 @@ export class AuthController {
     @UseGuards(FacebookOAuthGuard)
     async facebookAuth(@Request() { user }: { user: IUserFacebookResponse }) {
         return this.authService
-            .send({ cmd: 'auth_facebook_login' }, { user })
+            .send(AuthMessagePattern.facebookAuth, { user })
             .pipe(catchException());
     }
 }

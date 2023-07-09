@@ -15,6 +15,7 @@ import {
 import { UsersService } from '@app/resource/users';
 import { JwtGuard } from './guards/jwt.guard';
 import { IUserFacebookResponse, IUserGoogleResponse } from './interfaces';
+import { AuthMessagePattern } from './auth.pattern';
 
 @Controller()
 export class AuthController {
@@ -29,19 +30,19 @@ export class AuthController {
         return this.authService.getPing();
     }
 
-    @MessagePattern({ cmd: 'auth_login' })
+    @MessagePattern(AuthMessagePattern.login)
     async login(@Ctx() context: RmqContext, @Payload() { email, password }: LoginRequestDTO) {
         this.rabbitMqService.acknowledgeMessage(context);
         return this.authService.login({ email, password });
     }
 
-    @MessagePattern({ cmd: 'auth_check_email' })
+    @MessagePattern(AuthMessagePattern.checkEmail)
     async checkEmail(@Ctx() context: RmqContext, @Payload() { email }: CheckEmailRequestDTO) {
         this.rabbitMqService.acknowledgeMessage(context);
         return this.authService.checkEmail({ email });
     }
 
-    @MessagePattern({ cmd: 'auth_register' })
+    @MessagePattern(AuthMessagePattern.register)
     async register(
         @Ctx() context: RmqContext,
         @Payload() { email, firstName, lastName, password, re_password }: RegisterRequestDTO,
@@ -50,7 +51,7 @@ export class AuthController {
         return this.authService.register({ email, firstName, lastName, password, re_password });
     }
 
-    @MessagePattern({ cmd: 'auth_verify_email' })
+    @MessagePattern(AuthMessagePattern.verifyEmail)
     async verifyEmail(
         @Ctx() context: RmqContext,
         @Payload() { email, otpCode }: VerifyEmailRequestDTO,
@@ -59,7 +60,7 @@ export class AuthController {
         return this.authService.verifyEmail({ email, otpCode });
     }
 
-    @MessagePattern({ cmd: 'auth_get_new_access_token' })
+    @MessagePattern(AuthMessagePattern.getNewToken)
     async getNewToken(
         @Ctx() context: RmqContext,
         @Payload() { refreshToken }: NewTokenRequestDTO,
@@ -68,7 +69,7 @@ export class AuthController {
         return this.authService.getNewToken({ refreshToken });
     }
 
-    @MessagePattern({ cmd: 'verify-jwt' })
+    @MessagePattern(AuthMessagePattern.verifyJwt)
     @UseGuards(JwtGuard)
     async verifyJwt(@Ctx() context: RmqContext, @Payload() payload: { jwt: string }) {
         this.rabbitMqService.acknowledgeMessage(context);
@@ -76,13 +77,13 @@ export class AuthController {
         return this.authService.verifyAccessToken(payload.jwt);
     }
 
-    @MessagePattern({ cmd: 'auth_forgot_password' })
+    @MessagePattern(AuthMessagePattern.forgotPassword)
     async forgotPassword(@Ctx() context: RmqContext, @Payload() { email }: ForgotPasswordDTO) {
         this.rabbitMqService.acknowledgeMessage(context);
         return this.authService.forgotPassword({ email });
     }
 
-    @MessagePattern({ cmd: 'auth_verify_forgot_password' })
+    @MessagePattern(AuthMessagePattern.verifyForgotPassword)
     async verifyForgotPassword(
         @Ctx() context: RmqContext,
         @Payload() { email, otpCode, password, re_password }: VerifyForgotPasswordDTO,
@@ -91,13 +92,13 @@ export class AuthController {
         return this.authService.verifyForgotPassword({ email, otpCode, password, re_password });
     }
 
-    @MessagePattern({ cmd: 'auth_google_login' })
+    @MessagePattern(AuthMessagePattern.googleAuth)
     async googleAuthRedirect(@Ctx() context, @Payload() { user }: { user: IUserGoogleResponse }) {
         this.rabbitMqService.acknowledgeMessage(context);
         return this.authService.googleLogin({ user });
     }
 
-    @MessagePattern({ cmd: 'auth_facebook_login' })
+    @MessagePattern(AuthMessagePattern.facebookAuth)
     async facebookAuthRedirect(
         @Ctx() context,
         @Payload() { user }: { user: IUserFacebookResponse },

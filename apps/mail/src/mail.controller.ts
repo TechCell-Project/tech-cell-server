@@ -3,6 +3,7 @@ import { MailService } from './mail.service';
 import { RabbitMQService } from '@app/common';
 import { Ctx, MessagePattern, Payload, RmqContext } from '@nestjs/microservices';
 import { ConfirmEmailRegisterDTO, ForgotPasswordEmailDTO } from './dtos';
+import { MailMessagePattern } from './mail.pattern';
 
 @Controller()
 export class MailController {
@@ -11,7 +12,7 @@ export class MailController {
         @Inject(RabbitMQService) private readonly rabbitMqService: RabbitMQService,
     ) {}
 
-    @MessagePattern({ cmd: 'mail_send_confirm' })
+    @MessagePattern(MailMessagePattern.sendMailConfirm)
     async sendConfirmEmail(
         @Ctx() context: RmqContext,
         @Payload()
@@ -21,7 +22,7 @@ export class MailController {
         return this.mailService.sendConfirmMail(email, emailContext);
     }
 
-    @MessagePattern({ cmd: 'mail_send_forgot_password' })
+    @MessagePattern(MailMessagePattern.sendMailForgotPassword)
     async sendForgotPasswordEmail(
         @Ctx() context: RmqContext,
         @Payload() { userEmail, firstName, otpCode }: ForgotPasswordEmailDTO,

@@ -11,7 +11,11 @@ import {
     ApiQuery,
     ApiTags,
 } from '@nestjs/swagger';
-import { ChangeRoleRequestDTO, GetUsersDTO } from '~/apps/managements/users-mnt/dtos';
+import {
+    ChangeRoleRequestDTO,
+    GetUsersDTO,
+    UsersMntMessagePattern,
+} from '~/apps/managements/users-mnt';
 import { catchException } from '@app/common';
 import { UserMntResponseDto } from '@app/resource/users/dtos';
 
@@ -35,7 +39,7 @@ export class ManagementsController {
     async getUsers(@Request() req) {
         const reqQuery: GetUsersDTO = req.query;
         return this.managementsService
-            .send({ cmd: 'mnt_get_users' }, { ...reqQuery })
+            .send(UsersMntMessagePattern.getUsers, { ...reqQuery })
             .pipe(catchException());
     }
 
@@ -45,7 +49,7 @@ export class ManagementsController {
     async getUserById(@Request() req) {
         const { id } = req.params;
         return this.managementsService
-            .send({ cmd: 'mnt_get_user_by_id' }, { id })
+            .send(UsersMntMessagePattern.getUserById, { id })
             .pipe(catchException());
     }
 
@@ -58,10 +62,12 @@ export class ManagementsController {
         const { id: victimUserId } = req.params;
         const { blockReason = '', blockNote = '', userId } = req.body;
         return this.managementsService
-            .send(
-                { cmd: 'mnt_block_user' },
-                { victimUserId, blockUserId: userId, blockReason, blockNote },
-            )
+            .send(UsersMntMessagePattern.blockUser, {
+                victimUserId,
+                blockUserId: userId,
+                blockReason,
+                blockNote,
+            })
             .pipe(catchException());
     }
 
@@ -74,10 +80,12 @@ export class ManagementsController {
         const { id: victimUserId } = req.params;
         const { userId, unblockReason = '', unblockNote = '' } = req.body;
         return this.managementsService
-            .send(
-                { cmd: 'mnt_unblock_user' },
-                { victimUserId, unblockUserId: userId, unblockReason, unblockNote },
-            )
+            .send(UsersMntMessagePattern.unblockUser, {
+                victimUserId,
+                unblockUserId: userId,
+                unblockReason,
+                unblockNote,
+            })
             .pipe(catchException());
     }
 
@@ -89,7 +97,7 @@ export class ManagementsController {
     async changeRoleUser(@Request() req, @Body() { role, userId: actorId }: ChangeRoleRequestDTO) {
         const { id: victimId } = req.params;
         return this.managementsService
-            .send({ cmd: 'mnt_change_role_user' }, { victimId, actorId, role })
+            .send(UsersMntMessagePattern.changeRoleUser, { victimId, actorId, role })
             .pipe(catchException());
     }
 }

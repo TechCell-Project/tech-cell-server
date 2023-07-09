@@ -8,6 +8,7 @@ import { SAMPLE_SERVICE } from '~/constants';
 import { ClientRMQ } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { formatLogsDiscord } from '@app/common';
+import { SampleMessagePattern } from '~/apps/sample';
 
 @Injectable()
 export class MorganMiddleware implements NestMiddleware {
@@ -46,10 +47,9 @@ export class MorganMiddleware implements NestMiddleware {
                 logStream.write(message.trim() + '\n');
 
                 await firstValueFrom(
-                    this.sampleService.send(
-                        { cmd: 'write_logs_to_discord' },
-                        { message: formatLogsDiscord(message, req, res) },
-                    ),
+                    this.sampleService.send(SampleMessagePattern.writeLogsToDiscord, {
+                        message: formatLogsDiscord(message, req, res),
+                    }),
                 );
             };
         }
