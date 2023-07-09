@@ -1,8 +1,8 @@
-import { BadRequestException, ForbiddenException, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { Types } from 'mongoose';
 import { GetUsersDTO, QueryUserParamsDTO } from './dtos';
 import { RpcException } from '@nestjs/microservices';
-import { BlockActivity, CommonActivity, UserRole } from '@app/resource/users/enums';
+import { BlockActivity, UserRole } from '@app/resource/users/enums';
 import { UsersMntUtilService } from './users-mnt.util.service';
 import { timeStringToMs } from '@app/common';
 
@@ -65,20 +65,13 @@ export class UsersMntService extends UsersMntUtilService {
             this.usersService.getUser({ _id: new Types.ObjectId(blockUserId) }),
         ]);
 
+        this.canBlockAndUnblockUser({
+            victimUser,
+            actorUser: blockByUser,
+        });
+
         if (victimUser.block && victimUser.block.isBlocked) {
             throw new RpcException(new BadRequestException('User is already blocked'));
-        }
-
-        if (
-            !this.verifyPermission({
-                victimUser,
-                actorUser: blockByUser,
-                actions: BlockActivity.Block,
-            })
-        ) {
-            throw new RpcException(
-                new ForbiddenException('You do not have permission to block this user'),
-            );
         }
 
         const actLogs = (victimUser.block && victimUser.block.activityLogs) || [];
@@ -127,20 +120,13 @@ export class UsersMntService extends UsersMntUtilService {
             this.usersService.getUser({ _id: new Types.ObjectId(unblockUserId) }),
         ]);
 
+        this.canBlockAndUnblockUser({
+            victimUser,
+            actorUser: unblockByUser,
+        });
+
         if (victimUser.block && !victimUser.block.isBlocked) {
             throw new RpcException(new BadRequestException('User is not blocked'));
-        }
-
-        if (
-            !this.verifyPermission({
-                victimUser,
-                actorUser: unblockByUser,
-                actions: BlockActivity.Block,
-            })
-        ) {
-            throw new RpcException(
-                new ForbiddenException('You do not have permission to unblock this user'),
-            );
         }
 
         const actLogs = (victimUser.block && victimUser.block.activityLogs) || [];
@@ -189,10 +175,9 @@ export class UsersMntService extends UsersMntUtilService {
             );
         }
 
-        await this.verifyPermission({
+        this.canChangeRole({
             victimUser: user,
             actorUser: updatedByUser,
-            actions: CommonActivity.ChangeRole,
         });
 
         const [changeRole] = await Promise.all([
