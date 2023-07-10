@@ -6,9 +6,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { SAMPLE_SERVICE } from '~/constants';
 import { ClientRMQ } from '@nestjs/microservices';
-import { firstValueFrom } from 'rxjs';
 import { formatLogsDiscord } from '@app/common';
-import { SampleMessagePattern } from '~/apps/sample';
+import { SampleEventPattern } from '~/apps/sample';
 
 @Injectable()
 export class MorganMiddleware implements NestMiddleware {
@@ -30,29 +29,17 @@ export class MorganMiddleware implements NestMiddleware {
             flags: 'a',
         });
 
-        let writeFc;
-        if (
-            process.env.DISCORD_IS_ENABLE === 'false' ||
-            process.env.DISCORD_IS_ENABLE === '0' ||
-            !process.env.DISCORD_TOKEN ||
-            !process.env.DISCORD_LOGS_CHANNEL_ID
-        ) {
-            writeFc = (message: string) => {
+        const writeFc = (message: string) => {
+            try {
                 this.logger.log(message.trim());
                 logStream.write(message.trim() + '\n');
-            };
-        } else {
-            writeFc = async (message: string) => {
-                this.logger.log(message.trim());
-                logStream.write(message.trim() + '\n');
-
-                await firstValueFrom(
-                    this.sampleService.send(SampleMessagePattern.writeLogsToDiscord, {
-                        message: formatLogsDiscord(message, req, res),
-                    }),
-                );
-            };
-        }
+                this.sampleService.emit(SampleEventPattern.writeLogsToDiscord, {
+                    message: formatLogsDiscord(message, req, res),
+                });
+            } catch (error) {
+                this.logger.error(error);
+            }
+        };
 
         morgan('combined', {
             stream: {

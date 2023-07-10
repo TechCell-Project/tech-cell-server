@@ -1,8 +1,8 @@
 import { Controller, Get, Inject, Post } from '@nestjs/common';
 import { SampleService } from './sample.service';
-import { SampleMessagePattern } from './sample.pattern';
+import { SampleMessagePattern, SampleEventPattern } from './sample.pattern';
 import { RabbitMQService } from '@app/common';
-import { Ctx, RmqContext, MessagePattern, Payload } from '@nestjs/microservices';
+import { Ctx, RmqContext, MessagePattern, Payload, EventPattern } from '@nestjs/microservices';
 import { BotGateway } from '@app/common/Discordjs/bot/bot.gateway';
 
 @Controller()
@@ -40,7 +40,8 @@ export class SampleController {
         return { message: 'you only see this if you already auth success' };
     }
 
-    @MessagePattern(SampleMessagePattern.writeLogsToDiscord)
+    // @MessagePattern(SampleMessagePattern.writeLogsToDiscord)
+    @EventPattern(SampleEventPattern.writeLogsToDiscord)
     async writeLogsToDiscord(@Ctx() context: RmqContext, @Payload() { message }: { message: any }) {
         this.rabbitMqService.acknowledgeMessage(context);
         return await this.botGateway.writeLogs(message);
