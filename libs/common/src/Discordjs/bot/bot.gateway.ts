@@ -18,6 +18,11 @@ export class BotGateway {
     }
 
     async writeLogs(message: any) {
+        if (!configChannelId.serverLogs) {
+            this.logger.warn('[env] DISCORD_LOGS_CHANNEL_ID not found!');
+            return;
+        }
+
         const channel = this.client.channels.cache.get(configChannelId.serverLogs) as TextChannel;
         return await channel.send(message);
     }
