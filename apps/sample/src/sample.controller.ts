@@ -40,7 +40,6 @@ export class SampleController {
         return { message: 'you only see this if you already auth success' };
     }
 
-    // @MessagePattern(SampleMessagePattern.writeLogsToDiscord)
     @EventPattern(SampleEventPattern.writeLogsToDiscord)
     async writeLogsToDiscord(@Ctx() context: RmqContext, @Payload() { message }: { message: any }) {
         this.rabbitMqService.acknowledgeMessage(context);
