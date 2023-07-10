@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { SampleController } from './sample.controller';
 import { SampleService } from './sample.service';
-import { RabbitMQModule, RabbitMQService } from '@app/common';
+import { RabbitMQModule, RabbitMQService, DiscordModule } from '@app/common';
 import { RedisCacheModule } from '@app/common';
 import { ConfigModule } from '@nestjs/config';
 
@@ -13,6 +13,7 @@ import { ConfigModule } from '@nestjs/config';
             envFilePath: './.env',
         }),
         RedisCacheModule,
+        DiscordModule,
     ],
     controllers: [SampleController],
     providers: [RabbitMQService, SampleService],

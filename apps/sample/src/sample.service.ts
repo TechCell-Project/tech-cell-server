@@ -1,10 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { REDIS_CACHE } from '~/constants';
-import { Cache } from 'cache-manager';
+import { Store } from 'cache-manager';
 
 @Injectable()
 export class SampleService {
-    constructor(@Inject(REDIS_CACHE) private cacheManager: Cache) {}
+    constructor(@Inject(REDIS_CACHE) private cacheManager: Store) {}
 
     private cacheSampleNumber = 0;
 

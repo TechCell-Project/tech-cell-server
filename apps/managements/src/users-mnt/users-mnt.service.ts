@@ -1,70 +1,39 @@
-import { UsersService } from '@app/resource';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { Types } from 'mongoose';
-import { GetUsersDTO } from './dtos';
-import { capitalize, isAdmin, isMod, isSuperAdmin, isUser } from '@app/common/utils';
+import { GetUsersDTO, QueryUserParamsDTO } from './dtos';
 import { RpcException } from '@nestjs/microservices';
-import { BlockActivity } from '@app/resource/users/enums';
+import { BlockActivity, UserRole } from '@app/resource/users/enums';
+import { UsersMntUtilService } from './users-mnt.util.service';
+import { timeStringToMs } from '@app/common';
 
 @Injectable()
-export class UsersMntService {
-    constructor(private readonly usersService: UsersService) {}
+export class UsersMntService extends UsersMntUtilService {
+    async getUsers(payload: QueryUserParamsDTO) {
+        const { all, limit = 1, offset = 0 } = payload;
 
-    async getUsers(payload: GetUsersDTO) {
-        const {
-            email,
-            emailVerified,
-            isBlocked,
-            isDeleted,
-            isVerified,
-            role,
-            search,
-            status,
-            limit = 10,
-            offset = 0,
-            order = 'asc',
-            sort = 'createdAt',
-        } = payload;
         const query: GetUsersDTO = {};
+        const options = { limit, skip: offset };
 
-        if (email) {
-            query.email = email;
+        const cacheKey = this.buildCacheKeyUsers({ limit, offset, all });
+        const usersFromCache = await this.cacheManager.get(cacheKey);
+        if (usersFromCache) {
+            Logger.log(`CACHE HIT: ${cacheKey}`);
+            return usersFromCache;
         }
 
-        if (typeof isBlocked !== 'undefined') {
-            query.isBlocked = isBlocked;
+        if (all) {
+            delete options.limit;
+            delete options.skip;
         }
 
-        if (typeof isDeleted !== 'undefined') {
-            query.isDeleted = isDeleted;
-        }
+        Logger.warn(`CACHE MISS: ${cacheKey}`);
+        const usersFromDb = await this.usersService.getUsers({ ...query }, { ...options }, [
+            '-password',
+        ]);
 
-        if (typeof isVerified !== 'undefined') {
-            query.isVerified = isVerified;
-        }
+        await this.cacheManager.set(cacheKey, usersFromDb, timeStringToMs('1h'));
 
-        if (typeof emailVerified !== 'undefined') {
-            query.emailVerified = emailVerified;
-        }
-
-        if (status) {
-            query.status = status;
-        }
-
-        if (role) {
-            query.role = capitalize(role);
-        }
-
-        if (search) {
-            // Add any specific logic for search filtering, if needed
-            // e.g., query.search = search;
-        }
-
-        return await this.usersService.getUsers(
-            { role: query.role, ...query },
-            { limit, offset, order, sort },
-            ['-password'],
-        );
+        return usersFromDb;
     }
 
     async getUserById(id: string | Types.ObjectId | any) {
@@ -96,39 +65,13 @@ export class UsersMntService {
             this.usersService.getUser({ _id: new Types.ObjectId(blockUserId) }),
         ]);
 
+        this.canBlockAndUnblockUser({
+            victimUser,
+            actorUser: blockByUser,
+        });
+
         if (victimUser.block && victimUser.block.isBlocked) {
             throw new RpcException(new BadRequestException('User is already blocked'));
-        }
-
-        if (isSuperAdmin(victimUser)) {
-            throw new RpcException(new BadRequestException('Cannot block SuperAdmin'));
-        }
-
-        if (isAdmin(victimUser) && !isSuperAdmin(blockByUser)) {
-            throw new RpcException(
-                new BadRequestException('Cannot block Admin from other SuperAdmin'),
-            );
-        }
-
-        if (isMod(victimUser) && !isSuperAdmin(blockByUser) && !isAdmin(blockByUser)) {
-            throw new RpcException(
-                new BadRequestException('Cannot block Mod from other Admin or SuperAdmin'),
-            );
-        }
-
-        if (
-            isUser(victimUser) &&
-            !isSuperAdmin(blockByUser) &&
-            !isAdmin(blockByUser) &&
-            !isMod(blockByUser)
-        ) {
-            throw new RpcException(
-                new BadRequestException('Cannot block User if not Admin or Mod'),
-            );
-        }
-
-        if (isUser(blockByUser)) {
-            throw new RpcException(new BadRequestException('User can not block other user'));
         }
 
         const actLogs = (victimUser.block && victimUser.block.activityLogs) || [];
@@ -140,15 +83,21 @@ export class UsersMntService {
             activityNote: blockNote ? blockNote : '',
         });
 
-        return await this.usersService.findOneAndUpdateUser(
-            { _id: victimUserId },
-            {
-                block: {
-                    isBlocked: true,
-                    activityLogs: actLogs,
+        const [userReturn] = await Promise.all([
+            this.usersService.findOneAndUpdateUser(
+                { _id: victimUserId },
+                {
+                    block: {
+                        isBlocked: true,
+                        activityLogs: actLogs,
+                    },
                 },
-            },
-        );
+            ),
+            this.setUserRequiredRefresh({ user: victimUser }),
+            this.delCacheUsers(),
+        ]);
+
+        return userReturn;
     }
 
     async unblockUser({
@@ -171,39 +120,13 @@ export class UsersMntService {
             this.usersService.getUser({ _id: new Types.ObjectId(unblockUserId) }),
         ]);
 
+        this.canBlockAndUnblockUser({
+            victimUser,
+            actorUser: unblockByUser,
+        });
+
         if (victimUser.block && !victimUser.block.isBlocked) {
             throw new RpcException(new BadRequestException('User is not blocked'));
-        }
-
-        if (isSuperAdmin(victimUser)) {
-            throw new RpcException(new BadRequestException('Cannot unblock SuperAdmin'));
-        }
-
-        if (isAdmin(victimUser) && !isSuperAdmin(unblockByUser)) {
-            throw new RpcException(
-                new BadRequestException('Cannot unblock Admin from other SuperAdmin'),
-            );
-        }
-
-        if (isMod(victimUser) && !isSuperAdmin(unblockByUser) && !isAdmin(unblockByUser)) {
-            throw new RpcException(
-                new BadRequestException('Cannot unblock Mod from other Admin or SuperAdmin'),
-            );
-        }
-
-        if (
-            isUser(victimUser) &&
-            !isSuperAdmin(unblockByUser) &&
-            !isAdmin(unblockByUser) &&
-            !isMod(unblockByUser)
-        ) {
-            throw new RpcException(
-                new BadRequestException('Cannot unblock User if not Admin or Mod'),
-            );
-        }
-
-        if (isUser(unblockByUser)) {
-            throw new RpcException(new BadRequestException('User can not unblock other user'));
         }
 
         const actLogs = (victimUser.block && victimUser.block.activityLogs) || [];
@@ -215,14 +138,54 @@ export class UsersMntService {
             activityNote: unblockNote ? unblockNote : '',
         });
 
-        return await this.usersService.findOneAndUpdateUser(
-            { _id: victimUserId },
-            {
-                block: {
-                    isBlocked: false,
-                    activityLogs: actLogs,
+        const [userReturn] = await Promise.all([
+            this.usersService.findOneAndUpdateUser(
+                { _id: victimUserId },
+                {
+                    block: {
+                        isBlocked: false,
+                        activityLogs: actLogs,
+                    },
                 },
-            },
-        );
+            ),
+            this.setUserRequiredRefresh({ user: victimUser }),
+            this.delCacheUsers(),
+        ]);
+
+        return userReturn;
+    }
+
+    async updateRole({
+        victimId,
+        role,
+        actorId,
+    }: {
+        victimId: string;
+        role: string;
+        actorId: string;
+    }) {
+        const [user, updatedByUser] = await Promise.all([
+            this.usersService.getUser({ _id: new Types.ObjectId(victimId) }),
+            this.usersService.getUser({ _id: new Types.ObjectId(actorId) }),
+        ]);
+
+        if (role.toLowerCase() === UserRole.SuperAdmin.toLowerCase()) {
+            throw new RpcException(
+                new BadRequestException('You cannot grant Super Admin role to anyone'),
+            );
+        }
+
+        this.canChangeRole({
+            victimUser: user,
+            actorUser: updatedByUser,
+        });
+
+        const [changeRole] = await Promise.all([
+            this.usersService.findOneAndUpdateUser({ _id: victimId }, { role: role }),
+            this.setUserRequiredRefresh({ user }),
+            this.delCacheUsers(),
+        ]);
+
+        return changeRole;
     }
 }

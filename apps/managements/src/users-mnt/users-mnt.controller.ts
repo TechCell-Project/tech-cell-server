@@ -3,6 +3,7 @@ import { MessagePattern, RmqContext, Payload, Ctx } from '@nestjs/microservices'
 import { RabbitMQService } from '@app/common';
 import { UsersMntService } from './users-mnt.service';
 import { GetUsersDTO } from './dtos';
+import { UsersMntMessagePattern } from './users-mnt.pattern';
 
 @Controller()
 export class UsersMntController {
@@ -16,19 +17,19 @@ export class UsersMntController {
         return { message: 'pong' };
     }
 
-    @MessagePattern({ cmd: 'mnt_get_users' })
+    @MessagePattern(UsersMntMessagePattern.getUsers)
     async getUsers(@Ctx() context: RmqContext, @Payload() payload: GetUsersDTO) {
         this.rabbitMqService.acknowledgeMessage(context);
         return await this.usersMntService.getUsers({ ...payload });
     }
 
-    @MessagePattern({ cmd: 'mnt_get_user_by_id' })
+    @MessagePattern(UsersMntMessagePattern.getUserById)
     async getUserById(@Ctx() context: RmqContext, @Payload() payload) {
         this.rabbitMqService.acknowledgeMessage(context);
         return await this.usersMntService.getUserById({ _id: payload.id });
     }
 
-    @MessagePattern({ cmd: 'mnt_block_user' })
+    @MessagePattern(UsersMntMessagePattern.blockUser)
     async blockUser(@Ctx() context: RmqContext, @Payload() payload) {
         this.rabbitMqService.acknowledgeMessage(context);
 
@@ -42,7 +43,7 @@ export class UsersMntController {
         });
     }
 
-    @MessagePattern({ cmd: 'mnt_unblock_user' })
+    @MessagePattern(UsersMntMessagePattern.unblockUser)
     async unblockUser(@Ctx() context: RmqContext, @Payload() payload) {
         this.rabbitMqService.acknowledgeMessage(context);
 
@@ -53,6 +54,19 @@ export class UsersMntController {
             unblockUserId,
             unblockReason,
             unblockNote,
+        });
+    }
+
+    @MessagePattern(UsersMntMessagePattern.changeRoleUser)
+    async changeRoleUser(@Ctx() context: RmqContext, @Payload() payload) {
+        this.rabbitMqService.acknowledgeMessage(context);
+
+        const { victimId, actorId, role } = payload;
+
+        return await this.usersMntService.updateRole({
+            victimId,
+            actorId,
+            role,
         });
     }
 }

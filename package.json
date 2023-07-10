@@ -16,7 +16,7 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node ./scripts/start-production.js",
-    "lint": "eslint \"{src,apps,libs,test,types}/**/*.ts\" --fix",
+    "lint": "eslint \"{src,apps,libs,test,types,constants}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
@@ -31,9 +31,11 @@
     "restart": "yarn down && yarn up:build",
     "up:all": "yarn up:core && yarn up",
     "down:all": "yarn down:core && yarn down",
-    "compodoc": "npx @compodoc/compodoc -p tsconfig.json -s"
+    "compodoc": "npx @compodoc/compodoc -p tsconfig.json -s",
+    "get-logs": "docker cp tech-cell-web-server-api-1:/usr/src/app/logs ."
   },
   "dependencies": {
+    "@discord-nestjs/core": "^5.3.8",
     "@nestjs-modules/mailer": "^1.8.1",
     "@nestjs/axios": "^3.0.0",
     "@nestjs/cache-manager": "^2.0.1",
@@ -57,6 +59,7 @@
     "cache-manager-redis-yet": "^4.1.2",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
+    "discord.js": "^14.11.0",
     "express": "^4.18.2",
     "handlebars": "^4.7.7",
     "helmet": "^7.0.0",

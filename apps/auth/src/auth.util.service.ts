@@ -7,10 +7,11 @@ import { ConfigService } from '@nestjs/config';
 import { JwtPayloadDto } from '~/apps/auth/dtos';
 import * as bcrypt from 'bcrypt';
 import { RpcException, ClientRMQ } from '@nestjs/microservices';
-import { MAIL_SERVICE } from '~/constants';
+import { MAIL_SERVICE, REDIS_CACHE, REQUIRE_USER_REFRESH } from '~/constants';
 import { catchError, throwError } from 'rxjs';
 import { ConfirmEmailRegisterDTO } from '~/apps/mail/dtos';
 import { OtpService, OtpType } from '@app/resource/otp';
+import { Store } from 'cache-manager';
 
 @Injectable()
 export class AuthUtilService {
@@ -20,9 +21,24 @@ export class AuthUtilService {
         protected configService: ConfigService,
         @Inject(MAIL_SERVICE) protected mailService: ClientRMQ,
         protected readonly otpService: OtpService,
+        @Inject(REDIS_CACHE) protected cacheManager: Store,
     ) {}
 
     // Utils below
+    protected async checkIsRequiredRefresh(userId: string) {
+        const cacheUserKey = `${REQUIRE_USER_REFRESH}_${userId}`;
+        const userFound = await this.cacheManager.get(cacheUserKey);
+        if (userFound) {
+            return true;
+        }
+        return false;
+    }
+
+    protected async removeRequireRefresh(userId: string) {
+        const cacheUserKey = `${REQUIRE_USER_REFRESH}_${userId}`;
+        await this.cacheManager.del(cacheUserKey);
+    }
+
     cleanUserBeforeResponse(user: User) {
         delete user.password;
         if (user.block) delete user.block;
@@ -93,7 +109,9 @@ export class AuthUtilService {
                 },
                 {
                     secret: this.configService.get<string>('JWT_ACCESS_TOKEN_SECRET'),
-                    expiresIn: '15m',
+                    expiresIn:
+                        this.configService.get<string>('JWT_ACCESS_TOKEN_EXPIRE_TIME_STRING') ||
+                        '15m',
                 },
             ),
             this.jwtService.signAsync(
@@ -104,10 +122,15 @@ export class AuthUtilService {
                 },
                 {
                     secret: this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'),
-                    expiresIn: '7d',
+                    expiresIn:
+                        this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRE_TIME_STRING') ||
+                        '7d',
                 },
             ),
         ]);
+
+        // Remove require refresh any time token is created or refreshed
+        await this.removeRequireRefresh(_id.toString());
 
         return {
             accessToken,

@@ -8,6 +8,7 @@ import {
 import { ClientRMQ, RpcException } from '@nestjs/microservices';
 import { catchError, Observable, of, switchMap } from 'rxjs';
 import { AUTH_SERVICE } from '~/constants';
+import { AuthMessagePattern } from '~/apps/auth';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -30,7 +31,7 @@ export class AuthGuard implements CanActivate {
 
         const [, jwt] = authHeaderParts;
 
-        return this.authService.send({ cmd: 'verify-jwt' }, { jwt }).pipe(
+        return this.authService.send(AuthMessagePattern.verifyJwt, { jwt }).pipe(
             switchMap(({ exp }) => {
                 if (!exp) return of(false);
 

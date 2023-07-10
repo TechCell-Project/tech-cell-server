@@ -14,12 +14,13 @@ import {
     LoginRequestDTO,
     VerifyEmailRequestDTO,
     VerifyForgotPasswordDTO,
+    RegisterRequestDTO,
+    NewTokenRequestDTO,
+    UserDataResponseDTO,
 } from '~/apps/auth/dtos';
-import { RegisterRequestDTO, NewTokenRequestDTO, UserDataResponseDTO } from '~/apps/auth/dtos';
 import { User } from '@app/resource/users/schemas';
 import { RpcException } from '@nestjs/microservices';
-import { catchError, throwError, firstValueFrom } from 'rxjs';
-import { ConfirmEmailRegisterDTO, ForgotPasswordEmailDTO } from '~/apps/mail/dtos';
+import { ConfirmEmailRegisterDTO, ForgotPasswordEmailDTO, MailEventPattern } from '~/apps/mail';
 import { OtpType } from '@app/resource/otp';
 import { IUserFacebookResponse, IUserGoogleResponse, ITokenVerifiedResponse } from './interfaces';
 import { generateRandomString } from '@app/common';
@@ -43,6 +44,14 @@ export class AuthService extends AuthUtilService {
             );
         }
 
+        if (user.block && user.block.isBlocked) {
+            throw new RpcException(
+                new ForbiddenException(
+                    'Your account has been locked, please contact the administrator',
+                ),
+            );
+        }
+
         if (!user.emailVerified) {
             const otp = await this.otpService.createOrRenewOtp({
                 email,
@@ -52,13 +61,10 @@ export class AuthService extends AuthUtilService {
                 otpCode: otp.otpCode,
             };
 
-            await firstValueFrom(
-                this.mailService
-                    .send({ cmd: 'mail_send_confirm' }, { email, emailContext })
-                    .pipe(
-                        catchError((error) => throwError(() => new RpcException(error.response))),
-                    ),
-            );
+            this.mailService.emit(MailEventPattern.sendMailConfirm, {
+                email,
+                emailContext,
+            });
 
             throw new RpcException(
                 new NotAcceptableException(
@@ -176,11 +182,7 @@ export class AuthService extends AuthUtilService {
             firstName: userFound.firstName,
         };
 
-        await firstValueFrom(
-            this.mailService
-                .send({ cmd: 'mail_send_forgot_password' }, { ...emailContext })
-                .pipe(catchError((error) => throwError(() => new RpcException(error.response)))),
-        );
+        this.mailService.emit(MailEventPattern.sendMailForgotPassword, { ...emailContext });
 
         return {
             message: 'An email has already been sent to you email address, please check your email',
@@ -220,10 +222,16 @@ export class AuthService extends AuthUtilService {
             throw new RpcException(new BadRequestException('Access token missing.'));
         }
 
-        return (await this.verifyToken(
+        const dataVerified = (await this.verifyToken(
             accessToken,
             this.configService.get<string>('JWT_ACCESS_TOKEN_SECRET'),
         )) as ITokenVerifiedResponse;
+
+        if (await this.checkIsRequiredRefresh(dataVerified._id)) {
+            throw new RpcException(new ForbiddenException('Access token is expired.'));
+        }
+
+        return dataVerified;
     }
 
     async verifyRefreshToken(refreshToken: string): Promise<ITokenVerifiedResponse> {

@@ -146,6 +146,22 @@ declare namespace NodeJS {
         JWT_REFRESH_TOKEN_SECRET: string;
 
         /**
+         * The expire time of `accessToken`
+         * @description This value is used for `JWT` module
+         * @example
+         * JWT_ACCESS_TOKEN_EXPIRE_TIME = 15m // means 15 mins
+         */
+        JWT_ACCESS_TOKEN_EXPIRE_TIME_STRING: string;
+
+        /**
+         * The expire time of `refreshToken`
+         * @description This value is used for `JWT` module
+         * @example
+         * JWT_REFRESH_TOKEN_EXPIRE_TIME = 7d // means 7 days
+         */
+        JWT_REFRESH_TOKEN_EXPIRE_TIME_STRING: string;
+
+        /**
          * The mongodb uri
          * @description This value is used for `mongoose` module
          * @example
@@ -301,5 +317,53 @@ declare namespace NodeJS {
          * @see https://developers.facebook.com/docs/facebook-login
          */
         FACEBOOK_REDIRECT_URL: string;
+
+        /**
+         * The env to enable all `Logs`
+         * @description `true/1/on` to enable, otherwise disable
+         * @example
+         * LOGS_IS_ENABLE = true
+         */
+        LOGS_IS_ENABLE: string | boolean;
+
+        /**
+         * The env to enable `Console` logs
+         * @description `true/1/on` to enable, otherwise disable
+         * @example
+         * LOGS_TO_CONSOLE = true
+         */
+        LOGS_TO_CONSOLE: string | boolean;
+
+        /**
+         * The env to enable `File` logs
+         * @description `true/1/on` to enable, otherwise disable
+         * @example
+         * LOGS_TO_FILE = true
+         */
+        LOGS_TO_FILE: string | boolean; // `true/1/on` to enable, otherwise disable
+
+        /**
+         * The env to enable `Discord` logs
+         * @description `true/1/on` to enable, otherwise disable
+         * @example
+         * DISCORD_IS_ENABLE = true
+         */
+        LOGS_TO_DISCORD: string | boolean;
+
+        /**
+         * The `Discord` token
+         * @description This value is used for `discord.js` module
+         * @example
+         * DISCORD_TOKEN = 'example'
+         */
+        DISCORD_TOKEN: string;
+
+        /**
+         * The `Discord` logs channel id
+         * @description This value is used for `discord.js` module
+         * @example
+         * DISCORD_LOGS_CHANNEL_ID = example
+         */
+        DISCORD_LOGS_CHANNEL_ID: string;
     }
 }

@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { ClientRMQ, RpcException } from '@nestjs/microservices';
 import { catchError, firstValueFrom } from 'rxjs';
-import { ITokenVerifiedResponse } from '~/apps/auth/interfaces';
+import { ITokenVerifiedResponse, AuthMessagePattern } from '~/apps/auth';
 import { UserRole } from '@app/resource/users/enums';
 import { AUTH_SERVICE } from '~/constants';
 
@@ -17,7 +17,7 @@ export class ModGuard implements CanActivate {
     constructor(@Inject(AUTH_SERVICE) private readonly authService: ClientRMQ) {}
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
-        const acceptRoles: string[] = [UserRole.Admin, UserRole.Mod];
+        const acceptRoles: string[] = [UserRole.Admin, UserRole.Mod, UserRole.SuperAdmin];
 
         if (context.getType() !== 'http') {
             return false;
@@ -30,7 +30,7 @@ export class ModGuard implements CanActivate {
         const [, jwt] = authHeaderParts;
 
         const dataVerified: ITokenVerifiedResponse = await firstValueFrom(
-            this.authService.send({ cmd: 'verify-jwt' }, { jwt }).pipe(
+            this.authService.send(AuthMessagePattern.verifyJwt, { jwt }).pipe(
                 catchError((error) => {
                     throw new RpcException(error);
                 }),
