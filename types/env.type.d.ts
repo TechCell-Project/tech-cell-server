@@ -319,12 +319,36 @@ declare namespace NodeJS {
         FACEBOOK_REDIRECT_URL: string;
 
         /**
+         * The env to enable all `Logs`
+         * @description `true/1/on` to enable, otherwise disable
+         * @example
+         * LOGS_IS_ENABLE = true
+         */
+        LOGS_IS_ENABLE: string | boolean;
+
+        /**
+         * The env to enable `Console` logs
+         * @description `true/1/on` to enable, otherwise disable
+         * @example
+         * LOGS_TO_CONSOLE = true
+         */
+        LOGS_TO_CONSOLE: string | boolean;
+
+        /**
+         * The env to enable `File` logs
+         * @description `true/1/on` to enable, otherwise disable
+         * @example
+         * LOGS_TO_FILE = true
+         */
+        LOGS_TO_FILE: string | boolean; // `true/1/on` to enable, otherwise disable
+
+        /**
          * The env to enable `Discord` logs
-         * @description Use for enable logs for `Discord` module
+         * @description `true/1/on` to enable, otherwise disable
          * @example
          * DISCORD_IS_ENABLE = true
          */
-        DISCORD_IS_ENABLE: string | boolean;
+        LOGS_TO_DISCORD: string | boolean;
 
         /**
          * The `Discord` token

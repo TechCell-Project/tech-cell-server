@@ -16,26 +16,69 @@ export class MorganMiddleware implements NestMiddleware {
     private readonly logger = new Logger(MorganMiddleware.name);
 
     use(req: Request, res: Response, next: NextFunction) {
-        const logDirectory = path.join(__dirname, `../../../logs`);
-        fs.mkdirSync(logDirectory, { recursive: true });
+        if (
+            !process.env.LOGS_IS_ENABLE ||
+            (process.env.LOGS_IS_ENABLE &&
+                !(
+                    process.env.LOGS_IS_ENABLE === 'true' ||
+                    process.env.LOGS_IS_ENABLE === '1' ||
+                    process.env.LOGS_IS_ENABLE === 'on'
+                ))
+        ) {
+            /**
+             * if logs is not enable, just skip this middleware
+             * LOGS_IS_ENABLE is need to be set to `true` or `1` or `on` to enable logs
+             */
+            return next();
+        }
 
-        const currentDate = new Date();
-        const day = currentDate.getDate().toString().padStart(2, '0');
-        const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
-        const year = currentDate.getFullYear().toString();
-        const fileName = `logs_${day}-${month}-${year}.log`;
+        function logsToFile(message: string) {
+            const logDirectory = path.join(__dirname, `../../../logs`);
+            fs.mkdirSync(logDirectory, { recursive: true });
 
-        const logStream = fs.createWriteStream(path.join(logDirectory, fileName), {
-            flags: 'a',
-        });
+            const currentDate = new Date();
+            const day = currentDate.getDate().toString().padStart(2, '0');
+            const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
+            const year = currentDate.getFullYear().toString();
+            const fileName = `logs_${day}-${month}-${year}.log`;
+
+            const logStream = fs.createWriteStream(path.join(logDirectory, fileName), {
+                flags: 'a',
+            });
+
+            return logStream.write(message.trim() + '\n');
+        }
 
         const writeFc = (message: string) => {
             try {
-                this.logger.log(message.trim());
-                logStream.write(message.trim() + '\n');
-                this.sampleService.emit(SampleEventPattern.writeLogsToDiscord, {
-                    message: formatLogsDiscord(message, req, res),
-                });
+                if (
+                    process.env.LOGS_TO_CONSOLE &&
+                    (process.env.LOGS_TO_CONSOLE === 'true' ||
+                        process.env.LOGS_TO_CONSOLE === '1' ||
+                        process.env.LOGS_TO_CONSOLE === 'on')
+                ) {
+                    this.logger.log(message.trim());
+                }
+
+                if (
+                    process.env.LOGS_TO_FILE &&
+                    (process.env.LOGS_TO_FILE === 'true' ||
+                        process.env.LOGS_TO_FILE === '1' ||
+                        process.env.LOGS_TO_FILE === 'on')
+                ) {
+                    logsToFile(message);
+                }
+
+                if (
+                    process.env.LOGS_TO_DISCORD &&
+                    (process.env.LOGS_TO_DISCORD === 'true' ||
+                        process.env.LOGS_TO_DISCORD === '1' ||
+                        process.env.LOGS_TO_DISCORD === 'on')
+                ) {
+                    this.sampleService.emit(SampleEventPattern.writeLogsToDiscord, {
+                        message: formatLogsDiscord(message, req, res),
+                    });
+                }
             } catch (error) {
                 this.logger.error(error);
             }
