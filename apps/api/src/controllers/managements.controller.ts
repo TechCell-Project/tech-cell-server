@@ -1,4 +1,4 @@
-import { Controller, Get, Inject, Request, UseGuards, Patch, Body } from '@nestjs/common';
+import { Controller, Get, Inject, UseGuards, Patch, Body, Query, Param } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import { MANAGEMENTS_SERVICE } from '~/constants';
 import { ModGuard } from '@app/common/guards';
@@ -15,6 +15,7 @@ import {
     ChangeRoleRequestDTO,
     GetUsersDTO,
     UsersMntMessagePattern,
+    BlockUnblockRequestDTO,
 } from '~/apps/managements/users-mnt';
 import { catchException } from '@app/common';
 import { UserMntResponseDto } from '@app/resource/users/dtos';
@@ -32,22 +33,19 @@ export class ManagementsController {
         return { message: 'pong' };
     }
 
-    @ApiQuery({ type: GetUsersDTO })
     @ApiOkResponse({ description: 'Get users success', type: [UserMntResponseDto] })
     @ApiNotFoundResponse({ description: 'No users found' })
     @Get('users')
-    async getUsers(@Request() req) {
-        const reqQuery: GetUsersDTO = req.query;
+    async getUsers(@Query() requestQuery: GetUsersDTO) {
         return this.managementsService
-            .send(UsersMntMessagePattern.getUsers, { ...reqQuery })
+            .send(UsersMntMessagePattern.getUsers, { ...requestQuery })
             .pipe(catchException());
     }
 
     @ApiOkResponse({ description: 'Get users success', type: UserMntResponseDto })
     @ApiNotFoundResponse({ description: 'No users found' })
     @Get('users/:id')
-    async getUserById(@Request() req) {
-        const { id } = req.params;
+    async getUserById(@Param('id') id: string) {
         return this.managementsService
             .send(UsersMntMessagePattern.getUserById, { id })
             .pipe(catchException());
@@ -58,15 +56,16 @@ export class ManagementsController {
         description: 'Invalid request',
     })
     @Patch('users/:id/block')
-    async blockUser(@Request() req) {
-        const { id: victimUserId } = req.params;
-        const { blockReason = '', blockNote = '', userId } = req.body;
+    async blockUser(
+        @Param('id') idParam: string,
+        @Body() { reason = '', note = '', userId }: BlockUnblockRequestDTO,
+    ) {
         return this.managementsService
             .send(UsersMntMessagePattern.blockUser, {
-                victimUserId,
+                victimUserId: idParam,
                 blockUserId: userId,
-                blockReason,
-                blockNote,
+                blockReason: reason,
+                blockNote: note,
             })
             .pipe(catchException());
     }
@@ -76,15 +75,16 @@ export class ManagementsController {
         description: 'Invalid request',
     })
     @Patch('users/:id/unblock')
-    async unblockUser(@Request() req) {
-        const { id: victimUserId } = req.params;
-        const { userId, unblockReason = '', unblockNote = '' } = req.body;
+    async unblockUser(
+        @Param('id') idParam: string,
+        @Body() { reason = '', note = '', userId }: BlockUnblockRequestDTO,
+    ) {
         return this.managementsService
             .send(UsersMntMessagePattern.unblockUser, {
-                victimUserId,
+                victimUserId: idParam,
                 unblockUserId: userId,
-                unblockReason,
-                unblockNote,
+                unblockReason: reason,
+                unblockNote: note,
             })
             .pipe(catchException());
     }
@@ -94,10 +94,12 @@ export class ManagementsController {
         description: 'Invalid request',
     })
     @Patch('users/:id/change-role')
-    async changeRoleUser(@Request() req, @Body() { role, userId: actorId }: ChangeRoleRequestDTO) {
-        const { id: victimId } = req.params;
+    async changeRoleUser(
+        @Param('id') idParam: string,
+        @Body() { role, userId: actorId }: ChangeRoleRequestDTO,
+    ) {
         return this.managementsService
-            .send(UsersMntMessagePattern.changeRoleUser, { victimId, actorId, role })
+            .send(UsersMntMessagePattern.changeRoleUser, { victimId: idParam, actorId, role })
             .pipe(catchException());
     }
 }
