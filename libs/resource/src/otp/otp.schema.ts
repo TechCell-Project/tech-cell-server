@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { AbstractDocument } from '@app/common';
 import { OtpType } from './otp.enum';
 
-@Schema({ versionKey: false })
+@Schema({ versionKey: false, timestamps: true })
 export class Otp extends AbstractDocument {
     @Prop({ required: true })
     email: string;
@@ -25,3 +25,15 @@ export class Otp extends AbstractDocument {
 
 export const OtpSchema = SchemaFactory.createForClass(Otp);
 OtpSchema.index({ email: 1, otpType: 1 }, { unique: true });
+
+OtpSchema.pre('save', function () {
+    this.set({ updatedAt: new Date(), createdAt: new Date() });
+});
+
+OtpSchema.pre('updateOne', function () {
+    this.set({ updatedAt: new Date() });
+});
+
+OtpSchema.pre('findOneAndUpdate', function () {
+    this.set({ updatedAt: new Date() });
+});
