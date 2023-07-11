@@ -135,7 +135,8 @@
       "^~/apps/products(|/.*)$": "<rootDir>/apps/products/src/$1",
       "^~/apps/sample(|/.*)$": "<rootDir>/apps/sample/src/$1",
       "^~/apps/managements(|/.*)$": "<rootDir>/apps/managements/src/$1",
-      "^@app/resource(|/.*)$": "<rootDir>/libs/resource/src/$1"
+      "^@app/resource(|/.*)$": "<rootDir>/libs/resource/src/$1",
+      "^@app/payment(|/.*)$": "<rootDir>/libs/payment/src/$1"
     }
   }
 }
