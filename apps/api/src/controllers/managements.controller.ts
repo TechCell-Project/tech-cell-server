@@ -8,7 +8,6 @@ import {
     ApiForbiddenResponse,
     ApiNotFoundResponse,
     ApiOkResponse,
-    ApiQuery,
     ApiTags,
 } from '@nestjs/swagger';
 import {
