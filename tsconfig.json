@@ -62,6 +62,12 @@
       ],
       "@app/resource/*": [
         "libs/resource/src/*"
+      ],
+      "@app/payment": [
+        "libs/payment/src"
+      ],
+      "@app/payment/*": [
+        "libs/payment/src/*"
       ]
     }
   }
