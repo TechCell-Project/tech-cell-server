@@ -178,6 +178,7 @@ export class UsersMntService extends UsersMntUtilService {
         this.canChangeRole({
             victimUser: user,
             actorUser: updatedByUser,
+            roleToChange: role,
         });
 
         const [changeRole] = await Promise.all([
