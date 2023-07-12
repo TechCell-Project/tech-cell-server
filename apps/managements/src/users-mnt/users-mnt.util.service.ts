@@ -19,6 +19,7 @@ import {
     USERS_LIMIT,
 } from '~/constants';
 import { Store } from 'cache-manager';
+import { UserRole } from '@app/resource/users/enums';
 
 @Injectable()
 export class UsersMntUtilService {
@@ -106,14 +107,17 @@ export class UsersMntUtilService {
      * @param param0 - { victimUser, actorUser } - victimUser is the user to be changed role, actorUser is the user who change victimUser role
      * @returns return true if actorUser can change victimUser role, otherwise throw an error
      */
-    protected canChangeRole({ victimUser, actorUser }: { victimUser: User; actorUser: User }) {
+    protected canChangeRole({
+        victimUser,
+        actorUser,
+        roleToChange,
+    }: {
+        victimUser: User;
+        actorUser: User;
+        roleToChange: string;
+    }) {
         if (victimUser._id.toString() === actorUser._id.toString()) {
             throw new RpcException(new BadRequestException('You cannot change your role'));
-        }
-
-        // Actor's role must be higher than victim's role
-        if (!this.requiredHigherRole({ victimUser, actorUser })) {
-            throw new RpcException(new ForbiddenException('You cannot change this user role'));
         }
 
         // Actor user must be admin or higher role to change other user role
@@ -121,8 +125,26 @@ export class UsersMntUtilService {
             throw new RpcException(new ForbiddenException('You cannot change this user role'));
         }
 
-        // Victim user must not be Super Admin
-        if (this.requiredSuperAdminRole({ actorUser: victimUser })) {
+        // Actor's role must be higher than victim's role
+        if (!this.requiredHigherRole({ victimUser, actorUser })) {
+            throw new RpcException(new ForbiddenException('You cannot change this user role'));
+        }
+
+        // Victim user must not be `SuperAdmin`
+        if (!isSuperAdmin(victimUser)) {
+            throw new RpcException(new ForbiddenException('You cannot change this user role'));
+        }
+
+        // If `victim` is `Admin`, `Actor` must be `SuperAdmin`
+        if (isAdmin(victimUser) && !isSuperAdmin(actorUser)) {
+            throw new RpcException(new ForbiddenException('You cannot change this user role'));
+        }
+
+        // If role to change is `Admin`, `Actor` must be `SuperAdmin`
+        if (
+            roleToChange.toLowerCase() === UserRole.Admin.toLowerCase() &&
+            !isSuperAdmin(actorUser)
+        ) {
             throw new RpcException(new ForbiddenException('You cannot change this user role'));
         }
 
@@ -135,11 +157,11 @@ export class UsersMntUtilService {
      * @returns return true if actorUser is higher role than victimUser, otherwise return false
      */
     private requiredHigherRole({ victimUser, actorUser }: { victimUser: User; actorUser: User }) {
-        if (isSuperAdmin(victimUser)) {
+        if (isUser(actorUser)) {
             return false;
         }
 
-        if (isUser(actorUser)) {
+        if (isSuperAdmin(victimUser)) {
             return false;
         }
 
