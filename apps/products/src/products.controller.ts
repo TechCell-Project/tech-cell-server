@@ -1,8 +1,8 @@
 import { Controller, Get, Inject } from '@nestjs/common';
-import { ProductsService } from './services';
+import { ProductsService } from './products.service';
 import { RabbitMQService } from '@app/common';
 import { MessagePattern, Ctx, RmqContext, Payload } from '@nestjs/microservices';
-import { CreateProductRequest } from '~/apps/products/dtos';
+import { CreateProductRequestDto, UpdateProductRequestDto, SearchProductsRequestDTO } from '~/apps/products/dtos';
 
 @Controller()
 export class ProductsController {
@@ -11,25 +11,32 @@ export class ProductsController {
         private readonly productsService: ProductsService,
     ) {}
 
-    @Get('ping')
-    async getPing() {
-        return this.productsService.getPing();
-    }
-
-    @MessagePattern({ cmd: 'get_products' })
-    async getProducts(@Ctx() context: RmqContext) {
+    @MessagePattern({ cmd: 'search_product_by_name' })
+    async getProduct(
+        @Ctx() context: RmqContext,
+        @Payload() { searchTerm, page, sortField, sortOrder }: SearchProductsRequestDTO,
+    ) {
         this.rabbitMqService.acknowledgeMessage(context);
-        const products = await this.productsService.findAll();
+        const products = await this.productsService.searchByName({
+            searchTerm,
+            page,
+            sortField,
+            sortOrder,
+        });
         return {
             products: products,
         };
     }
 
-    // @UseFilters(new RpcValidationFilter())
-    @MessagePattern({ cmd: 'create_product' })
-    async createProduct(@Payload() product: CreateProductRequest, @Ctx() context: RmqContext) {
-        this.rabbitMqService.acknowledgeMessage(context);
-        const createdProduct = await this.productsService.create(product);
-        return createdProduct;
-    }
+    // @MessagePattern({ cmd: 'create_product' })
+    // async createProduct(@Payload() product: createProductDto, @Ctx() context: RmqContext) {
+    //     this.rabbitMqService.acknowledgeMessage(context);
+    //     return await this.productsService.create(product);
+    // }
+
+    // @MessagePattern({ cmd: 'update_product' })
+    // async editProduct(@Payload() product: updateProductDto, @Ctx() context: RmqContext) {
+    //     this.rabbitMqService.acknowledgeMessage(context);
+    //     return await this.productsService.create(product);
+    // }
 }
