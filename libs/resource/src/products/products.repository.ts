@@ -37,13 +37,13 @@ export class ProductsRepository extends AbstractRepository<Product> {
     }
 
     async getProductsByCategory(
-        searchTerm: string,
+        category: string,
         page: number,
         sortField: string,
         sortOrder: 'asc' | 'desc',
     ) {
         const perPage = 10;
-        const regex = new RegExp(searchTerm, 'i');
+        const regex = new RegExp(category, 'i');
         const sortOptions: any = {};
         sortOptions[sortField] = sortOrder;
 

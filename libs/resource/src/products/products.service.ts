@@ -1,9 +1,4 @@
-import {
-    Injectable,
-    ConflictException,
-    NotFoundException,
-    UnprocessableEntityException,
-} from '@nestjs/common';
+import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import {
     SearchProductsRequestDTO,
     GetProductsByCateRequestDTO,
@@ -66,54 +61,12 @@ export class ProductsService {
         }
     }
 
-    // async update(updateProductDto: updateProductDto) {
-    //     try {
-    //         const updated = this.productsRepository.
-    //     } catch (error) {
-    //         throw error;
-    //     }
-    // }
-
     async searchByName({ searchTerm, page, sortField, sortOrder }: SearchProductsRequestDTO) {
-        try {
-            const productsFound = await this.productsRepository.searchProducts(
-                searchTerm,
-                page,
-                sortField,
-                sortOrder,
-            );
-
-            if (productsFound.length === 0) {
-                throw new NotFoundException('Not found any product!');
-            }
-
-            return { productsFound };
-        } catch (error) {
-            throw new RpcException(
-                new ConflictException('An error occurred while searching for products.'),
-            );
-        }
+        return this.productsRepository.searchProducts(searchTerm, page, sortField, sortOrder);
     }
 
     async getByCategory({ category, page, sortField, sortOrder }: GetProductsByCateRequestDTO) {
-        try {
-            const productsFound = await this.productsRepository.getProductsByCategory(
-                category,
-                page,
-                sortField,
-                sortOrder,
-            );
-
-            if (productsFound.length === 0) {
-                throw new NotFoundException('Not found any product!');
-            }
-
-            return { productsFound };
-        } catch (error) {
-            throw new RpcException(
-                new ConflictException('An error occurred while getting products.'),
-            );
-        }
+        return this.productsRepository.getProductsByCategory(category, page, sortField, sortOrder);
     }
 
     async getUser(
@@ -126,9 +79,18 @@ export class ProductsService {
 
     async findOneAndUpdateProduct(
         filterQuery: FilterQuery<Product>,
-        updateUserArgs: Partial<Product>,
+        updateProductArgs: Partial<Product>,
     ) {
-        return this.productsRepository.findOneAndUpdate(filterQuery, updateUserArgs);
+        if ('name' in updateProductArgs) {
+            const existingProduct = await this.productsRepository.findOne({
+                name: updateProductArgs.name,
+            });
+
+            if (existingProduct && existingProduct._id.toString() !== filterQuery._id.toString()) {
+                throw new Error('Product with the same name already exists');
+            }
+        }
+        return this.productsRepository.findOneAndUpdate(filterQuery, updateProductArgs);
     }
 
     async countProduct(filterQuery: FilterQuery<Product>) {

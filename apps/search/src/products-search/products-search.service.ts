@@ -6,7 +6,7 @@ export class ProductsSearchService {
     constructor(private readonly productsService: ProductsService) {}
 
     async getProducts() {
-        return this.productsService.getProducts();
+        return this.productsService.getAllProducts();
     }
 
     // async getProductsByName() {

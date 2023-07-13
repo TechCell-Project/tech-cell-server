@@ -11,6 +11,7 @@ import {
     Max,
     ArrayMinSize,
     ValidateNested,
+    IsMongoId,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { Category, Manufacturer } from '../enums';
@@ -38,8 +39,9 @@ class FilterDto {
 }
 
 export class UpdateProductRequestDto {
-    @IsOptional()
-    product_id: number;
+    @IsNotEmpty()
+    @IsMongoId()
+    id: string;
 
     @IsString()
     @IsNotEmpty()

@@ -25,5 +25,4 @@ export class GeneralSchema {
 
     @Prop({ required: true, type: String, enum: Category })
     categories: string;
-
 }
