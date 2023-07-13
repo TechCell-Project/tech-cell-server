@@ -14,6 +14,9 @@ export class Product extends AbstractDocument {
 
     @Prop({ required: true })
     filterable: FilterableSchema;
+
+    @Prop({ required: true, type: Boolean, default: true })
+    status: boolean;
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);

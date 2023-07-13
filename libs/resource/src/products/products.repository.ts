@@ -36,7 +36,7 @@ export class ProductsRepository extends AbstractRepository<Product> {
         return products;
     }
 
-    async searchProductsByCategory(
+    async getProductsByCategory(
         searchTerm: string,
         page: number,
         sortField: string,
