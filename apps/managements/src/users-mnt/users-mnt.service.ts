@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { Types } from 'mongoose';
 import { GetUsersDTO, QueryUserParamsDTO } from './dtos';
 import { RpcException } from '@nestjs/microservices';
-import { BlockActivity, UserRole } from '@app/resource/users/enums';
+import { BlockActivity } from '@app/resource/users/enums';
 import { UsersMntUtilService } from './users-mnt.util.service';
 import { timeStringToMs } from '@app/common';
 
@@ -168,12 +168,6 @@ export class UsersMntService extends UsersMntUtilService {
             this.usersService.getUser({ _id: new Types.ObjectId(victimId) }),
             this.usersService.getUser({ _id: new Types.ObjectId(actorId) }),
         ]);
-
-        if (role.toLowerCase() === UserRole.SuperAdmin.toLowerCase()) {
-            throw new RpcException(
-                new BadRequestException('You cannot grant Super Admin role to anyone'),
-            );
-        }
 
         this.canChangeRole({
             victimUser: user,

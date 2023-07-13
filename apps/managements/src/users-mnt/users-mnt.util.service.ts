@@ -116,36 +116,32 @@ export class UsersMntUtilService {
         actorUser: User;
         roleToChange: string;
     }) {
+        if (!isSuperAdmin(actorUser) && !isAdmin(actorUser)) {
+            throw new RpcException(
+                new ForbiddenException('You do not have permission to change roles'),
+            );
+        }
+
         if (victimUser._id.toString() === actorUser._id.toString()) {
-            throw new RpcException(new BadRequestException('You cannot change your role'));
+            throw new RpcException(new BadRequestException('You cannot change your own role'));
         }
 
-        // Actor user must be admin or higher role to change other user role
-        if (!this.requiredAdminOrHigherRole({ actorUser })) {
-            throw new RpcException(new ForbiddenException('You cannot change this user role'));
+        if (isSuperAdmin(victimUser) && !isSuperAdmin(actorUser)) {
+            throw new RpcException(
+                new ForbiddenException('You do not have permission to change SuperAdmin role'),
+            );
         }
 
-        // Actor's role must be higher than victim's role
-        if (!this.requiredHigherRole({ victimUser, actorUser })) {
-            throw new RpcException(new ForbiddenException('You cannot change this user role'));
+        if (roleToChange === UserRole.SuperAdmin) {
+            throw new RpcException(
+                new BadRequestException('You cannot grant SuperAdmin role to anyone'),
+            );
         }
 
-        // Victim user must not be `SuperAdmin`
-        if (!isSuperAdmin(victimUser)) {
-            throw new RpcException(new ForbiddenException('You cannot change this user role'));
-        }
-
-        // If `victim` is `Admin`, `Actor` must be `SuperAdmin`
-        if (isAdmin(victimUser) && !isSuperAdmin(actorUser)) {
-            throw new RpcException(new ForbiddenException('You cannot change this user role'));
-        }
-
-        // If role to change is `Admin`, `Actor` must be `SuperAdmin`
-        if (
-            roleToChange.toLowerCase() === UserRole.Admin.toLowerCase() &&
-            !isSuperAdmin(actorUser)
-        ) {
-            throw new RpcException(new ForbiddenException('You cannot change this user role'));
+        if (actorUser.role === UserRole.Admin && roleToChange === UserRole.Admin) {
+            throw new RpcException(
+                new ForbiddenException('You do not have permission to grant Admin role'),
+            );
         }
 
         return true;
