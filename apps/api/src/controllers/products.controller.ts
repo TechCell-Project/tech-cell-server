@@ -1,34 +1,20 @@
-import {
-    Controller,
-    Inject,
-    Body,
-    Get,
-    Post,
-    UseGuards,
-    UploadedFile,
-    UseInterceptors,
-    Query,
-} from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
-import { PRODUCTS_SERVICE } from '~/constants';
-import { AuthGuard, catchException } from '@app/common';
-import {
-    ApiTags,
-    ApiOkResponse,
-    ApiNotFoundResponse,
-    ApiBadRequestResponse,
-} from '@nestjs/swagger';
-// import { uploadCloud } from './../configs';
-import { SearchProductsRequestDTO, SearchProductResponseDTO } from '~/apps/products/dtos';
+import { Controller, Inject, Get } from '@nestjs/common';
+import { ClientRMQ } from '@nestjs/microservices';
+import { SEARCH_SERVICE } from '~/constants';
+import { catchException } from '@app/common';
+import { ApiTags } from '@nestjs/swagger';
+import { ProductsSearchMessagePattern } from '~/apps/search/products-search';
 
 @ApiTags('products')
 @Controller('products')
 export class ProductsController {
-    constructor(@Inject(PRODUCTS_SERVICE) private readonly productsService: ClientProxy) {}
+    constructor(@Inject(SEARCH_SERVICE) private readonly searchService: ClientRMQ) {}
 
     @Get()
     async getProducts() {
-        return this.productsService.send({ cmd: 'get_products' }, {}).pipe(catchException());
+        return this.searchService
+            .send(ProductsSearchMessagePattern.getProducts, {})
+            .pipe(catchException());
     }
 
     // @UseGuards(AuthGuard)
@@ -68,15 +54,15 @@ export class ProductsController {
     //         .pipe(catchException());
     // }
 
-    @ApiOkResponse({ description: 'Products found', type: SearchProductResponseDTO, isArray: true })
-    @ApiNotFoundResponse({ description: 'No products found' })
-    @ApiBadRequestResponse({ description: 'Invalid request parameters' })
-    @Get('search')
-    async searchProducts(
-        @Query() { searchTerm, page, sortField, sortOrder }: SearchProductsRequestDTO,
-    ) {
-        return this.productsService
-            .send({ cmd: 'search_product_by_name' }, { searchTerm, page, sortField, sortOrder })
-            .pipe(catchException());
-    }
+    // @ApiOkResponse({ description: 'Products found', type: SearchProductResponseDTO, isArray: true })
+    // @ApiNotFoundResponse({ description: 'No products found' })
+    // @ApiBadRequestResponse({ description: 'Invalid request parameters' })
+    // @Get('search')
+    // async searchProducts(
+    //     @Query() { searchTerm, page, sortField, sortOrder }: SearchProductsRequestDTO,
+    // ) {
+    //     return this.productsService
+    //         .send({ cmd: 'search_product_by_name' }, { searchTerm, page, sortField, sortOrder })
+    //         .pipe(catchException());
+    // }
 }

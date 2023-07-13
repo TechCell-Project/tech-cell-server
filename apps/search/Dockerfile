@@ -8,7 +8,7 @@ RUN yarn install
 
 COPY . . 
 
-RUN yarn run build products
+RUN yarn run build search
 
 FROM node:18 as production
 
@@ -22,4 +22,4 @@ COPY . .
 
 COPY --from=development /usr/src/app/dist ./dist
 
-CMD ["node", "dist/apps/products/main"]
+CMD ["node", "dist/apps/search/main"]

@@ -138,7 +138,7 @@
       "^~/apps/api(|/.*)$": "<rootDir>/apps/api/src/$1",
       "^~/apps/auth(|/.*)$": "<rootDir>/apps/auth/src/$1",
       "^~/apps/mail(|/.*)$": "<rootDir>/apps/mail/src/$1",
-      "^~/apps/products(|/.*)$": "<rootDir>/apps/products/src/$1",
+      "^~/apps/search(|/.*)$": "<rootDir>/apps/search/src/$1",
       "^~/apps/sample(|/.*)$": "<rootDir>/apps/sample/src/$1",
       "^~/apps/managements(|/.*)$": "<rootDir>/apps/managements/src/$1",
       "^@app/resource(|/.*)$": "<rootDir>/libs/resource/src/$1",

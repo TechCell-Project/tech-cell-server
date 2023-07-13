@@ -13,7 +13,7 @@ import {
     ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { Category, Manufacturer } from '~/apps/products/enums';
+import { Category, Manufacturer } from '../enums';
 
 export class AttributesDto {
     @IsString()

@@ -1,30 +1,21 @@
-import {
-    Injectable,
-    UnauthorizedException,
-    ForbiddenException,
-    ConflictException,
-    NotFoundException,
-    BadRequestException,
-    NotAcceptableException,
-    UnprocessableEntityException,
-} from '@nestjs/common';
+import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Product } from './schemas';
 import { Model } from 'mongoose';
-import {
-    CreateProductRequestDto,
-    UpdateProductRequestDto,
-    SearchProductsRequestDTO,
-} from '~/apps/products/dtos';
+import { SearchProductsRequestDTO } from './dtos';
 import { RpcException } from '@nestjs/microservices';
 import { ProductsRepository } from './products.repository';
 
 @Injectable()
 export class ProductsService {
     constructor(
-        private readonly productsRepository: ProductsRepository,
-        @InjectModel(Product.name) private productModel: Model<Product>,
+        @InjectModel(Product.name) private productModel: Model<Product>, // TODO: remove this
+        private readonly productsRepository: ProductsRepository, // TODO: use this instead of productModel
     ) {}
+
+    async getProducts() {
+        return this.productsRepository.find({});
+    }
 
     // async create(CreateProductDTO: createProductDto) {
     //     try {
