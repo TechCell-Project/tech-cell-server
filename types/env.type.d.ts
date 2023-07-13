@@ -17,10 +17,10 @@ declare namespace NodeJS {
         SERVICE_SAMPLE_PORT: string;
 
         /**
-         * HTTP port of service products
-         * @description This port can not need to be exposed to outside
+         * HTTP port of service `search`
+         * @description This port maybe not need to be exposed to outside
          */
-        SERVICE_PRODUCTS_PORT: string;
+        SERVICE_SEARCH_PORT: string;
 
         /**
          * HTTP port of service auth
@@ -201,7 +201,7 @@ declare namespace NodeJS {
          * RABBITMQ_SAMPLE_QUEUE = 'sample-queue'
          */
         RABBITMQ_SAMPLE_QUEUE: string;
-        RABBITMQ_PRODUCTS_QUEUE: string;
+        RABBITMQ_SEARCH_QUEUE: string;
         RABBITMQ_AUTH_QUEUE: string;
         RABBITMQ_MAIL_QUEUE: string;
         RABBITMQ_MANAGEMENTS_QUEUE: string;
@@ -365,5 +365,30 @@ declare namespace NodeJS {
          * DISCORD_LOGS_CHANNEL_ID = example
          */
         DISCORD_LOGS_CHANNEL_ID: string;
+
+        /**
+         * The `cloud_name` of `Cloudinary`
+         * @description This value is used for `cloudinary` module
+         * @example
+         * CLOUDINARY_CLOUD_NAME = example
+         * @see https://cloudinary.com/documentation/image_upload_api_reference#upload_method
+         */
+        CLOUDINARY_CLOUD_NAME: string;
+
+        /**
+         * The `api_key` of `Cloudinary`
+         * @description This value is used for `cloudinary` module
+         * @example
+         * CLOUDINARY_API_KEY = example
+         */
+        CLOUDINARY_API_KEY: string;
+
+        /**
+         * The `api_secret` of `Cloudinary`
+         * @description This value is used for `cloudinary` module
+         * @example
+         * CLOUDINARY_API_SECRET = example
+         */
+        CLOUDINARY_API_SECRET: string;
     }
 }

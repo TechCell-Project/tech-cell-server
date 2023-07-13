@@ -37,15 +37,6 @@
         "tsConfigPath": "apps/sample/tsconfig.app.json"
       }
     },
-    "products": {
-      "type": "application",
-      "root": "apps/products",
-      "entryFile": "main",
-      "sourceRoot": "apps/products/src",
-      "compilerOptions": {
-        "tsConfigPath": "apps/products/tsconfig.app.json"
-      }
-    },
     "auth": {
       "type": "application",
       "root": "apps/auth",
@@ -102,6 +93,15 @@
       "sourceRoot": "libs/payment/src",
       "compilerOptions": {
         "tsConfigPath": "libs/payment/tsconfig.lib.json"
+      }
+    },
+    "search": {
+      "type": "application",
+      "root": "apps/search",
+      "entryFile": "main",
+      "sourceRoot": "apps/search/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/search/tsconfig.app.json"
       }
     }
   }
