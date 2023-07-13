@@ -12,7 +12,7 @@ import {
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerStorageRedisService } from 'nestjs-throttler-storage-redis';
-import { MorganMiddleware, JwtMiddleware } from './middlewares';
+import { MorganMiddleware } from './middlewares';
 import { GoogleStrategy, AccessTokenStrategy, FacebookStrategy } from '~/apps/auth/strategies';
 
 @Module({
@@ -55,6 +55,5 @@ import { GoogleStrategy, AccessTokenStrategy, FacebookStrategy } from '~/apps/au
 export class AppModule implements NestModule {
     configure(consumer: MiddlewareConsumer) {
         consumer.apply(MorganMiddleware).forRoutes('*');
-        consumer.apply(JwtMiddleware).forRoutes('mnt');
     }
 }

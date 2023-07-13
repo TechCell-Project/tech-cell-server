@@ -18,6 +18,8 @@ import {
 } from '~/apps/managements/users-mnt';
 import { catchException } from '@app/common';
 import { UserMntResponseDto } from '@app/resource/users/dtos';
+import { CurrentUser } from '@app/common/decorators';
+import { ICurrentUser } from '@app/common/interfaces';
 
 @ApiTags('managements')
 @ApiBearerAuth('accessToken')
@@ -57,12 +59,13 @@ export class ManagementsController {
     @Patch('users/:id/block')
     async blockUser(
         @Param('id') idParam: string,
-        @Body() { reason = '', note = '', userId }: BlockUnblockRequestDTO,
+        @Body() { reason = '', note = '' }: BlockUnblockRequestDTO,
+        @CurrentUser() user: ICurrentUser,
     ) {
         return this.managementsService
             .send(UsersMntMessagePattern.blockUser, {
                 victimUserId: idParam,
-                blockUserId: userId,
+                blockUserId: user._id,
                 blockReason: reason,
                 blockNote: note,
             })
@@ -76,12 +79,13 @@ export class ManagementsController {
     @Patch('users/:id/unblock')
     async unblockUser(
         @Param('id') idParam: string,
-        @Body() { reason = '', note = '', userId }: BlockUnblockRequestDTO,
+        @Body() { reason = '', note = '' }: BlockUnblockRequestDTO,
+        @CurrentUser() user: ICurrentUser,
     ) {
         return this.managementsService
             .send(UsersMntMessagePattern.unblockUser, {
                 victimUserId: idParam,
-                unblockUserId: userId,
+                unblockUserId: user._id,
                 unblockReason: reason,
                 unblockNote: note,
             })
@@ -95,10 +99,15 @@ export class ManagementsController {
     @Patch('users/:id/change-role')
     async changeRoleUser(
         @Param('id') idParam: string,
-        @Body() { role, userId: actorId }: ChangeRoleRequestDTO,
+        @Body() { role }: ChangeRoleRequestDTO,
+        @CurrentUser() user: ICurrentUser,
     ) {
         return this.managementsService
-            .send(UsersMntMessagePattern.changeRoleUser, { victimId: idParam, actorId, role })
+            .send(UsersMntMessagePattern.changeRoleUser, {
+                victimId: idParam,
+                actorId: user._id,
+                role,
+            })
             .pipe(catchException());
     }
 }

@@ -1,49 +1,11 @@
-import {
-    CanActivate,
-    ExecutionContext,
-    Inject,
-    Injectable,
-    UnauthorizedException,
-} from '@nestjs/common';
-import { ClientRMQ, RpcException } from '@nestjs/microservices';
-import { catchError, Observable, of, switchMap } from 'rxjs';
-import { AUTH_SERVICE } from '~/constants';
-import { AuthMessagePattern } from '~/apps/auth';
+import { Injectable } from '@nestjs/common';
+import { UserRole } from '@app/resource/users/enums';
+import { AuthCoreGuard } from './auth.core.guard';
 
 @Injectable()
-export class AuthGuard implements CanActivate {
-    constructor(@Inject(AUTH_SERVICE) private readonly authService: ClientRMQ) {}
-
-    canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
-        if (context.getType() !== 'http') {
-            return false;
-        }
-
-        const request = context.switchToHttp().getRequest();
-
-        const authHeader = request.headers['authorization'];
-
-        if (!authHeader) return false;
-
-        const authHeaderParts = (authHeader as string).split(' ');
-
-        if (authHeaderParts.length !== 2) return false;
-
-        const [, jwt] = authHeaderParts;
-
-        return this.authService.send(AuthMessagePattern.verifyJwt, { jwt }).pipe(
-            switchMap(({ exp }) => {
-                if (!exp) return of(false);
-
-                const TOKEN_EXP_MS = exp * 1000;
-
-                const isJwtValid = Date.now() < TOKEN_EXP_MS;
-
-                return of(isJwtValid);
-            }),
-            catchError(() => {
-                throw new RpcException(new UnauthorizedException());
-            }),
-        );
+export class AuthGuard extends AuthCoreGuard {
+    constructor() {
+        super();
+        this._acceptRoles.push(UserRole.SuperAdmin, UserRole.Admin, UserRole.Mod, UserRole.User);
     }
 }
