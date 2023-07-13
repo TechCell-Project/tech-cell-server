@@ -169,12 +169,6 @@ export class UsersMntService extends UsersMntUtilService {
             this.usersService.getUser({ _id: new Types.ObjectId(actorId) }),
         ]);
 
-        if (role.toLowerCase() === UserRole.SuperAdmin.toLowerCase()) {
-            throw new RpcException(
-                new BadRequestException('You cannot grant Super Admin role to anyone'),
-            );
-        }
-
         this.canChangeRole({
             victimUser: user,
             actorUser: updatedByUser,
