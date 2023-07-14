@@ -205,6 +205,7 @@ declare namespace NodeJS {
         RABBITMQ_AUTH_QUEUE: string;
         RABBITMQ_MAIL_QUEUE: string;
         RABBITMQ_MANAGEMENTS_QUEUE: string;
+        RABBITMQ_ORDER_QUEUE: string;
 
         /**
          * The `RabbitMq` default user

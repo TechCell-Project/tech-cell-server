@@ -12,6 +12,7 @@ import helmet from 'helmet';
 
 async function bootstrap() {
     const port = process.env.API_PORT || 8000;
+    const logger = new Logger('api gateway');
 
     const server = express();
     const app = await NestFactory.create(AppModule, new ExpressAdapter(server));
@@ -50,7 +51,7 @@ async function bootstrap() {
 
     await app.init();
     createHttpServer(server).listen(port, () =>
-        Logger.log(`⚡️ [http] ready on port: ${port}, url: http://localhost:${port}`),
+        logger.log(`⚡️ [http] ready on port: ${port}, url: http://localhost:${port}`),
     );
 
     try {
@@ -70,12 +71,12 @@ async function bootstrap() {
             cert: fs.readFileSync(httpsCertDir),
         };
         createHttpsServer(httpsOptions, server).listen(portHttps, () =>
-            Logger.log(
+            logger.log(
                 `⚡️ [https] ready on port: ${portHttps}, url: https://localhost:${portHttps}`,
             ),
         );
     } catch (error) {
-        Logger.warn(`[https] Can not start https server: ${error.message}`);
+        logger.warn(`[https] Can not start https server: ${error.message}`);
     }
 }
 bootstrap();
