@@ -69,7 +69,7 @@ export class ProductsService {
         return this.productsRepository.getProductsByCategory(category, page, sortField, sortOrder);
     }
 
-    async getUser(
+    async getProduct(
         getProductArgs: Partial<Product>,
         queryArgs?: Partial<QueryOptions<Product>>,
         projectionArgs?: Partial<ProjectionType<Product>>,
