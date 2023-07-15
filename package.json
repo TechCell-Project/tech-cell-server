@@ -26,7 +26,7 @@
     "down:core": "docker compose -f docker-compose.core.yml down",
     "restart:core": "yarn down:core && yarn up:core --build",
     "up": "docker compose -f docker-compose.yml up -d",
-    "up:build": "docker compose build --no-cache && docker compose -f docker-compose.yml up -d --force-recreate",
+    "up:build": "docker compose -f docker-compose.yml up -d --build",
     "down": "docker compose -f docker-compose.yml down",
     "restart": "yarn down && yarn up:build",
     "up:all": "yarn up:core && yarn up",
