@@ -59,10 +59,10 @@ export class UsersController {
     ) {
         return this.managementsService
             .send(UsersMntMessagePattern.blockUser, {
-                victimUserId: idParam,
-                blockUserId: user._id,
-                blockReason: reason,
-                blockNote: note,
+                victimId: idParam,
+                actorId: user._id,
+                reason,
+                note,
             })
             .pipe(catchException());
     }
@@ -79,10 +79,10 @@ export class UsersController {
     ) {
         return this.managementsService
             .send(UsersMntMessagePattern.unblockUser, {
-                victimUserId: idParam,
-                unblockUserId: user._id,
-                unblockReason: reason,
-                unblockNote: note,
+                victimId: idParam,
+                actorId: user._id,
+                reason,
+                note,
             })
             .pipe(catchException());
     }
