@@ -15,6 +15,7 @@ export class RegisterRequestDTO {
         minimum: 8,
         maximum: 50,
         example: 'example-username',
+        required: false,
     })
     @IsString()
     @IsOptional()

@@ -18,6 +18,21 @@ export class UserDataResponseDTO {
     @IsNotEmpty()
     email: string;
 
+    @ApiProperty({ type: String, example: 'username_example' })
+    @IsString()
+    @IsNotEmpty()
+    userName: string;
+
+    @ApiProperty({ type: String, example: 'John' })
+    @IsString()
+    @IsNotEmpty()
+    firstName: string;
+
+    @ApiProperty({ type: String, example: 'Doe' })
+    @IsString()
+    @IsNotEmpty()
+    lastName: string;
+
     @ApiProperty({ type: [AddressSchemaDTO] })
     @IsArray()
     @IsOptional()

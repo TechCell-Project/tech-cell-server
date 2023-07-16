@@ -3,7 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class LoginRequestDTO {
     @ApiProperty({
-        description: 'The email or of user to register',
+        description: 'The email or userName of user to register',
         example: 'example@techcell.com',
     })
     @IsString()
