@@ -10,7 +10,7 @@ export class User extends AbstractDocument {
     email: string;
 
     @Prop({ required: true, unique: true })
-    userName?: string;
+    userName: string;
 
     @Prop({ default: false })
     emailVerified?: boolean;
@@ -25,10 +25,10 @@ export class User extends AbstractDocument {
     address?: AddressSchema[];
 
     @Prop({ default: '' })
-    firstName?: string;
+    firstName: string;
 
     @Prop({ default: '' })
-    lastName?: string;
+    lastName: string;
 
     @Prop({ type: BlockSchema })
     block?: BlockSchema;
