@@ -106,11 +106,12 @@ export class AuthController {
     })
     @Post('register')
     async register(
-        @Body() { email, firstName, lastName, password, re_password }: RegisterRequestDTO,
+        @Body() { email, userName, firstName, lastName, password, re_password }: RegisterRequestDTO,
     ) {
         return this.authService
             .send(AuthMessagePattern.register, {
                 email,
+                userName,
                 firstName,
                 lastName,
                 password,

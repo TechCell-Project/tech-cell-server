@@ -12,6 +12,11 @@ export class UsersMntController {
         private readonly usersMntService: UsersMntService,
     ) {}
 
+    @MessagePattern(UsersMntMessagePattern.createUser)
+    async createUser(@Ctx() context: RmqContext, @Payload() payload: any) {
+        this.rabbitMqService.acknowledgeMessage(context);
+    }
+
     @MessagePattern(UsersMntMessagePattern.getUsers)
     async getUsers(@Ctx() context: RmqContext, @Payload() payload: GetUsersDTO) {
         this.rabbitMqService.acknowledgeMessage(context);

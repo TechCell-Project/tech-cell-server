@@ -45,10 +45,11 @@ export class AuthController {
     @MessagePattern(AuthMessagePattern.register)
     async register(
         @Ctx() context: RmqContext,
-        @Payload() { email, firstName, lastName, password, re_password }: RegisterRequestDTO,
+        @Payload()
+        registerArgs: RegisterRequestDTO,
     ) {
         this.rabbitMqService.acknowledgeMessage(context);
-        return this.authService.register({ email, firstName, lastName, password, re_password });
+        return this.authService.register({ ...registerArgs });
     }
 
     @MessagePattern(AuthMessagePattern.verifyEmail)

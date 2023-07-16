@@ -10,23 +10,39 @@ import { FilterQuery, ProjectionType, QueryOptions } from 'mongoose';
 export class UsersService {
     constructor(private readonly usersRepository: UsersRepository) {}
 
-    async createUser({ email, firstName, lastName, password }: CreateUserDTO) {
-        await this.validateCreateUserRequest({ email });
+    async createUser({ email, userName, firstName, lastName, password }: CreateUserDTO) {
+        await this.validateCreateUserRequest({ email, userName });
         return this.usersRepository.create({
             email,
+            userName,
             firstName,
             lastName,
             password: await this.hashPassword({ password }),
         });
     }
 
-    private async validateCreateUserRequest({ email }: { email: string }) {
-        const userCount = await this.usersRepository.count({
-            email: email,
-        });
+    private async validateCreateUserRequest({
+        email,
+        userName,
+    }: {
+        email: string;
+        userName: string;
+    }) {
+        const [emailCount, userNameCount] = await Promise.all([
+            this.usersRepository.count({
+                email: email,
+            }),
+            this.usersRepository.count({
+                userName: userName,
+            }),
+        ]);
 
-        if (userCount > 0) {
+        if (emailCount > 0) {
             throw new RpcException(new UnprocessableEntityException('Email already exists.'));
+        }
+
+        if (userNameCount > 0) {
+            throw new RpcException(new UnprocessableEntityException('Username already exists.'));
         }
     }
 

@@ -1,10 +1,21 @@
-import { Controller, Get, Inject, UseGuards, Patch, Body, Query, Param } from '@nestjs/common';
+import {
+    Controller,
+    Get,
+    Inject,
+    UseGuards,
+    Patch,
+    Body,
+    Query,
+    Param,
+    Post,
+} from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import { MANAGEMENTS_SERVICE } from '~/constants';
-import { ModGuard } from '@app/common/guards';
+import { ModGuard, SuperAdminGuard } from '@app/common/guards';
 import {
     ApiBadRequestResponse,
     ApiBearerAuth,
+    ApiCreatedResponse,
     ApiForbiddenResponse,
     ApiNotFoundResponse,
     ApiOkResponse,
@@ -28,6 +39,15 @@ import { ICurrentUser } from '@app/common/interfaces';
 @UseGuards(ModGuard)
 export class UsersController {
     constructor(@Inject(MANAGEMENTS_SERVICE) private readonly managementsService: ClientRMQ) {}
+
+    @ApiCreatedResponse({ description: 'Create user success', type: UserMntResponseDto })
+    @Post('/')
+    @UseGuards(SuperAdminGuard)
+    async createUser() {
+        return this.managementsService
+            .send(UsersMntMessagePattern.createUser, {})
+            .pipe(catchException());
+    }
 
     @ApiOkResponse({ description: 'Get users success', type: [UserMntResponseDto] })
     @ApiNotFoundResponse({ description: 'No users found' })
