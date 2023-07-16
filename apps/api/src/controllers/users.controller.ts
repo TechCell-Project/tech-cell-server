@@ -26,6 +26,7 @@ import {
     GetUsersDTO,
     UsersMntMessagePattern,
     BlockUnblockRequestDTO,
+    CreateUserRequestDto,
 } from '~/apps/managements/users-mnt';
 import { catchException } from '@app/common';
 import { UserMntResponseDto } from '@app/resource/users/dtos';
@@ -43,9 +44,9 @@ export class UsersController {
     @ApiCreatedResponse({ description: 'Create user success', type: UserMntResponseDto })
     @Post('/')
     @UseGuards(SuperAdminGuard)
-    async createUser() {
+    async createUser(@Body() createUserRequestDto: CreateUserRequestDto) {
         return this.managementsService
-            .send(UsersMntMessagePattern.createUser, {})
+            .send(UsersMntMessagePattern.createUser, { ...createUserRequestDto })
             .pipe(catchException());
     }
 

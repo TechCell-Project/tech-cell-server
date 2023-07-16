@@ -3,16 +3,41 @@ import { Types } from 'mongoose';
 import {
     BlockUnblockRequestDTO,
     ChangeRoleRequestDTO,
+    CreateUserRequestDto,
     GetUsersDTO,
     QueryUserParamsDTO,
 } from './dtos';
 import { RpcException } from '@nestjs/microservices';
-import { BlockActivity } from '@app/resource/users/enums';
+import { BlockActivity, UserRole } from '@app/resource/users/enums';
 import { UsersMntUtilService } from './users-mnt.util.service';
 import { timeStringToMs } from '@app/common';
+import { CreateUserDTO } from '@app/resource/users/dtos';
 
 @Injectable()
 export class UsersMntService extends UsersMntUtilService {
+    async createUser({ ...createUserRequestDto }: CreateUserRequestDto) {
+        const newUser = createUserRequestDto;
+
+        if (createUserRequestDto.role === UserRole.SuperAdmin) {
+            throw new RpcException(new BadRequestException('Cannot create Super Admin'));
+        }
+
+        if (!createUserRequestDto.firstName) {
+            Object.assign(newUser, { firstName: `systemF` });
+        }
+
+        if (!createUserRequestDto.lastName) {
+            Object.assign(newUser, { lastName: `systemL` });
+        }
+
+        if (!createUserRequestDto.email) {
+            Object.assign(newUser, { email: `${newUser.userName}_account@techcell.cloud` });
+            Object.assign(newUser, { emailVerified: true });
+        }
+
+        return await this.usersService.createUser(newUser as CreateUserDTO);
+    }
+
     async getUsers(payload: QueryUserParamsDTO) {
         const { all, limit = 1, offset = 0 } = payload;
 

@@ -10,13 +10,21 @@ import { FilterQuery, ProjectionType, QueryOptions } from 'mongoose';
 export class UsersService {
     constructor(private readonly usersRepository: UsersRepository) {}
 
-    async createUser({ email, userName, firstName, lastName, password }: CreateUserDTO) {
+    async createUser({
+        email,
+        userName,
+        firstName,
+        lastName,
+        password,
+        emailVerified,
+    }: CreateUserDTO & { emailVerified?: boolean }) {
         await this.validateCreateUserRequest({ email, userName });
         return this.usersRepository.create({
             email,
             userName,
             firstName,
             lastName,
+            emailVerified: emailVerified ?? false,
             password: await this.hashPassword({ password }),
         });
     }
