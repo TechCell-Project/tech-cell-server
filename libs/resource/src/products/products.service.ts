@@ -1,9 +1,5 @@
 import { Injectable, UnprocessableEntityException } from '@nestjs/common';
-import {
-    SearchProductsRequestDTO,
-    GetProductsByCateRequestDTO,
-    CreateProductRequestDto,
-} from './dtos';
+import { SearchProductsRequestDTO, GetProductsByCateRequestDTO, CreateProductDto } from './dtos';
 import { RpcException } from '@nestjs/microservices';
 import { Product } from './schemas/product.schema';
 import { ProductsRepository } from './products.repository';
@@ -29,7 +25,7 @@ export class ProductsService {
         special_price,
         thumbnail,
         status,
-    }: CreateProductRequestDto) {
+    }: CreateProductDto) {
         await this.productDuplicationCheck({ name });
         const newProduct = {
             general: {

@@ -4,6 +4,8 @@ import * as mongoose from 'mongoose';
 import slugify from 'slugify';
 import { GeneralSchema } from './general.schema';
 import { FilterableSchema } from './filterable.schema';
+import { Review_StatsSchema } from './reviews-stats.schema';
+import { ProductStatus } from '../enums';
 
 export type ProductDocument = mongoose.HydratedDocument<Product>;
 
@@ -15,8 +17,11 @@ export class Product extends AbstractDocument {
     @Prop({ required: true })
     filterable: FilterableSchema;
 
-    @Prop({ required: true, type: Boolean, default: true })
-    status: boolean;
+    @Prop({ required: false })
+    Review_StatsSchema?: Review_StatsSchema;
+
+    @Prop({ required: true, type: Number, enum: ProductStatus, default: 1 })
+    status: number;
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);

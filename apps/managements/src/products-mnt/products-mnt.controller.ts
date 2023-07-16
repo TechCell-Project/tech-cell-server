@@ -3,6 +3,7 @@ import { MessagePattern, RmqContext, Payload, Ctx } from '@nestjs/microservices'
 import { RabbitMQService } from '@app/common';
 import { ProductsMntService } from './products-mnt.service';
 import { ProductsMntMessagePattern } from './products-mnt.pattern';
+import { CreateProductRequestDto } from './dto';
 
 @Controller()
 export class ProductsMntController {
@@ -14,5 +15,29 @@ export class ProductsMntController {
     @Get('ping')
     getHello() {
         return { message: 'pong' };
+    }
+
+    @MessagePattern(ProductsMntMessagePattern.getAllProducts)
+    async getAllProducts(@Ctx() context: RmqContext) {
+        this.rabbitMqService.acknowledgeMessage(context);
+        return await this.productsMntService.getAllProducts();
+    }
+
+    @MessagePattern(ProductsMntMessagePattern.createProduct)
+    async createProduct(@Ctx() context: RmqContext, @Payload() payload: CreateProductRequestDto) {
+        this.rabbitMqService.acknowledgeMessage(context);
+        return await this.productsMntService.createProduct({ ...payload });
+    }
+
+    @MessagePattern(ProductsMntMessagePattern.changeStatus)
+    async changeStatus(@Ctx() context: RmqContext, @Payload() payload) {
+        this.rabbitMqService.acknowledgeMessage(context);
+
+        const { productId, status } = payload;
+
+        return await this.productsMntService.changeStatus({
+            productId,
+            status,
+        });
     }
 }

@@ -3,7 +3,6 @@ import {
     IsString,
     IsNumber,
     IsOptional,
-    IsBoolean,
     IsArray,
     IsEnum,
     Length,
@@ -11,9 +10,10 @@ import {
     Max,
     ArrayMinSize,
     ValidateNested,
+    IsDate,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { Category, Manufacturer } from '../enums';
+import { Category, Manufacturer, ProductStatus } from '../enums';
 
 export class AttributesDto {
     @IsString()
@@ -38,7 +38,21 @@ export class FilterDto {
     Label: string;
 }
 
-export class CreateProductRequestDto {
+export class ImageDto {
+    @IsNotEmpty()
+    @IsString()
+    name: string;
+
+    @IsNotEmpty()
+    @IsString()
+    path: string;
+
+    @IsNotEmpty()
+    @IsDate()
+    date_modified: Date;
+}
+
+export class CreateProductDto {
     @IsString()
     @IsNotEmpty()
     @Length(10)
@@ -58,15 +72,11 @@ export class CreateProductRequestDto {
 
     @IsArray()
     @ArrayMinSize(1)
-    @IsString({ each: true })
-    images: string[];
+    images: ImageDto[];
 
     @IsNotEmpty()
     @IsEnum(Category)
     categories: Category;
-
-    @IsBoolean()
-    status: boolean;
 
     @IsNotEmpty()
     @Type(() => Number)
@@ -93,6 +103,10 @@ export class CreateProductRequestDto {
     special_price: number;
 
     @IsNotEmpty()
-    @IsString()
-    thumbnail: string;
+    thumbnail: ImageDto;
+
+    @IsNotEmpty()
+    @Type(() => Number)
+    @IsEnum(ProductStatus)
+    status: number;
 }

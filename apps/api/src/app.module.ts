@@ -14,6 +14,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerStorageRedisService } from 'nestjs-throttler-storage-redis';
 import { MorganMiddleware, JwtMiddleware } from './middlewares';
 import { GoogleStrategy, AccessTokenStrategy, FacebookStrategy } from '~/apps/auth/strategies';
+import { CloudinaryModule } from '@app/common/Cloudinary';
 
 @Module({
     imports: [
@@ -34,6 +35,7 @@ import { GoogleStrategy, AccessTokenStrategy, FacebookStrategy } from '~/apps/au
                 }),
             }),
         }),
+        CloudinaryModule,
         HealthModule,
         RabbitMQModule.registerRmq(SAMPLE_SERVICE, process.env.RABBITMQ_SAMPLE_QUEUE),
         RabbitMQModule.registerRmq(SEARCH_SERVICE, process.env.RABBITMQ_SEARCH_QUEUE),

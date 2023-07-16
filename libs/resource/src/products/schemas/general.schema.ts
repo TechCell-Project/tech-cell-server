@@ -7,6 +7,12 @@ interface IAttributes {
     u?: string;
 }
 
+export interface IImage {
+    name: string;
+    path: string;
+    date_modified: Date;
+}
+
 export class GeneralSchema {
     @Prop({ required: true })
     name: string;
@@ -21,7 +27,7 @@ export class GeneralSchema {
     manufacturer: string;
 
     @Prop({ required: true, type: Array<string> })
-    images: string[];
+    images: IImage[];
 
     @Prop({ required: true, type: String, enum: Category })
     categories: string;
