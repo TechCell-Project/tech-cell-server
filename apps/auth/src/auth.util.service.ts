@@ -10,7 +10,7 @@ import { RpcException, ClientRMQ } from '@nestjs/microservices';
 import { MAIL_SERVICE, REDIS_CACHE, REQUIRE_USER_REFRESH } from '~/constants';
 import { OtpService } from '@app/resource/otp';
 import { Store } from 'cache-manager';
-import { buildUniqueUserNameFromEmail } from '@app/common';
+import { buildUniqueUserNameFromEmail, isEmail } from '@app/common';
 
 @Injectable()
 export class AuthUtilService {
@@ -67,8 +67,10 @@ export class AuthUtilService {
         return { accessToken, refreshToken, ...this.cleanUserBeforeResponse(user) };
     }
 
-    async validateUser(email: string, password: string) {
-        const user = await this.usersService.getUser({ email });
+    async validateUser(input: string, password: string) {
+        const query = isEmail(input) ? { email: input } : { userName: input };
+
+        const user = await this.usersService.getUser(query);
 
         const doesUserExist = !!user;
         if (!doesUserExist) return null;

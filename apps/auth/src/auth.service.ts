@@ -35,8 +35,8 @@ export class AuthService extends AuthUtilService {
         };
     }
 
-    async login({ email, password }: LoginRequestDTO) {
-        const user = await this.validateUser(email, password);
+    async login({ emailOrUsername, password }: LoginRequestDTO) {
+        const user = await this.validateUser(emailOrUsername, password);
 
         if (!user) {
             throw new RpcException(
@@ -54,7 +54,7 @@ export class AuthService extends AuthUtilService {
 
         if (!user.emailVerified) {
             const otp = await this.otpService.createOrRenewOtp({
-                email,
+                email: user.email,
                 otpType: OtpType.VerifyEmail,
             });
             const emailContext: ConfirmEmailRegisterDTO = {
@@ -62,7 +62,7 @@ export class AuthService extends AuthUtilService {
             };
 
             this.mailService.emit(MailEventPattern.sendMailConfirm, {
-                email,
+                email: user.email,
                 emailContext,
             });
 

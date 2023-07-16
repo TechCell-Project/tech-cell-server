@@ -31,9 +31,12 @@ export class AuthController {
     }
 
     @MessagePattern(AuthMessagePattern.login)
-    async login(@Ctx() context: RmqContext, @Payload() { email, password }: LoginRequestDTO) {
+    async login(
+        @Ctx() context: RmqContext,
+        @Payload() { emailOrUsername, password }: LoginRequestDTO,
+    ) {
         this.rabbitMqService.acknowledgeMessage(context);
-        return this.authService.login({ email, password });
+        return this.authService.login({ emailOrUsername, password });
     }
 
     @MessagePattern(AuthMessagePattern.checkEmail)

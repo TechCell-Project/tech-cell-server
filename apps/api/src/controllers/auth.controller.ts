@@ -73,9 +73,9 @@ export class AuthController {
     })
     @HttpCode(HttpStatus.OK)
     @Post('login')
-    async login(@Body() { email, password }: LoginRequestDTO) {
+    async login(@Body() { emailOrUsername, password }: LoginRequestDTO) {
         return this.authService
-            .send(AuthMessagePattern.login, { email, password })
+            .send(AuthMessagePattern.login, { emailOrUsername, password })
             .pipe(catchException());
     }
 
