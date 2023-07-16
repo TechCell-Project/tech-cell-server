@@ -26,11 +26,6 @@ export class HealthController {
     readiness() {
         return this.health.check([
             async () => this.db.pingCheck('database', { timeout: 300 }),
-            () =>
-                this.disk.checkStorage('storage', {
-                    path: 'C://',
-                    thresholdPercent: 0.75,
-                }),
             () => this.http.pingCheck('nestjs-docs', 'https://docs.nestjs.com'),
             () =>
                 this.http.responseCheck(
