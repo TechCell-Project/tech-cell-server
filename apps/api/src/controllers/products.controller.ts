@@ -14,7 +14,7 @@ import { ClientRMQ } from '@nestjs/microservices';
 import { MANAGEMENTS_SERVICE } from '~/constants';
 import { catchException } from '@app/common';
 import { ApiTags } from '@nestjs/swagger';
-import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { FilesInterceptor } from '@nestjs/platform-express';
 // import { ProductsSearchMessagePattern } from '~/apps/search/products-search';
 import { ProductsMntMessagePattern } from '~/apps/managements/products-mnt';
 import { CreateProductRequestDto } from '~/apps/managements/products-mnt/dto';
