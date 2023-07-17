@@ -3,8 +3,6 @@ import * as otpGenerator from 'otp-generator';
 import * as bcrypt from 'bcrypt';
 import { OtpRepository } from '../otp.repository';
 import { CreateOtpDTO, VerifyOtpDTO } from '../dtos';
-import { InternalServerErrorException } from '@nestjs/common';
-import { RpcException } from '@nestjs/microservices';
 import { Otp } from '../otp.schema';
 import { OtpService } from '../otp.service';
 import { Types } from 'mongoose';

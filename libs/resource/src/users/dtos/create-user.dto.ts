@@ -7,6 +7,10 @@ export class CreateUserDTO {
 
     @IsString()
     @IsNotEmpty()
+    userName: string;
+
+    @IsString()
+    @IsNotEmpty()
     @Length(8, 24)
     password: string;
 

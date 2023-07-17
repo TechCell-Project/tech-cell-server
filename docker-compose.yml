@@ -55,10 +55,10 @@ services:
             - techcell_backend
         restart: always
 
-    products:
+    search:
         build:
             context: ./
-            dockerfile: ./apps/products/Dockerfile
+            dockerfile: ./apps/search/Dockerfile
         environment:
             - RABBITMQ_URLS=amqp://techcell_server:techcell_server_9901@rabbitmq:5672
             - MONGODB_URI=mongodb://root:password123@mongodb-primary:27017/techcell-dev?directConnection=true&authMechanism=SCRAM-SHA-1&replicaSet=replicaset&authSource=admin
@@ -104,6 +104,21 @@ services:
             - techcell_backend
         restart: always
 
+    order:
+        build:
+            context: ./
+            dockerfile: ./apps/order/Dockerfile
+        environment:
+            - RABBITMQ_URLS=amqp://techcell_server:techcell_server_9901@rabbitmq:5672
+            - MONGODB_URI=mongodb://root:password123@mongodb-primary:27017/techcell-dev?directConnection=true&authMechanism=SCRAM-SHA-1&replicaSet=replicaset&authSource=admin
+        env_file:
+            - .env
+        volumes:
+            - .:/usr/src/techcell_app
+            - /usr/src/techcell_app/node_modules
+        networks:
+            - techcell_backend
+        restart: always
 
 networks:
     techcell_backend:

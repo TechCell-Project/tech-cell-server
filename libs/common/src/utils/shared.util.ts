@@ -1,6 +1,13 @@
 import { RpcException } from '@nestjs/microservices';
 import { catchError, throwError } from 'rxjs';
 
+export function isEmail(email: string): boolean {
+    if (typeof email !== 'string') return false;
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
+
 /**
  * @returns A function to catch exception from microservice and throw it to client
  */
@@ -18,7 +25,7 @@ export function generateRandomString(length: number) {
     return result;
 }
 
-export function capitalize(str) {
+export function capitalize(str: string) {
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
@@ -45,4 +52,22 @@ export function timeStringToMs(timeString: string): number {
         default:
             throw new Error(`Invalid time unit: ${timeUnit}`);
     }
+}
+
+export function dateFormat(date: Date, format: string): string {
+    const pad = (n: number) => (n < 10 ? `0${n}` : n).toString();
+    const year = date.getFullYear();
+    const month = pad(date.getMonth() + 1);
+    const day = pad(date.getDate());
+    const hour = pad(date.getHours());
+    const minute = pad(date.getMinutes());
+    const second = pad(date.getSeconds());
+
+    return format
+        .replace('yyyy', year.toString())
+        .replace('MM', month)
+        .replace('dd', day)
+        .replace('HH', hour)
+        .replace('mm', minute)
+        .replace('ss', second);
 }

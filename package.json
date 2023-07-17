@@ -26,7 +26,7 @@
     "down:core": "docker compose -f docker-compose.core.yml down",
     "restart:core": "yarn down:core && yarn up:core --build",
     "up": "docker compose -f docker-compose.yml up -d",
-    "up:build": "docker compose build --no-cache && docker compose -f docker-compose.yml up -d --force-recreate",
+    "up:build": "docker compose -f docker-compose.yml up -d --build",
     "down": "docker compose -f docker-compose.yml down",
     "restart": "yarn down && yarn up:build",
     "up:all": "yarn up:core && yarn up",
@@ -59,12 +59,14 @@
     "cache-manager-redis-yet": "^4.1.2",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
+    "cloudinary": "^1.37.3",
     "discord.js": "^14.11.0",
     "express": "^4.18.2",
     "handlebars": "^4.7.7",
     "helmet": "^7.0.0",
     "ioredis": "^5.3.2",
     "jsonwebtoken": "^9.0.0",
+    "moment-timezone": "^0.5.43",
     "mongoose": "^7.3.1",
     "morgan": "^1.10.0",
     "nestjs-throttler-storage-redis": "^0.3.3",
@@ -75,7 +77,9 @@
     "passport-google-oauth20": "^2.0.0",
     "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.1.13",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "slugify": "^1.6.6",
+    "streamifier": "^0.1.1"
   },
   "devDependencies": {
     "@compodoc/compodoc": "^1.1.21",
@@ -85,11 +89,13 @@
     "@types/bcrypt": "^5.0.0",
     "@types/express": "^4.17.17",
     "@types/jest": "29.5.2",
+    "@types/multer": "^1.4.7",
     "@types/node": "20.3.1",
     "@types/nodemailer": "^6.4.8",
     "@types/otp-generator": "^4.0.0",
     "@types/passport-facebook": "^2.1.11",
     "@types/passport-google-oauth20": "^2.0.11",
+    "@types/streamifier": "^0.1.0",
     "@types/supertest": "^2.0.12",
     "@typescript-eslint/eslint-plugin": "^5.60.0",
     "@typescript-eslint/parser": "^5.60.0",
@@ -132,10 +138,11 @@
       "^~/apps/api(|/.*)$": "<rootDir>/apps/api/src/$1",
       "^~/apps/auth(|/.*)$": "<rootDir>/apps/auth/src/$1",
       "^~/apps/mail(|/.*)$": "<rootDir>/apps/mail/src/$1",
-      "^~/apps/products(|/.*)$": "<rootDir>/apps/products/src/$1",
+      "^~/apps/search(|/.*)$": "<rootDir>/apps/search/src/$1",
       "^~/apps/sample(|/.*)$": "<rootDir>/apps/sample/src/$1",
       "^~/apps/managements(|/.*)$": "<rootDir>/apps/managements/src/$1",
-      "^@app/resource(|/.*)$": "<rootDir>/libs/resource/src/$1"
+      "^@app/resource(|/.*)$": "<rootDir>/libs/resource/src/$1",
+      "^@app/payment(|/.*)$": "<rootDir>/libs/payment/src/$1"
     }
   }
 }

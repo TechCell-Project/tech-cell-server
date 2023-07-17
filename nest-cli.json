@@ -37,15 +37,6 @@
         "tsConfigPath": "apps/sample/tsconfig.app.json"
       }
     },
-    "products": {
-      "type": "application",
-      "root": "apps/products",
-      "entryFile": "main",
-      "sourceRoot": "apps/products/src",
-      "compilerOptions": {
-        "tsConfigPath": "apps/products/tsconfig.app.json"
-      }
-    },
     "auth": {
       "type": "application",
       "root": "apps/auth",
@@ -84,6 +75,33 @@
       "sourceRoot": "libs/resource/src",
       "compilerOptions": {
         "tsConfigPath": "libs/resource/tsconfig.lib.json"
+      }
+    },
+    "order": {
+      "type": "application",
+      "root": "apps/order",
+      "entryFile": "main",
+      "sourceRoot": "apps/order/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/order/tsconfig.app.json"
+      }
+    },
+    "payment": {
+      "type": "library",
+      "root": "libs/payment",
+      "entryFile": "index",
+      "sourceRoot": "libs/payment/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/payment/tsconfig.lib.json"
+      }
+    },
+    "search": {
+      "type": "application",
+      "root": "apps/search",
+      "entryFile": "main",
+      "sourceRoot": "apps/search/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/search/tsconfig.app.json"
       }
     }
   }

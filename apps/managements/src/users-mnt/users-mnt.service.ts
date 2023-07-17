@@ -1,13 +1,43 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { Types } from 'mongoose';
-import { GetUsersDTO, QueryUserParamsDTO } from './dtos';
+import {
+    BlockUnblockRequestDTO,
+    ChangeRoleRequestDTO,
+    CreateUserRequestDto,
+    GetUsersDTO,
+    QueryUserParamsDTO,
+} from './dtos';
 import { RpcException } from '@nestjs/microservices';
 import { BlockActivity, UserRole } from '@app/resource/users/enums';
 import { UsersMntUtilService } from './users-mnt.util.service';
 import { timeStringToMs } from '@app/common';
+import { CreateUserDTO } from '@app/resource/users/dtos';
 
 @Injectable()
 export class UsersMntService extends UsersMntUtilService {
+    async createUser({ ...createUserRequestDto }: CreateUserRequestDto) {
+        const newUser = createUserRequestDto;
+
+        if (createUserRequestDto.role === UserRole.SuperAdmin) {
+            throw new RpcException(new BadRequestException('Cannot create Super Admin'));
+        }
+
+        if (!createUserRequestDto.firstName) {
+            Object.assign(newUser, { firstName: `systemF` });
+        }
+
+        if (!createUserRequestDto.lastName) {
+            Object.assign(newUser, { lastName: `systemL` });
+        }
+
+        if (!createUserRequestDto.email) {
+            Object.assign(newUser, { email: `${newUser.userName}_account@techcell.cloud` });
+            Object.assign(newUser, { emailVerified: true });
+        }
+
+        return await this.usersService.createUser(newUser as CreateUserDTO);
+    }
+
     async getUsers(payload: QueryUserParamsDTO) {
         const { all, limit = 1, offset = 0 } = payload;
 
@@ -46,23 +76,18 @@ export class UsersMntService extends UsersMntUtilService {
     }
 
     async blockUser({
-        victimUserId,
-        blockUserId,
-        blockReason,
-        blockNote,
-    }: {
-        victimUserId: string;
-        blockUserId: string;
-        blockReason: string;
-        blockNote: string;
-    }) {
-        if (victimUserId === blockUserId) {
+        victimId,
+        actorId,
+        reason,
+        note,
+    }: BlockUnblockRequestDTO & { victimId: string; actorId: string }) {
+        if (victimId === actorId) {
             throw new RpcException(new BadRequestException('Cannot block yourself'));
         }
 
         const [victimUser, blockByUser] = await Promise.all([
-            this.usersService.getUser({ _id: new Types.ObjectId(victimUserId) }),
-            this.usersService.getUser({ _id: new Types.ObjectId(blockUserId) }),
+            this.usersService.getUser({ _id: new Types.ObjectId(victimId) }),
+            this.usersService.getUser({ _id: new Types.ObjectId(actorId) }),
         ]);
 
         this.canBlockAndUnblockUser({
@@ -78,14 +103,14 @@ export class UsersMntService extends UsersMntUtilService {
         actLogs.push({
             activity: BlockActivity.Block,
             activityAt: new Date(),
-            activityBy: blockUserId,
-            activityReason: blockReason ? blockReason : '',
-            activityNote: blockNote ? blockNote : '',
+            activityBy: actorId,
+            activityReason: reason ? reason : '',
+            activityNote: note ? note : '',
         });
 
         const [userReturn] = await Promise.all([
             this.usersService.findOneAndUpdateUser(
-                { _id: victimUserId },
+                { _id: victimId },
                 {
                     block: {
                         isBlocked: true,
@@ -101,23 +126,18 @@ export class UsersMntService extends UsersMntUtilService {
     }
 
     async unblockUser({
-        victimUserId,
-        unblockUserId,
-        unblockReason,
-        unblockNote,
-    }: {
-        victimUserId: string;
-        unblockUserId: string;
-        unblockReason: string;
-        unblockNote: string;
-    }) {
-        if (victimUserId === unblockUserId) {
+        victimId,
+        actorId,
+        reason,
+        note,
+    }: BlockUnblockRequestDTO & { victimId: string; actorId: string }) {
+        if (victimId === actorId) {
             throw new RpcException(new BadRequestException('Cannot unblock yourself'));
         }
 
         const [victimUser, unblockByUser] = await Promise.all([
-            this.usersService.getUser({ _id: new Types.ObjectId(victimUserId) }),
-            this.usersService.getUser({ _id: new Types.ObjectId(unblockUserId) }),
+            this.usersService.getUser({ _id: new Types.ObjectId(victimId) }),
+            this.usersService.getUser({ _id: new Types.ObjectId(actorId) }),
         ]);
 
         this.canBlockAndUnblockUser({
@@ -133,14 +153,14 @@ export class UsersMntService extends UsersMntUtilService {
         actLogs.push({
             activity: BlockActivity.Unblock,
             activityAt: new Date(),
-            activityBy: unblockUserId,
-            activityReason: unblockReason ? unblockReason : '',
-            activityNote: unblockNote ? unblockNote : '',
+            activityBy: actorId,
+            activityReason: reason ? reason : '',
+            activityNote: note ? note : '',
         });
 
         const [userReturn] = await Promise.all([
             this.usersService.findOneAndUpdateUser(
-                { _id: victimUserId },
+                { _id: victimId },
                 {
                     block: {
                         isBlocked: false,
@@ -156,12 +176,11 @@ export class UsersMntService extends UsersMntUtilService {
     }
 
     async updateRole({
-        victimId,
         role,
+        victimId,
         actorId,
-    }: {
+    }: ChangeRoleRequestDTO & {
         victimId: string;
-        role: string;
         actorId: string;
     }) {
         const [user, updatedByUser] = await Promise.all([
@@ -169,15 +188,10 @@ export class UsersMntService extends UsersMntUtilService {
             this.usersService.getUser({ _id: new Types.ObjectId(actorId) }),
         ]);
 
-        if (role.toLowerCase() === UserRole.SuperAdmin.toLowerCase()) {
-            throw new RpcException(
-                new BadRequestException('You cannot grant Super Admin role to anyone'),
-            );
-        }
-
         this.canChangeRole({
             victimUser: user,
             actorUser: updatedByUser,
+            roleToChange: role,
         });
 
         const [changeRole] = await Promise.all([

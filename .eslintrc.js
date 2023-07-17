@@ -38,6 +38,7 @@ module.exports = {
                 trailingComma: 'all',
                 useTabs: false,
                 vueIndentScriptAndStyle: false,
+                endOfLine: "auto"
             },
         ],
     },
