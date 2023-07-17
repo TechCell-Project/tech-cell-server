@@ -38,7 +38,6 @@ export class ProductsMntService extends ProductsMntUtilService {
             thumbnail,
             status,
         } = payload;
-
         return await this.productsService.createProduct({
             name,
             attributes,

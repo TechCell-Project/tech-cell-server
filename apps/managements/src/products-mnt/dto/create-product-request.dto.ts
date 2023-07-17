@@ -3,13 +3,13 @@ import {
     IsString,
     IsNumber,
     IsOptional,
-    IsBoolean,
-    IsArray,
     IsEnum,
     Length,
     Min,
     Max,
+    IsArray,
     ArrayMinSize,
+    IsDate,
     ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
@@ -39,8 +39,16 @@ export class FilterDto {
 }
 
 export class ImageDto {
+    @IsNotEmpty()
+    @IsString()
     name: string;
+
+    @IsNotEmpty()
+    @IsString()
     path: string;
+
+    @IsNotEmpty()
+    @IsDate()
     date_modified: Date;
 }
 
@@ -62,11 +70,10 @@ export class CreateProductRequestDto {
     @IsEnum(Manufacturer)
     manufacturer: Manufacturer;
 
+    @IsOptional()
     @IsArray()
     @ArrayMinSize(1)
-    @ValidateNested({ each: true })
-    @Type(() => ImageDto)
-    images: ImageDto[];
+    images?: ImageDto[];
 
     @IsNotEmpty()
     @IsEnum(Category)
@@ -97,11 +104,13 @@ export class CreateProductRequestDto {
     special_price: number;
 
     @IsNotEmpty()
-    thumbnail: ImageDto;
-
-    @IsNotEmpty()
     @Type(() => Number)
-    @Min(1)
-    @Max(7)
+    @IsEnum(ProductStatus)
     status: number;
+
+    @IsOptional()
+    thumbnail?: ImageDto;
+
+    @IsOptional()
+    files?: any;
 }
