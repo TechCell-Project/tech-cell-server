@@ -6,8 +6,11 @@ import { AddressSchema } from './address.schema';
 
 @Schema({ versionKey: false, timestamps: true })
 export class User extends AbstractDocument {
-    @Prop({ required: true })
+    @Prop({ required: true, unique: true })
     email: string;
+
+    @Prop({ required: true, unique: true })
+    userName: string;
 
     @Prop({ default: false })
     emailVerified?: boolean;
@@ -22,10 +25,10 @@ export class User extends AbstractDocument {
     address?: AddressSchema[];
 
     @Prop({ default: '' })
-    firstName?: string;
+    firstName: string;
 
     @Prop({ default: '' })
-    lastName?: string;
+    lastName: string;
 
     @Prop({ type: BlockSchema })
     block?: BlockSchema;

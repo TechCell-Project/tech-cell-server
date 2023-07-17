@@ -1,8 +1,8 @@
-import { Controller, Get, Inject } from '@nestjs/common';
+import { Controller, Inject } from '@nestjs/common';
 import { MessagePattern, RmqContext, Payload, Ctx } from '@nestjs/microservices';
 import { RabbitMQService } from '@app/common';
 import { UsersMntService } from './users-mnt.service';
-import { GetUsersDTO } from './dtos';
+import { BlockUnblockRequestDTO, ChangeRoleRequestDTO, CreateUserRequestDto, GetUsersDTO } from './dtos';
 import { UsersMntMessagePattern } from './users-mnt.pattern';
 
 @Controller()
@@ -12,9 +12,13 @@ export class UsersMntController {
         private readonly usersMntService: UsersMntService,
     ) {}
 
-    @Get('ping')
-    getHello() {
-        return { message: 'pong' };
+    @MessagePattern(UsersMntMessagePattern.createUser)
+    async createUser(
+        @Ctx() context: RmqContext,
+        @Payload() createUserRequestDto: CreateUserRequestDto,
+    ) {
+        this.rabbitMqService.acknowledgeMessage(context);
+        return await this.usersMntService.createUser({ ...createUserRequestDto });
     }
 
     @MessagePattern(UsersMntMessagePattern.getUsers)
@@ -24,41 +28,51 @@ export class UsersMntController {
     }
 
     @MessagePattern(UsersMntMessagePattern.getUserById)
-    async getUserById(@Ctx() context: RmqContext, @Payload() payload) {
+    async getUserById(@Ctx() context: RmqContext, @Payload() { id }: { id: string }) {
         this.rabbitMqService.acknowledgeMessage(context);
-        return await this.usersMntService.getUserById({ _id: payload.id });
+        return await this.usersMntService.getUserById({ _id: id });
     }
 
     @MessagePattern(UsersMntMessagePattern.blockUser)
-    async blockUser(@Ctx() context: RmqContext, @Payload() payload) {
+    async blockUser(
+        @Ctx() context: RmqContext,
+        @Payload() payload: BlockUnblockRequestDTO & { victimId: string; actorId: string },
+    ) {
         this.rabbitMqService.acknowledgeMessage(context);
 
-        const { victimUserId, blockUserId, blockReason, blockNote } = payload;
+        const { victimId, actorId, reason, note } = payload;
 
         return await this.usersMntService.blockUser({
-            victimUserId,
-            blockUserId,
-            blockReason,
-            blockNote,
+            victimId,
+            actorId,
+            reason,
+            note,
         });
     }
 
     @MessagePattern(UsersMntMessagePattern.unblockUser)
-    async unblockUser(@Ctx() context: RmqContext, @Payload() payload) {
+    async unblockUser(
+        @Ctx() context: RmqContext,
+        @Payload()
+        payload: BlockUnblockRequestDTO & { victimId: string; actorId: string },
+    ) {
         this.rabbitMqService.acknowledgeMessage(context);
 
-        const { victimUserId, unblockUserId, unblockReason, unblockNote } = payload;
+        const { victimId, actorId, reason, note } = payload;
 
         return await this.usersMntService.unblockUser({
-            victimUserId,
-            unblockUserId,
-            unblockReason,
-            unblockNote,
+            victimId,
+            actorId,
+            reason,
+            note,
         });
     }
 
     @MessagePattern(UsersMntMessagePattern.changeRoleUser)
-    async changeRoleUser(@Ctx() context: RmqContext, @Payload() payload) {
+    async changeRoleUser(
+        @Ctx() context: RmqContext,
+        @Payload() payload: ChangeRoleRequestDTO & { victimId: string; actorId: string },
+    ) {
         this.rabbitMqService.acknowledgeMessage(context);
 
         const { victimId, actorId, role } = payload;

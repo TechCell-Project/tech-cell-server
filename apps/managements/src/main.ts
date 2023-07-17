@@ -5,11 +5,12 @@ import { Logger } from '@nestjs/common';
 
 async function bootstrap() {
     const port = process.env.SERVICE_MANAGEMENTS_PORT;
+    const logger = new Logger('managements');
     const app = await NestFactory.create(ManagementsModule);
     app.useGlobalFilters(new RpcExceptionFilter());
     useRabbitMQ(app, 'RABBITMQ_MANAGEMENTS_QUEUE');
     await app.startAllMicroservices();
     await app.listen(port);
-    Logger.log(`⚡️ [Managements] Listening on http://localhost:${port}`);
+    logger.log(`⚡️ ready on port: ${port}, url: http://localhost:${port}`);
 }
 bootstrap();

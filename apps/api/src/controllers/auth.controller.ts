@@ -73,9 +73,9 @@ export class AuthController {
     })
     @HttpCode(HttpStatus.OK)
     @Post('login')
-    async login(@Body() { email, password }: LoginRequestDTO) {
+    async login(@Body() { emailOrUsername, password }: LoginRequestDTO) {
         return this.authService
-            .send(AuthMessagePattern.login, { email, password })
+            .send(AuthMessagePattern.login, { emailOrUsername, password })
             .pipe(catchException());
     }
 
@@ -106,11 +106,12 @@ export class AuthController {
     })
     @Post('register')
     async register(
-        @Body() { email, firstName, lastName, password, re_password }: RegisterRequestDTO,
+        @Body() { email, userName, firstName, lastName, password, re_password }: RegisterRequestDTO,
     ) {
         return this.authService
             .send(AuthMessagePattern.register, {
                 email,
+                userName,
                 firstName,
                 lastName,
                 password,

@@ -1,6 +1,13 @@
 import { RpcException } from '@nestjs/microservices';
 import { catchError, throwError } from 'rxjs';
 
+export function isEmail(email: string): boolean {
+    if (typeof email !== 'string') return false;
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
+
 /**
  * @returns A function to catch exception from microservice and throw it to client
  */
@@ -18,7 +25,7 @@ export function generateRandomString(length: number) {
     return result;
 }
 
-export function capitalize(str) {
+export function capitalize(str: string) {
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
 

@@ -6,11 +6,12 @@ import { RpcExceptionFilter } from '@app/common/filters/';
 
 async function bootstrap() {
     const port = process.env.SERVICE_ORDER_PORT;
+    const logger = new Logger('order');
     const app = await NestFactory.create(OrderModule);
     app.useGlobalFilters(new RpcExceptionFilter());
     useRabbitMQ(app, 'RABBITMQ_ORDER_QUEUE');
     await app.startAllMicroservices();
     await app.listen(port);
-    Logger.log(`⚡️ [Order] Listening on http://localhost:${port}`);
+    logger.log(`⚡️ ready on port: ${port}, url: http://localhost:${port}`);
 }
 bootstrap();

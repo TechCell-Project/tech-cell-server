@@ -1,4 +1,4 @@
-FROM node:18 AS development
+FROM node:18-alpine AS development
 
 WORKDIR /usr/src/app
 
@@ -10,7 +10,7 @@ COPY . .
 
 RUN yarn run build api
 
-FROM node:18 as production
+FROM node:18-alpine AS production
 
 WORKDIR /usr/src/app
 

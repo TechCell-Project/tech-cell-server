@@ -8,10 +8,9 @@ import { JwtPayloadDto } from '~/apps/auth/dtos';
 import * as bcrypt from 'bcrypt';
 import { RpcException, ClientRMQ } from '@nestjs/microservices';
 import { MAIL_SERVICE, REDIS_CACHE, REQUIRE_USER_REFRESH } from '~/constants';
-import { catchError, throwError } from 'rxjs';
-import { ConfirmEmailRegisterDTO } from '~/apps/mail/dtos';
-import { OtpService, OtpType } from '@app/resource/otp';
+import { OtpService } from '@app/resource/otp';
 import { Store } from 'cache-manager';
+import { buildUniqueUserNameFromEmail, isEmail } from '@app/common';
 
 @Injectable()
 export class AuthUtilService {
@@ -25,6 +24,18 @@ export class AuthUtilService {
     ) {}
 
     // Utils below
+    protected async createUniqueUserName(email: string) {
+        const userName = buildUniqueUserNameFromEmail(email);
+        try {
+            await this.usersService.getUser({
+                userName: userName.toString(),
+            });
+            return await this.createUniqueUserName(email);
+        } catch (error) {
+            return userName;
+        }
+    }
+
     protected async checkIsRequiredRefresh(userId: string) {
         const cacheUserKey = `${REQUIRE_USER_REFRESH}_${userId}`;
         const userFound = await this.cacheManager.get(cacheUserKey);
@@ -56,19 +67,10 @@ export class AuthUtilService {
         return { accessToken, refreshToken, ...this.cleanUserBeforeResponse(user) };
     }
 
-    async sendMailOtp({ email, otpType, cmd }: { email: string; otpType: OtpType; cmd: string }) {
-        const otp = await this.otpService.createOrRenewOtp({ email, otpType });
-        const emailContext: ConfirmEmailRegisterDTO = {
-            otpCode: otp.otpCode,
-        };
+    async validateUser(input: string, password: string) {
+        const query = isEmail(input) ? { email: input } : { userName: input };
 
-        return this.mailService
-            .send({ cmd }, { email, emailContext })
-            .pipe(catchError((error) => throwError(() => new RpcException(error.response))));
-    }
-
-    async validateUser(email: string, password: string) {
-        const user = await this.usersService.getUser({ email });
+        const user = await this.usersService.getUser(query);
 
         const doesUserExist = !!user;
         if (!doesUserExist) return null;

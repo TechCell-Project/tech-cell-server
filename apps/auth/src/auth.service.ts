@@ -23,7 +23,7 @@ import { RpcException } from '@nestjs/microservices';
 import { ConfirmEmailRegisterDTO, ForgotPasswordEmailDTO, MailEventPattern } from '~/apps/mail';
 import { OtpType } from '@app/resource/otp';
 import { IUserFacebookResponse, IUserGoogleResponse, ITokenVerifiedResponse } from './interfaces';
-import { generateRandomString } from '@app/common';
+import { buildUniqueUserNameFromEmail, generateRandomString } from '@app/common';
 import { MAX_PASSWORD_LENGTH } from '~/constants';
 
 @Injectable()
@@ -35,8 +35,8 @@ export class AuthService extends AuthUtilService {
         };
     }
 
-    async login({ email, password }: LoginRequestDTO) {
-        const user = await this.validateUser(email, password);
+    async login({ emailOrUsername, password }: LoginRequestDTO) {
+        const user = await this.validateUser(emailOrUsername, password);
 
         if (!user) {
             throw new RpcException(
@@ -54,7 +54,7 @@ export class AuthService extends AuthUtilService {
 
         if (!user.emailVerified) {
             const otp = await this.otpService.createOrRenewOtp({
-                email,
+                email: user.email,
                 otpType: OtpType.VerifyEmail,
             });
             const emailContext: ConfirmEmailRegisterDTO = {
@@ -62,7 +62,7 @@ export class AuthService extends AuthUtilService {
             };
 
             this.mailService.emit(MailEventPattern.sendMailConfirm, {
-                email,
+                email: user.email,
                 emailContext,
             });
 
@@ -88,8 +88,17 @@ export class AuthService extends AuthUtilService {
         };
     }
 
-    async register({ email, firstName, lastName, password, re_password }: RegisterRequestDTO) {
+    async register({
+        email,
+        userName,
+        firstName,
+        lastName,
+        password,
+        re_password,
+    }: RegisterRequestDTO) {
         let userFound: User;
+        let userFoundByUserName: User;
+
         try {
             userFound = await this.usersService.getUser({
                 email,
@@ -98,8 +107,24 @@ export class AuthService extends AuthUtilService {
             userFound = undefined;
         }
 
+        if (userName && userName.length > 0) {
+            try {
+                userFoundByUserName = await this.usersService.getUser({
+                    userName,
+                });
+            } catch (error) {
+                userFoundByUserName = undefined;
+            }
+        } else {
+            userName = await this.createUniqueUserName(email);
+        }
+
         if (userFound || (userFound && userFound.emailVerified)) {
             throw new RpcException(new ConflictException('Email is already registered'));
+        }
+
+        if (userFoundByUserName) {
+            throw new RpcException(new ConflictException('Username is already registered'));
         }
 
         if (password !== re_password) {
@@ -108,16 +133,21 @@ export class AuthService extends AuthUtilService {
 
         userFound = await this.usersService.createUser({
             email,
+            userName,
             firstName,
             lastName,
             password,
         });
 
-        return await this.sendMailOtp({
-            email,
-            otpType: OtpType.VerifyEmail,
-            cmd: 'mail_send_confirm',
-        });
+        const otp = await this.otpService.createOrRenewOtp({ email, otpType: OtpType.VerifyEmail });
+        const emailContext: ConfirmEmailRegisterDTO = {
+            otpCode: otp.otpCode,
+        };
+        this.mailService.emit(MailEventPattern.sendMailConfirm, { email, emailContext });
+
+        return {
+            message: 'Register successfully, please check your email to verify it',
+        };
     }
 
     async verifyEmail({ email, otpCode }: VerifyEmailRequestDTO) {
@@ -259,6 +289,7 @@ export class AuthService extends AuthUtilService {
             // if not found, create new user
             newUser = await this.usersService.createUser({
                 email: user.email,
+                userName: buildUniqueUserNameFromEmail(user.email),
                 firstName: user.firstName,
                 lastName: user.lastName,
                 password: `${user.openid}${generateRandomString(
@@ -294,6 +325,7 @@ export class AuthService extends AuthUtilService {
             // if not found, create new user
             newUser = await this.usersService.createUser({
                 email: user.email,
+                userName: buildUniqueUserNameFromEmail(user.email),
                 firstName: user.firstName,
                 lastName: user.lastName,
                 password: `${user.email}${generateRandomString(
