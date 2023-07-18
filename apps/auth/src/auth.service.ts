@@ -191,6 +191,9 @@ export class AuthService extends AuthUtilService {
                 email: emailUser,
                 role,
             });
+
+            await this.revokeRefreshToken(oldRefreshToken);
+
             return { ...this.cleanUserBeforeResponse(userFound), accessToken, refreshToken };
         } catch (error) {
             throw new RpcException(new ForbiddenException(error.message));
@@ -252,6 +255,10 @@ export class AuthService extends AuthUtilService {
             throw new RpcException(new BadRequestException('Access token missing.'));
         }
 
+        if (await this.isAccessTokenRevoked(accessToken)) {
+            throw new RpcException(new BadRequestException('Refresh token is revoked'));
+        }
+
         const dataVerified = (await this.verifyToken(
             accessToken,
             this.configService.get<string>('JWT_ACCESS_TOKEN_SECRET'),
@@ -267,6 +274,10 @@ export class AuthService extends AuthUtilService {
     async verifyRefreshToken(refreshToken: string): Promise<ITokenVerifiedResponse> {
         if (!refreshToken) {
             throw new RpcException(new BadRequestException('Refresh token missing.'));
+        }
+
+        if (await this.isRefreshTokenRevoked(refreshToken)) {
+            throw new RpcException(new BadRequestException('Refresh token is revoked'));
         }
 
         return (await this.verifyToken(
