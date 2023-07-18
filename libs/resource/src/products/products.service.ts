@@ -1,4 +1,4 @@
-import { Injectable, UnprocessableEntityException } from '@nestjs/common';
+import { Injectable, UnprocessableEntityException, NotFoundException } from '@nestjs/common';
 import { SearchProductsRequestDTO, GetProductsByCateRequestDTO, CreateProductDto } from './dtos';
 import { RpcException } from '@nestjs/microservices';
 import { Product } from './schemas/product.schema';
@@ -57,13 +57,13 @@ export class ProductsService {
         }
     }
 
-    async searchByName({ searchTerm, page, sortField, sortOrder }: SearchProductsRequestDTO) {
-        return this.productsRepository.searchProducts(searchTerm, page, sortField, sortOrder);
-    }
+    // async searchByName({ searchTerm, page, sortField, sortOrder }: SearchProductsRequestDTO) {
+    //     return this.productsRepository.searchProducts(searchTerm, page, sortField, sortOrder);
+    // }
 
-    async getByCategory({ category, page, sortField, sortOrder }: GetProductsByCateRequestDTO) {
-        return this.productsRepository.getProductsByCategory(category, page, sortField, sortOrder);
-    }
+    // async getByCategory({ category, page, sortField, sortOrder }: GetProductsByCateRequestDTO) {
+    //     return this.productsRepository.getProductsByCategory(category, page, sortField, sortOrder);
+    // }
 
     async getProduct(
         getProductArgs: Partial<Product>,
@@ -92,4 +92,32 @@ export class ProductsService {
     async countProduct(filterQuery: FilterQuery<Product>) {
         return await this.productsRepository.count(filterQuery);
     }
+
+    // async calculateAverageRating(getProductArgs: Partial<Product>, rating: number) {
+    //     const product = await this.getProduct(getProductArgs, {}, ['review_stats']);
+    //     if (!product) {
+    //         throw new NotFoundException('Product not found');
+    //     }
+
+    //     const reviews = product.review_stats;
+    //     const totalReviews = reviews.review_count;
+    //     const averageRating = (reviews.average_rating + rating) / totalReviews;
+
+    //     product.review_stats.average_rating = averageRating;
+    //     product.review_stats.review_count = totalReviews;
+
+    //     return { averageRating, totalReviews };
+    // }
+
+    // async getProductStats(productId: string) {
+    //     const product = await this.productModel.findById(productId);
+    //     if (!product) {
+    //         throw new NotFoundException('Product not found');
+    //     }
+
+    //     return {
+    //         averageRating: product.averageRating,
+    //         totalReviews: product.totalReviews,
+    //     };
+    // }
 }

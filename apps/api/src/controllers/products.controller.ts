@@ -6,7 +6,6 @@ import {
     UploadedFiles,
     UseInterceptors,
     Body,
-    UploadedFile,
     Patch,
     Param,
 } from '@nestjs/common';

@@ -18,7 +18,7 @@ export class Product extends AbstractDocument {
     filterable: FilterableSchema;
 
     @Prop({ required: false })
-    Review_StatsSchema?: Review_StatsSchema;
+    review_stats?: Review_StatsSchema;
 
     @Prop({ required: true, type: Number, enum: ProductStatus, default: 1 })
     status: number;
