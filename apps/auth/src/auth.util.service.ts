@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, Inject } from '@nestjs/common';
+import { Injectable, UnauthorizedException, Inject, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { TokenExpiredError } from 'jsonwebtoken';
 import { UsersService } from '@app/resource/users';
@@ -10,7 +10,13 @@ import { RpcException, ClientRMQ } from '@nestjs/microservices';
 import { MAIL_SERVICE, REDIS_CACHE, REQUIRE_USER_REFRESH } from '~/constants';
 import { OtpService } from '@app/resource/otp';
 import { Store } from 'cache-manager';
-import { buildUniqueUserNameFromEmail, isEmail } from '@app/common';
+import {
+    buildRevokeAccessTokenKey,
+    buildRevokeRefreshTokenKey,
+    buildUniqueUserNameFromEmail,
+    isEmail,
+    timeStringToMs,
+} from '@app/common';
 
 @Injectable()
 export class AuthUtilService {
@@ -50,7 +56,7 @@ export class AuthUtilService {
         await this.cacheManager.del(cacheUserKey);
     }
 
-    cleanUserBeforeResponse(user: User) {
+    protected cleanUserBeforeResponse(user: User) {
         delete user.password;
         if (user.block) delete user.block;
         return user;
@@ -83,6 +89,66 @@ export class AuthUtilService {
 
     async doesPasswordMatch(password: string, hashedPassword: string): Promise<boolean> {
         return bcrypt.compare(password, hashedPassword);
+    }
+
+    protected async revokeAccessToken(accessToken: string): Promise<boolean> {
+        try {
+            const revokeAccessTokenKey = buildRevokeAccessTokenKey(accessToken);
+            await this.cacheManager.set(
+                revokeAccessTokenKey,
+                {
+                    revoked: true,
+                    accessToken,
+                },
+                timeStringToMs(process.env.JWT_ACCESS_TOKEN_EXPIRE_TIME_STRING),
+            );
+            return true;
+        } catch (error) {
+            Logger.error(`Error when revoke access token: ${error.message}`);
+            return false;
+        }
+    }
+
+    protected async isAccessTokenRevoked(accessToken: string): Promise<boolean> {
+        try {
+            const revokeAccessTokenKey = buildRevokeAccessTokenKey(accessToken);
+            const isRevoked = await this.cacheManager.get(revokeAccessTokenKey);
+            if (isRevoked) return true;
+            return false;
+        } catch (error) {
+            Logger.error(`Error when check revoked access token: ${error.message}`);
+            return true;
+        }
+    }
+
+    protected async revokeRefreshToken(refreshToken: string): Promise<boolean> {
+        try {
+            const revokeRefreshTokenKey = buildRevokeRefreshTokenKey(refreshToken);
+            await this.cacheManager.set(
+                revokeRefreshTokenKey,
+                {
+                    revoked: true,
+                    refreshToken,
+                },
+                timeStringToMs(process.env.JWT_REFRESH_TOKEN_EXPIRE_TIME_STRING),
+            );
+            return true;
+        } catch (error) {
+            Logger.error(`Error when revoke refresh token: ${error.message}`);
+            return false;
+        }
+    }
+
+    protected async isRefreshTokenRevoked(refreshToken: string): Promise<boolean> {
+        try {
+            const revokeRefreshTokenKey = buildRevokeRefreshTokenKey(refreshToken);
+            const isRevoked = await this.cacheManager.get(revokeRefreshTokenKey);
+            if (isRevoked) return true;
+            return false;
+        } catch (error) {
+            Logger.error(`Error when check revoked refresh token: ${error.message}`);
+            return true;
+        }
     }
 
     async verifyToken(token: string, secret: string) {
