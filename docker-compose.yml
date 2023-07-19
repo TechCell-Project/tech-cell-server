@@ -2,7 +2,7 @@ version: '3'
 
 services:
     cli:
-        build: ./cli
+        build: ./ssl/cli
         # image: evgeniy-khyst/letsencrypt-docker-compose-cli
         user: ${CURRENT_USER}
         group_add:
@@ -13,20 +13,20 @@ services:
             - DOCKER_GROUP
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock
-            - ./:/workdir
+            - ./ssl/:/workdir
         profiles:
             - config
 
     nginx:
-        build: ./nginx
+        build: ./ssl/nginx
         # image: evgeniy-khyst/nginx
         environment:
             - DRY_RUN
         volumes:
-            - ./config.json:/letsencrypt-docker-compose/config.json:ro
-            - ./nginx-conf/nginx.conf:/etc/nginx/nginx.conf:ro
-            - ./nginx-conf/conf.d:/etc/nginx/conf.d:ro
-            - ./html:/var/www/html:ro
+            - ./ssl/config.json:/letsencrypt-docker-compose/config.json:ro
+            - ./ssl/nginx-conf/nginx.conf:/etc/nginx/nginx.conf:ro
+            - ./ssl/nginx-conf/conf.d:/etc/nginx/conf.d:ro
+            - ./ssl/html:/var/www/html:ro
             - nginx_conf_ssl:/etc/nginx/ssl
             - letsencrypt_certs:/etc/letsencrypt
             - certbot_acme_challenge:/var/www/certbot
@@ -44,12 +44,12 @@ services:
         restart: unless-stopped
 
     certbot:
-        build: ./certbot
+        build: ./ssl/certbot
         # image: evgeniy-khyst/certbot
         environment:
             - DRY_RUN
         volumes:
-            - ./config.json:/letsencrypt-docker-compose/config.json:ro
+            - ./ssl/config.json:/letsencrypt-docker-compose/config.json:ro
             - letsencrypt_certs:/etc/letsencrypt
             - certbot_acme_challenge:/var/www/certbot
         healthcheck:
@@ -68,14 +68,14 @@ services:
         restart: unless-stopped
 
     cron:
-        build: ./cron
+        build: ./ssl/cron
         # image: evgeniy-khyst/cron
         environment:
             - COMPOSE_PROJECT_NAME
             - DRY_RUN
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock
-            - ./:/workdir:ro
+            - ./ssl/:/workdir:ro
         depends_on:
             certbot:
                 condition: service_healthy
