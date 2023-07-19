@@ -1,0 +1,17 @@
+{
+  "domains": [
+    {
+      "domain": "techcell.cloud",
+      "email": "techcell.cloud@gmail.com",
+      "wwwSubdomain": true,
+      "testCert": true,
+      "rsaKeySize": 4096,
+      "requestHandler": "reverseProxy",
+      "upstream": "tech-cell-web-server-api-1:8000",
+      "websockets": true,
+      "dnsResolver": "127.0.0.11"
+    }
+  ],
+  "dhparamsSize": 2048,
+  "gzip": true
+}
