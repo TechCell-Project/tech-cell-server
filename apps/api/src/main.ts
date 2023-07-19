@@ -1,4 +1,3 @@
-import * as fs from 'fs';
 import * as express from 'express';
 import { createServer as createHttpServer } from 'http';
 import { NestFactory } from '@nestjs/core';
@@ -17,7 +16,16 @@ async function bootstrap() {
     const app = await NestFactory.create(AppModule, new ExpressAdapter(server));
 
     app.enableCors();
-    app.use(helmet());
+    app.use(
+        helmet({
+            contentSecurityPolicy: {
+                directives: {
+                    ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+                    'script-src': ["'self'", "'unsafe-inline'"],
+                },
+            },
+        }),
+    );
 
     // Use to catch exceptions and send them to responses
     app.useGlobalFilters(new RpcExceptionFilter());
