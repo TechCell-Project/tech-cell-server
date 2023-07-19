@@ -39,6 +39,8 @@ services:
             timeout: 30s
             start_period: 30s
             retries: 10
+        networks:
+            - techcell_backend
         restart: unless-stopped
 
     certbot:
@@ -92,7 +94,6 @@ services:
         volumes:
             - .:/usr/src/techcell_app
             - /usr/src/techcell_app/node_modules
-            # - /etc/letsencrypt/:/etc/letsencrypt
         ports:
             - 8000:8000
         networks:

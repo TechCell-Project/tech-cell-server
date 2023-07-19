@@ -7,7 +7,7 @@
       "testCert": true,
       "rsaKeySize": 4096,
       "requestHandler": "reverseProxy",
-      "upstream": "tech-cell-web-server-api-1:8000",
+      "upstream": "tech-cell-web-server-api:8000",
       "websockets": true,
       "dnsResolver": "127.0.0.11"
     }
