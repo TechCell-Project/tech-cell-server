@@ -1,9 +1,9 @@
 {
   "domains": [
     {
-      "domain": "techcell.cloud",
+      "domain": "api.techcell.cloud",
       "email": "techcell.cloud@gmail.com",
-      "wwwSubdomain": true,
+      "wwwSubdomain": false,
       "testCert": true,
       "rsaKeySize": 4096,
       "requestHandler": "reverseProxy",
