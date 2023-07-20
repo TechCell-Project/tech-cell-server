@@ -30,10 +30,10 @@ export class ProductsMntController {
             const dateModified = new Date();
 
             const uploadedImage = await this.cloudinaryService.uploadFile(file);
-
             const imageObject = {
-                name: filename,
-                path: uploadedImage.url,
+                file_name: filename,
+                path: uploadedImage.secure_url,
+                cloudinary_id: uploadedImage.public_id,
                 date_modified: dateModified,
             };
 
@@ -51,6 +51,18 @@ export class ProductsMntController {
 
     @MessagePattern(ProductsMntMessagePattern.changeStatus)
     async changeStatus(@Ctx() context: RmqContext, @Payload() payload) {
+        this.rabbitMqService.acknowledgeMessage(context);
+
+        const { productId, status } = payload;
+
+        return await this.productsMntService.changeStatus({
+            productId,
+            status,
+        });
+    }
+
+    @MessagePattern(ProductsMntMessagePattern.updateProduct)
+    async updateProduct(@Ctx() context: RmqContext, @Payload() payload) {
         this.rabbitMqService.acknowledgeMessage(context);
 
         const { productId, status } = payload;

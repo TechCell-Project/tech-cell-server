@@ -8,9 +8,9 @@ interface IAttributes {
 }
 
 export interface IImage {
-    name: string;
+    file_name: string;
     path: string;
-    index: number;
+    cloudinary_id: string;
     date_modified: Date;
 }
 

@@ -1,6 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { ProductsMntUtilService } from './products-mnt.ultil.service';
-import { CreateProductRequestDto, ChangeStatusDTO } from './dtos';
+import { CreateProductRequestDto, ChangeStatusDTO, UpdateProductRequestDto } from './dtos';
+import { Types } from 'mongoose';
+import { RpcException } from '@nestjs/microservices';
 
 @Injectable()
 export class ProductsMntService extends ProductsMntUtilService {
@@ -31,6 +33,15 @@ export class ProductsMntService extends ProductsMntUtilService {
             thumbnail,
             status,
         });
+    }
+
+    async getProductById(id: string | Types.ObjectId | any) {
+        try {
+            const idSearch: Types.ObjectId = typeof id === 'string' ? new Types.ObjectId(id) : id;
+            return await this.productsService.getProduct({ _id: idSearch }, {});
+        } catch (error) {
+            throw new RpcException(new BadRequestException('Product Id is invalid'));
+        }
     }
 
     async changeStatus({ productId, status }: ChangeStatusDTO) {

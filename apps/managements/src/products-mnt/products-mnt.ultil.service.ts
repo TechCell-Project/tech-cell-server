@@ -1,14 +1,7 @@
 import { ProductsService } from '@app/resource';
-import { Product } from '@app/resource/products/schemas';
 import { Inject, Injectable } from '@nestjs/common';
 import { delStartWith } from '@app/common/utils';
-import {
-    REDIS_CACHE,
-    PRODUCTS_CACHE_PREFIX,
-    PRODUCTS_ALL,
-    PRODUCTS_OFFSET,
-    PRODUCTS_LIMIT,
-} from '~/constants';
+import { REDIS_CACHE, PRODUCTS_CACHE_PREFIX } from '~/constants';
 import { Store } from 'cache-manager';
 
 @Injectable()

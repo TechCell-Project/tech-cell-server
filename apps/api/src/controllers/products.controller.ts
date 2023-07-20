@@ -13,8 +13,9 @@ import {
 import { ClientRMQ } from '@nestjs/microservices';
 import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~/constants';
 import { catchException } from '@app/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiNotFoundResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { FilesInterceptor } from '@nestjs/platform-express';
+import { ProductsMntResponseDto } from '@app/resource/products/dtos';
 import { ProductsMntMessagePattern } from '~/apps/managements/products-mnt';
 import { ProductsSearchMessagePattern } from '~/apps/search/products-search';
 import {
@@ -31,6 +32,8 @@ export class ProductsController {
         @Inject(SEARCH_SERVICE) private readonly searchService: ClientRMQ,
     ) {}
 
+    @ApiOkResponse({ description: 'Get products success', type: [ProductsMntResponseDto] })
+    @ApiNotFoundResponse({ description: 'No products found' })
     @Get('/')
     async getProducts(@Query() requestQuery: GetProductsDTO) {
         return this.searchService

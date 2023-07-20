@@ -1,5 +1,3 @@
 export * from './create-product.dto';
-export * from './updateProductRequestDTO';
-export * from './searchProductRequestDTO';
-export * from './searchProductResponseDTO';
-export * from './getProductByCateDTO';
+export * from './update-product.dto';
+export * from './product-mnt.dto';

@@ -41,15 +41,15 @@ export class FilterDto {
 export class ImageDto {
     @IsNotEmpty()
     @IsString()
-    name: string;
+    file_name: string;
 
     @IsString()
     @IsNotEmpty()
     path: string;
 
-    @IsNumber()
+    @IsString()
     @IsNotEmpty()
-    index: number;
+    cloudinary_id: string;
 
     @IsDate()
     @IsNotEmpty()

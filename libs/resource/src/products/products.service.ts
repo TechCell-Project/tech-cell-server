@@ -1,5 +1,5 @@
-import { Injectable, UnprocessableEntityException, NotFoundException } from '@nestjs/common';
-import { SearchProductsRequestDTO, GetProductsByCateRequestDTO, CreateProductDto } from './dtos';
+import { Injectable, UnprocessableEntityException } from '@nestjs/common';
+import { CreateProductDto, UpdateProductDto } from './dtos';
 import { RpcException } from '@nestjs/microservices';
 import { Product } from './schemas/product.schema';
 import { ProductsRepository } from './products.repository';
@@ -65,6 +65,14 @@ export class ProductsService {
     //     return this.productsRepository.getProductsByCategory(category, page, sortField, sortOrder);
     // }
 
+    async getProduct(
+        getProductArgs: Partial<Product>,
+        queryArgs?: Partial<QueryOptions<Product>>,
+        projectionArgs?: Partial<ProjectionType<Product>>,
+    ) {
+        return this.productsRepository.findOne(getProductArgs, queryArgs, projectionArgs);
+    }
+
     async getProducts(
         getProductsArgs: Partial<Product>,
         queryArgs?: Partial<QueryOptions<Product>>,
@@ -75,11 +83,11 @@ export class ProductsService {
 
     async findOneAndUpdateProduct(
         filterQuery: FilterQuery<Product>,
-        updateProductArgs: Partial<Product>,
+        updateProductArgs: UpdateProductDto,
     ) {
-        if ('name' in updateProductArgs) {
+        if ('general.name' in updateProductArgs) {
             const existingProduct = await this.productsRepository.findOne({
-                name: updateProductArgs.name,
+                name: updateProductArgs.general.name,
             });
 
             if (existingProduct && existingProduct._id.toString() !== filterQuery._id.toString()) {

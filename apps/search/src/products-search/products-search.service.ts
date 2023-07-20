@@ -1,7 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException } from '@nestjs/common';
+import { RpcException } from '@nestjs/microservices';
 import { ProductsSearchUtilService } from './products-search.ultil.service';
 import { QueryProductParamsDTO, GetProductsDTO } from './dtos';
 import { timeStringToMs } from '@app/common';
+import { Types } from 'mongoose';
 
 @Injectable()
 export class ProductsSearchService extends ProductsSearchUtilService {
@@ -29,5 +31,14 @@ export class ProductsSearchService extends ProductsSearchUtilService {
         await this.cacheManager.set(cacheKey, productsFromDb, timeStringToMs('1h'));
 
         return productsFromDb;
+    }
+
+    async getProductById(id: string | Types.ObjectId | any) {
+        try {
+            const idSearch: Types.ObjectId = typeof id === 'string' ? new Types.ObjectId(id) : id;
+            return await this.productsService.getProduct({ _id: idSearch }, {});
+        } catch (error) {
+            throw new RpcException(new BadRequestException('Product Id is invalid'));
+        }
     }
 }
