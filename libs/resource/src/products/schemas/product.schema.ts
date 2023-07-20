@@ -28,8 +28,9 @@ export const ProductSchema = SchemaFactory.createForClass(Product);
 
 // ProductSchema.index({ 'general.attributes.k': 1, 'general.attributes.v': 1 });
 
-ProductSchema.post('validate', function (doc: any) {
-    const productName: string = doc.name;
-    const slug: string = slugify(productName, { lower: true });
-    doc.general.sku = slug;
+ProductSchema.pre('save', function (next) {
+    if (this.isModified('name') || this.isNew) {
+        this.general.sku = slugify(this.general.name, { lower: true });
+    }
+    next();
 });
