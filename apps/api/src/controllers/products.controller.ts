@@ -33,7 +33,7 @@ export class ProductsController {
 
     @Get('/')
     async getProducts(@Query() requestQuery: GetProductsDTO) {
-        return this.managementsService
+        return this.searchService
             .send(ProductsSearchMessagePattern.getProducts, { ...requestQuery })
             .pipe(catchException());
     }
