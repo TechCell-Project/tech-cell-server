@@ -9,52 +9,11 @@ import {
     Max,
     IsArray,
     ArrayMinSize,
-    IsDate,
     ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { Category, Manufacturer, ProductStatus } from '@app/resource/products/enums';
-
-export class AttributesDto {
-    @IsString()
-    k: string;
-
-    @IsNumber()
-    @IsString()
-    v: number | string;
-
-    @IsOptional()
-    @IsString()
-    u?: string;
-}
-
-export class FilterDto {
-    @IsNotEmpty()
-    @IsString()
-    id: string;
-
-    @IsNotEmpty()
-    @IsString()
-    Label: string;
-}
-
-export class ImageDto {
-    @IsNotEmpty()
-    @IsString()
-    name: string;
-
-    @IsNotEmpty()
-    @IsString()
-    path: string;
-
-    @IsNumber()
-    @IsNotEmpty()
-    index: number;
-
-    @IsNotEmpty()
-    @IsDate()
-    date_modified: Date;
-}
+import { AttributesDto, FilterDto, ImageDto } from '@app/resource/products/dtos';
 
 export class CreateProductRequestDto {
     @IsString()
@@ -107,14 +66,15 @@ export class CreateProductRequestDto {
     @Max(100000000)
     special_price: number;
 
+    @IsOptional()
+    thumbnail?: ImageDto;
+
     @IsNotEmpty()
     @Type(() => Number)
     @IsEnum(ProductStatus)
     status: number;
 
     @IsOptional()
-    thumbnail?: ImageDto;
-
-    @IsOptional()
-    files?: any;
+    @ArrayMinSize(2)
+    files?: Express.Multer.File[];
 }
