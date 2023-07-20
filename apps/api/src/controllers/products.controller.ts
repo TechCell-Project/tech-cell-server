@@ -8,29 +8,37 @@ import {
     Body,
     Patch,
     Param,
+    Query,
 } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
-import { MANAGEMENTS_SERVICE } from '~/constants';
+import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~/constants';
 import { catchException } from '@app/common';
 import { ApiTags } from '@nestjs/swagger';
 import { FilesInterceptor } from '@nestjs/platform-express';
-// import { ProductsSearchMessagePattern } from '~/apps/search/products-search';
 import { ProductsMntMessagePattern } from '~/apps/managements/products-mnt';
-import { CreateProductRequestDto } from '~/apps/managements/products-mnt/dto';
+import { ProductsSearchMessagePattern } from '~/apps/search/products-search';
+import {
+    CreateProductRequestDto,
+    ChangeStatusRequestDTO,
+} from '~/apps/managements/products-mnt/dtos';
+import { GetProductsDTO } from '~/apps/search/products-search/dtos';
 
 @ApiTags('products')
 @Controller('products')
 export class ProductsController {
-    constructor(@Inject(MANAGEMENTS_SERVICE) private readonly managementsService: ClientRMQ) {}
+    constructor(
+        @Inject(MANAGEMENTS_SERVICE) private readonly managementsService: ClientRMQ,
+        @Inject(SEARCH_SERVICE) private readonly searchService: ClientRMQ,
+    ) {}
 
-    @Get('products')
-    async getAllProducts() {
+    @Get('/')
+    async getProducts(@Query() requestQuery: GetProductsDTO) {
         return this.managementsService
-            .send(ProductsMntMessagePattern.getAllProducts, {})
+            .send(ProductsSearchMessagePattern.getProducts, { ...requestQuery })
             .pipe(catchException());
     }
 
-    @Post('product')
+    @Post('/')
     @UseInterceptors(FilesInterceptor('file[]', 5))
     async createProduct(
         @UploadedFiles() files: Express.Multer.File[],
@@ -48,26 +56,23 @@ export class ProductsController {
         }: CreateProductRequestDto,
     ) {
         return this.managementsService
-            .send(
-                { cmd: 'create_product' },
-                {
-                    name,
-                    attributes,
-                    manufacturer,
-                    categories,
-                    stock,
-                    filter,
-                    price,
-                    special_price,
-                    status,
-                    files,
-                },
-            )
+            .send(ProductsMntMessagePattern.createProduct, {
+                name,
+                attributes,
+                manufacturer,
+                categories,
+                stock,
+                filter,
+                price,
+                special_price,
+                status,
+                files,
+            })
             .pipe(catchException());
     }
 
-    @Patch('products/:id/change-status')
-    async changeStatus(@Param('id') idParam: string, @Body() { status }: { status: number }) {
+    @Patch('/:id/change-status')
+    async changeStatus(@Param('id') idParam: string, @Body() { status }: ChangeStatusRequestDTO) {
         return this.managementsService
             .send(ProductsMntMessagePattern.changeStatus, { productId: idParam, status })
             .pipe(catchException());

@@ -1,29 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { PRODUCTS_ALL } from '~/constants';
-// import { Types } from 'mongoose';
-// import { RpcException } from '@nestjs/microservices';
+import { Injectable } from '@nestjs/common';
 import { ProductsMntUtilService } from './products-mnt.ultil.service';
-import { timeStringToMs } from '@app/common';
-import { CreateProductRequestDto } from './dto';
+import { CreateProductRequestDto, ChangeStatusDTO } from './dtos';
 
 @Injectable()
 export class ProductsMntService extends ProductsMntUtilService {
-    async getAllProducts() {
-        const cacheKey = PRODUCTS_ALL;
-        const productsFromCache = await this.cacheManager.get(cacheKey);
-        if (productsFromCache) {
-            Logger.log(`CACHE HIT: ${cacheKey}`);
-            return productsFromCache;
-        }
-
-        Logger.warn(`CACHE MISS: ${cacheKey}`);
-        const productsFromDb = await this.productsService.getAllProducts();
-
-        await this.cacheManager.set(cacheKey, productsFromDb, timeStringToMs('1h'));
-
-        return productsFromDb;
-    }
-
     async createProduct(payload: CreateProductRequestDto) {
         const {
             name,
@@ -53,7 +33,7 @@ export class ProductsMntService extends ProductsMntUtilService {
         });
     }
 
-    async changeStatus({ productId, status }: { productId: string; status: number }) {
+    async changeStatus({ productId, status }: ChangeStatusDTO) {
         const [changeRole] = await Promise.all([
             this.productsService.findOneAndUpdateProduct({ _id: productId }, { status: status }),
             this.delCacheProducts(),

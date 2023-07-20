@@ -10,6 +10,7 @@ interface IAttributes {
 export interface IImage {
     name: string;
     path: string;
+    index: number;
     date_modified: Date;
 }
 

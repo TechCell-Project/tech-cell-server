@@ -1,12 +1,21 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { ProductsModule } from '@app/resource/products';
 import { ProductsSearchController } from './products-search.controller';
-import { RabbitMQModule } from '@app/common';
 import { ProductsSearchService } from './products-search.service';
-import { ProductsModule } from '@app/resource';
+import { RabbitMQModule, RabbitMQService, RedisCacheModule } from '@app/common';
 
 @Module({
-    imports: [RabbitMQModule, ProductsModule],
+    imports: [
+        RabbitMQModule,
+        ConfigModule.forRoot({
+            isGlobal: true,
+            envFilePath: './.env',
+        }),
+        ProductsModule,
+        RedisCacheModule,
+    ],
     controllers: [ProductsSearchController],
-    providers: [ProductsSearchService],
+    providers: [RabbitMQService, ProductsSearchService],
 })
 export class ProductsSearchModule {}

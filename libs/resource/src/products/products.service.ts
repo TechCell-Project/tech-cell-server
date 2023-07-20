@@ -9,9 +9,9 @@ import { FilterQuery, ProjectionType, QueryOptions } from 'mongoose';
 export class ProductsService {
     constructor(private readonly productsRepository: ProductsRepository) {}
 
-    async getAllProducts() {
-        return this.productsRepository.find({});
-    }
+    // async getAllProducts() {
+    //     return this.productsRepository.find({});
+    // }
 
     async createProduct({
         name,
@@ -65,12 +65,12 @@ export class ProductsService {
     //     return this.productsRepository.getProductsByCategory(category, page, sortField, sortOrder);
     // }
 
-    async getProduct(
-        getProductArgs: Partial<Product>,
+    async getProducts(
+        getProductsArgs: Partial<Product>,
         queryArgs?: Partial<QueryOptions<Product>>,
         projectionArgs?: Partial<ProjectionType<Product>>,
     ) {
-        return this.productsRepository.findOne(getProductArgs, queryArgs, projectionArgs);
+        return this.productsRepository.find(getProductsArgs, queryArgs, projectionArgs);
     }
 
     async findOneAndUpdateProduct(

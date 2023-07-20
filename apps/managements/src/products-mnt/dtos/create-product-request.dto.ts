@@ -47,6 +47,10 @@ export class ImageDto {
     @IsString()
     path: string;
 
+    @IsNumber()
+    @IsNotEmpty()
+    index: number;
+
     @IsNotEmpty()
     @IsDate()
     date_modified: Date;
