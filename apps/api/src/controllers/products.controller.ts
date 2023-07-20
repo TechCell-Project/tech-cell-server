@@ -33,7 +33,7 @@ export class ProductsController {
     ) {}
 
     @ApiOkResponse({ description: 'Get products success', type: [ProductsMntResponseDto] })
-    @ApiNotFoundResponse({ description: 'No products found' })
+    @ApiNotFoundResponse({ description: 'Products not found.' })
     @Get('/')
     async getProducts(@Query() requestQuery: GetProductsDTO) {
         return this.searchService
