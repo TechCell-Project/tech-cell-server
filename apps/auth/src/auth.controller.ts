@@ -1,4 +1,4 @@
-import { Controller, Get, Inject, UseGuards } from '@nestjs/common';
+import { Controller, Get, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RabbitMQService } from '@app/common';
 import { Ctx, MessagePattern, Payload, RmqContext } from '@nestjs/microservices';
@@ -12,7 +12,6 @@ import {
     ForgotPasswordDTO,
     VerifyForgotPasswordDTO,
 } from './dtos';
-import { UsersService } from '@app/resource/users';
 import { JwtGuard } from './guards/jwt.guard';
 import { IUserFacebookResponse, IUserGoogleResponse } from './interfaces';
 import { AuthMessagePattern } from './auth.pattern';
@@ -21,8 +20,7 @@ import { AuthMessagePattern } from './auth.pattern';
 export class AuthController {
     constructor(
         private readonly authService: AuthService,
-        @Inject(RabbitMQService) private readonly rabbitMqService: RabbitMQService,
-        @Inject(UsersService) private readonly usersService: UsersService,
+        private readonly rabbitMqService: RabbitMQService,
     ) {}
 
     @Get('ping')
