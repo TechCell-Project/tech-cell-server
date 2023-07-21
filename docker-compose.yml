@@ -79,7 +79,9 @@ services:
         restart: unless-stopped
 
     api:
-        build: ./apps/api
+        build:
+            context: ./
+            dockerfile: ./apps/api/Dockerfile
         env_file:
             - .env
         volumes:
@@ -92,7 +94,9 @@ services:
         restart: always
 
     auth:
-        build: ./apps/auth
+        build:
+            context: ./
+            dockerfile: ./apps/auth/Dockerfile
         env_file:
             - .env
         volumes:
@@ -103,7 +107,9 @@ services:
         restart: always
 
     mail:
-        build: ./apps/mail
+        build:
+            context: ./
+            dockerfile: ./apps/mail/Dockerfile
         env_file:
             - .env
         volumes:
@@ -114,7 +120,9 @@ services:
         restart: always
 
     search:
-        build: ./apps/search
+        build:
+            context: ./
+            dockerfile: ./apps/search/Dockerfile
         env_file:
             - .env
         volumes:
@@ -125,7 +133,9 @@ services:
         restart: always
 
     sample:
-        build: ./apps/sample
+        build:
+            context: ./
+            dockerfile: ./apps/sample/Dockerfile
         env_file:
             - .env
         volumes:
@@ -136,7 +146,9 @@ services:
         restart: always
 
     managements:
-        build: ./apps/managements
+        build:
+            context: ./
+            dockerfile: ./apps/managements/Dockerfile
         env_file:
             - .env
         volumes:
@@ -147,7 +159,9 @@ services:
         restart: always
 
     order:
-        build: ./apps/order
+        build:
+            context: ./
+            dockerfile: ./apps/order/Dockerfile
         env_file:
             - .env
         volumes:
