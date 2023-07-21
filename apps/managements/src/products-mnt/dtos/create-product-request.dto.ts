@@ -3,44 +3,19 @@ import {
     IsString,
     IsNumber,
     IsOptional,
-    IsBoolean,
-    IsArray,
     IsEnum,
     Length,
     Min,
     Max,
+    IsArray,
     ArrayMinSize,
     ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { Category, Manufacturer } from '../enums';
+import { Category, Manufacturer, ProductStatus } from '@app/resource/products/enums';
+import { AttributesDto, FilterDto, ImageDto } from '@app/resource/products/dtos';
 
-class AttributesDto {
-    @IsString()
-    k: string;
-
-    @IsNumber()
-    @IsString()
-    v: number | string;
-
-    @IsOptional()
-    @IsString()
-    u?: string;
-}
-class FilterDto {
-    @IsNotEmpty()
-    @IsString()
-    id: string;
-
-    @IsNotEmpty()
-    @IsString()
-    Label: string;
-}
-
-export class UpdateProductRequestDto {
-    @IsOptional()
-    product_id: number;
-
+export class CreateProductRequestDto {
     @IsString()
     @IsNotEmpty()
     @Length(10)
@@ -58,17 +33,14 @@ export class UpdateProductRequestDto {
     @IsEnum(Manufacturer)
     manufacturer: Manufacturer;
 
+    @IsOptional()
     @IsArray()
     @ArrayMinSize(1)
-    @IsString({ each: true })
-    images: string[];
+    images?: ImageDto[];
 
     @IsNotEmpty()
     @IsEnum(Category)
     categories: Category;
-
-    @IsBoolean()
-    status: boolean;
 
     @IsNotEmpty()
     @Type(() => Number)
@@ -82,6 +54,7 @@ export class UpdateProductRequestDto {
 
     @IsNotEmpty()
     @Type(() => Number)
+    @IsNumber()
     @Min(1000)
     @Max(100000000)
     price: number;
@@ -93,7 +66,15 @@ export class UpdateProductRequestDto {
     @Max(100000000)
     special_price: number;
 
+    @IsOptional()
+    thumbnail?: ImageDto;
+
     @IsNotEmpty()
-    @IsString()
-    thumbnail: string;
+    @Type(() => Number)
+    @IsEnum(ProductStatus)
+    status: number;
+
+    @IsOptional()
+    @ArrayMinSize(2)
+    files?: Express.Multer.File[];
 }

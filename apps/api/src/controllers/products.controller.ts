@@ -1,68 +1,83 @@
-import { Controller, Inject, Get } from '@nestjs/common';
+import {
+    Controller,
+    Inject,
+    Get,
+    Post,
+    UploadedFiles,
+    UseInterceptors,
+    Body,
+    Patch,
+    Param,
+    Query,
+} from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
-import { SEARCH_SERVICE } from '~/constants';
+import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~/constants';
 import { catchException } from '@app/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiNotFoundResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { ProductsMntResponseDto } from '@app/resource/products/dtos';
+import { ProductsMntMessagePattern } from '~/apps/managements/products-mnt';
 import { ProductsSearchMessagePattern } from '~/apps/search/products-search';
+import {
+    CreateProductRequestDto,
+    ChangeStatusRequestDTO,
+} from '~/apps/managements/products-mnt/dtos';
+import { GetProductsDTO } from '~/apps/search/products-search/dtos';
 
 @ApiTags('products')
 @Controller('products')
 export class ProductsController {
-    constructor(@Inject(SEARCH_SERVICE) private readonly searchService: ClientRMQ) {}
+    constructor(
+        @Inject(MANAGEMENTS_SERVICE) private readonly managementsService: ClientRMQ,
+        @Inject(SEARCH_SERVICE) private readonly searchService: ClientRMQ,
+    ) {}
 
-    @Get()
-    async getProducts() {
+    @ApiOkResponse({ description: 'Get products success', type: [ProductsMntResponseDto] })
+    @ApiNotFoundResponse({ description: 'Products not found.' })
+    @Get('/')
+    async getProducts(@Query() requestQuery: GetProductsDTO) {
         return this.searchService
-            .send(ProductsSearchMessagePattern.getProducts, {})
+            .send(ProductsSearchMessagePattern.getProducts, { ...requestQuery })
             .pipe(catchException());
     }
 
-    // @UseGuards(AuthGuard)
-    // @Post()
-    // @UseInterceptors(uploadCloud.single('file'), uploadCloud.multiple('files'))
-    // async createProduct(
-    //     @UploadedFile() file: Express.Multer.File,
-    //     @Body()
-    //     {
-    //         name,
-    //         attributes,
-    //         manufacturer,
-    //         categories,
-    //         status,
-    //         stock,
-    //         filter,
-    //         price,
-    //         special_price,
-    //     }: createProductRequestDto,
-    // ) {
-    //     return this.productsService
-    //         .send(
-    //             { cmd: 'create_product' },
-    //             {
-    //                 name,
-    //                 attributes,
-    //                 manufacturer,
-    //                 categories,
-    //                 status,
-    //                 stock,
-    //                 filter,
-    //                 price,
-    //                 special_price,
-    //                 file,
-    //             },
-    //         )
-    //         .pipe(catchException());
-    // }
+    @Post('/')
+    @UseInterceptors(FilesInterceptor('file[]', 5))
+    async createProduct(
+        @UploadedFiles() files: Express.Multer.File[],
+        @Body()
+        {
+            name,
+            attributes,
+            manufacturer,
+            categories,
+            stock,
+            filter,
+            price,
+            special_price,
+            status,
+        }: CreateProductRequestDto,
+    ) {
+        return this.managementsService
+            .send(ProductsMntMessagePattern.createProduct, {
+                name,
+                attributes,
+                manufacturer,
+                categories,
+                stock,
+                filter,
+                price,
+                special_price,
+                status,
+                files,
+            })
+            .pipe(catchException());
+    }
 
-    // @ApiOkResponse({ description: 'Products found', type: SearchProductResponseDTO, isArray: true })
-    // @ApiNotFoundResponse({ description: 'No products found' })
-    // @ApiBadRequestResponse({ description: 'Invalid request parameters' })
-    // @Get('search')
-    // async searchProducts(
-    //     @Query() { searchTerm, page, sortField, sortOrder }: SearchProductsRequestDTO,
-    // ) {
-    //     return this.productsService
-    //         .send({ cmd: 'search_product_by_name' }, { searchTerm, page, sortField, sortOrder })
-    //         .pipe(catchException());
-    // }
+    @Patch('/:id/change-status')
+    async changeStatus(@Param('id') idParam: string, @Body() { status }: ChangeStatusRequestDTO) {
+        return this.managementsService
+            .send(ProductsMntMessagePattern.changeStatus, { productId: idParam, status })
+            .pipe(catchException());
+    }
 }

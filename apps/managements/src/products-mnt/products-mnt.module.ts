@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ProductsModule } from '@app/resource/products';
-import { ProductsSearchController } from './products-search.controller';
-import { ProductsSearchService } from './products-search.service';
+import { ProductsMntController } from './products-mnt.controller';
+import { ProductsMntService } from './products-mnt.service';
 import { RabbitMQModule, RabbitMQService, RedisCacheModule } from '@app/common';
+import { CloudinaryModule } from '@app/common/Cloudinary';
 
 @Module({
     imports: [
@@ -14,8 +15,9 @@ import { RabbitMQModule, RabbitMQService, RedisCacheModule } from '@app/common';
         }),
         ProductsModule,
         RedisCacheModule,
+        CloudinaryModule,
     ],
-    controllers: [ProductsSearchController],
-    providers: [RabbitMQService, ProductsSearchService],
+    controllers: [ProductsMntController],
+    providers: [RabbitMQService, ProductsMntService],
 })
-export class ProductsSearchModule {}
+export class ProductsMntModule {}

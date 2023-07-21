@@ -1,4 +1,5 @@
 import { Prop } from '@nestjs/mongoose';
+import { IImage } from './general.schema';
 
 interface IFilter {
     id: string;
@@ -19,5 +20,5 @@ export class FilterableSchema {
     special_price: number;
 
     @Prop({ required: true, type: String })
-    thumbnail: string;
+    thumbnail: IImage;
 }

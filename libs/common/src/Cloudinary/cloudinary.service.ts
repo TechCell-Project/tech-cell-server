@@ -22,4 +22,15 @@ export class CloudinaryService {
             streamifier.createReadStream(file.buffer).pipe(uploadStream);
         });
     }
+    deleteFile(publicId: string): Promise<CloudinaryResponse> {
+        return new Promise<CloudinaryResponse>((resolve, reject) => {
+            cloudinary.uploader.destroy(publicId, (error, result) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve(result);
+                }
+            });
+        });
+    }
 }

@@ -1,4 +1,3 @@
-export * from './createProductRequestDTO';
-export * from './updateProductRequestDTO';
-export * from './searchProductRequestDTO';
-export * from './searchProductResponseDTO';
+export * from './create-product.dto';
+export * from './update-product.dto';
+export * from './product-mnt.dto';
