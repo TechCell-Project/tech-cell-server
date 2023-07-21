@@ -10,7 +10,7 @@ export class ProductsSearchService extends ProductsSearchUtilService {
     async getProducts(payload: QueryProductParamsDTO) {
         const { all, limit = 1, offset = 0 } = payload;
 
-        const query: GetProductsDTO = {};
+        // const query: GetProductsDTO = {};
         const options = { limit, skip: offset };
 
         const cacheKey = this.buildCacheKeyProducts({ limit, offset, all });
@@ -26,7 +26,13 @@ export class ProductsSearchService extends ProductsSearchUtilService {
         }
 
         Logger.warn(`CACHE MISS: ${cacheKey}`);
-        const productsFromDb = await this.productsService.getProducts({ ...query }, { ...options });
+        const productsFromDb = await this.productsService.getProducts(
+            {
+                /*...query*/
+                // TODO: limit, offset is not a part of `product`
+            },
+            { ...options },
+        );
 
         await this.cacheManager.set(cacheKey, productsFromDb, timeStringToMs('1h'));
 
