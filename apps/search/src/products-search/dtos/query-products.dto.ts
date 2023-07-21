@@ -12,13 +12,4 @@ export class QueryProductParamsDTO {
 
     @IsOptional()
     offset?: number;
-
-    @IsOptional()
-    sort?: string;
-
-    @IsOptional()
-    order?: string;
-
-    @IsOptional()
-    search?: string;
 }
