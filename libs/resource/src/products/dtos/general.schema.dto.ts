@@ -4,19 +4,19 @@ import { Category, Manufacturer } from '../enums';
 class AttributesSchemaDto {
     @ApiProperty({
         description: 'The attribute key',
-        example: 'k: "Storage"',
+        example: 'Storage',
     })
     k: string;
 
     @ApiProperty({
         description: 'The attribute value',
-        example: 'v: "512"',
+        example: '512',
     })
-    v: number | string;
+    v: string | number;
 
     @ApiProperty({
         description: 'The unit of attribute',
-        example: 'u: "GB"',
+        example: 'GB',
     })
     u?: string;
 }
@@ -36,7 +36,7 @@ export class ImageSchemaDto {
 
     @ApiProperty({
         description: 'Public_id of the image return by cloudinary',
-        example: 'u: "GB"',
+        example: 'GB',
     })
     cloudinary_id: string;
 
