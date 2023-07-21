@@ -1,14 +1,19 @@
-import { Controller, Inject } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
 import { MessagePattern, RmqContext, Payload, Ctx } from '@nestjs/microservices';
 import { RabbitMQService } from '@app/common';
 import { UsersMntService } from './users-mnt.service';
-import { BlockUnblockRequestDTO, ChangeRoleRequestDTO, CreateUserRequestDto, GetUsersDTO } from './dtos';
+import {
+    BlockUnblockRequestDTO,
+    ChangeRoleRequestDTO,
+    CreateUserRequestDto,
+    GetUsersDTO,
+} from './dtos';
 import { UsersMntMessagePattern } from './users-mnt.pattern';
 
 @Controller()
 export class UsersMntController {
     constructor(
-        @Inject(RabbitMQService) private readonly rabbitMqService: RabbitMQService,
+        private readonly rabbitMqService: RabbitMQService,
         private readonly usersMntService: UsersMntService,
     ) {}
 

@@ -1,4 +1,4 @@
-import { Controller, Get, Inject, Post } from '@nestjs/common';
+import { Controller, Get, Post } from '@nestjs/common';
 import { SampleService } from './sample.service';
 import { SampleMessagePattern, SampleEventPattern } from './sample.pattern';
 import { RabbitMQService } from '@app/common';
@@ -9,7 +9,7 @@ import { BotGateway } from '@app/common/Discordjs/bot/bot.gateway';
 export class SampleController {
     constructor(
         private readonly sampleService: SampleService,
-        @Inject(RabbitMQService) private readonly rabbitMqService: RabbitMQService,
+        private readonly rabbitMqService: RabbitMQService,
         private readonly botGateway: BotGateway,
     ) {}
 

@@ -3,7 +3,6 @@ import {
     HealthCheck,
     HealthCheckService,
     MongooseHealthIndicator,
-    DiskHealthIndicator,
     HttpHealthIndicator,
     MemoryHealthIndicator,
     MicroserviceHealthIndicator,
@@ -15,7 +14,6 @@ export class HealthController {
     constructor(
         private health: HealthCheckService,
         private db: MongooseHealthIndicator,
-        private disk: DiskHealthIndicator,
         private http: HttpHealthIndicator,
         private memory: MemoryHealthIndicator,
         private microservice: MicroserviceHealthIndicator,

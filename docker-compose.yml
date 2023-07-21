@@ -1,23 +1,97 @@
 version: '3'
 
 services:
+    cli:
+        build: ./ssl/cli
+        user: ${CURRENT_USER}
+        group_add:
+            - ${DOCKER_GROUP}
+        environment:
+            - COMPOSE_PROJECT_NAME
+            - CURRENT_USER
+            - DOCKER_GROUP
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+            - ./ssl/:/workdir
+        profiles:
+            - config
+
+    nginx:
+        build: ./ssl/nginx
+        environment:
+            - DRY_RUN
+        volumes:
+            - ./ssl/config.json:/letsencrypt-docker-compose/config.json:ro
+            - ./ssl/nginx-conf/nginx.conf:/etc/nginx/nginx.conf:ro
+            - ./ssl/nginx-conf/conf.d:/etc/nginx/conf.d:ro
+            - ./ssl/html:/var/www/html:ro
+            - nginx_conf_ssl:/etc/nginx/ssl
+            - letsencrypt_certs:/etc/letsencrypt
+            - certbot_acme_challenge:/var/www/certbot
+        ports:
+            - 80:80
+            - 443:443
+            - 6644:6644
+        healthcheck:
+            test: ['CMD', 'nc', '-z', 'nginx', '80']
+            interval: 30s
+            timeout: 30s
+            start_period: 30s
+            retries: 10
+        networks:
+            - techcell_backend
+        restart: unless-stopped
+
+    certbot:
+        build: ./ssl/certbot
+        environment:
+            - DRY_RUN
+        volumes:
+            - ./ssl/config.json:/letsencrypt-docker-compose/config.json:ro
+            - letsencrypt_certs:/etc/letsencrypt
+            - certbot_acme_challenge:/var/www/certbot
+        healthcheck:
+            test:
+                [
+                    'CMD-SHELL',
+                    'test -n "$$(ls -A /etc/letsencrypt/live/)" || test "$$DRY_RUN" == "true" || exit 1',
+                ]
+            interval: 30s
+            timeout: 30s
+            start_period: 30s
+            retries: 5
+        depends_on:
+            nginx:
+                condition: service_healthy
+        restart: unless-stopped
+
+    cron:
+        build: ./ssl/cron
+        environment:
+            - COMPOSE_PROJECT_NAME
+            - DRY_RUN
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+            - ./ssl/:/workdir:ro
+        depends_on:
+            certbot:
+                condition: service_healthy
+        restart: unless-stopped
+
     api:
         build:
             context: ./
             dockerfile: ./apps/api/Dockerfile
         environment:
             - REDIS_HOST=redis
-            - RABBITMQ_URLS=amqp://techcell_server:techcell_server_9901@rabbitmq:5672
+            - RABBITMQ_URLS=amqp://techcell_server:techcell_server_9901@haproxy:5672
             - MONGODB_URI=mongodb://root:password123@mongodb-primary:27017/techcell-dev?directConnection=true&authMechanism=SCRAM-SHA-1&replicaSet=replicaset&authSource=admin
         env_file:
             - .env
         volumes:
             - .:/usr/src/techcell_app
             - /usr/src/techcell_app/node_modules
-            - /etc/letsencrypt/:/etc/letsencrypt
         ports:
-            - 80:8000
-            - 443:4430
             - 8000:8000
         networks:
             - techcell_backend
@@ -29,7 +103,7 @@ services:
             dockerfile: ./apps/auth/Dockerfile
         environment:
             - REDIS_HOST=redis
-            - RABBITMQ_URLS=amqp://techcell_server:techcell_server_9901@rabbitmq:5672
+            - RABBITMQ_URLS=amqp://techcell_server:techcell_server_9901@haproxy:5672
             - MONGODB_URI=mongodb://root:password123@mongodb-primary:27017/techcell-dev?directConnection=true&authMechanism=SCRAM-SHA-1&replicaSet=replicaset&authSource=admin
         env_file:
             - .env
@@ -45,7 +119,7 @@ services:
             context: ./
             dockerfile: ./apps/mail/Dockerfile
         environment:
-            - RABBITMQ_URLS=amqp://techcell_server:techcell_server_9901@rabbitmq:5672
+            - RABBITMQ_URLS=amqp://techcell_server:techcell_server_9901@haproxy:5672
         env_file:
             - .env
         volumes:
@@ -60,7 +134,7 @@ services:
             context: ./
             dockerfile: ./apps/search/Dockerfile
         environment:
-            - RABBITMQ_URLS=amqp://techcell_server:techcell_server_9901@rabbitmq:5672
+            - RABBITMQ_URLS=amqp://techcell_server:techcell_server_9901@haproxy:5672
             - MONGODB_URI=mongodb://root:password123@mongodb-primary:27017/techcell-dev?directConnection=true&authMechanism=SCRAM-SHA-1&replicaSet=replicaset&authSource=admin
         env_file:
             - .env
@@ -76,7 +150,7 @@ services:
             context: ./
             dockerfile: ./apps/sample/Dockerfile
         environment:
-            - RABBITMQ_URLS=amqp://techcell_server:techcell_server_9901@rabbitmq:5672
+            - RABBITMQ_URLS=amqp://techcell_server:techcell_server_9901@haproxy:5672
             - REDIS_HOST=redis
         env_file:
             - .env
@@ -93,7 +167,7 @@ services:
             dockerfile: ./apps/managements/Dockerfile
         environment:
             - REDIS_HOST=redis
-            - RABBITMQ_URLS=amqp://techcell_server:techcell_server_9901@rabbitmq:5672
+            - RABBITMQ_URLS=amqp://techcell_server:techcell_server_9901@haproxy:5672
             - MONGODB_URI=mongodb://root:password123@mongodb-primary:27017/techcell-dev?directConnection=true&authMechanism=SCRAM-SHA-1&replicaSet=replicaset&authSource=admin
         env_file:
             - .env
@@ -109,7 +183,7 @@ services:
             context: ./
             dockerfile: ./apps/order/Dockerfile
         environment:
-            - RABBITMQ_URLS=amqp://techcell_server:techcell_server_9901@rabbitmq:5672
+            - RABBITMQ_URLS=amqp://techcell_server:techcell_server_9901@haproxy:5672
             - MONGODB_URI=mongodb://root:password123@mongodb-primary:27017/techcell-dev?directConnection=true&authMechanism=SCRAM-SHA-1&replicaSet=replicaset&authSource=admin
         env_file:
             - .env
@@ -122,7 +196,12 @@ services:
 
 networks:
     techcell_backend:
+        driver: bridge
 
 volumes:
-    app_data:
+    nginx_conf_ssl:
+        driver: local
+    letsencrypt_certs:
+        driver: local
+    certbot_acme_challenge:
         driver: local

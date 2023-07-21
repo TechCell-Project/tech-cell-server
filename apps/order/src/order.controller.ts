@@ -1,4 +1,4 @@
-import { Controller, Get, Inject, Response, InternalServerErrorException } from '@nestjs/common';
+import { Controller, Get, Response, InternalServerErrorException } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { VnpayService } from '@app/payment/vnpay/vnpay.service';
 import { RpcException } from '@nestjs/microservices';
@@ -7,7 +7,7 @@ import { RpcException } from '@nestjs/microservices';
 export class OrderController {
     constructor(
         private readonly orderService: OrderService,
-        @Inject(VnpayService) private readonly vnpayService: VnpayService,
+        private readonly vnpayService: VnpayService,
     ) {}
 
     @Get()

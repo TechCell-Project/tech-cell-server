@@ -1,5 +1,6 @@
 import { Store } from 'cache-manager';
 import { Logger } from '@nestjs/common';
+import { REVOKE_ACCESS_TOKEN, REVOKE_REFRESH_TOKEN } from '~/constants';
 
 /**
  *  Delete all keys with the prefix
@@ -15,4 +16,24 @@ export async function delStartWith(prefix: string, cacheManager: Store) {
     }
     const keysToDelete = keys.filter((key) => key.startsWith(prefix));
     return await Promise.all(keysToDelete.map((key) => cacheManager.del(key)));
+}
+
+/**
+ *
+ * @param refreshToken the refresh token to build the key to revoke
+ * @returns the key to revoke the refresh token
+ */
+export function buildRevokeRefreshTokenKey(refreshToken: string): string {
+    const revokeRefreshTokenKey = `${REVOKE_REFRESH_TOKEN}_${refreshToken}`;
+    return revokeRefreshTokenKey;
+}
+
+/**
+ *
+ * @param accessToken the access token to build the key to revoke
+ * @returns the key to revoke the access token
+ */
+export function buildRevokeAccessTokenKey(accessToken: string): string {
+    const revokeAccessTokenKey = `${REVOKE_ACCESS_TOKEN}_${accessToken}`;
+    return revokeAccessTokenKey;
 }
