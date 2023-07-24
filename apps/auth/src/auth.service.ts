@@ -23,8 +23,8 @@ import { RpcException } from '@nestjs/microservices';
 import { ConfirmEmailRegisterDTO, ForgotPasswordEmailDTO, MailEventPattern } from '~/apps/mail';
 import { OtpType } from '@app/resource/otp';
 import { IUserFacebookResponse, IUserGoogleResponse, ITokenVerifiedResponse } from './interfaces';
-import { buildUniqueUserNameFromEmail, generateRandomString } from '@app/common';
-import { MAX_PASSWORD_LENGTH } from '~/constants';
+import { buildUniqueUserNameFromEmail, delStartWith, generateRandomString } from '@app/common';
+import { MAX_PASSWORD_LENGTH, USERS_CACHE_PREFIX } from '~/constants';
 
 @Injectable()
 export class AuthService extends AuthUtilService {
@@ -131,19 +131,36 @@ export class AuthService extends AuthUtilService {
             throw new RpcException(new BadRequestException('Password does not match'));
         }
 
-        userFound = await this.usersService.createUser({
-            email,
-            userName,
-            firstName,
-            lastName,
-            password,
-        });
+        // userFound = await this.usersService.createUser({
+        //     email,
+        //     userName,
+        //     firstName,
+        //     lastName,
+        //     password,
+        // });
 
-        const otp = await this.otpService.createOrRenewOtp({ email, otpType: OtpType.VerifyEmail });
+        const [userCreated] = await Promise.all([
+            this.usersService.createUser({
+                email,
+                userName,
+                firstName,
+                lastName,
+                password,
+            }),
+            delStartWith(USERS_CACHE_PREFIX, this.cacheManager), // remove users cache
+        ]);
+
+        const otp = await this.otpService.createOrRenewOtp({
+            email: userCreated.email,
+            otpType: OtpType.VerifyEmail,
+        });
         const emailContext: ConfirmEmailRegisterDTO = {
             otpCode: otp.otpCode,
         };
-        this.mailService.emit(MailEventPattern.sendMailConfirm, { email, emailContext });
+        this.mailService.emit(MailEventPattern.sendMailConfirm, {
+            email: userCreated.email,
+            emailContext,
+        });
 
         return {
             message: 'Register successfully, please check your email to verify it',

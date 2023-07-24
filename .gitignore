@@ -37,3 +37,4 @@ lerna-debug.log*
 .vscode
 # env
 .env
+.env.prod
