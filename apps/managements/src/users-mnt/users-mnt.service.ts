@@ -10,8 +10,9 @@ import {
 import { RpcException } from '@nestjs/microservices';
 import { BlockActivity, UserRole } from '@app/resource/users/enums';
 import { UsersMntUtilService } from './users-mnt.util.service';
-import { timeStringToMs } from '@app/common';
+import { delStartWith, timeStringToMs } from '@app/common';
 import { CreateUserDTO } from '@app/resource/users/dtos';
+import { USERS_CACHE_PREFIX } from '~/constants';
 
 @Injectable()
 export class UsersMntService extends UsersMntUtilService {
@@ -35,7 +36,12 @@ export class UsersMntService extends UsersMntUtilService {
             Object.assign(newUser, { emailVerified: true });
         }
 
-        return await this.usersService.createUser(newUser as CreateUserDTO);
+        const userCreated = await Promise.all([
+            this.usersService.getUser({ userName: newUser.userName }),
+            delStartWith(USERS_CACHE_PREFIX, this.cacheManager), // remove users cache
+        ]);
+
+        return userCreated;
     }
 
     async getUsers(payload: QueryUserParamsDTO) {
