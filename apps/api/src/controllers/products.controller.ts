@@ -13,7 +13,13 @@ import {
 import { ClientRMQ } from '@nestjs/microservices';
 import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~/constants';
 import { catchException } from '@app/common';
-import { ApiNotFoundResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import {
+    ApiNotFoundResponse,
+    ApiOkResponse,
+    ApiTags,
+    ApiCreatedResponse,
+    ApiBadRequestResponse,
+} from '@nestjs/swagger';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { ProductsMntResponseDto } from '@app/resource/products/dtos';
 import { ProductsMntMessagePattern } from '~/apps/managements/products-mnt';
@@ -41,6 +47,7 @@ export class ProductsController {
             .pipe(catchException());
     }
 
+    @ApiCreatedResponse({ description: 'Create product success', type: ProductsMntResponseDto })
     @Post('/')
     @UseInterceptors(FilesInterceptor('file[]', 5))
     async createProduct(
@@ -74,6 +81,13 @@ export class ProductsController {
             .pipe(catchException());
     }
 
+    @ApiOkResponse({
+        description: 'Product status change successful',
+        type: ProductsMntResponseDto,
+    })
+    @ApiBadRequestResponse({
+        description: 'Invalid request',
+    })
     @Patch('/:id/change-status')
     async changeStatus(@Param('id') idParam: string, @Body() { status }: ChangeStatusRequestDTO) {
         return this.managementsService

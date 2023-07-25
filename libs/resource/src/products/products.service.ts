@@ -9,10 +9,6 @@ import { FilterQuery, ProjectionType, QueryOptions } from 'mongoose';
 export class ProductsService {
     constructor(private readonly productsRepository: ProductsRepository) {}
 
-    // async getAllProducts() {
-    //     return this.productsRepository.find({});
-    // }
-
     async createProduct({
         name,
         attributes,

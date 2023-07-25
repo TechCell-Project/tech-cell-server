@@ -20,7 +20,10 @@ export class ProductsMntController {
     }
 
     @MessagePattern(ProductsMntMessagePattern.createProduct)
-    async createProduct(@Ctx() context: RmqContext, @Payload() payload: CreateProductRequestDto) {
+    async createProduct(
+        @Ctx() context: RmqContext,
+        @Payload() payload: CreateProductRequestDto & { files: Express.Multer.File[] },
+    ) {
         this.rabbitMqService.acknowledgeMessage(context);
         let thumbnail;
         const images = [];
@@ -38,9 +41,9 @@ export class ProductsMntController {
             };
 
             if (fieldname == 'thumbnail') {
-                thumbnail = imageObject;
+                thumbnail = { ...imageObject };
             } else {
-                images.push(imageObject);
+                images.push({ ...imageObject });
             }
         }
         delete payload.files;

@@ -24,7 +24,7 @@ export class ProductsMntResponseDto {
 
     @ApiProperty({
         description: 'Contains information specific to product filtering',
-        type: FilterableSchemaDto,
+        type: Review_StatsSchemaDto,
     })
     review_stats: Review_StatsSchemaDto;
 
