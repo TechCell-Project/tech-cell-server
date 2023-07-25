@@ -36,8 +36,8 @@ export class UsersMntService extends UsersMntUtilService {
             Object.assign(newUser, { emailVerified: true });
         }
 
-        const userCreated = await Promise.all([
-            this.usersService.getUser({ userName: newUser.userName }),
+        const [userCreated] = await Promise.all([
+            this.usersService.createUser(newUser as CreateUserDTO),
             delStartWith(USERS_CACHE_PREFIX, this.cacheManager), // remove users cache
         ]);
 
