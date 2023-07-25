@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { ProductsMntUtilService } from './products-mnt.ultil.service';
-import { CreateProductRequestDto, ChangeStatusDTO, UpdateProductRequestDto } from './dtos';
+import { CreateProductRequestDto, ChangeStatusDTO } from './dtos';
 import { Types } from 'mongoose';
 import { RpcException } from '@nestjs/microservices';
 
