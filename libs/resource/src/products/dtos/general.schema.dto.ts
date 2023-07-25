@@ -52,7 +52,7 @@ export class GeneralSchemaDto {
     name: string;
 
     @ApiProperty({
-        description: 'contains product attributes',
+        description: 'Contains product attributes',
         type: [AttributesSchemaDto],
     })
     attributes?: AttributesSchemaDto[];
