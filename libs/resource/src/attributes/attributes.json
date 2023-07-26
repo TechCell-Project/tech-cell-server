@@ -1,0 +1,453 @@
+[
+    {
+        "label": "brand",
+        "name": "thương hiệu",
+        "description": "The brand of the smartphone",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
+        "label": "manufacturer",
+        "name": "nhà sản xuất",
+        "description": "The manufacturer of the smartphone",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
+        "label": "model",
+        "name": "mẫu",
+        "description": "Mẫu sản phẩm",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
+        "label": "feature",
+        "name": "tính năng",
+        "description": "Tính năng của sản phẩm",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
+        "label": "special_feature",
+        "name": "tính năng đặc biệt",
+        "description": "Tính năng đặc biệt của sản phẩm",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
+        "label": "screen_size",
+        "name": "kích thước màn hình",
+        "description": "Kích thước màn hình của điện thoại",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
+        "label": "screen_resolution",
+        "name": "độ phân giải màn hình",
+        "description": "Độ phân giải màn hình của điện thoại",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
+        "label": "screen_brightness",
+        "name": "độ sáng màn hình",
+        "description": "Độ sáng màn hình của điện thoại",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
+        "label": "screen_tech",
+        "name": "công nghệ màn hình",
+        "description": "Công nghệ màn hình của điện thoại",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
+        "label": "flash_light",
+        "name": "đèn flash",
+        "description": "Đèn flash",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
+        "label": "screen_refresh_rate",
+        "name": "tần số làm mới",
+        "description": "Tần số làm mới màn hình của điện thoại",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
+        "label": "screen_touchscreen",
+        "name": "màn hình cảm ứng",
+        "description": "Có màn hình cảm ứng trên điện thoại hay không",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
+        "label": "cpu",
+        "name": "CPU",
+        "description": "Bộ xử lý của điện thoại",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
+        "label": "cpu_cores",
+        "name": "số lượng nhân CPU",
+        "description": "Số lượng nhân CPU",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
+        "label": "cpu_speed",
+        "name": "tốc độ CPU",
+        "description": "Tốc độ CPU",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
+        "label": "privacy_protection",
+        "name": "bảo mật",
+        "description": "Các tính năng bảo mật",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
+        "label": "gpu",
+        "name": "GPU",
+        "description": "GPU trong điện thoại",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
+        "label": "ram",
+        "name": "RAM",
+        "description": "Số lượng RAM trong điện thoại",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
+        "label": "storage",
+        "name": "bộ nhớ trong",
+        "description": "Số lượng bộ nhớ trong trong điện thoại",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
+        "label": "expandable_storage",
+        "name": "bộ nhớ mở rộng",
+        "description": "Có hỗ trợ bộ nhớ mở rộng trên điện thoại hay không",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
+        "label": "battery_capacity",
+        "name": "dung lượng pin",
+        "description": "Dung lượng pin của điện thoại",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
+        "label": "battery_life",
+        "name": "thời lượng pin",
+        "description": "Thời lượng pin của điện thoại",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
+        "label": "fast_charging",
+        "name": "sạc nhanh",
+        "description": "Có hỗ trợ sạc nhanh trên điện thoại hay không",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
+        "label": "wireless_charging",
+        "name": "sạc không dây",
+        "description": "Có hỗ trợ sạc không dây trên điện thoại hay không",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
+        "label": "operating_system",
+        "name": "hệ điều hành",
+        "description": "Hệ điều hành chạy trên điện thoại",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
+        "label": "user_interface",
+        "name": "giao diện người dùng",
+        "description": "Giao diện người dùng trên điện thoại",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
+        "label": "front_camera",
+        "name": "camera trước",
+        "description": "Camera trước trên điện thoại",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
+        "label": "rear_camera",
+        "name": "camera sau",
+        "description": "Camera sau trên điện thoại",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
+        "label": "camera_features",
+        "name": "tính năng camera",
+        "description": "Các tính năng của camera trên điện thoại",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
+        "label": "sim_card_slots",
+        "name": "khe thẻ SIM",
+        "description": "Số lượng khe thẻ SIM trên điện thoại",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
+        "label": "connectivity_wifi",
+        "name": "Wi-Fi",
+        "description": "Có hỗ trợ Wi-Fi trên điện thoại hay không",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
+        "label": "connectivity_mobile_networks",
+        "name": "Mạng di động",
+        "description": "Mạng di động hỗ trợ trên điện thoại",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
+        "label": "connectivity_bluetooth",
+        "name": "Bluetooth",
+        "description": "Có hỗ trợ Bluetooth trên điện thoại hay không",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
+        "label": "connectivity_nfc",
+        "name": "NFC",
+        "description": "Có hỗ trợ NFC trên điện thoại hay không",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
+        "label": "connectivity_gps",
+        "name": "GPS",
+        "description": "Có hỗ trợ GPS trên điện thoại hay không",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
+        "label": "sensors",
+        "name": "cảm biến",
+        "description": "Các cảm biến có sẵn trên điện thoại",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
+        "label": "dimensions",
+        "name": "kích thước",
+        "description": "Kích thước của sản phẩm",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
+        "label": "weight",
+        "name": "trọng lượng",
+        "description": "Trọng lượng của sản phẩm",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
+        "label": "water_resistance",
+        "name": "khả năng chống nước",
+        "description": "Có khả năng chống nước trên điện thoại hay không",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
+        "label": "dust_resistance",
+        "name": "khả năng chống bụi",
+        "description": "Có khả năng chống bụi trên điện thoại hay không",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
+        "label": "color",
+        "name": "màu sắc",
+        "description": "Màu của sản phẩm",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    }
+]
