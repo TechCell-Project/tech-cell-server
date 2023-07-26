@@ -1,7 +1,8 @@
-import { IsOptional } from 'class-validator';
+import { IsNumber, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { SelectDelete } from '../enums';
 
-export class GetAttributesDTO {
+export class GetAttributesRequestDTO {
     @ApiProperty({
         type: Boolean,
         description: 'All of attributes to be returned',
@@ -11,11 +12,23 @@ export class GetAttributesDTO {
     all?: boolean;
 
     @ApiProperty({
+        type: String,
+        enum: SelectDelete,
+        description: 'Select deleted attributes to be returned',
+        default: SelectDelete.onlyActive,
+        required: false,
+    })
+    @IsOptional()
+    @IsNumber()
+    selectDelete?: string;
+
+    @ApiProperty({
         type: Number,
         description: 'Limit of attributes to be returned',
         required: false,
     })
     @IsOptional()
+    @IsNumber()
     limit?: number;
 
     @ApiProperty({
@@ -23,6 +36,7 @@ export class GetAttributesDTO {
         description: 'Offset of attributes to be returned',
         required: false,
     })
+    @IsNumber()
     @IsOptional()
     offset?: number;
 }

@@ -2,7 +2,7 @@ import { Controller } from '@nestjs/common';
 import { Ctx, MessagePattern, RmqContext, Payload } from '@nestjs/microservices';
 import { RabbitMQService } from '@app/common';
 import { AttributesSearchMessagePattern } from './attributes-search.pattern';
-import { GetAttributesDTO } from './dtos';
+import { GetAttributesRequestDTO } from './dtos';
 import { AttributesSearchService } from './attributes-search.service';
 
 @Controller()
@@ -13,7 +13,10 @@ export class AttributesSearchController {
     ) {}
 
     @MessagePattern(AttributesSearchMessagePattern.getAttributes)
-    async getAttributes(@Ctx() context: RmqContext, @Payload() requestQuery: GetAttributesDTO) {
+    async getAttributes(
+        @Ctx() context: RmqContext,
+        @Payload() requestQuery: GetAttributesRequestDTO,
+    ) {
         this.rabbitMqService.acknowledgeMessage(context);
         return await this.attributeSearchService.getAttributes({ ...requestQuery });
     }
