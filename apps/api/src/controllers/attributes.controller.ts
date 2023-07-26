@@ -13,15 +13,14 @@ import {
 import { ClientRMQ } from '@nestjs/microservices';
 import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~/constants';
 import { AdminGuard, catchException } from '@app/common';
-import { ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 import {
     AttributesSearchMessagePattern,
     GetAttributesRequestDTO,
 } from '~/apps/search/attributes-search';
-import { CreateAttributeDTO } from '@app/resource/attributes/dtos/create-attribute.dto';
 import { UpdateAttributeRequestDTO } from '~/apps/managements/attributes-mnt/dtos';
 import { AttributesMntMessagePattern } from '~/apps/managements/attributes-mnt/attributes-mnt.pattern';
-import { SelectDelete } from '~/apps/search/attributes-search/enums';
+import { CreateAttributeRequestDTO } from '~/apps/managements/attributes-mnt/dtos';
+import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('attributes')
 @Controller('/attributes')
@@ -47,7 +46,7 @@ export class AttributesController {
 
     @UseGuards(AdminGuard)
     @Post('/')
-    async createAttribute(@Body() { label, name, description }: CreateAttributeDTO) {
+    async createAttribute(@Body() { label, name, description }: CreateAttributeRequestDTO) {
         return this.managementsService
             .send(AttributesMntMessagePattern.createAttribute, { label, name, description })
             .pipe(catchException());

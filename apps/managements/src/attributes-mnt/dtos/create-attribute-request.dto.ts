@@ -11,11 +11,13 @@ export class CreateAttributeRequestDTO {
     @ApiProperty({
         description:
             'Label of attribute. Must unique and only contain lowercase letters and optional underscores',
+        example: 'label_of_attribute',
     })
     label: string;
 
     @ApiProperty({
         description: 'Name of attribute',
+        example: 'name_of_attribute',
     })
     @IsString()
     @IsNotEmpty()
@@ -23,6 +25,7 @@ export class CreateAttributeRequestDTO {
 
     @ApiProperty({
         description: 'Description of attribute',
+        example: 'This is a description',
     })
     @IsString()
     @IsOptional()
