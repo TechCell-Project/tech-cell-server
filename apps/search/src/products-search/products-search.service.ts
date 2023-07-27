@@ -26,25 +26,26 @@ export class ProductsSearchService extends ProductsSearchUtilService {
         }
 
         Logger.warn(`CACHE MISS: ${cacheKey}`);
-        const productsFromDb = await this.productsService.getProducts(
-            {
-                /*...query*/
-                // TODO: limit, offset is not a part of `product`
-            },
-            { ...options },
-        );
+        const productsFromDb = await this.productsService
+            .getProducts
+            // {
+            //     /*...query*/
+            //     // TODO: limit, offset is not a part of `product`
+            // },
+            // { ...options },
+            ();
 
         await this.cacheManager.set(cacheKey, productsFromDb, timeStringToMs('1h'));
 
         return productsFromDb;
     }
 
-    async getProductById(id: string | Types.ObjectId | any) {
-        try {
-            const idSearch: Types.ObjectId = typeof id === 'string' ? new Types.ObjectId(id) : id;
-            return await this.productsService.getProduct({ _id: idSearch }, {});
-        } catch (error) {
-            throw new RpcException(new BadRequestException('Product Id is invalid'));
-        }
-    }
+    // async getProductById(id: string | Types.ObjectId | any) {
+    //     try {
+    //         const idSearch: Types.ObjectId = typeof id === 'string' ? new Types.ObjectId(id) : id;
+    //         return await this.productsService.getProduct({ _id: idSearch }, {});
+    //     } catch (error) {
+    //         throw new RpcException(new BadRequestException('Product Id is invalid'));
+    //     }
+    // }
 }

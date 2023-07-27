@@ -11,6 +11,28 @@
         }
     },
     {
+        "label": "brand_country",
+        "name": "xuất xứ thương hiệu",
+        "description": "The brand of the smartphone",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
+        "label": "origin",
+        "name": "xuất xứ",
+        "description": "The brand of the smartphone",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
         "label": "manufacturer",
         "name": "nhà sản xuất",
         "description": "The manufacturer of the smartphone",
@@ -88,8 +110,8 @@
         }
     },
     {
-        "label": "screen_tech",
-        "name": "công nghệ màn hình",
+        "label": "screen_type",
+        "name": "loại/ công nghệ màn hình",
         "description": "Công nghệ màn hình của điện thoại",
         "updatedAt": {
             "$date": "2023-07-26T19:32:08.770Z"
@@ -330,6 +352,17 @@
         }
     },
     {
+        "label": "sim_card_type",
+        "name": "loại thẻ SIM",
+        "description": "Loại thẻ SIM hỗ trợ trên điện thoại",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
         "label": "connectivity_wifi",
         "name": "Wi-Fi",
         "description": "Có hỗ trợ Wi-Fi trên điện thoại hay không",
@@ -377,6 +410,28 @@
         "label": "connectivity_gps",
         "name": "GPS",
         "description": "Có hỗ trợ GPS trên điện thoại hay không",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
+        "label": "connectivity_5g",
+        "name": "5G",
+        "description": "Có hỗ trợ 5G trên điện thoại hay không",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
+        "label": "connectivity_4g",
+        "name": "4G",
+        "description": "Có hỗ trợ 4G trên điện thoại hay không",
         "updatedAt": {
             "$date": "2023-07-26T19:32:08.770Z"
         },
