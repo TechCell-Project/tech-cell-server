@@ -11,7 +11,6 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { Category, ProductStatus } from '../enums';
-import { IAttribute, IImage, IPrice } from '../interfaces';
 import { VariationSchema } from '../schemas';
 
 export class CreateProductDTO {
@@ -66,7 +65,7 @@ class VariationDTO implements VariationSchema {
     images: Array<ImageDTO>;
 }
 
-class AttributeDTO implements IAttribute {
+class AttributeDTO {
     @IsString()
     @IsNotEmpty()
     k: string;
@@ -79,7 +78,7 @@ class AttributeDTO implements IAttribute {
     u?: string;
 }
 
-class ImageDTO implements IImage {
+class ImageDTO {
     @IsString()
     @IsNotEmpty()
     url: string;
@@ -89,7 +88,7 @@ class ImageDTO implements IImage {
     alt: string;
 }
 
-class PriceDTO implements IPrice {
+class PriceDTO {
     @IsNumber()
     @IsNotEmpty()
     base: number;
