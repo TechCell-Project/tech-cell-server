@@ -3,8 +3,8 @@ import { MessagePattern, RmqContext, Payload, Ctx } from '@nestjs/microservices'
 import { RabbitMQService } from '@app/common';
 import { ProductsMntService } from './products-mnt.service';
 import { ProductsMntMessagePattern } from './products-mnt.pattern';
-import { CreateProductRequestDto } from './dtos';
 import { CloudinaryService } from '@app/common/Cloudinary';
+import { CreateProductRequestDTO } from './dtos';
 
 @Controller()
 export class ProductsMntController {
@@ -22,57 +22,61 @@ export class ProductsMntController {
     @MessagePattern(ProductsMntMessagePattern.createProduct)
     async createProduct(
         @Ctx() context: RmqContext,
-        @Payload() payload: CreateProductRequestDto & { files: Express.Multer.File[] },
+        @Payload()
+        {
+            productData,
+            files,
+        }: { productData: CreateProductRequestDTO; files: Express.Multer.File[] },
     ) {
         this.rabbitMqService.acknowledgeMessage(context);
-        let thumbnail;
-        const images = [];
+        // let thumbnail;
+        // const images = [];
 
-        for (const file of payload.files) {
-            const { fieldname, filename } = file;
-            const dateModified = new Date();
+        // for (const file of payload.files) {
+        //     const { fieldname, filename } = file;
+        //     const dateModified = new Date();
 
-            const uploadedImage = await this.cloudinaryService.uploadFile(file);
-            const imageObject = {
-                file_name: filename,
-                path: uploadedImage.secure_url,
-                cloudinary_id: uploadedImage.public_id,
-                date_modified: dateModified,
-            };
+        //     const uploadedImage = await this.cloudinaryService.uploadFile(file);
+        //     const imageObject = {
+        //         file_name: filename,
+        //         path: uploadedImage.secure_url,
+        //         cloudinary_id: uploadedImage.public_id,
+        //         date_modified: dateModified,
+        //     };
 
-            if (fieldname == 'thumbnail') {
-                thumbnail = { ...imageObject };
-            } else {
-                images.push({ ...imageObject });
-            }
-        }
-        delete payload.files;
-        payload.images = images;
-        payload.thumbnail = thumbnail;
-        return await this.productsMntService.createProduct({ ...payload });
+        //     if (fieldname == 'thumbnail') {
+        //         thumbnail = { ...imageObject };
+        //     } else {
+        //         images.push({ ...imageObject });
+        //     }
+        // }
+        // delete productData.files;
+        // payload.images = images;
+        // payload.thumbnail = thumbnail;
+        return await this.productsMntService.createProduct({ ...productData });
     }
 
-    @MessagePattern(ProductsMntMessagePattern.changeStatus)
-    async changeStatus(@Ctx() context: RmqContext, @Payload() payload) {
-        this.rabbitMqService.acknowledgeMessage(context);
+    // @MessagePattern(ProductsMntMessagePattern.changeStatus)
+    // async changeStatus(@Ctx() context: RmqContext, @Payload() payload) {
+    //     this.rabbitMqService.acknowledgeMessage(context);
 
-        const { productId, status } = payload;
+    //     const { productId, status } = payload;
 
-        return await this.productsMntService.changeStatus({
-            productId,
-            status,
-        });
-    }
+    //     return await this.productsMntService.changeStatus({
+    //         productId,
+    //         status,
+    //     });
+    // }
 
-    @MessagePattern(ProductsMntMessagePattern.updateProduct)
-    async updateProduct(@Ctx() context: RmqContext, @Payload() payload) {
-        this.rabbitMqService.acknowledgeMessage(context);
+    // @MessagePattern(ProductsMntMessagePattern.updateProduct)
+    // async updateProduct(@Ctx() context: RmqContext, @Payload() payload) {
+    //     this.rabbitMqService.acknowledgeMessage(context);
 
-        const { productId, status } = payload;
+    //     const { productId, status } = payload;
 
-        return await this.productsMntService.changeStatus({
-            productId,
-            status,
-        });
-    }
+    //     return await this.productsMntService.changeStatus({
+    //         productId,
+    //         status,
+    //     });
+    // }
 }

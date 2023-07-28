@@ -71,3 +71,14 @@ export function dateFormat(date: Date, format: string): string {
         .replace('mm', minute)
         .replace('ss', second);
 }
+
+/**
+ *
+ * @param str String to replace space
+ * @param replaceTo The string to replace space
+ * @returns the string after replace space
+ * @default replaceTo is '_'
+ */
+export function replaceWhitespaceTo(str: string, replaceTo = '_') {
+    return str.replace(/\s+/g, replaceTo);
+}

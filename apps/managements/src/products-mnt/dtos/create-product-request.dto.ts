@@ -2,104 +2,96 @@ import {
     IsNotEmpty,
     IsString,
     IsNumber,
-    IsEnum,
-    Length,
-    Min,
-    Max,
     IsArray,
+    IsEnum,
     ArrayMinSize,
     ValidateNested,
+    Min,
+    Max,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ApiProperty } from '@nestjs/swagger';
-import { Category, Manufacturer, ProductStatus } from '@app/resource/products/enums';
-import { AttributesDto, FilterDto, ImageDto } from '@app/resource/products/dtos';
+import { Category, ProductStatus } from '@app/resource/products/enums';
 
-export class CreateProductRequestDto {
-    @ApiProperty({
-        description: "Product's name",
-        example: 'Samsung Galaxy S23 Ultra',
-        required: true,
-    })
+export class CreateProductRequestDTO {
     @IsString()
     @IsNotEmpty()
-    @Length(10)
     name: string;
 
-    @ApiProperty({
-        description: 'Contains product attributes',
-        type: [AttributesDto],
-        required: true,
-    })
-    @ValidateNested({ each: true })
-    @Type(() => AttributesDto)
-    attributes: AttributesDto[];
-
-    @ApiProperty({ description: 'The manufacturer', example: 'Samsung', required: true })
+    @IsString()
     @IsNotEmpty()
-    @IsEnum(Manufacturer)
-    manufacturer: Manufacturer;
+    description: string;
 
-    @ApiProperty({
-        description: 'Array containing data of product images',
-        type: [ImageDto],
-        required: false,
-    })
+    @IsString()
+    @IsNotEmpty()
+    brand: string;
+
     @IsArray()
-    @ArrayMinSize(4)
-    images?: ImageDto[];
-
-    @ApiProperty({ description: 'The category', example: 'Android', required: true })
     @IsNotEmpty()
-    @IsEnum(Category)
-    categories: Category;
+    @IsEnum(Category, { each: true })
+    categories: string[];
 
-    @ApiProperty({ description: 'Total products in stock', example: '3423', required: true })
-    @IsNotEmpty()
-    @Type(() => Number)
-    @Min(0)
-    @Max(999999)
-    stock: number;
-
-    @ApiProperty({ description: 'The product filter', type: [FilterDto], required: true })
-    @ValidateNested({ each: true })
-    @Type(() => FilterDto)
-    filter: FilterDto[];
-
-    @ApiProperty({ description: 'The product price', example: '29990000', required: true })
-    @IsNotEmpty()
-    @Type(() => Number)
     @IsNumber()
-    @Min(1000)
-    @Max(100000000)
-    price: number;
-
-    @ApiProperty({
-        description: 'Special price of the product',
-        example: '27990000',
-        required: true,
-    })
     @IsNotEmpty()
-    @Type(() => Number)
-    @IsNumber()
-    @Min(1000)
-    @Max(100000000)
-    special_price: number;
-
-    @ApiProperty({ description: 'The product thumbnail', type: ImageDto, required: false })
-    thumbnail?: ImageDto;
-
-    @ApiProperty({ description: 'The product status', example: 1, required: true })
-    @IsNotEmpty()
-    @Type(() => Number)
     @IsEnum(ProductStatus)
     status: number;
 
-    // @ApiProperty({
-    //     description: 'Store uploaded photos, minimum 5 photos required',
-    //     required: true,
-    // })
-    // @IsNotEmpty()
-    // @ArrayMinSize(5)
-    // files: Express.Multer.File[];
+    @IsArray()
+    @IsNotEmpty()
+    @ArrayMinSize(1)
+    @ValidateNested({ each: true })
+    @Type(() => VariationDTO)
+    variations: VariationDTO[];
+}
+
+class VariationDTO {
+    @IsArray()
+    @IsNotEmpty()
+    @ArrayMinSize(1)
+    attributes: Array<AttributeDTO>;
+
+    @IsNumber()
+    @IsNotEmpty()
+    @Min(0)
+    @Max(9000000)
+    stock: number;
+
+    price: PriceDTO;
+    images: Array<ImageDTO>;
+}
+
+class AttributeDTO {
+    @IsString()
+    @IsNotEmpty()
+    k: string;
+
+    @IsString()
+    @IsNotEmpty()
+    v: string;
+
+    @IsString()
+    u?: string;
+}
+
+class ImageDTO {
+    @IsString()
+    @IsNotEmpty()
+    url: string;
+
+    @IsString()
+    @IsNotEmpty()
+    alt: string;
+}
+
+class PriceDTO {
+    @IsNumber()
+    @IsNotEmpty()
+    base: number;
+
+    @IsNumber()
+    @IsNotEmpty()
+    sale: number;
+
+    @IsNumber()
+    @IsNotEmpty()
+    special: number;
 }
