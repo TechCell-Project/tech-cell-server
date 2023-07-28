@@ -2,15 +2,16 @@ import { ConflictException, Injectable } from '@nestjs/common';
 import { AttributesRepository } from './attributes.repository';
 import { Types } from 'mongoose';
 import { CreateAttributeDTO, UpdateAttributeDTO } from './dtos';
-import { IBaseQuery } from './interfaces';
+import { IBaseQuery } from '../interfaces';
 import { RpcException } from '@nestjs/microservices';
+import { Attribute } from './schemas';
 
 @Injectable()
 export class AttributesService {
     constructor(private readonly attributesRepository: AttributesRepository) {}
 
-    async getAttributes({ getAttributesArgs, queryArgs, projectionArgs }: IBaseQuery) {
-        return this.attributesRepository.find(getAttributesArgs, queryArgs, projectionArgs);
+    async getAttributes({ filterQueries, queryOptions, projectionArgs }: IBaseQuery<Attribute>) {
+        return this.attributesRepository.find(filterQueries, queryOptions, projectionArgs);
     }
 
     async getAttributeById(id: string | Types.ObjectId) {
