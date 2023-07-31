@@ -1,5 +1,5 @@
 import { ConflictException, Injectable } from '@nestjs/common';
-import { ProductsMntUtilService } from './products-mnt.ultil.service';
+import { ProductsMntUtilService } from './products-mnt.util.service';
 import { CreateProductRequestDTO } from './dtos';
 import { RpcException } from '@nestjs/microservices';
 
@@ -15,7 +15,9 @@ export class ProductsMntService extends ProductsMntUtilService {
             );
         }
 
-        return await this.productsService.createProduct({ ...productToCreate });
+        await this.validProductAttributes(productToCreate);
+
+        return await this.productsService.createProduct(productToCreate);
     }
 
     // async getProductById(id: string | Types.ObjectId | any) {

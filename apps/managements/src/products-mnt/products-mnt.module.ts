@@ -5,6 +5,7 @@ import { ProductsMntController } from './products-mnt.controller';
 import { ProductsMntService } from './products-mnt.service';
 import { RabbitMQModule, RabbitMQService, RedisCacheModule } from '@app/common';
 import { CloudinaryModule } from '@app/common/Cloudinary';
+import { AttributesModule, CategoriesModule } from '@app/resource';
 
 @Module({
     imports: [
@@ -13,9 +14,11 @@ import { CloudinaryModule } from '@app/common/Cloudinary';
             isGlobal: true,
             envFilePath: './.env',
         }),
-        ProductsModule,
         RedisCacheModule,
         CloudinaryModule,
+        ProductsModule,
+        CategoriesModule,
+        AttributesModule,
     ],
     controllers: [ProductsMntController],
     providers: [RabbitMQService, ProductsMntService],

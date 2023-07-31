@@ -8,9 +8,10 @@ import {
     ValidateNested,
     Min,
     Max,
+    IsOptional,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { Category, ProductStatus } from '../enums';
+import { ProductStatus } from '../enums';
 import { VariationSchema } from '../schemas';
 
 export class CreateProductDTO {
@@ -28,13 +29,16 @@ export class CreateProductDTO {
 
     @IsArray()
     @IsNotEmpty()
-    @IsEnum(Category, { each: true })
     categories: string[];
 
     @IsNumber()
     @IsNotEmpty()
     @IsEnum(ProductStatus)
     status: ProductStatus;
+
+    @IsArray()
+    @IsOptional()
+    generalAttributes: Array<AttributeDTO>;
 
     @IsArray()
     @IsNotEmpty()

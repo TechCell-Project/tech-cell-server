@@ -1,6 +1,6 @@
 import { Attribute } from '@app/resource/attributes';
 import { Type } from 'class-transformer';
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsLowercase, IsNotEmpty, IsOptional, IsString, Matches } from 'class-validator';
 
 export class CreateCategoryDTO {
     @IsString()
@@ -9,6 +9,10 @@ export class CreateCategoryDTO {
 
     @IsString()
     @IsNotEmpty()
+    @IsLowercase()
+    @Matches(/^[a-z_]*[a-z][a-z_]*$/, {
+        message: 'Label must only contain lowercase letters and optional underscores',
+    })
     label: string;
 
     @IsString()
