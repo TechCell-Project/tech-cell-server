@@ -1,19 +1,36 @@
-import { Controller, Inject, Get, Request } from '@nestjs/common';
+import { Controller, Inject, Get, Query, Post, Body } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
-import { SEARCH_SERVICE } from '~/constants';
+import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~/constants';
 import { catchException } from '@app/common';
 import { ApiTags } from '@nestjs/swagger';
-import { CategoriesSearchMessagePattern } from '~/apps/search/categories-search';
+import {
+    CategoriesSearchMessagePattern,
+    GetCategoriesRequestDTO,
+} from '~/apps/search/categories-search';
+import {
+    CategoriesMntMessagePattern,
+    CreateCategoryRequestDTO,
+} from '~/apps/managements/categories-mnt';
 
 @ApiTags('categories')
 @Controller('categories')
 export class CategoriesController {
-    constructor(@Inject(SEARCH_SERVICE) private readonly searchService: ClientRMQ) {}
+    constructor(
+        @Inject(SEARCH_SERVICE) private readonly searchService: ClientRMQ,
+        @Inject(MANAGEMENTS_SERVICE) private readonly managementsService: ClientRMQ,
+    ) {}
 
     @Get('/')
-    async getCategories() {
+    async getCategories(@Query() query: GetCategoriesRequestDTO) {
         return this.searchService
-            .send(CategoriesSearchMessagePattern.getCategories, {})
+            .send(CategoriesSearchMessagePattern.getCategories, { ...query })
+            .pipe(catchException());
+    }
+
+    @Post('/')
+    async createCategories(@Body() data: CreateCategoryRequestDTO) {
+        return this.managementsService
+            .send(CategoriesMntMessagePattern.createCategory, { ...data })
             .pipe(catchException());
     }
 }

@@ -3,6 +3,7 @@ import { RabbitMQService } from '@app/common';
 import { Ctx, MessagePattern, Payload, RmqContext } from '@nestjs/microservices';
 import { CategoriesSearchService } from './categories-search.service';
 import { CategoriesSearchMessagePattern } from './categories-search.pattern';
+import { GetCategoriesRequestDTO } from './dtos';
 
 @Controller()
 export class CategoriesSearchController {
@@ -14,13 +15,10 @@ export class CategoriesSearchController {
     @MessagePattern(CategoriesSearchMessagePattern.getCategories)
     async getCategories(
         @Ctx() context: RmqContext,
-        // @Payload() requestQuery: // GetCategoriesRequestDTO,
+        @Payload() { ...requestQuery }: GetCategoriesRequestDTO,
     ) {
         this.rabbitMqService.acknowledgeMessage(context);
-        return await this.categoriesSearchService
-            .getCategories
-            // { ...requestQuery }
-            ();
+        return await this.categoriesSearchService.getCategories({ ...requestQuery });
     }
 
     // @MessagePattern(CategoriesSearchMessagePattern.getCategoryById)

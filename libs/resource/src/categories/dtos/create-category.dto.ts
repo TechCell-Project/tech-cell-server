@@ -19,24 +19,6 @@ export class CreateCategoryDTO {
     @IsOptional()
     url: string;
 
-    @Type(() => AttributeDTO)
-    requireAttributes: AttributeDTO[];
-}
-
-class AttributeDTO extends Attribute {
-    @IsString()
-    @IsNotEmpty()
-    name: string;
-
-    @IsString()
-    @IsNotEmpty()
-    label: string;
-
-    @IsString()
-    @IsOptional()
-    description: string;
-
-    @IsString()
-    @IsOptional()
-    url: string;
+    @Type(() => Attribute)
+    requireAttributes: Attribute[];
 }

@@ -1,5 +1,6 @@
 import { CategoriesService } from '@app/resource/categories';
 import { Injectable } from '@nestjs/common';
+import { GetCategoriesRequestDTO } from './dtos';
 
 @Injectable()
 export class CategoriesSearchService {
@@ -13,7 +14,15 @@ export class CategoriesSearchService {
     //     return await this.categoriesService.getCategory();
     // }
 
-    async getCategories() {
-        return await this.categoriesService.getCategories();
+    async getCategories({ page, pageSize }: GetCategoriesRequestDTO) {
+        /**
+         * @default page = 1
+         * @default pageSize = 10
+         */
+        const queryOptions = {
+            skip: page ? (page - 1) * pageSize : 0,
+            limit: pageSize ? pageSize : 10,
+        };
+        return await this.categoriesService.getCategories({ queryOptions });
     }
 }
