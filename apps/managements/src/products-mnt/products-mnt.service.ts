@@ -1,12 +1,21 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, Logger } from '@nestjs/common';
 import { ProductsMntUtilService } from './products-mnt.util.service';
 import { CreateProductRequestDTO } from './dtos';
 import { RpcException } from '@nestjs/microservices';
+import { CreateProductDTO } from '@app/resource';
 
 @Injectable()
 export class ProductsMntService extends ProductsMntUtilService {
-    async createProduct({ ...payload }: CreateProductRequestDTO) {
-        const productToCreate = this.updateProductWithSku(payload);
+    async createProduct({
+        productData,
+        files,
+    }: {
+        productData: string;
+        files: Express.Multer.File[];
+    }) {
+        const productParse = JSON.parse(productData) as CreateProductRequestDTO;
+        await this.validProductAttributes({ ...productParse });
+        const productToCreate: CreateProductDTO = this.updateProductWithSku(productParse);
 
         const isProductExist = await this.isProductExist(productToCreate);
         if (isProductExist) {
@@ -15,7 +24,13 @@ export class ProductsMntService extends ProductsMntUtilService {
             );
         }
 
-        await this.validProductAttributes(productToCreate);
+        const { generalImages, variations } = await this.resolveImages({
+            productData: productToCreate,
+            files,
+        });
+
+        productToCreate.generalImages = generalImages;
+        productToCreate.variations = variations;
 
         return await this.productsService.createProduct(productToCreate);
     }

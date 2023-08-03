@@ -11,12 +11,13 @@ import {
 import { ClientRMQ } from '@nestjs/microservices';
 import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~/constants';
 import { catchException } from '@app/common';
-import { ApiNotFoundResponse, ApiTags } from '@nestjs/swagger';
-import { FilesInterceptor } from '@nestjs/platform-express';
+import { ApiBody, ApiConsumes, ApiNotFoundResponse, ApiTags } from '@nestjs/swagger';
+import { AnyFilesInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { ProductsMntMessagePattern } from '~/apps/managements/products-mnt';
 import { ProductsSearchMessagePattern } from '~/apps/search/products-search';
 import { GetProductsDTO } from '~/apps/search/products-search/dtos';
 import { CreateProductRequestDTO } from '~/apps/managements/products-mnt/dtos';
+import { ApiMultiFile } from '@app/common/decorators';
 
 @ApiTags('products')
 @Controller('products')
@@ -26,7 +27,6 @@ export class ProductsController {
         @Inject(SEARCH_SERVICE) private readonly searchService: ClientRMQ,
     ) {}
 
-    // @ApiOkResponse({ description: 'Get products success', type: [ProductsMntResponseDto] })
     @ApiNotFoundResponse({ description: 'Products not found.' })
     @Get('/')
     async getProducts(@Query() requestQuery: GetProductsDTO) {
@@ -35,11 +35,14 @@ export class ProductsController {
             .pipe(catchException());
     }
 
+    @ApiConsumes('multipart/form-data')
+    @ApiMultiFile('files')
     @Post('/')
-    @UseInterceptors(FilesInterceptor('file[]', 5))
+    // @UseInterceptors(FilesInterceptor('files', 10))
+    @UseInterceptors(AnyFilesInterceptor())
     async createProduct(
-        @UploadedFiles() files: Express.Multer.File[],
-        @Body() { ...productData }: CreateProductRequestDTO,
+        @Body('productData') productData: string, //CreateProductRequestDTO,
+        @UploadedFiles() files: Array<Express.Multer.File>,
     ) {
         return this.managementsService
             .send(ProductsMntMessagePattern.createProduct, {

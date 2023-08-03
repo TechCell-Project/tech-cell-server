@@ -4,21 +4,141 @@ import {
     CreateProductDTO,
     ProductsService,
 } from '@app/resource';
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common';
 import { delStartWith, replaceWhitespaceTo } from '@app/common/utils';
-import { REDIS_CACHE, PRODUCTS_CACHE_PREFIX } from '~/constants';
+import { REDIS_CACHE, PRODUCTS_CACHE_PREFIX, ProductImageFieldname } from '~/constants';
 import { Store } from 'cache-manager';
 import { CreateProductRequestDTO } from './dtos';
 import { RpcException } from '@nestjs/microservices';
+import { CloudinaryService } from '@app/common/Cloudinary';
+import { ImageSchema } from '@app/resource/products/schemas';
 
 @Injectable()
 export class ProductsMntUtilService {
+    protected readonly logger = new Logger(ProductsMntUtilService.name);
+
     constructor(
         protected readonly productsService: ProductsService,
         protected readonly categoriesService: CategoriesService,
         protected readonly attributesService: AttributesService,
         @Inject(REDIS_CACHE) protected cacheManager: Store,
+        private readonly cloudinaryService: CloudinaryService,
     ) {}
+
+    protected async resolveImages({
+        productData,
+        files,
+    }: {
+        productData: CreateProductDTO;
+        files: Express.Multer.File[];
+    }) {
+        const { variations } = productData;
+
+        // Define images to upload of general
+        const generalImagesToUpload: Array<{ file: Express.Multer.File; isThumbnail: boolean }> =
+            [];
+
+        // Define images to upload of variation
+        const variationImagesToUpload: Array<
+            Array<{ file: Express.Multer.File; isThumbnail: boolean }>
+        > = [];
+
+        // Resolve images
+        files.forEach((file) => {
+            // Replace whitespace to underscore, and lowercase fieldname
+            file.fieldname = file.fieldname.trim();
+            file.fieldname = replaceWhitespaceTo(file.fieldname, '_');
+            file.fieldname = file.fieldname.toLowerCase();
+
+            // Validate fieldname if has both general and variation
+            if (
+                file.fieldname.includes(ProductImageFieldname.GENERAL) &&
+                file.fieldname.includes(ProductImageFieldname.VARIATION)
+            ) {
+                throw new RpcException(
+                    new BadRequestException(
+                        `Image fieldname must be start with '${ProductImageFieldname.GENERAL}' or '${ProductImageFieldname.VARIATION}'`,
+                    ),
+                );
+            }
+
+            if (file.fieldname.includes(ProductImageFieldname.GENERAL)) {
+                generalImagesToUpload.push({
+                    file,
+                    isThumbnail: file.fieldname.includes(ProductImageFieldname.IS_THUMBNAIL),
+                });
+            }
+
+            if (file.fieldname.includes(ProductImageFieldname.VARIATION)) {
+                const index =
+                    parseInt(file.fieldname.split('_')[file.fieldname.split('_').length - 1]) - 1;
+                if (!variationImagesToUpload[index]) {
+                    variationImagesToUpload[index] = [];
+                }
+
+                variationImagesToUpload[index].push({
+                    file,
+                    isThumbnail: file.fieldname.includes(ProductImageFieldname.IS_THUMBNAIL),
+                });
+            }
+        });
+
+        // Upload general images
+        const generalImagesUploaded = await Promise.all(
+            generalImagesToUpload.map(({ file }) => this.cloudinaryService.uploadFile(file)),
+        );
+
+        // Upload variation images
+        const variationImagesUploaded = await Promise.all(
+            variationImagesToUpload.map((files) =>
+                Promise.all(files.map(({ file }) => this.cloudinaryService.uploadFile(file))),
+            ),
+        );
+
+        // Map general images
+        const generalImages: Array<ImageSchema> = generalImagesUploaded.flatMap((image) => {
+            return {
+                url: image.secure_url,
+                publicId: image.public_id,
+            };
+        });
+
+        // Map variation images
+        const newVariations = variations.map((variation, index) => {
+            const variationImages: Array<ImageSchema> =
+                variationImagesUploaded[index]?.flatMap((image) => {
+                    return {
+                        url: image.secure_url,
+                        publicId: image.public_id,
+                    };
+                }) || [];
+            return {
+                ...variation,
+                images: [...(variation.images || []), ...variationImages],
+            };
+        });
+
+        // Set thumbnail for general images
+        generalImagesToUpload.forEach((image, index) => {
+            if (image.isThumbnail) {
+                generalImages[index].isThumbnail = true;
+            }
+        });
+
+        // Set thumbnail for variation images
+        variationImagesToUpload.forEach((variationImages, variationIndex) => {
+            variationImages.forEach((image, index) => {
+                if (image.isThumbnail) {
+                    newVariations[variationIndex].images[index].isThumbnail = true;
+                }
+            });
+        });
+
+        return {
+            generalImages: [...generalImages],
+            variations: newVariations,
+        };
+    }
 
     protected async isProductExist(product: CreateProductDTO) {
         try {
@@ -58,6 +178,7 @@ export class ProductsMntUtilService {
 
         const newProduct: CreateProductDTO = {
             ...productData,
+            generalImages: [],
             variations: variations.map((variation) => {
                 const { attributes } = variation;
                 const sortedAttributes = attributes.sort((a, b) => a.k.localeCompare(b.k));
@@ -68,7 +189,7 @@ export class ProductsMntUtilService {
                     .map((attribute) => replaceWhitespaceTo(attribute.v))
                     .join('-')}`.toLowerCase();
 
-                return { ...variation, attributes: sortedAttributes, sku };
+                return { ...variation, attributes: sortedAttributes, sku, images: [] };
             }),
         };
 

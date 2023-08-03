@@ -9,10 +9,12 @@ import {
     Min,
     Max,
     IsOptional,
+    IsBoolean,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ProductStatus } from '../enums';
-import { VariationSchema } from '../schemas';
+import { AttributeSchema, VariationSchema } from '../schemas';
+import { ImageSchema } from '../schemas/image.schema';
 
 export class CreateProductDTO {
     @IsString()
@@ -41,6 +43,10 @@ export class CreateProductDTO {
     generalAttributes: Array<AttributeDTO>;
 
     @IsArray()
+    @IsOptional()
+    generalImages: ImageDTO[];
+
+    @IsArray()
     @IsNotEmpty()
     @ArrayMinSize(1)
     @ValidateNested({ each: true })
@@ -66,10 +72,12 @@ class VariationDTO implements VariationSchema {
     @Max(9000000)
     stock: number;
 
-    images: Array<ImageDTO>;
+    @IsArray()
+    @Type(() => ImageDTO)
+    images: ImageDTO[];
 }
 
-class AttributeDTO {
+class AttributeDTO implements AttributeSchema {
     @IsString()
     @IsNotEmpty()
     k: string;
@@ -79,17 +87,26 @@ class AttributeDTO {
     v: string;
 
     @IsString()
+    @IsOptional()
     u?: string;
 }
 
-class ImageDTO {
+class ImageDTO implements ImageSchema {
     @IsString()
     @IsNotEmpty()
     url: string;
 
     @IsString()
     @IsNotEmpty()
-    alt: string;
+    publicId: string;
+
+    @IsOptional()
+    @IsBoolean()
+    isThumbnail?: boolean;
+
+    @IsOptional()
+    @IsBoolean()
+    isDeleted?: boolean;
 }
 
 class PriceDTO {
@@ -99,9 +116,11 @@ class PriceDTO {
 
     @IsNumber()
     @IsNotEmpty()
-    sale: number;
+    @IsOptional()
+    sale?: number;
 
     @IsNumber()
     @IsNotEmpty()
-    special: number;
+    @IsOptional()
+    special?: number;
 }
