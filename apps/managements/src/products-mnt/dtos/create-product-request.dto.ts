@@ -79,6 +79,10 @@ class VariationDTO {
 }
 
 export class CreateProductRequestDTO {
+    constructor(dto: Partial<CreateProductRequestDTO>) {
+        Object.assign(this, dto);
+    }
+
     @ApiProperty({
         type: String,
         required: true,

@@ -11,7 +11,7 @@ import {
 import { ClientRMQ } from '@nestjs/microservices';
 import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~/constants';
 import { catchException } from '@app/common';
-import { ApiBody, ApiConsumes, ApiNotFoundResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiNotFoundResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AnyFilesInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { ProductsMntMessagePattern } from '~/apps/managements/products-mnt';
 import { ProductsSearchMessagePattern } from '~/apps/search/products-search';
@@ -35,13 +35,43 @@ export class ProductsController {
             .pipe(catchException());
     }
 
+    @ApiOperation({
+        summary: 'Create a new product',
+    })
     @ApiConsumes('multipart/form-data')
-    @ApiMultiFile('files')
+    // @ApiMultiFile('files')
+    @ApiBody({
+        description: 'Create product request',
+        examples: {},
+        required: true,
+        schema: {
+            type: 'object',
+            properties: {
+                productData: {
+                    type: 'string',
+                    description: 'Product data',
+                },
+                files: {
+                    type: 'array',
+                    items: {
+                        type: 'string',
+                        format: 'binary',
+                    },
+                },
+            },
+        },
+    })
     @Post('/')
-    // @UseInterceptors(FilesInterceptor('files', 10))
-    @UseInterceptors(AnyFilesInterceptor())
+    @UseInterceptors(
+        AnyFilesInterceptor({
+            limits: {
+                files: 30,
+                fileSize: 10 * 1024 * 1024, // 10 MB
+            },
+        }),
+    )
     async createProduct(
-        @Body('productData') productData: string, //CreateProductRequestDTO,
+        @Body('productData') productData: string,
         @UploadedFiles() files: Array<Express.Multer.File>,
     ) {
         return this.managementsService

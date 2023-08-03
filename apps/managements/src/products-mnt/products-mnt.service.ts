@@ -1,8 +1,9 @@
-import { ConflictException, Injectable, Logger } from '@nestjs/common';
+import { ConflictException, Injectable, BadRequestException } from '@nestjs/common';
 import { ProductsMntUtilService } from './products-mnt.util.service';
 import { CreateProductRequestDTO } from './dtos';
 import { RpcException } from '@nestjs/microservices';
 import { CreateProductDTO } from '@app/resource';
+import { validateDTO } from '@app/common';
 
 @Injectable()
 export class ProductsMntService extends ProductsMntUtilService {
@@ -13,7 +14,13 @@ export class ProductsMntService extends ProductsMntUtilService {
         productData: string;
         files: Express.Multer.File[];
     }) {
+        if (!productData) {
+            throw new RpcException(new BadRequestException(`productData is required`));
+        }
+
         const productParse = JSON.parse(productData) as CreateProductRequestDTO;
+        await validateDTO(productParse, CreateProductRequestDTO);
+
         await this.validProductAttributes({ ...productParse });
         const productToCreate: CreateProductDTO = this.updateProductWithSku(productParse);
 
