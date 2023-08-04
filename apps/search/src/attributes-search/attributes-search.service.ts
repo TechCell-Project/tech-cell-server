@@ -3,7 +3,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Store } from 'cache-manager';
 import { REDIS_CACHE } from '~/constants';
 import { GetAttributesRequestDTO } from './dtos';
-import { SelectDelete } from './enums';
+import { SelectType } from './enums';
 
 @Injectable()
 export class AttributesSearchService {
@@ -13,13 +13,16 @@ export class AttributesSearchService {
     ) {}
 
     async getAttributes({
-        all = false,
-        limit = 1,
-        offset = 0,
-        selectDelete = SelectDelete.onlyActive,
+        no_limit = false,
+        page = 1,
+        pageSize = 10,
+        select_type = SelectType.onlyActive,
     }: GetAttributesRequestDTO) {
         const attributeArgs = {};
-        const options = { limit, skip: offset };
+        const options = {
+            skip: page ? (page - 1) * pageSize : 0,
+            limit: pageSize ? pageSize : 10,
+        };
 
         // const cacheKey = 'attributes';
         // const attributesFromCache = await this.cacheManager.get(cacheKey);
@@ -27,24 +30,25 @@ export class AttributesSearchService {
         //     return attributesFromCache;
         // }
 
-        switch (selectDelete) {
-            case SelectDelete.onlyActive:
+        switch (select_type) {
+            case SelectType.onlyActive:
                 Object.assign(attributeArgs, {
                     $or: [{ isDeleted: false }, { isDeleted: { $exists: false } }],
                 });
                 break;
-            case SelectDelete.onlyDeleted:
+            case SelectType.onlyDeleted:
                 Object.assign(attributeArgs, { isDelete: true });
                 break;
-            case SelectDelete.both:
-                delete attributeArgs['isDelete'];
+            case SelectType.both:
+                delete attributeArgs['isDeleted'];
                 break;
         }
 
-        if (all) {
-            delete options.limit;
+        if (no_limit) {
             delete options.skip;
+            delete options.limit;
         }
+
         const attributesFromDb = await this.attributesService.getAttributes({
             filterQueries: { ...attributeArgs },
             queryOptions: { ...options },
