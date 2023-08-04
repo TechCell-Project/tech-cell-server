@@ -20,20 +20,16 @@ import {
     ApiTags,
     ApiExtraModels,
     getSchemaPath,
+    ApiOkResponse,
 } from '@nestjs/swagger';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { ProductsMntMessagePattern } from '~/apps/managements/products-mnt';
 import { ProductsSearchMessagePattern } from '~/apps/search/products-search';
 import { GetProductsDTO } from '~/apps/search/products-search/dtos';
-import {
-    CreateProductRequestDTO,
-    AttributeDTO,
-    PriceDTO,
-    VariationDTO,
-} from '~/apps/managements/products-mnt/dtos';
+import { CreateProductRequestDTO } from '~/apps/managements/products-mnt/dtos';
 
 @ApiTags('products')
-@ApiExtraModels(CreateProductRequestDTO, AttributeDTO, PriceDTO, VariationDTO)
+@ApiExtraModels(CreateProductRequestDTO)
 @Controller('products')
 export class ProductsController {
     constructor(
@@ -41,6 +37,7 @@ export class ProductsController {
         @Inject(SEARCH_SERVICE) private readonly searchService: ClientRMQ,
     ) {}
 
+    @ApiOkResponse({ description: 'Get products successfully!' })
     @ApiNotFoundResponse({ description: 'Products not found.' })
     @Get('/')
     async getProducts(@Query() requestQuery: GetProductsDTO) {

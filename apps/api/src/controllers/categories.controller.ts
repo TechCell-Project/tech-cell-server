@@ -2,7 +2,13 @@ import { Controller, Inject, Get, Query, Post, Body } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~/constants';
 import { catchException } from '@app/common';
-import { ApiTags } from '@nestjs/swagger';
+import {
+    ApiBadRequestResponse,
+    ApiCreatedResponse,
+    ApiNotFoundResponse,
+    ApiOkResponse,
+    ApiTags,
+} from '@nestjs/swagger';
 import {
     CategoriesSearchMessagePattern,
     GetCategoriesRequestDTO,
@@ -20,6 +26,8 @@ export class CategoriesController {
         @Inject(MANAGEMENTS_SERVICE) private readonly managementsService: ClientRMQ,
     ) {}
 
+    @ApiOkResponse({ description: 'Get categories successfully!' })
+    @ApiNotFoundResponse({ description: 'Categories not found!' })
     @Get('/')
     async getCategories(@Query() query: GetCategoriesRequestDTO) {
         return this.searchService
@@ -27,6 +35,8 @@ export class CategoriesController {
             .pipe(catchException());
     }
 
+    @ApiCreatedResponse({ description: 'The category has been successfully created.' })
+    @ApiBadRequestResponse({ description: 'Something wrong, re-check your input.' })
     @Post('/')
     async createCategories(@Body() data: CreateCategoryRequestDTO) {
         return this.managementsService
