@@ -34,9 +34,9 @@ export class CreateProductDTO {
     categories: string[];
 
     @IsNumber()
-    @IsNotEmpty()
+    @IsOptional()
     @IsEnum(ProductStatus)
-    status: ProductStatus;
+    status?: ProductStatus;
 
     @IsArray()
     @IsOptional()

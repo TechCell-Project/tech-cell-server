@@ -21,8 +21,8 @@ export class Product extends AbstractDocument {
     @Prop({ required: true })
     categories: string[];
 
-    @Prop({ required: true, type: Number, enum: ProductStatus, default: 1 })
-    status: number;
+    @Prop({ required: false, type: Number, enum: ProductStatus, default: ProductStatus.OnSales })
+    status?: number;
 
     @Prop({ required: false, default: [] })
     generalAttributes: AttributeSchema[];
