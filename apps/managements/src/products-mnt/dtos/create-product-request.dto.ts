@@ -14,38 +14,85 @@ import { Type } from 'class-transformer';
 import { ProductStatus } from '@app/resource/products/enums';
 import { ApiProperty } from '@nestjs/swagger';
 
-class PriceDTO {
+export class PriceDTO {
+    @ApiProperty({
+        type: 'number',
+        required: true,
+        description: 'Base price of product',
+        example: 1000000,
+    })
     @IsNumber()
     @IsNotEmpty()
     base: number;
 
+    @ApiProperty({
+        type: 'number',
+        required: true,
+        description: 'Sale price of product',
+        example: 900000,
+    })
     @IsNumber()
-    @IsNotEmpty()
-    sale: number;
+    @IsOptional()
+    sale?: number;
 
+    @ApiProperty({
+        type: 'number',
+        required: true,
+        description: 'Special price of product',
+        example: 800000,
+    })
     @IsNumber()
-    @IsNotEmpty()
-    special: number;
+    @IsOptional()
+    special?: number;
 }
 
-class AttributeDTO {
+export class AttributeDTO {
+    @ApiProperty({
+        type: String,
+        required: true,
+        description: 'Key of attribute',
+        example: 'ram',
+    })
     @IsString()
     @IsNotEmpty()
     k: string;
 
+    @ApiProperty({
+        type: String,
+        required: true,
+        description: 'Value of attribute',
+        example: '8',
+    })
     @IsString()
     @IsNotEmpty()
     v: string;
 
+    @ApiProperty({
+        type: String,
+        required: false,
+        description: 'Unit of attribute',
+        example: 'gb',
+    })
     @IsString()
     u?: string;
 }
 
-class VariationDTO {
+export class VariationDTO {
     @ApiProperty({
-        type: Array<AttributeDTO>,
+        type: [AttributeDTO],
         required: true,
         description: 'Attributes of product',
+        example: [
+            {
+                k: 'color',
+                v: 'black',
+            },
+            {
+                k: 'storage',
+                v: '256',
+                u: 'gb',
+            },
+        ],
     })
     @IsArray()
     @IsNotEmpty()
@@ -56,6 +103,7 @@ class VariationDTO {
         type: 'number',
         required: true,
         description: 'Stock of product',
+        example: 100,
     })
     @IsNumber()
     @IsNotEmpty()
@@ -67,26 +115,28 @@ class VariationDTO {
         type: PriceDTO,
         required: true,
         description: 'Price of product',
+        example: {
+            base: 1000000,
+            sale: 900000,
+            special: 800000,
+        },
     })
     price: PriceDTO;
 
-    @ApiProperty({
-        type: Array<Express.Multer.File>,
-        required: true,
-        description: 'Files of image product',
-    })
-    files: Array<Express.Multer.File>;
+    // @ApiProperty({
+    //     type: Array<Express.Multer.File>,
+    //     required: true,
+    //     description: 'Files of image product',
+    // })
+    // files: Array<Express.Multer.File>;
 }
 
 export class CreateProductRequestDTO {
-    constructor(dto: Partial<CreateProductRequestDTO>) {
-        Object.assign(this, dto);
-    }
-
     @ApiProperty({
         type: String,
         required: true,
         description: 'Name of product',
+        example: 'Iphone 13',
     })
     @IsString()
     @IsNotEmpty()
@@ -96,6 +146,8 @@ export class CreateProductRequestDTO {
         type: String,
         required: true,
         description: 'Description of product',
+        example:
+            'The iPhone 13 and iPhone 13 mini are smartphones designed, developed, and marketed by Apple Inc.',
     })
     @IsString()
     @IsNotEmpty()
@@ -105,6 +157,7 @@ export class CreateProductRequestDTO {
         type: String,
         required: true,
         description: 'Brand of product',
+        example: 'Apple',
     })
     @IsString()
     @IsNotEmpty()
@@ -114,24 +167,25 @@ export class CreateProductRequestDTO {
         type: String,
         required: true,
         description: 'Categories of product',
+        example: ['iphone'],
     })
     @IsArray()
     @IsNotEmpty()
     categories: string[];
 
-    @ApiProperty({
-        type: 'number',
-        enum: ProductStatus,
-        required: true,
-        description: 'Status of product',
-    })
+    // @ApiProperty({
+    //     type: 'number',
+    //     enum: ProductStatus,
+    //     required: false,
+    //     description: 'Status of product',
+    // })
     @IsNumber()
-    @IsNotEmpty()
+    @IsOptional()
     @IsEnum(ProductStatus)
-    status: number;
+    status?: number;
 
     @ApiProperty({
-        type: Array<AttributeDTO>,
+        type: [AttributeDTO],
         required: false,
         description: 'General attributes of product',
     })
@@ -140,7 +194,7 @@ export class CreateProductRequestDTO {
     generalAttributes: Array<AttributeDTO>;
 
     @ApiProperty({
-        type: Array<VariationDTO>,
+        type: [VariationDTO],
         required: true,
         description: 'Variations of product',
     })
@@ -151,6 +205,6 @@ export class CreateProductRequestDTO {
     @Type(() => VariationDTO)
     variations: VariationDTO[];
 
-    @ApiProperty({ type: String, format: 'binary', required: true })
-    files: Express.Multer.File[];
+    // @ApiProperty({ type: String, format: 'binary', required: true })
+    // files: Express.Multer.File[];
 }
