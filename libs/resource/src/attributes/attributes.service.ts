@@ -19,6 +19,10 @@ export class AttributesService {
         return this.attributesRepository.findOne({ _id: idFind });
     }
 
+    async getAttributeByLabel(label: string) {
+        return this.attributesRepository.findOne({ label });
+    }
+
     async createAttribute({ label, name, description }: CreateAttributeDTO) {
         const newAttribute = {
             name,

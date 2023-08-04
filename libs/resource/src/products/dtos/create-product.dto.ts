@@ -8,11 +8,13 @@ import {
     ValidateNested,
     Min,
     Max,
+    IsOptional,
+    IsBoolean,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { Category, ProductStatus } from '../enums';
-import { IAttribute, IImage, IPrice } from '../interfaces';
-import { VariationSchema } from '../schemas';
+import { ProductStatus } from '../enums';
+import { AttributeSchema, VariationSchema } from '../schemas';
+import { ImageSchema } from '../schemas/image.schema';
 
 export class CreateProductDTO {
     @IsString()
@@ -29,13 +31,20 @@ export class CreateProductDTO {
 
     @IsArray()
     @IsNotEmpty()
-    @IsEnum(Category, { each: true })
     categories: string[];
 
     @IsNumber()
     @IsNotEmpty()
     @IsEnum(ProductStatus)
     status: ProductStatus;
+
+    @IsArray()
+    @IsOptional()
+    generalAttributes: Array<AttributeDTO>;
+
+    @IsArray()
+    @IsOptional()
+    generalImages: ImageDTO[];
 
     @IsArray()
     @IsNotEmpty()
@@ -63,10 +72,12 @@ class VariationDTO implements VariationSchema {
     @Max(9000000)
     stock: number;
 
-    images: Array<ImageDTO>;
+    @IsArray()
+    @Type(() => ImageDTO)
+    images: ImageDTO[];
 }
 
-class AttributeDTO implements IAttribute {
+class AttributeDTO implements AttributeSchema {
     @IsString()
     @IsNotEmpty()
     k: string;
@@ -76,29 +87,40 @@ class AttributeDTO implements IAttribute {
     v: string;
 
     @IsString()
+    @IsOptional()
     u?: string;
 }
 
-class ImageDTO implements IImage {
+class ImageDTO implements ImageSchema {
     @IsString()
     @IsNotEmpty()
     url: string;
 
     @IsString()
     @IsNotEmpty()
-    alt: string;
+    publicId: string;
+
+    @IsOptional()
+    @IsBoolean()
+    isThumbnail?: boolean;
+
+    @IsOptional()
+    @IsBoolean()
+    isDeleted?: boolean;
 }
 
-class PriceDTO implements IPrice {
+class PriceDTO {
     @IsNumber()
     @IsNotEmpty()
     base: number;
 
     @IsNumber()
     @IsNotEmpty()
-    sale: number;
+    @IsOptional()
+    sale?: number;
 
     @IsNumber()
     @IsNotEmpty()
-    special: number;
+    @IsOptional()
+    special?: number;
 }

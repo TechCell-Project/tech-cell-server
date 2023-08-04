@@ -1,4 +1,5 @@
 import { Prop } from '@nestjs/mongoose';
+import { ImageSchema } from './image.schema';
 
 export class PriceSchema {
     @Prop({ required: true })
@@ -20,14 +21,6 @@ export class AttributeSchema {
 
     @Prop({ required: false })
     u?: string;
-}
-
-export class ImageSchema {
-    @Prop({ required: true })
-    url: string;
-
-    @Prop({ required: false, default: '' })
-    alt?: string;
 }
 
 export class VariationSchema {

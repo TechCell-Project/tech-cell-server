@@ -3,7 +3,6 @@ import { MessagePattern, RmqContext, Payload, Ctx } from '@nestjs/microservices'
 import { RabbitMQService } from '@app/common';
 import { ProductsMntService } from './products-mnt.service';
 import { ProductsMntMessagePattern } from './products-mnt.pattern';
-import { CloudinaryService } from '@app/common/Cloudinary';
 import { CreateProductRequestDTO } from './dtos';
 
 @Controller()
@@ -11,7 +10,6 @@ export class ProductsMntController {
     constructor(
         @Inject(RabbitMQService) private readonly rabbitMqService: RabbitMQService,
         private readonly productsMntService: ProductsMntService,
-        private readonly cloudinaryService: CloudinaryService,
     ) {}
 
     @Get('ping')
@@ -26,34 +24,14 @@ export class ProductsMntController {
         {
             productData,
             files,
-        }: { productData: CreateProductRequestDTO; files: Express.Multer.File[] },
+        }: {
+            productData: string; //CreateProductRequestDTO;
+            files: Express.Multer.File[];
+        },
     ) {
         this.rabbitMqService.acknowledgeMessage(context);
-        // let thumbnail;
-        // const images = [];
-
-        // for (const file of payload.files) {
-        //     const { fieldname, filename } = file;
-        //     const dateModified = new Date();
-
-        //     const uploadedImage = await this.cloudinaryService.uploadFile(file);
-        //     const imageObject = {
-        //         file_name: filename,
-        //         path: uploadedImage.secure_url,
-        //         cloudinary_id: uploadedImage.public_id,
-        //         date_modified: dateModified,
-        //     };
-
-        //     if (fieldname == 'thumbnail') {
-        //         thumbnail = { ...imageObject };
-        //     } else {
-        //         images.push({ ...imageObject });
-        //     }
-        // }
-        // delete productData.files;
-        // payload.images = images;
-        // payload.thumbnail = thumbnail;
-        return await this.productsMntService.createProduct({ ...productData });
+        return await this.productsMntService.createProduct({ productData, files });
+        // return { productData, files: files.map((file) => file.fieldname) };
     }
 
     // @MessagePattern(ProductsMntMessagePattern.changeStatus)

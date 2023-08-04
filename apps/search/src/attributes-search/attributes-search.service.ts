@@ -46,8 +46,8 @@ export class AttributesSearchService {
             delete options.skip;
         }
         const attributesFromDb = await this.attributesService.getAttributes({
-            getAttributesArgs: { ...attributeArgs },
-            queryArgs: { ...options },
+            filterQueries: { ...attributeArgs },
+            queryOptions: { ...options },
         });
 
         // await this.cacheManager.set(cacheKey, attributesFromDb);
