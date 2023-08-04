@@ -16,6 +16,9 @@ export class Category extends AbstractDocument {
     @Prop({ required: false, default: '' })
     url: string;
 
+    @Prop({ required: false, default: false })
+    isDeleted?: boolean;
+
     @Prop({ required: false, default: [] })
     requireAttributes: Attribute[];
 }
