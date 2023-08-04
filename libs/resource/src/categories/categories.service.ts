@@ -1,6 +1,6 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { IBaseQuery } from '@app/resource/interfaces';
-import { CreateCategoryDTO } from './dtos';
+import { CreateCategoryDTO, UpdateCategoryDTO } from './dtos';
 import { CategoriesRepository } from './categories.repository';
 import { Category } from './schemas';
 import { RpcException } from '@nestjs/microservices';
@@ -39,6 +39,13 @@ export class CategoriesService {
             projectionArgs,
         );
         return categories;
+    }
+
+    async updateCategory({
+        filterQueries,
+        updateData,
+    }: IBaseQuery<Category> & { updateData: UpdateCategoryDTO }) {
+        return await this.categoriesRepository.findOneAndUpdate(filterQueries, updateData);
     }
 
     async isExistCategory({ filterQueries }: IBaseQuery<Category>) {

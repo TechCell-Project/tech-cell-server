@@ -3,7 +3,7 @@ import { Ctx, MessagePattern, RmqContext, Payload } from '@nestjs/microservices'
 import { RabbitMQService } from '@app/common';
 import { CategoriesMntMessagePattern } from './categories-mnt.pattern';
 import { CategoriesMntService } from './categories-mnt.service';
-import { CreateCategoryRequestDTO } from './dtos';
+import { CreateCategoryRequestDTO, UpdateCategoryRequestDTO } from './dtos';
 
 @Controller()
 export class CategoriesMntController {
@@ -19,5 +19,15 @@ export class CategoriesMntController {
     ) {
         this.rabbitMqService.acknowledgeMessage(context);
         return await this.attributeMntService.createCategory(payload);
+    }
+
+    @MessagePattern(CategoriesMntMessagePattern.updateCategory)
+    async updateCategory(
+        @Ctx() context: RmqContext,
+        @Payload()
+        { categoryId, ...updateData }: UpdateCategoryRequestDTO & { categoryId: string },
+    ) {
+        this.rabbitMqService.acknowledgeMessage(context);
+        return await this.attributeMntService.updateCategory({ categoryId, ...updateData });
     }
 }

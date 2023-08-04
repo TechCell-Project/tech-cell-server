@@ -1,18 +1,9 @@
-import { CategoriesService } from '@app/resource/categories';
-import { AttributesService } from '@app/resource/attributes';
-import { Inject, Injectable } from '@nestjs/common';
-import { Store } from 'cache-manager';
-import { REDIS_CACHE } from '~/constants';
-import { CreateCategoryRequestDTO } from './dtos';
+import { CreateCategoryRequestDTO, UpdateCategoryRequestDTO } from './dtos';
+import { CategoriesMntUtilService } from './categories-mnt.util.service';
+import { Category } from '@app/resource';
+import { Types } from 'mongoose';
 
-@Injectable()
-export class CategoriesMntService {
-    constructor(
-        private readonly categoriesService: CategoriesService,
-        private readonly attributesService: AttributesService,
-        @Inject(REDIS_CACHE) private cacheManager: Store,
-    ) {}
-
+export class CategoriesMntService extends CategoriesMntUtilService {
     async createCategory({
         label,
         name,
@@ -23,17 +14,8 @@ export class CategoriesMntService {
         let listAttribute = [];
 
         if (requireAttributes) {
-            listAttribute = await Promise.all(
-                requireAttributes.map(async (attributeLabel) => {
-                    const attribute = await this.attributesService.getAttributeByLabel(
-                        attributeLabel,
-                    );
-                    delete attribute['_id'];
-                    delete attribute['createdAt'];
-                    delete attribute['updatedAt'];
-                    return attribute;
-                }),
-            );
+            listAttribute = await this.validateCategoryRequireAttributes(requireAttributes);
+            listAttribute = this.sortAttributes(listAttribute);
         }
 
         return await this.categoriesService.createCategory({
@@ -45,9 +27,24 @@ export class CategoriesMntService {
         });
     }
 
-    // async updateAttribute({ attributeId, description, name }: UpdateAttributeDTO) {
-    //     return await this.CategoriesService.updateAttribute({ attributeId, name, description });
-    // }
+    async updateCategory({
+        categoryId,
+        ...updateData
+    }: UpdateCategoryRequestDTO & { categoryId: string }) {
+        const newCategory = { ...updateData, requireAttributes: [] };
+
+        if (updateData.requireAttributes) {
+            newCategory.requireAttributes = await this.validateCategoryRequireAttributes(
+                updateData.requireAttributes,
+            );
+            newCategory.requireAttributes = this.sortAttributes(newCategory.requireAttributes);
+        }
+
+        return await this.categoriesService.updateCategory({
+            filterQueries: { _id: new Types.ObjectId(categoryId) },
+            updateData: { ...newCategory },
+        });
+    }
 
     // async deleteAttribute(attributeId: string) {
     //     return await this.CategoriesService.deleteAttribute(attributeId);
