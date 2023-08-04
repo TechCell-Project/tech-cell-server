@@ -12,6 +12,7 @@ import {
 import {
     CategoriesSearchMessagePattern,
     GetCategoriesRequestDTO,
+    GetCategoryByLabelRequestDTO,
 } from '~/apps/search/categories-search';
 import {
     CategoriesMntMessagePattern,
@@ -33,6 +34,15 @@ export class CategoriesController {
     async getCategories(@Query() query: GetCategoriesRequestDTO) {
         return this.searchService
             .send(CategoriesSearchMessagePattern.getCategories, { ...query })
+            .pipe(catchException());
+    }
+
+    @ApiOkResponse({ description: 'Get category successfully!' })
+    @ApiNotFoundResponse({ description: 'Category not found!' })
+    @Get('/label/:label')
+    async getCategoryByLabel(@Param() { label }: GetCategoryByLabelRequestDTO) {
+        return this.searchService
+            .send(CategoriesSearchMessagePattern.getCategoryByLabel, { label })
             .pipe(catchException());
     }
 
