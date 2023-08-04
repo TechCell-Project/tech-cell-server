@@ -25,4 +25,8 @@ export class CategoriesSearchService {
         };
         return await this.categoriesService.getCategories({ queryOptions });
     }
+
+    async getCategoryByLabel(label: string) {
+        return await this.categoriesService.getCategory({ filterQueries: { label } });
+    }
 }
