@@ -15,9 +15,13 @@ import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~/constants';
 import { AdminGuard, catchException } from '@app/common';
 import {
     AttributesSearchMessagePattern,
+    GetAttributeByIdRequestDTO,
     GetAttributesRequestDTO,
 } from '~/apps/search/attributes-search';
-import { UpdateAttributeRequestDTO } from '~/apps/managements/attributes-mnt/dtos';
+import {
+    DeleteAttributeByIdRequestDTO,
+    UpdateAttributeRequestDTO,
+} from '~/apps/managements/attributes-mnt/dtos';
 import { AttributesMntMessagePattern } from '~/apps/managements/attributes-mnt/attributes-mnt.pattern';
 import { CreateAttributeRequestDTO } from '~/apps/managements/attributes-mnt/dtos';
 import { ApiTags } from '@nestjs/swagger';
@@ -38,7 +42,7 @@ export class AttributesController {
     }
 
     @Get('/:attributeId')
-    async getAttributeById(@Param('attributeId') attributeId: string) {
+    async getAttributeById(@Param() { attributeId }: GetAttributeByIdRequestDTO) {
         return this.searchService
             .send(AttributesSearchMessagePattern.getAttributeById, { attributeId })
             .pipe(catchException());
@@ -70,7 +74,7 @@ export class AttributesController {
 
     @UseGuards(AdminGuard)
     @Delete('/:attributeId')
-    async deleteAttribute(@Param('attributeId') attributeId: string) {
+    async deleteAttribute(@Param() { attributeId }: DeleteAttributeByIdRequestDTO) {
         return this.managementsService
             .send(AttributesMntMessagePattern.deleteAttribute, { attributeId })
             .pipe(catchException());
