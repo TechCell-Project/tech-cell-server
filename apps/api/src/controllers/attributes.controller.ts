@@ -16,6 +16,7 @@ import { AdminGuard, catchException } from '@app/common';
 import {
     AttributesSearchMessagePattern,
     GetAttributeByIdRequestDTO,
+    GetAttributeByLabelRequestDTO,
     GetAttributesRequestDTO,
 } from '~/apps/search/attributes-search';
 import {
@@ -55,6 +56,15 @@ export class AttributesController {
     async getAttributeById(@Param() { attributeId }: GetAttributeByIdRequestDTO) {
         return this.searchService
             .send(AttributesSearchMessagePattern.getAttributeById, { attributeId })
+            .pipe(catchException());
+    }
+
+    @ApiOkResponse({ description: 'Get attribute by label successfully!' })
+    @ApiNotFoundResponse({ description: 'Attribute not found!' })
+    @Get('/label/:label')
+    async getAttributesByLabel(@Param() { label }: GetAttributeByLabelRequestDTO) {
+        return this.searchService
+            .send(AttributesSearchMessagePattern.getAttributeByLabel, { label })
             .pipe(catchException());
     }
 

@@ -29,4 +29,10 @@ export class AttributesSearchController {
         this.rabbitMqService.acknowledgeMessage(context);
         return await this.attributeSearchService.getAttributeById(attributeId);
     }
+
+    @MessagePattern(AttributesSearchMessagePattern.getAttributeByLabel)
+    async getAttributeByLabel(@Ctx() context: RmqContext, @Payload() { label }: { label: string }) {
+        this.rabbitMqService.acknowledgeMessage(context);
+        return await this.attributeSearchService.getAttributeByLabel(label);
+    }
 }

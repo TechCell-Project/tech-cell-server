@@ -62,4 +62,8 @@ export class AttributesSearchService {
     async getAttributeById(attributeId: string) {
         return await this.attributesService.getAttributeById(attributeId);
     }
+
+    async getAttributeByLabel(label: string) {
+        return await this.attributesService.getAttributeByLabel(label);
+    }
 }
