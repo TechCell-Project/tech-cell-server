@@ -13,8 +13,17 @@ export class ProductsSearchController {
     ) {}
 
     @MessagePattern(ProductsSearchMessagePattern.getProducts)
-    async getUsers(@Ctx() context: RmqContext, @Payload() payload: GetProductsDTO) {
+    async getProducts(@Ctx() context: RmqContext, @Payload() payload: GetProductsDTO) {
         this.rabbitMqService.acknowledgeMessage(context);
         return await this.productsSearchService.getProducts({ ...payload });
+    }
+
+    @MessagePattern(ProductsSearchMessagePattern.getProductById)
+    async getProductById(
+        @Ctx() context: RmqContext,
+        @Payload() { productId }: { productId: string },
+    ) {
+        this.rabbitMqService.acknowledgeMessage(context);
+        return await this.productsSearchService.getProductById(productId);
     }
 }
