@@ -15,8 +15,12 @@ export class AttributesService {
     }
 
     async getAttributeById(id: string | Types.ObjectId) {
-        const idFind = id instanceof Types.ObjectId ? id : new Types.ObjectId(id);
-        return this.attributesRepository.findOne({ _id: idFind });
+        try {
+            const idFind = id instanceof Types.ObjectId ? id : new Types.ObjectId(id);
+            return this.attributesRepository.findOne({ _id: idFind });
+        } catch (error) {
+            throw new RpcException(new ConflictException('Attribute Id is invalid'));
+        }
     }
 
     async getAttributeByLabel(label: string) {
