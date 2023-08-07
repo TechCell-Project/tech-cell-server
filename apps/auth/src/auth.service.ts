@@ -23,8 +23,8 @@ import { RpcException } from '@nestjs/microservices';
 import { ConfirmEmailRegisterDTO, ForgotPasswordEmailDTO, MailEventPattern } from '~/apps/mail';
 import { OtpType } from '@app/resource/otp';
 import { IUserFacebookResponse, IUserGoogleResponse, ITokenVerifiedResponse } from './interfaces';
-import { buildUniqueUserNameFromEmail, generateRandomString } from '@app/common';
-import { MAX_PASSWORD_LENGTH } from '~/constants';
+import { buildUniqueUserNameFromEmail, delStartWith, generateRandomString } from '@app/common';
+import { MAX_PASSWORD_LENGTH, USERS_CACHE_PREFIX } from '~/constants';
 
 @Injectable()
 export class AuthService extends AuthUtilService {
@@ -131,19 +131,36 @@ export class AuthService extends AuthUtilService {
             throw new RpcException(new BadRequestException('Password does not match'));
         }
 
-        userFound = await this.usersService.createUser({
-            email,
-            userName,
-            firstName,
-            lastName,
-            password,
-        });
+        // userFound = await this.usersService.createUser({
+        //     email,
+        //     userName,
+        //     firstName,
+        //     lastName,
+        //     password,
+        // });
 
-        const otp = await this.otpService.createOrRenewOtp({ email, otpType: OtpType.VerifyEmail });
+        const [userCreated] = await Promise.all([
+            this.usersService.createUser({
+                email,
+                userName,
+                firstName,
+                lastName,
+                password,
+            }),
+            delStartWith(USERS_CACHE_PREFIX, this.cacheManager), // remove users cache
+        ]);
+
+        const otp = await this.otpService.createOrRenewOtp({
+            email: userCreated.email,
+            otpType: OtpType.VerifyEmail,
+        });
         const emailContext: ConfirmEmailRegisterDTO = {
             otpCode: otp.otpCode,
         };
-        this.mailService.emit(MailEventPattern.sendMailConfirm, { email, emailContext });
+        this.mailService.emit(MailEventPattern.sendMailConfirm, {
+            email: userCreated.email,
+            emailContext,
+        });
 
         return {
             message: 'Register successfully, please check your email to verify it',
@@ -191,6 +208,9 @@ export class AuthService extends AuthUtilService {
                 email: emailUser,
                 role,
             });
+
+            await this.revokeRefreshToken(oldRefreshToken);
+
             return { ...this.cleanUserBeforeResponse(userFound), accessToken, refreshToken };
         } catch (error) {
             throw new RpcException(new ForbiddenException(error.message));
@@ -252,6 +272,10 @@ export class AuthService extends AuthUtilService {
             throw new RpcException(new BadRequestException('Access token missing.'));
         }
 
+        if (await this.isAccessTokenRevoked(accessToken)) {
+            throw new RpcException(new BadRequestException('Refresh token is revoked'));
+        }
+
         const dataVerified = (await this.verifyToken(
             accessToken,
             this.configService.get<string>('JWT_ACCESS_TOKEN_SECRET'),
@@ -267,6 +291,10 @@ export class AuthService extends AuthUtilService {
     async verifyRefreshToken(refreshToken: string): Promise<ITokenVerifiedResponse> {
         if (!refreshToken) {
             throw new RpcException(new BadRequestException('Refresh token missing.'));
+        }
+
+        if (await this.isRefreshTokenRevoked(refreshToken)) {
+            throw new RpcException(new BadRequestException('Refresh token is revoked'));
         }
 
         return (await this.verifyToken(

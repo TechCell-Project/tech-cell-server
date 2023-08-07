@@ -1,4 +1,7 @@
+import { BadRequestException } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
+import { plainToInstance } from 'class-transformer';
+import { validate } from 'class-validator';
 import { catchError, throwError } from 'rxjs';
 
 export function isEmail(email: string): boolean {
@@ -70,4 +73,28 @@ export function dateFormat(date: Date, format: string): string {
         .replace('HH', hour)
         .replace('mm', minute)
         .replace('ss', second);
+}
+
+/**
+ *
+ * @param str String to replace space
+ * @param replaceTo The string to replace space
+ * @returns the string after replace space
+ * @default replaceTo is '_'
+ */
+export function replaceWhitespaceTo(str: string, replaceTo = '_') {
+    return str.replace(/\s+/g, replaceTo);
+}
+
+export async function validateDTO(data: any, dto: any) {
+    const errors = await validate(plainToInstance(dto, data));
+    if (errors.length > 0) {
+        const constraints = errors.reduce((acc, error) => {
+            Object.values(error.constraints).forEach((constraint) => {
+                acc.push(constraint);
+            });
+            return acc;
+        }, []);
+        throw new RpcException(new BadRequestException(constraints));
+    }
 }

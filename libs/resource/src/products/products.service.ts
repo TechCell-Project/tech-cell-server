@@ -1,57 +1,29 @@
-import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Product } from './schemas';
-import { Model } from 'mongoose';
-import { SearchProductsRequestDTO } from './dtos';
-import { RpcException } from '@nestjs/microservices';
+import { Injectable } from '@nestjs/common';
+import { CreateProductDTO } from './dtos';
 import { ProductsRepository } from './products.repository';
+import { IBaseQuery } from '../interfaces';
+import { Product } from './schemas';
 
 @Injectable()
 export class ProductsService {
-    constructor(
-        @InjectModel(Product.name) private productModel: Model<Product>, // TODO: remove this
-        private readonly productsRepository: ProductsRepository, // TODO: use this instead of productModel
-    ) {}
+    constructor(private readonly productsRepository: ProductsRepository) {}
 
-    async getProducts() {
-        return this.productsRepository.find({});
+    async createProduct({ ...createProductDto }: CreateProductDTO) {
+        const product = await this.productsRepository.create({ ...createProductDto });
+        return product;
     }
 
-    // async create(CreateProductDTO: createProductDto) {
-    //     try {
-    //         const newProduct = new this.productModel(CreateProductDTO);
-    //         return await newProduct.save();
-    //     } catch (error) {
-    //         throw error;
-    //     }
-    // }
+    async getProduct({ filterQueries, queryOptions, projectionArgs }: IBaseQuery<Product>) {
+        const product = await this.productsRepository.findOne(
+            filterQueries,
+            queryOptions,
+            projectionArgs,
+        );
+        return product;
+    }
 
-    // async update(updateProductDto: updateProductDto) {
-    //     try {
-    //         const updated = this.productsRepository.
-    //     } catch (error) {
-    //         throw error;
-    //     }
-    // }
-
-    async searchByName({ searchTerm, page, sortField, sortOrder }: SearchProductsRequestDTO) {
-        try {
-            const productsFound = await this.productsRepository.searchProducts(
-                searchTerm,
-                page,
-                sortField,
-                sortOrder,
-            );
-
-            if (productsFound.length === 0) {
-                throw new NotFoundException('Not found any product!');
-            }
-
-            return { productsFound };
-        } catch (error) {
-            throw new RpcException(
-                new ConflictException('An error occurred while searching for products.'),
-            );
-        }
+    async getProducts() {
+        const products = await this.productsRepository.find({});
+        return products;
     }
 }

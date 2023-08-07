@@ -1,7 +1,5 @@
-import * as fs from 'fs';
 import * as express from 'express';
 import { createServer as createHttpServer } from 'http';
-import { createServer as createHttpsServer, ServerOptions } from 'https';
 import { NestFactory } from '@nestjs/core';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { ExpressAdapter } from '@nestjs/platform-express';
@@ -18,7 +16,16 @@ async function bootstrap() {
     const app = await NestFactory.create(AppModule, new ExpressAdapter(server));
 
     app.enableCors();
-    app.use(helmet());
+    app.use(
+        helmet({
+            contentSecurityPolicy: {
+                directives: {
+                    ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+                    'script-src': ["'self'", "'unsafe-inline'"],
+                },
+            },
+        }),
+    );
 
     // Use to catch exceptions and send them to responses
     app.useGlobalFilters(new RpcExceptionFilter());
@@ -53,30 +60,5 @@ async function bootstrap() {
     createHttpServer(server).listen(port, () =>
         logger.log(`⚡️ [http] ready on port: ${port}, url: http://localhost:${port}`),
     );
-
-    try {
-        // Config https
-        const portHttps = process.env.API_PORT_HTTPS;
-        const httpsPrivateKeyDir = process.env.HTTPS_PRIVATE_KEY_DIR;
-        const httpsCertDir = process.env.HTTPS_CERT_DIR;
-        if (!portHttps) {
-            throw new Error('[env] Missing https port');
-        }
-        if (!httpsPrivateKeyDir || !httpsCertDir) {
-            throw new Error('[env] Missing certificate paths');
-        }
-
-        const httpsOptions: ServerOptions = {
-            key: fs.readFileSync(httpsPrivateKeyDir),
-            cert: fs.readFileSync(httpsCertDir),
-        };
-        createHttpsServer(httpsOptions, server).listen(portHttps, () =>
-            logger.log(
-                `⚡️ [https] ready on port: ${portHttps}, url: https://localhost:${portHttps}`,
-            ),
-        );
-    } catch (error) {
-        logger.warn(`[https] Can not start https server: ${error.message}`);
-    }
 }
 bootstrap();

@@ -1,27 +1,37 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { AbstractDocument } from '@app/common';
 import * as mongoose from 'mongoose';
-import slugify from 'slugify';
-import { GeneralSchema } from './general.schema';
-import { FilterableSchema } from './filterable.schema';
+import { ProductStatus } from '../enums';
+import { AttributeSchema, VariationSchema } from './variation.schema';
+import { ImageSchema } from './image.schema';
 
 export type ProductDocument = mongoose.HydratedDocument<Product>;
 
 @Schema({ timestamps: true })
 export class Product extends AbstractDocument {
     @Prop({ required: true })
-    general: GeneralSchema;
+    name: string;
 
     @Prop({ required: true })
-    filterable: FilterableSchema;
+    brand: string;
+
+    @Prop({ required: true })
+    description: string;
+
+    @Prop({ required: true })
+    categories: string[];
+
+    @Prop({ required: false, type: Number, enum: ProductStatus, default: ProductStatus.OnSales })
+    status?: number;
+
+    @Prop({ required: false, default: [] })
+    generalAttributes: AttributeSchema[];
+
+    @Prop({ required: false, default: [] })
+    generalImages: ImageSchema[];
+
+    @Prop({ required: true })
+    variations: VariationSchema[];
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);
-
-// ProductSchema.index({ 'general.attributes.k': 1, 'general.attributes.v': 1 });
-
-ProductSchema.post('validate', function (doc: any) {
-    const productName: string = doc.name;
-    const slug: string = slugify(productName, { lower: true });
-    doc.general.sku = slug;
-});

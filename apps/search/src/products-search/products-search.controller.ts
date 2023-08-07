@@ -1,25 +1,29 @@
 import { RabbitMQService } from '@app/common';
-import { Controller, Inject } from '@nestjs/common';
-import { Ctx, MessagePattern, RmqContext } from '@nestjs/microservices';
+import { Controller } from '@nestjs/common';
+import { Ctx, MessagePattern, RmqContext, Payload } from '@nestjs/microservices';
 import { ProductsSearchMessagePattern } from './products-search.pattern';
 import { ProductsSearchService } from './products-search.service';
+import { GetProductsDTO } from './dtos';
 
 @Controller('products-search')
 export class ProductsSearchController {
     constructor(
-        @Inject(RabbitMQService) private readonly rabbitMqService: RabbitMQService,
+        private readonly rabbitMqService: RabbitMQService,
         private readonly productsSearchService: ProductsSearchService,
     ) {}
 
     @MessagePattern(ProductsSearchMessagePattern.getProducts)
-    async getProducts(@Ctx() context: RmqContext) {
+    async getProducts(@Ctx() context: RmqContext, @Payload() payload: GetProductsDTO) {
         this.rabbitMqService.acknowledgeMessage(context);
-        return this.productsSearchService.getProducts();
+        return await this.productsSearchService.getProducts({ ...payload });
     }
 
-    // @MessagePattern(ProductsSearchMessagePattern.getProductsByName)
-    // async getProductsByName(@Ctx() context: RmqContext) {
-    //     this.rabbitMqService.acknowledgeMessage(context);
-    //     return this.productsSearchService.getProductsByName();
-    // }
+    @MessagePattern(ProductsSearchMessagePattern.getProductById)
+    async getProductById(
+        @Ctx() context: RmqContext,
+        @Payload() { productId }: { productId: string },
+    ) {
+        this.rabbitMqService.acknowledgeMessage(context);
+        return await this.productsSearchService.getProductById(productId);
+    }
 }
