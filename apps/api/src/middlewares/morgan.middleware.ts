@@ -1,12 +1,11 @@
-import { Inject, Injectable, NestMiddleware } from '@nestjs/common';
+import { Inject, Injectable, NestMiddleware, Logger } from '@nestjs/common';
 import { NextFunction, Request, Response } from 'express';
 import * as morgan from 'morgan';
-import { Logger } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
 import { SAMPLE_SERVICE } from '~/constants';
 import { ClientRMQ } from '@nestjs/microservices';
-import { formatLogsDiscord } from '@app/common';
+import { formatLogsDiscord, isEnable } from '@app/common';
 import { SampleEventPattern } from '~/apps/sample';
 
 @Injectable()
@@ -16,15 +15,7 @@ export class MorganMiddleware implements NestMiddleware {
     private readonly logger = new Logger(MorganMiddleware.name);
 
     use(req: Request, res: Response, next: NextFunction) {
-        if (
-            !process.env.LOGS_IS_ENABLE ||
-            (process.env.LOGS_IS_ENABLE &&
-                !(
-                    process.env.LOGS_IS_ENABLE === 'true' ||
-                    process.env.LOGS_IS_ENABLE === '1' ||
-                    process.env.LOGS_IS_ENABLE === 'on'
-                ))
-        ) {
+        if (!isEnable(process.env.LOGS_IS_ENABLE)) {
             /**
              * if logs is not enable, just skip this middleware
              * LOGS_IS_ENABLE is need to be set to `true` or `1` or `on` to enable logs
@@ -49,32 +40,17 @@ export class MorganMiddleware implements NestMiddleware {
             return logStream.write(message.trim() + '\n');
         }
 
-        const writeFc = (message: string) => {
+        function writeFc(message: string) {
             try {
-                if (
-                    process.env.LOGS_TO_CONSOLE &&
-                    (process.env.LOGS_TO_CONSOLE === 'true' ||
-                        process.env.LOGS_TO_CONSOLE === '1' ||
-                        process.env.LOGS_TO_CONSOLE === 'on')
-                ) {
+                if (isEnable(process.env.LOGS_TO_CONSOLE)) {
                     this.logger.log(message.trim());
                 }
 
-                if (
-                    process.env.LOGS_TO_FILE &&
-                    (process.env.LOGS_TO_FILE === 'true' ||
-                        process.env.LOGS_TO_FILE === '1' ||
-                        process.env.LOGS_TO_FILE === 'on')
-                ) {
+                if (isEnable(process.env.LOGS_TO_FILE)) {
                     logsToFile(message);
                 }
 
-                if (
-                    process.env.LOGS_TO_DISCORD &&
-                    (process.env.LOGS_TO_DISCORD === 'true' ||
-                        process.env.LOGS_TO_DISCORD === '1' ||
-                        process.env.LOGS_TO_DISCORD === 'on')
-                ) {
+                if (isEnable(process.env.LOGS_TO_DISCORD)) {
                     this.sampleService.emit(SampleEventPattern.writeLogsToDiscord, {
                         message: formatLogsDiscord(message, req, res),
                     });
@@ -82,7 +58,7 @@ export class MorganMiddleware implements NestMiddleware {
             } catch (error) {
                 this.logger.error(error);
             }
-        };
+        }
 
         morgan('combined', {
             stream: {
