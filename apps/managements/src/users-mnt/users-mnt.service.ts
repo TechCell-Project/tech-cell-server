@@ -101,17 +101,17 @@ export class UsersMntService extends UsersMntUtilService {
             actorUser: blockByUser,
         });
 
-        if (victimUser.block && victimUser.block.isBlocked) {
+        if (victimUser.block && victimUser?.block?.isBlocked) {
             throw new RpcException(new BadRequestException('User is already blocked'));
         }
 
-        const actLogs = (victimUser.block && victimUser.block.activityLogs) || [];
+        const actLogs = (victimUser.block && victimUser?.block?.activityLogs) || [];
         actLogs.push({
             activity: BlockActivity.Block,
             activityAt: new Date(),
             activityBy: actorId,
-            activityReason: reason ? reason : '',
-            activityNote: note ? note : '',
+            activityReason: reason ?? '',
+            activityNote: note ?? '',
         });
 
         const [userReturn] = await Promise.all([
@@ -155,13 +155,13 @@ export class UsersMntService extends UsersMntUtilService {
             throw new RpcException(new BadRequestException('User is not blocked'));
         }
 
-        const actLogs = (victimUser.block && victimUser.block.activityLogs) || [];
+        const actLogs = (victimUser.block && victimUser?.block?.activityLogs) || [];
         actLogs.push({
             activity: BlockActivity.Unblock,
             activityAt: new Date(),
             activityBy: actorId,
-            activityReason: reason ? reason : '',
-            activityNote: note ? note : '',
+            activityReason: reason ?? '',
+            activityNote: note ?? '',
         });
 
         const [userReturn] = await Promise.all([
