@@ -18,8 +18,6 @@ COPY package.json yarn.lock ./
 
 RUN yarn install --prod
 
-COPY . .
-
 COPY --from=development /usr/src/app/dist ./dist
 
 CMD ["node", "dist/apps/search/main"]

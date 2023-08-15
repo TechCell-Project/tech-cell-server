@@ -98,3 +98,26 @@ export async function validateDTO(data: any, dto: any) {
         throw new RpcException(new BadRequestException(constraints));
     }
 }
+
+/**
+ *
+ * @param envVariable The environment variable to check
+ * @returns true if the environment variable is enable, otherwise false
+ * @description enable value: true, 1, 'on', 'enable'
+ */
+export function isEnable(envVariable: string | number | boolean = undefined) {
+    if (!envVariable) {
+        return false;
+    }
+    if (
+        envVariable === 'true' ||
+        envVariable === '1' ||
+        envVariable === 'on' ||
+        envVariable === 1 ||
+        envVariable === true ||
+        envVariable === 'enable'
+    ) {
+        return true;
+    }
+    return false;
+}
