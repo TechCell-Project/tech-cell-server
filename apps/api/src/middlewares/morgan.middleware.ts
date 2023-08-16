@@ -42,21 +42,22 @@ export class MorganMiddleware implements NestMiddleware {
 
         function writeFc(message: string) {
             try {
+                const messageExpected = message ? message.trim() : 'Unexpected error when logging';
                 if (isEnable(process.env.LOGS_TO_CONSOLE)) {
-                    this.logger.log(message.trim());
+                    this.logger.log(messageExpected);
                 }
 
                 if (isEnable(process.env.LOGS_TO_FILE)) {
-                    logsToFile(message);
+                    logsToFile(messageExpected);
                 }
 
                 if (isEnable(process.env.LOGS_TO_DISCORD)) {
                     this.sampleService.emit(SampleEventPattern.writeLogsToDiscord, {
-                        message: formatLogsDiscord(message, req, res),
+                        message: formatLogsDiscord(messageExpected, req, res),
                     });
                 }
             } catch (error) {
-                this.logger.error(error);
+                this.logger.error(error ?? 'Unexpected error when logging');
             }
         }
 
