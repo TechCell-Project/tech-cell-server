@@ -23,11 +23,11 @@ export class MorganMiddleware implements NestMiddleware {
             return next();
         }
 
-        function writeFc(message: string, _logger: Logger) {
+        const writeFc = (message: string) => {
             try {
                 const messageExpected = message ? message.trim() : 'Unexpected error when logging';
                 if (isEnable(process.env.LOGS_TO_CONSOLE)) {
-                    _logger.log(messageExpected);
+                    this._logger.log(messageExpected);
                 }
 
                 if (isEnable(process.env.LOGS_TO_FILE)) {
@@ -40,11 +40,11 @@ export class MorganMiddleware implements NestMiddleware {
                     });
                 }
             } catch (error) {
-                _logger.error(error ?? 'Unexpected error when logging');
+                this._logger.error(error ?? 'Unexpected error when logging');
             }
-        }
+        };
 
-        function logsToFile(message: string) {
+        const logsToFile = (message: string) => {
             const logDirectory = path.join(__dirname, `../../../logs`);
             fs.mkdirSync(logDirectory, { recursive: true });
 
@@ -59,7 +59,7 @@ export class MorganMiddleware implements NestMiddleware {
             });
 
             return logStream.write(message.trim() + '\n');
-        }
+        };
 
         morgan('combined', {
             stream: {
