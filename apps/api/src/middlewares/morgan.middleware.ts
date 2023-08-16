@@ -12,15 +12,36 @@ import { SampleEventPattern } from '~/apps/sample';
 export class MorganMiddleware implements NestMiddleware {
     constructor(@Inject(SAMPLE_SERVICE) private readonly sampleService: ClientRMQ) {}
 
-    private readonly logger = new Logger(MorganMiddleware.name);
+    private readonly _logger: Logger = new Logger(MorganMiddleware.name);
 
     use(req: Request, res: Response, next: NextFunction) {
+        /**
+         * if logs is not enable, just skip this middleware
+         * LOGS_IS_ENABLE is need to be set to `true` or `1` or `on` to enable logs
+         */
         if (!isEnable(process.env.LOGS_IS_ENABLE)) {
-            /**
-             * if logs is not enable, just skip this middleware
-             * LOGS_IS_ENABLE is need to be set to `true` or `1` or `on` to enable logs
-             */
             return next();
+        }
+
+        function writeFc(message: string, _logger: Logger) {
+            try {
+                const messageExpected = message ? message.trim() : 'Unexpected error when logging';
+                if (isEnable(process.env.LOGS_TO_CONSOLE)) {
+                    _logger.log(messageExpected);
+                }
+
+                if (isEnable(process.env.LOGS_TO_FILE)) {
+                    logsToFile(messageExpected);
+                }
+
+                if (isEnable(process.env.LOGS_TO_DISCORD)) {
+                    this.sampleService.emit(SampleEventPattern.writeLogsToDiscord, {
+                        message: formatLogsDiscord(messageExpected, req, res),
+                    });
+                }
+            } catch (error) {
+                _logger.error(error ?? 'Unexpected error when logging');
+            }
         }
 
         function logsToFile(message: string) {
@@ -38,27 +59,6 @@ export class MorganMiddleware implements NestMiddleware {
             });
 
             return logStream.write(message.trim() + '\n');
-        }
-
-        function writeFc(message: string) {
-            try {
-                const messageExpected = message ? message.trim() : 'Unexpected error when logging';
-                if (isEnable(process.env.LOGS_TO_CONSOLE)) {
-                    this.logger.log(messageExpected);
-                }
-
-                if (isEnable(process.env.LOGS_TO_FILE)) {
-                    logsToFile(messageExpected);
-                }
-
-                if (isEnable(process.env.LOGS_TO_DISCORD)) {
-                    this.sampleService.emit(SampleEventPattern.writeLogsToDiscord, {
-                        message: formatLogsDiscord(messageExpected, req, res),
-                    });
-                }
-            } catch (error) {
-                this.logger.error(error ?? 'Unexpected error when logging');
-            }
         }
 
         morgan('combined', {
