@@ -1,15 +1,24 @@
-import { IsOptional } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class QueryProductParamsDTO {
+    @IsString()
     @IsOptional()
     name?: string;
 
     @IsOptional()
+    @IsBoolean()
+    @Type(() => Boolean)
+    @Transform(({ value }) => value === 'true')
     all?: boolean;
 
     @IsOptional()
-    limit?: number;
+    @IsNumber()
+    @Type(() => Number)
+    page?: number;
 
     @IsOptional()
-    offset?: number;
+    @IsNumber()
+    @Type(() => Number)
+    pageSize?: number;
 }

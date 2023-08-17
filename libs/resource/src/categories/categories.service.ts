@@ -4,6 +4,7 @@ import { CreateCategoryDTO, UpdateCategoryDTO } from './dtos';
 import { CategoriesRepository } from './categories.repository';
 import { Category } from './schemas';
 import { RpcException } from '@nestjs/microservices';
+import { FilterQuery } from 'mongoose';
 
 @Injectable()
 export class CategoriesService {
@@ -32,13 +33,12 @@ export class CategoriesService {
         return category;
     }
 
-    async getCategories({ filterQueries, queryOptions, projectionArgs }: IBaseQuery<Category>) {
-        const categories = await this.categoriesRepository.find(
-            filterQueries,
-            queryOptions,
-            projectionArgs,
-        );
-        return categories;
+    async getCategories({
+        filterQueries,
+        queryOptions,
+        projectionArgs,
+    }: IBaseQuery<Category>): Promise<Category[] | undefined> {
+        return this.categoriesRepository.find(filterQueries, queryOptions, projectionArgs);
     }
 
     async updateCategory({
@@ -56,5 +56,9 @@ export class CategoriesService {
         } catch (error) {
             return false;
         }
+    }
+
+    async countCategories(filterQueries: FilterQuery<Category> = {}) {
+        return await this.categoriesRepository.count(filterQueries);
     }
 }

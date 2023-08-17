@@ -5,6 +5,7 @@ import { REDIS_CACHE } from '~/constants';
 import { GetAttributesRequestDTO } from './dtos';
 import { SelectType } from './enums';
 import { FilterQuery, QueryOptions } from 'mongoose';
+import { ListDataResponseDTO } from '@app/common/dtos';
 
 @Injectable()
 export class AttributesSearchService {
@@ -54,14 +55,23 @@ export class AttributesSearchService {
             delete options.limit;
         }
 
-        const attributesFromDb = await this.attributesService.getAttributes({
-            filterQueries: { ...attributeArgs },
-            queryOptions: { ...options },
-        });
+        const [attributesFromDb, totalRecord] = await Promise.all([
+            this.attributesService.getAttributes({
+                filterQueries: { ...attributeArgs },
+                queryOptions: { ...options },
+            }),
+            this.attributesService.countAttributes({ ...attributeArgs }),
+        ]);
 
         // await this.cacheManager.set(cacheKey, attributesFromDb);
 
-        return attributesFromDb;
+        return new ListDataResponseDTO({
+            data: attributesFromDb,
+            page: no_limit ? 1 : page,
+            pageSize: no_limit ? totalRecord : pageSize,
+            totalPage: no_limit ? 1 : Math.ceil(totalRecord / pageSize),
+            totalRecord,
+        });
     }
 
     async getAttributeById(attributeId: string) {

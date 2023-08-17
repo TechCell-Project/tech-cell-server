@@ -5,8 +5,8 @@ import {
     REDIS_CACHE,
     PRODUCTS_CACHE_PREFIX,
     PRODUCTS_ALL,
-    PRODUCTS_OFFSET,
-    PRODUCTS_LIMIT,
+    PRODUCTS_PAGESIZE,
+    PRODUCTS_PAGE,
 } from '~/constants';
 import { Store } from 'cache-manager';
 
@@ -18,12 +18,12 @@ export class ProductsSearchUtilService {
     ) {}
 
     protected buildCacheKeyProducts({
-        limit,
-        offset,
+        page,
+        pageSize,
         all,
     }: {
-        limit?: number;
-        offset?: number;
+        page?: number;
+        pageSize?: number;
         all?: boolean;
     }) {
         const arrCacheKey = [];
@@ -32,12 +32,12 @@ export class ProductsSearchUtilService {
             return PRODUCTS_ALL;
         }
 
-        if (limit) {
-            arrCacheKey.push(`${PRODUCTS_LIMIT}_${limit}`);
+        if (page) {
+            arrCacheKey.push(`${PRODUCTS_PAGE}_${page}`);
         }
 
-        if (offset) {
-            arrCacheKey.push(`${PRODUCTS_OFFSET}_${offset}`);
+        if (pageSize) {
+            arrCacheKey.push(`${PRODUCTS_PAGESIZE}_${pageSize}`);
         }
 
         return arrCacheKey.join('_');

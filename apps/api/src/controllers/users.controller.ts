@@ -32,6 +32,7 @@ import { catchException } from '@app/common';
 import { UserMntResponseDto } from '@app/resource/users/dtos';
 import { CurrentUser } from '@app/common/decorators';
 import { ICurrentUser } from '@app/common/interfaces';
+import { ListDataResponseDTO } from '@app/common/dtos';
 
 @ApiTags('users')
 @ApiBearerAuth('accessToken')
@@ -50,7 +51,7 @@ export class UsersController {
             .pipe(catchException());
     }
 
-    @ApiOkResponse({ description: 'Get users success', type: [UserMntResponseDto] })
+    @ApiOkResponse({ description: 'Get users success', type: ListDataResponseDTO })
     @ApiNotFoundResponse({ description: 'No users found' })
     @Get('/')
     async getUsers(@Query() requestQuery: GetUsersDTO) {
