@@ -13,6 +13,7 @@ import { UsersMntUtilService } from './users-mnt.util.service';
 import { delStartWith, timeStringToMs } from '@app/common';
 import { CreateUserDTO } from '@app/resource/users/dtos';
 import { USERS_CACHE_PREFIX } from '~/constants';
+import { ListDataResponseDTO } from '@app/common/dtos/list-data-response.dto';
 
 @Injectable()
 export class UsersMntService extends UsersMntUtilService {
@@ -44,13 +45,24 @@ export class UsersMntService extends UsersMntUtilService {
         return userCreated;
     }
 
-    async getUsers(payload: QueryUserParamsDTO) {
-        const { all, limit = 1, offset = 0 } = payload;
+    async getUsers({ page = 1, pageSize = 10, ...payload }: QueryUserParamsDTO) {
+        const { all } = payload;
+
+        if (typeof page !== 'number') {
+            page = Number(page);
+        }
+
+        if (typeof pageSize !== 'number') {
+            pageSize = Number(pageSize);
+        }
 
         const query: GetUsersDTO = {};
-        const options = { limit, skip: offset };
+        const options = {
+            skip: page ? (page - 1) * pageSize : 0,
+            limit: pageSize || 10,
+        };
 
-        const cacheKey = this.buildCacheKeyUsers({ limit, offset, all });
+        const cacheKey = this.buildCacheKeyUsers({ page, pageSize, all });
         const usersFromCache = await this.cacheManager.get(cacheKey);
         if (usersFromCache) {
             Logger.log(`CACHE HIT: ${cacheKey}`);
@@ -63,13 +75,21 @@ export class UsersMntService extends UsersMntUtilService {
         }
 
         Logger.warn(`CACHE MISS: ${cacheKey}`);
-        const usersFromDb = await this.usersService.getUsers({ ...query }, { ...options }, [
-            '-password',
+        const [usersFromDb, totalRecord] = await Promise.all([
+            this.usersService.getUsers({ ...query }, { ...options }, ['-password']),
+            this.usersService.countUsers({}),
         ]);
 
-        await this.cacheManager.set(cacheKey, usersFromDb, timeStringToMs('1h'));
+        const dataResponse = new ListDataResponseDTO({
+            data: usersFromDb,
+            page: all ? 1 : page,
+            pageSize: all ? totalRecord : pageSize,
+            totalPage: all ? 1 : Math.ceil(totalRecord / pageSize),
+            totalRecord,
+        });
 
-        return usersFromDb;
+        await this.cacheManager.set(cacheKey, dataResponse, timeStringToMs('1h'));
+        return dataResponse;
     }
 
     async getUserById(id: string | Types.ObjectId | any) {

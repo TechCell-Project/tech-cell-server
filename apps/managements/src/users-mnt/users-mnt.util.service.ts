@@ -15,8 +15,8 @@ import {
     REQUIRE_USER_REFRESH,
     USERS_CACHE_PREFIX,
     USERS_ALL,
-    USERS_OFFSET,
-    USERS_LIMIT,
+    USERS_PAGESIZE,
+    USERS_PAGE,
 } from '~/constants';
 import { Store } from 'cache-manager';
 import { UserRole } from '@app/resource/users/enums';
@@ -29,12 +29,12 @@ export class UsersMntUtilService {
     ) {}
 
     protected buildCacheKeyUsers({
-        limit,
-        offset,
+        page,
+        pageSize,
         all,
     }: {
-        limit?: number;
-        offset?: number;
+        page?: number;
+        pageSize?: number;
         all?: boolean;
     }) {
         const arrCacheKey = [];
@@ -43,12 +43,12 @@ export class UsersMntUtilService {
             return USERS_ALL;
         }
 
-        if (limit) {
-            arrCacheKey.push(`${USERS_LIMIT}_${limit}`);
+        if (page) {
+            arrCacheKey.push(`${USERS_PAGE}_${page}`);
         }
 
-        if (offset) {
-            arrCacheKey.push(`${USERS_OFFSET}_${offset}`);
+        if (pageSize) {
+            arrCacheKey.push(`${USERS_PAGESIZE}_${pageSize}`);
         }
 
         return arrCacheKey.join('_');

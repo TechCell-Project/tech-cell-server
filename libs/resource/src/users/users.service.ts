@@ -104,4 +104,8 @@ export class UsersService {
     async hashPassword({ password }: { password: string }) {
         return await bcrypt.hash(password, 10);
     }
+
+    async countUsers(filterQuery: FilterQuery<User>) {
+        return this.usersRepository.count(filterQuery);
+    }
 }
