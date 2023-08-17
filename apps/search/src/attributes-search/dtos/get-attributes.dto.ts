@@ -1,6 +1,7 @@
 import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { SelectType } from '../enums';
+import { Type } from 'class-transformer';
 
 export class GetAttributesRequestDTO {
     @ApiProperty({
@@ -30,6 +31,7 @@ export class GetAttributesRequestDTO {
         required: false,
     })
     @IsOptional()
+    @Type(() => Number)
     @IsNumber()
     page?: number;
 
@@ -39,6 +41,7 @@ export class GetAttributesRequestDTO {
         required: false,
     })
     @IsOptional()
+    @Type(() => Number)
     @IsNumber()
     pageSize?: number;
 }
