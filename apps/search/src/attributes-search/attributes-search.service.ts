@@ -5,7 +5,6 @@ import { REDIS_CACHE } from '~/constants';
 import { GetAttributesRequestDTO } from './dtos';
 import { SelectType } from './enums';
 import { FilterQuery, QueryOptions } from 'mongoose';
-import { buildListDataResponse } from '@app/common/utils';
 import { ListDataResponseDTO } from '@app/common/dtos';
 
 @Injectable()
