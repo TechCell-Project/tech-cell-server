@@ -3,6 +3,7 @@ import { CreateProductDTO } from './dtos';
 import { ProductsRepository } from './products.repository';
 import { IBaseQuery } from '../interfaces';
 import { Product } from './schemas';
+import { FilterQuery } from 'mongoose';
 
 @Injectable()
 export class ProductsService {
@@ -25,5 +26,9 @@ export class ProductsService {
     async getProducts() {
         const products = await this.productsRepository.find({});
         return products;
+    }
+
+    async countProducts(filterQueries: FilterQuery<Product> = {}) {
+        return this.productsRepository.count(filterQueries);
     }
 }
