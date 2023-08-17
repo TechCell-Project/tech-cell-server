@@ -1,7 +1,7 @@
-import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { SelectType } from '../enums';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 
 export class GetAttributesRequestDTO {
     @ApiProperty({
@@ -11,6 +11,8 @@ export class GetAttributesRequestDTO {
         required: false,
     })
     @IsOptional()
+    @IsBoolean()
+    @Transform(({ value }) => value === 'true')
     no_limit?: boolean;
 
     @ApiProperty({

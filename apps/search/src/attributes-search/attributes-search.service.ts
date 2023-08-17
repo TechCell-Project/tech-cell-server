@@ -1,9 +1,10 @@
-import { AttributesService } from '@app/resource/attributes';
+import { Attribute, AttributesService } from '@app/resource/attributes';
 import { Inject, Injectable } from '@nestjs/common';
 import { Store } from 'cache-manager';
 import { REDIS_CACHE } from '~/constants';
 import { GetAttributesRequestDTO } from './dtos';
 import { SelectType } from './enums';
+import { FilterQuery, QueryOptions } from 'mongoose';
 
 @Injectable()
 export class AttributesSearchService {
@@ -18,10 +19,10 @@ export class AttributesSearchService {
         pageSize = 10,
         select_type = SelectType.onlyActive,
     }: GetAttributesRequestDTO) {
-        const attributeArgs = {};
-        const options = {
+        const attributeArgs: FilterQuery<Attribute> = {};
+        const options: QueryOptions<Attribute> = {
             skip: page ? (page - 1) * pageSize : 0,
-            limit: pageSize ? pageSize : 10,
+            limit: Number(pageSize) || 10,
         };
 
         // const cacheKey = 'attributes';
@@ -42,6 +43,10 @@ export class AttributesSearchService {
             case SelectType.both:
                 delete attributeArgs['isDeleted'];
                 break;
+        }
+
+        if (typeof no_limit === 'string') {
+            no_limit = no_limit === 'true';
         }
 
         if (no_limit) {
