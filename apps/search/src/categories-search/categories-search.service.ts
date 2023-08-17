@@ -1,6 +1,8 @@
-import { CategoriesService } from '@app/resource/categories';
+import { CategoriesService, Category } from '@app/resource/categories';
 import { Injectable } from '@nestjs/common';
 import { GetCategoriesRequestDTO } from './dtos';
+import { QueryOptions } from 'mongoose';
+import { ListDataResponseDTO } from '@app/common/dtos';
 
 @Injectable()
 export class CategoriesSearchService {
@@ -14,16 +16,36 @@ export class CategoriesSearchService {
     //     return await this.categoriesService.getCategory();
     // }
 
-    async getCategories({ page, pageSize }: GetCategoriesRequestDTO) {
+    async getCategories({ page = 1, pageSize = 10 }: GetCategoriesRequestDTO) {
         /**
          * @default page = 1
          * @default pageSize = 10
          */
-        const queryOptions = {
+        if (typeof page !== 'number') {
+            page = Number(page);
+        }
+        if (typeof pageSize !== 'number') {
+            pageSize = Number(pageSize);
+        }
+
+        const queryOptions: QueryOptions<Category> = {
             skip: page ? (page - 1) * pageSize : 0,
-            limit: pageSize ? pageSize : 10,
+            limit: pageSize || 10,
         };
-        return await this.categoriesService.getCategories({ queryOptions });
+
+        const [dataFromDb, totalRecord] = await Promise.all([
+            this.categoriesService.getCategories({ queryOptions }),
+            this.categoriesService.countCategories(),
+        ]);
+        const totalPage = Math.ceil(totalRecord / pageSize);
+
+        return new ListDataResponseDTO({
+            page,
+            pageSize,
+            totalPage,
+            totalRecord,
+            data: dataFromDb,
+        });
     }
 
     async getCategoryByLabel(label: string) {
