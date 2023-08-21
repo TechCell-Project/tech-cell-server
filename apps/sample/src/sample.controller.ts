@@ -4,6 +4,7 @@ import { SampleMessagePattern, SampleEventPattern } from './sample.pattern';
 import { RabbitMQService } from '@app/common';
 import { Ctx, RmqContext, MessagePattern, Payload, EventPattern } from '@nestjs/microservices';
 import { BotGateway } from '@app/common/Discordjs/bot/bot.gateway';
+import { LogType } from '../enums';
 
 @Controller()
 export class SampleController {
@@ -44,5 +45,14 @@ export class SampleController {
     async writeLogsToDiscord(@Ctx() context: RmqContext, @Payload() { message }: { message: any }) {
         this.rabbitMqService.acknowledgeMessage(context);
         return await this.botGateway.writeLogs(message);
+    }
+
+    @EventPattern(SampleEventPattern.writeLogsToFile)
+    async writeLogsToFile(
+        @Ctx() context: RmqContext,
+        @Payload() { message, type }: { message: string; type: LogType },
+    ) {
+        this.rabbitMqService.acknowledgeMessage(context);
+        return await this.sampleService.writeLogsToFile(message, type);
     }
 }
