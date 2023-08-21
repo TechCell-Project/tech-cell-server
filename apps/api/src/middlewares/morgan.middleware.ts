@@ -1,12 +1,28 @@
 import { Inject, Injectable, NestMiddleware, Logger } from '@nestjs/common';
 import { NextFunction, Request, Response } from 'express';
 import * as morgan from 'morgan';
-import * as fs from 'fs';
-import * as path from 'path';
+import { TokenIndexer } from 'morgan';
 import { SAMPLE_SERVICE } from '~/constants';
 import { ClientRMQ } from '@nestjs/microservices';
 import { formatLogsDiscord, isEnable } from '@app/common';
 import { SampleEventPattern } from '~/apps/sample';
+import { LogType } from 'apps/sample/enums';
+
+interface JsonFormatTokens extends TokenIndexer {
+    date: (req: Request, res: Response) => string;
+    method: (req: Request, res: Response) => string;
+    url: (req: Request, res: Response) => string;
+    status: (req: Request, res: Response) => string;
+    responseTime: (req: Request, res: Response) => string;
+    remoteAddress: (req: Request, res: Response) => string;
+    remoteUser: (req: Request, res: Response) => string;
+    httpVersion: (req: Request, res: Response) => string;
+    userAgent: (req: Request, res: Response) => string;
+    referrer: (req: Request, res: Response) => string;
+    headers: (req: Request, res: Response) => string;
+    queryParameters: (req: Request, res: Response) => string;
+    requestBody: (req: Request, res: Response) => string;
+}
 
 @Injectable()
 export class MorganMiddleware implements NestMiddleware {
@@ -31,12 +47,15 @@ export class MorganMiddleware implements NestMiddleware {
                 }
 
                 if (isEnable(process.env.LOGS_TO_FILE)) {
-                    logsToFile(messageExpected);
+                    this.sampleService.emit(SampleEventPattern.writeLogsToFile, {
+                        message: messageExpected,
+                        type: LogType.HTTP,
+                    });
                 }
 
                 if (isEnable(process.env.LOGS_TO_DISCORD)) {
                     this.sampleService.emit(SampleEventPattern.writeLogsToDiscord, {
-                        message: formatLogsDiscord(messageExpected, req, res),
+                        message: formatLogsDiscord(messageExpected),
                     });
                 }
             } catch (error) {
@@ -44,24 +63,34 @@ export class MorganMiddleware implements NestMiddleware {
             }
         };
 
-        const logsToFile = (message: string) => {
-            const logDirectory = path.join(__dirname, `../../../logs`);
-            fs.mkdirSync(logDirectory, { recursive: true });
-
-            const currentDate = new Date();
-            const day = currentDate.getDate().toString().padStart(2, '0');
-            const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
-            const year = currentDate.getFullYear().toString();
-            const fileName = `logs_${day}-${month}-${year}.log`;
-
-            const logStream = fs.createWriteStream(path.join(logDirectory, fileName), {
-                flags: 'a',
+        morgan.format('json', (tokens: JsonFormatTokens, req: Request, res: Response) => {
+            return JSON.stringify({
+                date: new Date(Date.now()).toLocaleString('en-GB', {
+                    timeZone: 'Asia/Bangkok',
+                    hour12: false,
+                    hour: 'numeric',
+                    minute: 'numeric',
+                    second: 'numeric',
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                }),
+                method: tokens.method(req, res),
+                url: tokens.url(req, res),
+                status: tokens.status(req, res),
+                responseTime: tokens['response-time'](req, res),
+                remoteAddress: tokens['remote-addr'](req, res),
+                remoteUser: tokens['remote-user'](req, res),
+                httpVersion: tokens['http-version'](req, res),
+                userAgent: tokens['user-agent'](req, res),
+                referer: tokens.referrer(req, res),
+                headers: req.headers,
+                queryParameters: req.query,
+                requestBody: req.body,
             });
+        });
 
-            return logStream.write(message.trim() + '\n');
-        };
-
-        morgan('combined', {
+        morgan('json', {
             stream: {
                 write: writeFc,
             },
