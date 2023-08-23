@@ -1,16 +1,10 @@
 import { DynamicModule, Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigService } from '@nestjs/config';
 import { ClientProxyFactory, Transport } from '@nestjs/microservices';
 
 import { RabbitMQService } from './services';
 
 @Module({
-    imports: [
-        ConfigModule.forRoot({
-            isGlobal: true,
-            envFilePath: './.env',
-        }),
-    ],
     providers: [RabbitMQService],
     exports: [RabbitMQService],
 })
@@ -20,7 +14,7 @@ export class RabbitMQModule {
             {
                 provide: service,
                 useFactory: (configService: ConfigService) => {
-                    const URLS = configService.get('RABBITMQ_URLS');
+                    const URLS = configService.get('RABBITMQ_URLS') || process.env.RABBITMQ_URLS;
 
                     return ClientProxyFactory.create({
                         transport: Transport.RMQ,

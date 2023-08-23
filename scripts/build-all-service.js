@@ -1,25 +1,36 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-const fs = require('fs');
+const fs = require('fs').promises;
 const { promisify } = require('util');
 const exec = promisify(require('child_process').exec);
 
 async function buildApps() {
     const appsDir = './apps';
-    const appDirs = await fs.promises.readdir(appsDir, { withFileTypes: true });
+    const appDirs = await fs.readdir(appsDir, { withFileTypes: true });
 
-    for (const dirent of appDirs) {
-        if (dirent.isDirectory()) {
+    const concurrencyLimit = 4;
+    let runningCount = 0;
+
+    const buildPromises = appDirs
+        .filter((dirent) => dirent.isDirectory())
+        .map((dirent) => {
             const dirName = dirent.name;
             console.log(`Found ${dirName}, building '${dirName}' services...`);
 
-            try {
-                const { stdout, stderr } = await exec(`yarn build ${dirName}`);
-                console.log(stdout);
-                console.error(stderr);
-            } catch (error) {
-                console.error(error);
-            }
+            const buildPromise = exec(`yarn build ${dirName}`);
+            buildPromise.finally(() => {
+                runningCount--;
+            });
+
+            runningCount++;
+            return buildPromise;
+        });
+
+    for (const buildPromise of buildPromises) {
+        if (runningCount >= concurrencyLimit) {
+            await Promise.race(buildPromises);
         }
+
+        await buildPromise;
     }
 }
 
