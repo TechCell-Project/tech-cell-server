@@ -29,9 +29,9 @@ import { CloudinaryModule } from '@app/common/Cloudinary';
                 ttl: config.get('THROTTLE_GLOBAL_TTL'),
                 limit: config.get('THROTTLE_GLOBAL_LIMIT'),
                 storage: new ThrottlerStorageRedisService({
-                    host: process.env.REDIS_HOST,
-                    port: +process.env.REDIS_PORT,
-                    password: process.env.REDIS_PASSWORD,
+                    host: config.get('REDIS_HOST'),
+                    port: config.get('REDIS_PORT'),
+                    password: config.get('REDIS_PASSWORD'),
                 }),
             }),
         }),

@@ -7,12 +7,12 @@ import { ConfigModule } from '@nestjs/config';
 
 @Module({
     imports: [
-        RabbitMQModule,
         ConfigModule.forRoot({
             isGlobal: true,
             envFilePath: './.env',
         }),
         RedisCacheModule,
+        RabbitMQModule,
         DiscordModule,
     ],
     controllers: [SampleController],
