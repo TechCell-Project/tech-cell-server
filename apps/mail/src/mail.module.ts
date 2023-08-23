@@ -1,18 +1,18 @@
 import { Module } from '@nestjs/common';
 import { MailController } from './mail.controller';
 import { MailService } from './mail.service';
-import { RabbitMQModule } from '@app/common';
+import { AppConfigModule, RabbitMQService } from '@app/common';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { MailerConfig } from './mail.config';
 
 @Module({
     imports: [
-        RabbitMQModule,
+        AppConfigModule,
         MailerModule.forRootAsync({
             useClass: MailerConfig,
         }),
     ],
     controllers: [MailController],
-    providers: [MailService],
+    providers: [MailService, RabbitMQService],
 })
 export class MailModule {}

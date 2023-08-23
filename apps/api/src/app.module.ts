@@ -1,6 +1,6 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { RabbitMQModule, HealthModule } from '@app/common';
+import { RabbitMQModule, HealthModule, AppConfigModule } from '@app/common';
 import Controller from './controllers';
 import {
     SEARCH_SERVICE,
@@ -18,10 +18,7 @@ import { CloudinaryModule } from '@app/common/Cloudinary';
 
 @Module({
     imports: [
-        ConfigModule.forRoot({
-            isGlobal: true,
-            envFilePath: './.env',
-        }),
+        AppConfigModule,
         ThrottlerModule.forRootAsync({
             imports: [ConfigModule],
             inject: [ConfigService],
