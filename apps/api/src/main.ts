@@ -7,6 +7,7 @@ import { AppModule } from './app.module';
 import { RpcExceptionFilter } from '@app/common/filters/';
 import { SwaggerModule, DocumentBuilder, SwaggerCustomOptions } from '@nestjs/swagger';
 import helmet from 'helmet';
+import * as compression from 'compression';
 
 async function bootstrap() {
     const port = process.env.API_PORT || 8000;
@@ -26,6 +27,7 @@ async function bootstrap() {
             },
         }),
     );
+    app.use(compression());
 
     // Use to catch exceptions and send them to responses
     app.useGlobalFilters(new RpcExceptionFilter());
