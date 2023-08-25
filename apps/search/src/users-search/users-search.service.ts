@@ -1,13 +1,24 @@
 import { RpcException } from '@nestjs/microservices';
 import { Types } from 'mongoose';
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common';
 import { ListDataResponseDTO } from '@app/common/dtos';
 import { timeStringToMs } from '@app/common/utils';
-import { UsersSearchUtilService } from './users-search.util.service';
 import { GetUsersDTO, QueryUserParamsDTO } from './dtos';
+import { buildCacheKeyUsers } from '@app/resource/users/utils';
+import { REDIS_CACHE } from '~/constants';
+import { UsersService } from '@app/resource/users';
+import { Store } from 'cache-manager';
 
 @Injectable()
-export class UsersSearchService extends UsersSearchUtilService {
+export class UsersSearchService {
+    constructor(
+        private readonly usersService: UsersService,
+        @Inject(REDIS_CACHE) protected cacheManager: Store,
+        private readonly logger: Logger,
+    ) {
+        this.logger = new Logger(UsersSearchService.name);
+    }
+
     async getUsers({ page = 1, pageSize = 10, ...payload }: QueryUserParamsDTO) {
         const { all } = payload;
 
@@ -25,10 +36,10 @@ export class UsersSearchService extends UsersSearchUtilService {
             limit: pageSize || 10,
         };
 
-        const cacheKey = this.buildCacheKeyUsers({ page, pageSize, all });
+        const cacheKey = buildCacheKeyUsers({ page, pageSize, all });
         const usersFromCache = await this.cacheManager.get(cacheKey);
         if (usersFromCache) {
-            Logger.log(`CACHE HIT: ${cacheKey}`);
+            this.logger.log(`CACHE HIT: ${cacheKey}`);
             return usersFromCache;
         }
 
@@ -37,7 +48,7 @@ export class UsersSearchService extends UsersSearchUtilService {
             delete options.skip;
         }
 
-        Logger.warn(`CACHE MISS: ${cacheKey}`);
+        this.logger.warn(`CACHE MISS: ${cacheKey}`);
         const [usersFromDb, totalRecord] = await Promise.all([
             this.usersService.getUsers({ ...query }, { ...options }, ['-password']),
             this.usersService.countUsers({}),

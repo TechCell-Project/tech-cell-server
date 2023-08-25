@@ -7,6 +7,7 @@ import { UsersMntUtilService } from './users-mnt.util.service';
 import { delStartWith } from '@app/common';
 import { CreateUserDTO } from '@app/resource/users/dtos';
 import { USERS_CACHE_PREFIX } from '~/constants';
+import { delCacheUsers } from '@app/resource/users/utils';
 
 @Injectable()
 export class UsersMntService extends UsersMntUtilService {
@@ -82,7 +83,7 @@ export class UsersMntService extends UsersMntUtilService {
                 },
             ),
             this.setUserRequiredRefresh({ user: victimUser }),
-            this.delCacheUsers(),
+            delCacheUsers(),
         ]);
 
         return userReturn;
@@ -132,7 +133,7 @@ export class UsersMntService extends UsersMntUtilService {
                 },
             ),
             this.setUserRequiredRefresh({ user: victimUser }),
-            this.delCacheUsers(),
+            delCacheUsers(),
         ]);
 
         return userReturn;
@@ -160,7 +161,7 @@ export class UsersMntService extends UsersMntUtilService {
         const [changeRole] = await Promise.all([
             this.usersService.findOneAndUpdateUser({ _id: victimId }, { role: role }),
             this.setUserRequiredRefresh({ user }),
-            this.delCacheUsers(),
+            delCacheUsers(),
         ]);
 
         return changeRole;
