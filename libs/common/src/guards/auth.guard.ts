@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { UserRole } from '@app/resource/users/enums';
 import { AuthCoreGuard } from './auth.core.guard';
+import { Reflector } from '@nestjs/core';
 
 @Injectable()
 export class AuthGuard extends AuthCoreGuard {
     constructor() {
-        super();
+        super(new Reflector(), AuthGuard.name);
         this._acceptRoles.push(UserRole.SuperAdmin, UserRole.Admin, UserRole.Mod, UserRole.User);
     }
 }
