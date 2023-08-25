@@ -8,8 +8,8 @@ export class Cart extends AbstractDocument {
     @Prop({ required: true, type: Types.ObjectId, ref: 'User' })
     userId: Types.ObjectId;
 
-    @Prop({ required: true, type: [ProductCart] })
-    products: ProductCart[];
+    @Prop({ required: true, type: Array<ProductCart> })
+    products: Array<ProductCart>;
 }
 
 export const CartSchema = SchemaFactory.createForClass(Cart);

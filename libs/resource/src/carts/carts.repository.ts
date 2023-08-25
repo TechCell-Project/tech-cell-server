@@ -9,7 +9,7 @@ export class CartsRepository extends AbstractRepository<Cart> {
     protected readonly logger = new Logger(CartsRepository.name);
 
     constructor(
-        @InjectModel('Product.name') cartModel: Model<Cart>,
+        @InjectModel(Cart.name) cartModel: Model<Cart>,
         @InjectConnection() connection: Connection,
     ) {
         super(cartModel, connection);
