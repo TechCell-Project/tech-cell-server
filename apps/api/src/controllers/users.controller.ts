@@ -64,6 +64,15 @@ export class UsersController {
             .pipe(catchException());
     }
 
+    @ApiOkResponse({ description: 'Get current user info success', type: UserMntResponseDto })
+    @UseGuards(AuthGuard)
+    @Get('/me')
+    async getMe(@CurrentUser() user: ICurrentUser) {
+        return this.searchService
+            .send(UsersSearchMessagePattern.getUserById, { id: user._id })
+            .pipe(catchException());
+    }
+
     @ApiOkResponse({ description: 'Get users success', type: UserMntResponseDto })
     @ApiNotFoundResponse({ description: 'No users found' })
     @UseGuards(ModGuard)
