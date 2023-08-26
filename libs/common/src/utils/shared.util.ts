@@ -106,18 +106,23 @@ export async function validateDTO(data: any, dto: any) {
  * @description enable value: true, 1, 'on', 'enable'
  */
 export function isEnable(envVariable: string | number | boolean = undefined) {
-    if (!envVariable) {
-        return false;
+    switch (String(envVariable)?.toLowerCase()?.trim()) {
+        case 'true':
+        case '1':
+        case 'on':
+        case 'enable':
+            return true;
+        default:
+            return false;
     }
-    if (
-        envVariable === 'true' ||
-        envVariable === '1' ||
-        envVariable === 'on' ||
-        envVariable === 1 ||
-        envVariable === true ||
-        envVariable === 'enable'
-    ) {
-        return true;
-    }
-    return false;
+}
+
+/**
+ *
+ * @param stringValue The string value to check if it is true
+ * @returns true if the string value is true, otherwise false
+ * @description true value: true
+ */
+export function isTrueSet(stringValue: string | boolean) {
+    return !!stringValue && String(stringValue)?.toLowerCase()?.trim() === 'true';
 }
