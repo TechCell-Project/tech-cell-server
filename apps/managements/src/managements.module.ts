@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common';
+import { AppConfigModule, RabbitMQService } from '@app/common';
+import { CloudinaryModule } from '@app/common/Cloudinary';
 import { UsersMntModule } from '~/apps/managements/users-mnt';
 import { ProductsMntModule } from '~/apps/managements/products-mnt';
 import { AttributesMntModule } from './attributes-mnt';
 import { CategoriesMntModule } from './categories-mnt';
-import { AppConfigModule, RabbitMQService } from '@app/common';
-import { CloudinaryModule } from '@app/common/Cloudinary';
+import { CartsMntModule } from './carts-mnt';
 
 @Module({
     imports: [
@@ -14,6 +15,7 @@ import { CloudinaryModule } from '@app/common/Cloudinary';
         ProductsMntModule,
         AttributesMntModule,
         CategoriesMntModule,
+        CartsMntModule,
     ],
     providers: [RabbitMQService],
 })

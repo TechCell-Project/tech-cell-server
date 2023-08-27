@@ -174,19 +174,22 @@ export class ProductsMntUtilService {
      * @returns the product data with sku in each variation
      */
     protected updateProductWithSku(productData: CreateProductRequestDTO): CreateProductDTO {
-        const { brand, name, variations } = productData;
+        const { name, variations } = productData;
 
         const newProduct: CreateProductDTO = {
             ...productData,
             generalImages: [],
             variations: variations.map((variation) => {
                 const { attributes } = variation;
-                const sortedAttributes = attributes.sort((a, b) => a.k.localeCompare(b.k));
+                const sortedAttributes = attributes.slice().sort((a, b) => a.k.localeCompare(b.k));
 
-                const sku = `${replaceWhitespaceTo(brand)}-${replaceWhitespaceTo(
-                    name,
-                )}-${sortedAttributes
-                    .map((attribute) => replaceWhitespaceTo(attribute.v))
+                const sku = `${replaceWhitespaceTo(name)}-${sortedAttributes
+                    .map(({ k, v, u }) => {
+                        const attributeValue = `${replaceWhitespaceTo(k)}.${replaceWhitespaceTo(
+                            v,
+                        )}`;
+                        return u ? `${attributeValue}.${replaceWhitespaceTo(u)}` : attributeValue;
+                    })
                     .join('-')}`.toLowerCase();
 
                 return { ...variation, attributes: sortedAttributes, sku, images: [] };

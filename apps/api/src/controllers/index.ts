@@ -5,6 +5,7 @@ import { OrderController } from './order.controller';
 import { UsersController } from './users.controller';
 import { AttributesController } from './attributes.controller';
 import { CategoriesController } from './categories.controller';
+import { CartsController } from './carts.controller';
 
 export default [
     AuthController,
@@ -12,6 +13,7 @@ export default [
     ProductsController,
     CategoriesController,
     AttributesController,
+    CartsController,
     OrderController,
     AppController,
 ];

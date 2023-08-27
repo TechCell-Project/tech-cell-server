@@ -156,16 +156,6 @@ export class CreateProductRequestDTO {
     @ApiProperty({
         type: String,
         required: true,
-        description: 'Brand of product',
-        example: 'Apple',
-    })
-    @IsString()
-    @IsNotEmpty()
-    brand: string;
-
-    @ApiProperty({
-        type: String,
-        required: true,
         description: 'Categories of product',
         example: ['iphone'],
     })
