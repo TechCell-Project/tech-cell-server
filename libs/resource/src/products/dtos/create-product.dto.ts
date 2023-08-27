@@ -25,10 +25,6 @@ export class CreateProductDTO {
     @IsNotEmpty()
     description: string;
 
-    @IsString()
-    @IsNotEmpty()
-    brand: string;
-
     @IsArray()
     @IsNotEmpty()
     categories: string[];
