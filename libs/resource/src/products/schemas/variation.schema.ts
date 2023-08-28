@@ -1,5 +1,6 @@
 import { Prop } from '@nestjs/mongoose';
 import { ImageSchema } from './image.schema';
+import { ProductStatus } from '../enums';
 
 export class PriceSchema {
     @Prop({ required: true })
@@ -38,4 +39,7 @@ export class VariationSchema {
 
     @Prop({ required: true })
     images: ImageSchema[];
+
+    @Prop({ required: false, default: ProductStatus.Hide })
+    status?: number;
 }

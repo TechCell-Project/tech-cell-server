@@ -32,7 +32,7 @@ export class CreateProductDTO {
     @IsNumber()
     @IsOptional()
     @IsEnum(ProductStatus)
-    status?: ProductStatus;
+    status?: number;
 
     @IsArray()
     @IsOptional()
@@ -71,6 +71,11 @@ class VariationDTO implements VariationSchema {
     @IsArray()
     @Type(() => ImageDTO)
     images: ImageDTO[];
+
+    @IsNumber()
+    @IsOptional()
+    @IsEnum(ProductStatus)
+    status?: number;
 }
 
 class AttributeDTO implements AttributeSchema {
