@@ -123,12 +123,18 @@ export class VariationDTO {
     })
     price: PriceDTO;
 
-    // @ApiProperty({
-    //     type: Array<Express.Multer.File>,
-    //     required: true,
-    //     description: 'Files of image product',
-    // })
-    // files: Array<Express.Multer.File>;
+    @ApiProperty({
+        type: Number,
+        enum: Object.entries(ProductStatus).map(([key, value]) => `${key}: ${value}`),
+        required: false,
+        description: 'Status of product (number)',
+        default: ProductStatus.Hide,
+    })
+    @Type(() => Number)
+    @IsNumber()
+    @IsOptional()
+    @IsEnum(ProductStatus)
+    status?: number;
 }
 
 export class CreateProductRequestDTO {
@@ -156,29 +162,21 @@ export class CreateProductRequestDTO {
     @ApiProperty({
         type: String,
         required: true,
-        description: 'Brand of product',
-        example: 'Apple',
-    })
-    @IsString()
-    @IsNotEmpty()
-    brand: string;
-
-    @ApiProperty({
-        type: String,
-        required: true,
-        description: 'Categories of product',
+        description: 'Categories of product, (#label)',
         example: ['iphone'],
     })
     @IsArray()
     @IsNotEmpty()
     categories: string[];
 
-    // @ApiProperty({
-    //     type: 'number',
-    //     enum: ProductStatus,
-    //     required: false,
-    //     description: 'Status of product',
-    // })
+    @ApiProperty({
+        type: Number,
+        enum: Object.entries(ProductStatus).map(([key, value]) => `${key}: ${value}`),
+        required: false,
+        description: 'Status of product',
+        default: ProductStatus.Hide,
+    })
+    @Type(() => Number)
     @IsNumber()
     @IsOptional()
     @IsEnum(ProductStatus)
@@ -204,7 +202,4 @@ export class CreateProductRequestDTO {
     @ValidateNested({ each: true })
     @Type(() => VariationDTO)
     variations: VariationDTO[];
-
-    // @ApiProperty({ type: String, format: 'binary', required: true })
-    // files: Express.Multer.File[];
 }

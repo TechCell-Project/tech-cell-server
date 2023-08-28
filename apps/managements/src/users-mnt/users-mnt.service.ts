@@ -1,18 +1,13 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { Types } from 'mongoose';
-import {
-    BlockUnblockRequestDTO,
-    ChangeRoleRequestDTO,
-    CreateUserRequestDto,
-    GetUsersDTO,
-    QueryUserParamsDTO,
-} from './dtos';
+import { BlockUnblockRequestDTO, ChangeRoleRequestDTO, CreateUserRequestDto } from './dtos';
 import { RpcException } from '@nestjs/microservices';
 import { BlockActivity, UserRole } from '@app/resource/users/enums';
 import { UsersMntUtilService } from './users-mnt.util.service';
-import { delStartWith, timeStringToMs } from '@app/common';
+import { delStartWith } from '@app/common';
 import { CreateUserDTO } from '@app/resource/users/dtos';
 import { USERS_CACHE_PREFIX } from '~/constants';
+import { delCacheUsers } from '@app/resource/users/utils';
 
 @Injectable()
 export class UsersMntService extends UsersMntUtilService {
@@ -44,43 +39,6 @@ export class UsersMntService extends UsersMntUtilService {
         return userCreated;
     }
 
-    async getUsers(payload: QueryUserParamsDTO) {
-        const { all, limit = 1, offset = 0 } = payload;
-
-        const query: GetUsersDTO = {};
-        const options = { limit, skip: offset };
-
-        const cacheKey = this.buildCacheKeyUsers({ limit, offset, all });
-        const usersFromCache = await this.cacheManager.get(cacheKey);
-        if (usersFromCache) {
-            Logger.log(`CACHE HIT: ${cacheKey}`);
-            return usersFromCache;
-        }
-
-        if (all) {
-            delete options.limit;
-            delete options.skip;
-        }
-
-        Logger.warn(`CACHE MISS: ${cacheKey}`);
-        const usersFromDb = await this.usersService.getUsers({ ...query }, { ...options }, [
-            '-password',
-        ]);
-
-        await this.cacheManager.set(cacheKey, usersFromDb, timeStringToMs('1h'));
-
-        return usersFromDb;
-    }
-
-    async getUserById(id: string | Types.ObjectId | any) {
-        try {
-            const idSearch: Types.ObjectId = typeof id === 'string' ? new Types.ObjectId(id) : id;
-            return await this.usersService.getUser({ _id: idSearch }, {}, ['-password']);
-        } catch (error) {
-            throw new RpcException(new BadRequestException('User Id is invalid'));
-        }
-    }
-
     async blockUser({
         victimId,
         actorId,
@@ -101,17 +59,17 @@ export class UsersMntService extends UsersMntUtilService {
             actorUser: blockByUser,
         });
 
-        if (victimUser.block && victimUser.block.isBlocked) {
+        if (victimUser.block && victimUser?.block?.isBlocked) {
             throw new RpcException(new BadRequestException('User is already blocked'));
         }
 
-        const actLogs = (victimUser.block && victimUser.block.activityLogs) || [];
+        const actLogs = (victimUser.block && victimUser?.block?.activityLogs) || [];
         actLogs.push({
             activity: BlockActivity.Block,
             activityAt: new Date(),
             activityBy: actorId,
-            activityReason: reason ? reason : '',
-            activityNote: note ? note : '',
+            activityReason: reason ?? '',
+            activityNote: note ?? '',
         });
 
         const [userReturn] = await Promise.all([
@@ -125,7 +83,7 @@ export class UsersMntService extends UsersMntUtilService {
                 },
             ),
             this.setUserRequiredRefresh({ user: victimUser }),
-            this.delCacheUsers(),
+            delCacheUsers(),
         ]);
 
         return userReturn;
@@ -155,13 +113,13 @@ export class UsersMntService extends UsersMntUtilService {
             throw new RpcException(new BadRequestException('User is not blocked'));
         }
 
-        const actLogs = (victimUser.block && victimUser.block.activityLogs) || [];
+        const actLogs = (victimUser.block && victimUser?.block?.activityLogs) || [];
         actLogs.push({
             activity: BlockActivity.Unblock,
             activityAt: new Date(),
             activityBy: actorId,
-            activityReason: reason ? reason : '',
-            activityNote: note ? note : '',
+            activityReason: reason ?? '',
+            activityNote: note ?? '',
         });
 
         const [userReturn] = await Promise.all([
@@ -175,7 +133,7 @@ export class UsersMntService extends UsersMntUtilService {
                 },
             ),
             this.setUserRequiredRefresh({ user: victimUser }),
-            this.delCacheUsers(),
+            delCacheUsers(),
         ]);
 
         return userReturn;
@@ -203,7 +161,7 @@ export class UsersMntService extends UsersMntUtilService {
         const [changeRole] = await Promise.all([
             this.usersService.findOneAndUpdateUser({ _id: victimId }, { role: role }),
             this.setUserRequiredRefresh({ user }),
-            this.delCacheUsers(),
+            delCacheUsers(),
         ]);
 
         return changeRole;

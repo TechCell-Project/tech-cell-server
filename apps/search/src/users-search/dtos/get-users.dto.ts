@@ -12,13 +12,17 @@ export class GetUsersDTO {
     @IsOptional()
     all?: boolean;
 
-    @ApiProperty({ type: Number, description: 'Limit of users to be returned', required: false })
+    @ApiProperty({ type: Number, description: 'Page of users to be returned', required: false })
     @IsOptional()
-    limit?: number;
+    page?: number;
 
-    @ApiProperty({ type: Number, description: 'Offset of users to be returned', required: false })
+    @ApiProperty({
+        type: Number,
+        description: 'Size of page for users to be returned',
+        required: false,
+    })
     @IsOptional()
-    offset?: number;
+    pageSize?: number;
 
     // @ApiProperty({ type: String, description: 'Sort of users to be returned', required: false })
     @IsOptional()

@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import { IsNumber, IsOptional } from 'class-validator';
 
 export class GetCategoriesRequestDTO {
@@ -7,6 +8,7 @@ export class GetCategoriesRequestDTO {
         type: Number,
         default: 1,
     })
+    @Type(() => Number)
     @IsNumber()
     @IsOptional()
     page: number;
@@ -16,6 +18,7 @@ export class GetCategoriesRequestDTO {
         type: Number,
         default: 10,
     })
+    @Type(() => Number)
     @IsNumber()
     @IsOptional()
     pageSize: number;

@@ -44,7 +44,7 @@ export class AuthService extends AuthUtilService {
             );
         }
 
-        if (user.block && user.block.isBlocked) {
+        if (user.block && user?.block?.isBlocked) {
             throw new RpcException(
                 new ForbiddenException(
                     'Your account has been locked, please contact the administrator',
@@ -119,7 +119,7 @@ export class AuthService extends AuthUtilService {
             userName = await this.createUniqueUserName(email);
         }
 
-        if (userFound || (userFound && userFound.emailVerified)) {
+        if (userFound || (userFound && userFound?.emailVerified)) {
             throw new RpcException(new ConflictException('Email is already registered'));
         }
 
@@ -130,14 +130,6 @@ export class AuthService extends AuthUtilService {
         if (password !== re_password) {
             throw new RpcException(new BadRequestException('Password does not match'));
         }
-
-        // userFound = await this.usersService.createUser({
-        //     email,
-        //     userName,
-        //     firstName,
-        //     lastName,
-        //     password,
-        // });
 
         const [userCreated] = await Promise.all([
             this.usersService.createUser({

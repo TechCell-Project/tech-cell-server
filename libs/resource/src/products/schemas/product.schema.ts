@@ -13,15 +13,12 @@ export class Product extends AbstractDocument {
     name: string;
 
     @Prop({ required: true })
-    brand: string;
-
-    @Prop({ required: true })
     description: string;
 
     @Prop({ required: true })
     categories: string[];
 
-    @Prop({ required: false, type: Number, enum: ProductStatus, default: ProductStatus.OnSales })
+    @Prop({ required: false, type: Number, enum: ProductStatus, default: ProductStatus.Hide })
     status?: number;
 
     @Prop({ required: false, default: [] })

@@ -1,23 +1,9 @@
 import { UsersService } from '@app/resource';
 import { BadRequestException, ForbiddenException, Inject, Injectable } from '@nestjs/common';
-import {
-    isAdmin,
-    isMod,
-    isSuperAdmin,
-    isUser,
-    timeStringToMs,
-    delStartWith,
-} from '@app/common/utils';
+import { isAdmin, isMod, isSuperAdmin, isUser, timeStringToMs } from '@app/common/utils';
 import { RpcException } from '@nestjs/microservices';
 import { User } from '@app/resource/users/schemas';
-import {
-    REDIS_CACHE,
-    REQUIRE_USER_REFRESH,
-    USERS_CACHE_PREFIX,
-    USERS_ALL,
-    USERS_OFFSET,
-    USERS_LIMIT,
-} from '~/constants';
+import { REDIS_CACHE, REQUIRE_USER_REFRESH } from '~/constants';
 import { Store } from 'cache-manager';
 import { UserRole } from '@app/resource/users/enums';
 
@@ -27,40 +13,6 @@ export class UsersMntUtilService {
         protected readonly usersService: UsersService,
         @Inject(REDIS_CACHE) protected cacheManager: Store,
     ) {}
-
-    protected buildCacheKeyUsers({
-        limit,
-        offset,
-        all,
-    }: {
-        limit?: number;
-        offset?: number;
-        all?: boolean;
-    }) {
-        const arrCacheKey = [];
-
-        if (all) {
-            return USERS_ALL;
-        }
-
-        if (limit) {
-            arrCacheKey.push(`${USERS_LIMIT}_${limit}`);
-        }
-
-        if (offset) {
-            arrCacheKey.push(`${USERS_OFFSET}_${offset}`);
-        }
-
-        return arrCacheKey.join('_');
-    }
-
-    /**
-     *
-     * @returns remove all users cache
-     */
-    protected async delCacheUsers() {
-        return await delStartWith(USERS_CACHE_PREFIX, this.cacheManager);
-    }
 
     /**
      * After update user, set user to cache to require user refresh their token

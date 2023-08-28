@@ -6,15 +6,19 @@ export class GetProductsDTO {
     @IsOptional()
     all?: boolean;
 
-    @ApiProperty({ type: Number, description: 'Limit of products to be returned', required: false })
-    @IsOptional()
-    limit?: number;
-
     @ApiProperty({
         type: Number,
-        description: 'Offset of products to be returned',
+        description: 'Page of products to be returned',
         required: false,
     })
     @IsOptional()
-    offset?: number;
+    page?: number;
+
+    @ApiProperty({
+        type: Number,
+        description: 'Size of page for products to be returned',
+        required: false,
+    })
+    @IsOptional()
+    pageSize?: number;
 }

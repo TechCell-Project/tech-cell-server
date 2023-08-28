@@ -10,8 +10,8 @@ import {
     Post,
 } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
-import { MANAGEMENTS_SERVICE } from '~/constants';
-import { ModGuard, SuperAdminGuard } from '@app/common/guards';
+import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~/constants';
+import { AuthGuard, ModGuard, SuperAdminGuard } from '@app/common/guards';
 import {
     ApiBadRequestResponse,
     ApiBearerAuth,
@@ -23,7 +23,6 @@ import {
 } from '@nestjs/swagger';
 import {
     ChangeRoleRequestDTO,
-    GetUsersDTO,
     UsersMntMessagePattern,
     BlockUnblockRequestDTO,
     CreateUserRequestDto,
@@ -32,39 +31,55 @@ import { catchException } from '@app/common';
 import { UserMntResponseDto } from '@app/resource/users/dtos';
 import { CurrentUser } from '@app/common/decorators';
 import { ICurrentUser } from '@app/common/interfaces';
+import { ListDataResponseDTO } from '@app/common/dtos';
+import { UsersSearchMessagePattern } from '~/apps/search/users-search';
+import { GetUsersDTO } from '~/apps/search/users-search/dtos';
 
 @ApiTags('users')
 @ApiBearerAuth('accessToken')
 @ApiForbiddenResponse({ description: 'Forbidden permission, required Mod or Admin' })
 @Controller('users')
-@UseGuards(ModGuard)
 export class UsersController {
-    constructor(@Inject(MANAGEMENTS_SERVICE) private readonly managementsService: ClientRMQ) {}
+    constructor(
+        @Inject(SEARCH_SERVICE) private readonly searchService: ClientRMQ,
+        @Inject(MANAGEMENTS_SERVICE) private readonly managementsService: ClientRMQ,
+    ) {}
 
     @ApiCreatedResponse({ description: 'Create user success', type: UserMntResponseDto })
-    @Post('/')
     @UseGuards(SuperAdminGuard)
+    @Post('/')
     async createUser(@Body() createUserRequestDto: CreateUserRequestDto) {
         return this.managementsService
             .send(UsersMntMessagePattern.createUser, { ...createUserRequestDto })
             .pipe(catchException());
     }
 
-    @ApiOkResponse({ description: 'Get users success', type: [UserMntResponseDto] })
+    @ApiOkResponse({ description: 'Get users success', type: ListDataResponseDTO })
     @ApiNotFoundResponse({ description: 'No users found' })
+    @UseGuards(ModGuard)
     @Get('/')
     async getUsers(@Query() requestQuery: GetUsersDTO) {
-        return this.managementsService
-            .send(UsersMntMessagePattern.getUsers, { ...requestQuery })
+        return this.searchService
+            .send(UsersSearchMessagePattern.getUsers, { ...requestQuery })
+            .pipe(catchException());
+    }
+
+    @ApiOkResponse({ description: 'Get current user info success', type: UserMntResponseDto })
+    @UseGuards(AuthGuard)
+    @Get('/me')
+    async getMe(@CurrentUser() user: ICurrentUser) {
+        return this.searchService
+            .send(UsersSearchMessagePattern.getUserById, { id: user._id })
             .pipe(catchException());
     }
 
     @ApiOkResponse({ description: 'Get users success', type: UserMntResponseDto })
     @ApiNotFoundResponse({ description: 'No users found' })
+    @UseGuards(ModGuard)
     @Get('/:id')
     async getUserById(@Param('id') id: string) {
-        return this.managementsService
-            .send(UsersMntMessagePattern.getUserById, { id })
+        return this.searchService
+            .send(UsersSearchMessagePattern.getUserById, { id })
             .pipe(catchException());
     }
 
@@ -72,6 +87,7 @@ export class UsersController {
     @ApiBadRequestResponse({
         description: 'Invalid request',
     })
+    @UseGuards(ModGuard)
     @Patch('/:id/block')
     async blockUser(
         @Param('id') idParam: string,
@@ -92,6 +108,7 @@ export class UsersController {
     @ApiBadRequestResponse({
         description: 'Invalid request',
     })
+    @UseGuards(ModGuard)
     @Patch('/:id/unblock')
     async unblockUser(
         @Param('id') idParam: string,
@@ -112,6 +129,7 @@ export class UsersController {
     @ApiBadRequestResponse({
         description: 'Invalid request',
     })
+    @UseGuards(ModGuard)
     @Patch('/:id/change-role')
     async changeRoleUser(
         @Param('id') idParam: string,

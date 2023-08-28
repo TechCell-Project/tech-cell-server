@@ -1,5 +1,6 @@
 import { UserRole } from '@app/resource/users/enums';
-import { IsEmail, IsOptional } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsEmail, IsNumber, IsOptional } from 'class-validator';
 
 export class QueryUserParamsDTO {
     @IsEmail()
@@ -10,10 +11,14 @@ export class QueryUserParamsDTO {
     all?: boolean;
 
     @IsOptional()
-    limit?: number;
+    @IsNumber()
+    @Type(() => Number)
+    page?: number;
 
     @IsOptional()
-    offset?: number;
+    @IsNumber()
+    @Type(() => Number)
+    pageSize?: number;
 
     @IsOptional()
     sort?: string;

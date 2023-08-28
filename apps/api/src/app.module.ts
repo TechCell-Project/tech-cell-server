@@ -1,6 +1,6 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { RabbitMQModule, HealthModule } from '@app/common';
+import { RabbitMQModule, HealthModule, AppConfigModule } from '@app/common';
 import Controller from './controllers';
 import {
     SEARCH_SERVICE,
@@ -18,10 +18,7 @@ import { CloudinaryModule } from '@app/common/Cloudinary';
 
 @Module({
     imports: [
-        ConfigModule.forRoot({
-            isGlobal: true,
-            envFilePath: './.env',
-        }),
+        AppConfigModule,
         ThrottlerModule.forRootAsync({
             imports: [ConfigModule],
             inject: [ConfigService],
@@ -29,9 +26,9 @@ import { CloudinaryModule } from '@app/common/Cloudinary';
                 ttl: config.get('THROTTLE_GLOBAL_TTL'),
                 limit: config.get('THROTTLE_GLOBAL_LIMIT'),
                 storage: new ThrottlerStorageRedisService({
-                    host: process.env.REDIS_HOST,
-                    port: +process.env.REDIS_PORT,
-                    password: process.env.REDIS_PASSWORD,
+                    host: config.get('REDIS_HOST'),
+                    port: config.get('REDIS_PORT'),
+                    password: config.get('REDIS_PASSWORD'),
                 }),
             }),
         }),

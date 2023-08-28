@@ -3,7 +3,7 @@ import { MessagePattern, RmqContext, Payload, Ctx } from '@nestjs/microservices'
 import { RabbitMQService } from '@app/common';
 import { ProductsMntService } from './products-mnt.service';
 import { ProductsMntMessagePattern } from './products-mnt.pattern';
-import { CreateProductRequestDTO } from './dtos';
+// import { CreateProductRequestDTO } from './dtos';
 
 @Controller()
 export class ProductsMntController {

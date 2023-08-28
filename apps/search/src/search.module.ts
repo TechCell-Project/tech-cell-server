@@ -1,9 +1,19 @@
 import { Module } from '@nestjs/common';
+import { AppConfigModule } from '@app/common';
 import { ProductsSearchModule } from './products-search/products-search.module';
 import { AttributesSearchModule } from './attributes-search/attributes-search.module';
 import { CategoriesSearchModule } from './categories-search/categories-search.module';
+import { UsersSearchModule } from './users-search/users-search.module';
+import { CartsSearchModule } from './carts-search/carts-search.module';
 
 @Module({
-    imports: [ProductsSearchModule, AttributesSearchModule, CategoriesSearchModule],
+    imports: [
+        AppConfigModule,
+        UsersSearchModule,
+        ProductsSearchModule,
+        AttributesSearchModule,
+        CategoriesSearchModule,
+        CartsSearchModule
+    ],
 })
 export class SearchModule {}

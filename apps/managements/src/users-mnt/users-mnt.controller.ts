@@ -2,12 +2,7 @@ import { Controller } from '@nestjs/common';
 import { MessagePattern, RmqContext, Payload, Ctx } from '@nestjs/microservices';
 import { RabbitMQService } from '@app/common';
 import { UsersMntService } from './users-mnt.service';
-import {
-    BlockUnblockRequestDTO,
-    ChangeRoleRequestDTO,
-    CreateUserRequestDto,
-    GetUsersDTO,
-} from './dtos';
+import { BlockUnblockRequestDTO, ChangeRoleRequestDTO, CreateUserRequestDto } from './dtos';
 import { UsersMntMessagePattern } from './users-mnt.pattern';
 
 @Controller()
@@ -24,18 +19,6 @@ export class UsersMntController {
     ) {
         this.rabbitMqService.acknowledgeMessage(context);
         return await this.usersMntService.createUser({ ...createUserRequestDto });
-    }
-
-    @MessagePattern(UsersMntMessagePattern.getUsers)
-    async getUsers(@Ctx() context: RmqContext, @Payload() payload: GetUsersDTO) {
-        this.rabbitMqService.acknowledgeMessage(context);
-        return await this.usersMntService.getUsers({ ...payload });
-    }
-
-    @MessagePattern(UsersMntMessagePattern.getUserById)
-    async getUserById(@Ctx() context: RmqContext, @Payload() { id }: { id: string }) {
-        this.rabbitMqService.acknowledgeMessage(context);
-        return await this.usersMntService.getUserById({ _id: id });
     }
 
     @MessagePattern(UsersMntMessagePattern.blockUser)

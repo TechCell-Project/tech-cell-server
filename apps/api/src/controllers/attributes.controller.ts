@@ -32,6 +32,7 @@ import {
     ApiOkResponse,
     ApiTags,
 } from '@nestjs/swagger';
+import { ListDataResponseDTO } from '@app/common/dtos';
 
 @ApiTags('attributes')
 @Controller('/attributes')
@@ -41,7 +42,7 @@ export class AttributesController {
         @Inject(SEARCH_SERVICE) private readonly searchService: ClientRMQ,
     ) {}
 
-    @ApiOkResponse({ description: 'Get attributes successfully!' })
+    @ApiOkResponse({ type: ListDataResponseDTO, description: 'Get attributes successfully!' })
     @ApiNotFoundResponse({ description: 'Attributes not found!' })
     @Get('/')
     async getAttributes(@Query() requestQuery: GetAttributesRequestDTO) {

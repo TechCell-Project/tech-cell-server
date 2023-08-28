@@ -1,6 +1,6 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { AttributesRepository } from './attributes.repository';
-import { Types } from 'mongoose';
+import { FilterQuery, Types } from 'mongoose';
 import { CreateAttributeDTO, UpdateAttributeDTO } from './dtos';
 import { IBaseQuery } from '../interfaces';
 import { RpcException } from '@nestjs/microservices';
@@ -50,14 +50,12 @@ export class AttributesService {
 
     async updateAttribute(newAttribute: UpdateAttributeDTO) {
         const { attributeId, name, description } = newAttribute;
-        const updatedAttribute = await this.attributesRepository.findOneAndUpdate(
+        return this.attributesRepository.findOneAndUpdate(
             {
                 _id: attributeId,
             },
             { name, description },
         );
-
-        return updatedAttribute;
     }
 
     async deleteAttribute(attributeId: string) {
@@ -67,5 +65,9 @@ export class AttributesService {
                 isDeleted: true,
             },
         );
+    }
+
+    async countAttributes(filterQueries: FilterQuery<Attribute> = {}) {
+        return this.attributesRepository.count({ ...filterQueries });
     }
 }

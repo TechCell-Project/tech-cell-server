@@ -5,4 +5,5 @@ export const SampleMessagePattern = {
 
 export const SampleEventPattern = {
     writeLogsToDiscord: { event: 'sample.writeLogsToDiscord' },
+    writeLogsToFile: { event: 'sample.writeLogsToFile' },
 };

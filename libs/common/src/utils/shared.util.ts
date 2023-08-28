@@ -3,11 +3,10 @@ import { RpcException } from '@nestjs/microservices';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { catchError, throwError } from 'rxjs';
+import { emailRegex } from '~/constants/regex.constant';
 
 export function isEmail(email: string): boolean {
     if (typeof email !== 'string') return false;
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
 }
 
@@ -23,13 +22,13 @@ export function generateRandomString(length: number) {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     const charactersLength = characters.length;
     for (let i = 0; i < length; i++) {
-        result += characters[(Math.random() * charactersLength) | 0];
+        result += `${characters[(Math.random() * charactersLength) | 0]}`;
     }
     return result;
 }
 
 export function capitalize(str: string) {
-    return str.charAt(0).toUpperCase() + str.slice(1);
+    return str?.charAt(0)?.toUpperCase() + str?.slice(1);
 }
 
 /**
@@ -97,4 +96,32 @@ export async function validateDTO(data: any, dto: any) {
         }, []);
         throw new RpcException(new BadRequestException(constraints));
     }
+}
+
+/**
+ *
+ * @param envVariable The environment variable to check
+ * @returns true if the environment variable is enable, otherwise false
+ * @description enable value: true, 1, 'on', 'enable'
+ */
+export function isEnable(envVariable: string | number | boolean = undefined) {
+    switch (String(envVariable)?.toLowerCase()?.trim()) {
+        case 'true':
+        case '1':
+        case 'on':
+        case 'enable':
+            return true;
+        default:
+            return false;
+    }
+}
+
+/**
+ *
+ * @param stringValue The string value to check if it is true
+ * @returns true if the string value is true, otherwise false
+ * @description true value: true
+ */
+export function isTrueSet(stringValue: string | boolean) {
+    return !!stringValue && String(stringValue)?.toLowerCase()?.trim() === 'true';
 }
