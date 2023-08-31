@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { GetCategoriesRequestDTO } from './dtos';
 import { QueryOptions } from 'mongoose';
 import { ListDataResponseDTO } from '@app/common/dtos';
+import { isTrueSet } from '@app/common';
 
 @Injectable()
 export class CategoriesSearchService {
@@ -16,7 +17,7 @@ export class CategoriesSearchService {
     //     return await this.categoriesService.getCategory();
     // }
 
-    async getCategories({ page = 1, pageSize = 10 }: GetCategoriesRequestDTO) {
+    async getCategories({ page = 1, pageSize = 10, no_limit = false }: GetCategoriesRequestDTO) {
         /**
          * @default page = 1
          * @default pageSize = 10
@@ -32,6 +33,11 @@ export class CategoriesSearchService {
             skip: page ? (page - 1) * pageSize : 0,
             limit: pageSize || 10,
         };
+
+        if (isTrueSet(no_limit)) {
+            delete queryOptions.skip;
+            delete queryOptions.limit;
+        }
 
         const [dataFromDb, totalRecord] = await Promise.all([
             this.categoriesService.getCategories({ queryOptions }),
