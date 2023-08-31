@@ -3,6 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { RabbitMQService } from '@app/common';
 import { RmqOptions } from '@nestjs/microservices';
 
+const logger = new Logger('RabbitMQ');
+
 /**
  * @param app ISNestApplication instance
  * @param queueNameEnv A environment variable which is defined in the .env file that is used to configure the RabbitMQ queue name
@@ -19,8 +21,8 @@ export function useRabbitMQ(app: INestApplication, queueNameEnv: string) {
         }
 
         app.connectMicroservice<RmqOptions>(rmqService.getRmqOptions(queue));
-        Logger.log(`⚡️ [RabbitMQ] Config successfully, listen on: ${queue}`);
+        logger.log(`⚡️ Config successfully, listen on: ${queue}`);
     } catch (error) {
-        Logger.error(`⚡️ [RabbitMQ] Config failed: ${error});`);
+        logger.error(`⚡️ Config failed: ${error});`);
     }
 }
