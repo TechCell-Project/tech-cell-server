@@ -22,4 +22,13 @@ export class GetCategoriesRequestDTO {
     @IsNumber()
     @IsOptional()
     pageSize: number;
+
+    @ApiProperty({
+        required: false,
+        type: Boolean,
+        default: false,
+    })
+    @Type(() => Boolean)
+    @IsOptional()
+    no_limit: boolean;
 }
