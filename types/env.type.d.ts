@@ -6,30 +6,6 @@ declare namespace NodeJS {
         API_PORT: string;
 
         /**
-         * HTTP port of service sample
-         * @description This port can not need to be exposed to outside
-         */
-        SERVICE_SAMPLE_PORT: string;
-
-        /**
-         * HTTP port of service `search`
-         * @description This port maybe not need to be exposed to outside
-         */
-        SERVICE_SEARCH_PORT: string;
-
-        /**
-         * HTTP port of service auth
-         * @description This port can not need to be exposed to outside
-         */
-        SERVICE_AUTH_PORT: string;
-
-        /**
-         * HTTP port of service managements
-         * @description This port can not need to be exposed to outside
-         */
-        SERVICE_MAIL_PORT: string;
-
-        /**
          * The Global TTL(Time to live) of throttle
          * @description This value is used for `throttle` module, and is a second unit
          * @example
