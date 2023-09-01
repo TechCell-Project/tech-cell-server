@@ -55,7 +55,7 @@ export class ProductsSearchService extends ProductsSearchUtilService {
         });
     }
 
-    async getProductById(id: string) {
+    async getProductById(id: string | Types.ObjectId) {
         try {
             const idSearch: Types.ObjectId = typeof id === 'string' ? new Types.ObjectId(id) : id;
             return await this.productsService.getProduct({ filterQueries: { _id: idSearch } });
@@ -63,13 +63,4 @@ export class ProductsSearchService extends ProductsSearchUtilService {
             throw new RpcException(new BadRequestException('Product Id is invalid'));
         }
     }
-
-    // async getProductById(id: string | Types.ObjectId | any) {
-    //     try {
-    //         const idSearch: Types.ObjectId = typeof id === 'string' ? new Types.ObjectId(id) : id;
-    //         return await this.productsService.getProduct({ _id: idSearch }, {});
-    //     } catch (error) {
-    //         throw new RpcException(new BadRequestException('Product Id is invalid'));
-    //     }
-    // }
 }

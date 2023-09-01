@@ -9,6 +9,7 @@ import {
     Query,
     BadRequestException,
     Param,
+    Patch,
 } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import { MANAGEMENTS_SERVICE, ProductImageFieldname, SEARCH_SERVICE } from '~/constants';
@@ -22,12 +23,14 @@ import {
     ApiExtraModels,
     getSchemaPath,
     ApiOkResponse,
+    ApiBadRequestResponse,
 } from '@nestjs/swagger';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { ProductsMntMessagePattern } from '~/apps/managements/products-mnt';
 import { ProductsSearchMessagePattern } from '~/apps/search/products-search';
 import { GetProductsDTO } from '~/apps/search/products-search/dtos';
 import { CreateProductRequestDTO } from '~/apps/managements/products-mnt/dtos';
+import { ProductIdParamsDTO } from '~/apps/managements/products-mnt/dtos/params.dto';
 
 @ApiTags('products')
 @ApiExtraModels(CreateProductRequestDTO)
@@ -115,23 +118,9 @@ export class ProductsController {
     }
 
     @Get('/:productId')
-    async getProductById(@Param() { productId }: { productId: string }) {
+    async getProductById(@Param() { productId }: ProductIdParamsDTO) {
         return this.searchService
             .send(ProductsSearchMessagePattern.getProductById, { productId })
             .pipe(catchException());
     }
-
-    // @ApiOkResponse({
-    //     description: 'Product status change successful',
-    //     type: ProductsMntResponseDto,
-    // })
-    // @ApiBadRequestResponse({
-    //     description: 'Invalid request',
-    // })
-    // @Patch('/:id/change-status')
-    // async changeStatus(@Param('id') idParam: string, @Body() { status }: ChangeStatusRequestDTO) {
-    //     return this.managementsService
-    //         .send(ProductsMntMessagePattern.changeStatus, { productId: idParam, status })
-    //         .pipe(catchException());
-    // }
 }
