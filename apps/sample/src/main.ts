@@ -9,7 +9,7 @@ async function bootstrap() {
     const app = await NestFactory.create(SampleModule);
     app.useGlobalFilters(new RpcExceptionFilter());
     useRabbitMQ(app, 'RABBITMQ_SAMPLE_QUEUE');
-    await app.startAllMicroservices();
-    logger.log(`⚡️ service is ready`);
+    await app.startAllMicroservices().then(() => logger.log(`⚡️ service is ready`));
+    app.listen(3000, () => logger.log(`⚡️ server is listening port ...`));
 }
 bootstrap();

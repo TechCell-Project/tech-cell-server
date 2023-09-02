@@ -3,6 +3,10 @@ import { DiscordModule as DiscordModuleCore } from '@discord-nestjs/core';
 import { GatewayIntentBits } from 'discord.js';
 import { BotModule } from './bot';
 
+/**
+ * DiscordModule
+ * @description Discord Module required services listening port
+ */
 @Module({
     imports: [
         DiscordModuleCore.forRootAsync({
