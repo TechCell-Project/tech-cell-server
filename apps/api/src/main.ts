@@ -1,20 +1,16 @@
-import * as express from 'express';
-import { createServer as createHttpServer } from 'http';
 import { NestFactory } from '@nestjs/core';
 import { Logger, ValidationPipe } from '@nestjs/common';
-import { ExpressAdapter } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
-import { RpcExceptionFilter } from '@app/common/filters/';
+import { RpcExceptionFilter } from '@app/common/filters';
 import { SwaggerModule, DocumentBuilder, SwaggerCustomOptions } from '@nestjs/swagger';
 import helmet from 'helmet';
 import * as compression from 'compression';
 
 async function bootstrap() {
     const port = process.env.API_PORT || 8000;
-    const logger = new Logger('api gateway');
+    const logger = new Logger('api-gateway');
 
-    const server = express();
-    const app = await NestFactory.create(AppModule, new ExpressAdapter(server));
+    const app = await NestFactory.create(AppModule);
 
     app.enableCors();
     app.use(
@@ -27,10 +23,13 @@ async function bootstrap() {
             },
         }),
     );
+    // Use to compress responses to improve performance
     app.use(compression());
 
     // Use to catch exceptions and send them to responses
     app.useGlobalFilters(new RpcExceptionFilter());
+
+    // Use to validate DTOs and throw exceptions if they are not valid
     app.useGlobalPipes(new ValidationPipe());
 
     // Use swagger to generate documentations
@@ -48,7 +47,7 @@ async function bootstrap() {
                 type: 'http', // 'apiKey' too
                 in: 'Header',
             },
-            'accessToken', // This name here is important for matching up with @ApiBearerAuth() in your controller!
+            'accessToken', // This name here is important for matching up with @ApiBearerAuth() in controller!
         )
         .build();
     const document = SwaggerModule.createDocument(app, config);
@@ -58,8 +57,7 @@ async function bootstrap() {
     };
     SwaggerModule.setup('/', app, document, swaggerOptions);
 
-    await app.init();
-    createHttpServer(server).listen(port, () =>
+    await app.listen(port, () =>
         logger.log(`⚡️ [http] ready on port: ${port}, url: http://localhost:${port}`),
     );
 }
