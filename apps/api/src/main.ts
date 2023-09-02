@@ -2,7 +2,12 @@ import { NestFactory } from '@nestjs/core';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { RpcExceptionFilter } from '@app/common/filters';
-import { SwaggerModule, DocumentBuilder, SwaggerCustomOptions } from '@nestjs/swagger';
+import {
+    SwaggerModule,
+    DocumentBuilder,
+    SwaggerCustomOptions,
+    SwaggerDocumentOptions,
+} from '@nestjs/swagger';
 import helmet from 'helmet';
 import * as compression from 'compression';
 
@@ -13,16 +18,7 @@ async function bootstrap() {
     const app = await NestFactory.create(AppModule);
 
     app.enableCors();
-    app.use(
-        helmet({
-            contentSecurityPolicy: {
-                directives: {
-                    ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-                    'script-src': ["'self'", "'unsafe-inline'"],
-                },
-            },
-        }),
-    );
+    app.use(helmet());
     // Use to compress responses to improve performance
     app.use(compression());
 
@@ -50,12 +46,15 @@ async function bootstrap() {
             'accessToken', // This name here is important for matching up with @ApiBearerAuth() in controller!
         )
         .build();
-    const document = SwaggerModule.createDocument(app, config);
-    const swaggerOptions: SwaggerCustomOptions = {
-        // Change the page title
-        customJsStr: 'document.title = "TechCell documentations"',
+    const swaggerDocumentOptions: SwaggerDocumentOptions = {
+        // re-define the url for each method in controller
+        operationIdFactory: (controllerKey: string, methodKey: string) => methodKey,
     };
-    SwaggerModule.setup('/', app, document, swaggerOptions);
+    const document = SwaggerModule.createDocument(app, config, swaggerDocumentOptions);
+    const swaggerCustomOptions: SwaggerCustomOptions = {
+        customSiteTitle: 'TechCell documentations',
+    };
+    SwaggerModule.setup('/', app, document, swaggerCustomOptions);
 
     await app.listen(port, () =>
         logger.log(`⚡️ [http] ready on port: ${port}, url: http://localhost:${port}`),
