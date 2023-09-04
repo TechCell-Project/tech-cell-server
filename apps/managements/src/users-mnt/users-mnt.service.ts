@@ -1,10 +1,10 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { Types } from 'mongoose';
 import { BlockUnblockRequestDTO, ChangeRoleRequestDTO, CreateUserRequestDto } from './dtos';
 import { RpcException } from '@nestjs/microservices';
 import { BlockActivity, UserRole } from '@app/resource/users/enums';
 import { UsersMntUtilService } from './users-mnt.util.service';
-import { delStartWith } from '@app/common';
+import { delStartWith, generateRandomString } from '@app/common';
 import { CreateUserDTO } from '@app/resource/users/dtos';
 import { USERS_CACHE_PREFIX } from '~/constants';
 import { delCacheUsers } from '@app/resource/users/utils';
@@ -165,5 +165,29 @@ export class UsersMntService extends UsersMntUtilService {
         ]);
 
         return changeRole;
+    }
+
+    async generateUsers(num = 1) {
+        try {
+            const users = [];
+            for (let i = 0; i < num; i++) {
+                const ran = `user_clone_${generateRandomString(4)}_${i}`;
+                users.push(
+                    this.createUser({
+                        userName: ran,
+                        password: ran,
+                        role: UserRole.User,
+                    }),
+                );
+            }
+
+            await Promise.all(users);
+            return {
+                message: `Generate ${num} users success`,
+            };
+        } catch (error) {
+            Logger.error(error);
+            throw new RpcException(new BadRequestException(error.message));
+        }
     }
 }

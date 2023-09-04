@@ -17,6 +17,7 @@ import {
     ApiBearerAuth,
     ApiCreatedResponse,
     ApiForbiddenResponse,
+    ApiHideProperty,
     ApiNotFoundResponse,
     ApiOkResponse,
     ApiTags,
@@ -142,6 +143,15 @@ export class UsersController {
                 actorId: user._id,
                 role,
             })
+            .pipe(catchException());
+    }
+
+    @ApiHideProperty()
+    @UseGuards(SuperAdminGuard)
+    @Post('/gen-clone')
+    async gen(@Query() { num }: { num: number }) {
+        return this.managementsService
+            .send(UsersMntMessagePattern.generateUsers, { num })
             .pipe(catchException());
     }
 }

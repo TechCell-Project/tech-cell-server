@@ -3,7 +3,8 @@ import { MessagePattern, RmqContext, Payload, Ctx } from '@nestjs/microservices'
 import { RabbitMQService } from '@app/common';
 import { ProductsMntService } from './products-mnt.service';
 import { ProductsMntMessagePattern } from './products-mnt.pattern';
-// import { CreateProductRequestDTO } from './dtos';
+import { UpdateProductRequestDTO } from './dtos/update-product-request.dto';
+import { ProductIdParamsDTO } from './dtos/params.dto';
 
 @Controller()
 export class ProductsMntController {
@@ -31,30 +32,24 @@ export class ProductsMntController {
     ) {
         this.rabbitMqService.acknowledgeMessage(context);
         return await this.productsMntService.createProduct({ productData, files });
-        // return { productData, files: files.map((file) => file.fieldname) };
     }
 
-    // @MessagePattern(ProductsMntMessagePattern.changeStatus)
-    // async changeStatus(@Ctx() context: RmqContext, @Payload() payload) {
-    //     this.rabbitMqService.acknowledgeMessage(context);
+    @MessagePattern(ProductsMntMessagePattern.updateProductGeneral)
+    async updateProductGeneral(
+        @Ctx() context: RmqContext,
+        @Payload()
+        { productId, ...payload }: UpdateProductRequestDTO & ProductIdParamsDTO,
+    ) {
+        this.rabbitMqService.acknowledgeMessage(context);
+        return await this.productsMntService.updateProductGeneral({
+            productId,
+            ...payload,
+        });
+    }
 
-    //     const { productId, status } = payload;
-
-    //     return await this.productsMntService.changeStatus({
-    //         productId,
-    //         status,
-    //     });
-    // }
-
-    // @MessagePattern(ProductsMntMessagePattern.updateProduct)
-    // async updateProduct(@Ctx() context: RmqContext, @Payload() payload) {
-    //     this.rabbitMqService.acknowledgeMessage(context);
-
-    //     const { productId, status } = payload;
-
-    //     return await this.productsMntService.changeStatus({
-    //         productId,
-    //         status,
-    //     });
-    // }
+    @MessagePattern(ProductsMntMessagePattern.generateProducts)
+    async gen(@Ctx() context: RmqContext, @Payload() { num }: { num: number }) {
+        this.rabbitMqService.acknowledgeMessage(context);
+        return await this.productsMntService.gen(num);
+    }
 }

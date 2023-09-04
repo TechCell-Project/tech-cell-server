@@ -10,10 +10,12 @@ import {
     BadRequestException,
     Param,
     Patch,
+    Put,
+    UseGuards,
 } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import { MANAGEMENTS_SERVICE, ProductImageFieldname, SEARCH_SERVICE } from '~/constants';
-import { catchException } from '@app/common';
+import { SuperAdminGuard, catchException } from '@app/common';
 import {
     ApiBody,
     ApiConsumes,
@@ -24,6 +26,9 @@ import {
     getSchemaPath,
     ApiOkResponse,
     ApiBadRequestResponse,
+    ApiInternalServerErrorResponse,
+    ApiTooManyRequestsResponse,
+    ApiHideProperty,
 } from '@nestjs/swagger';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { ProductsMntMessagePattern } from '~/apps/managements/products-mnt';
@@ -31,7 +36,14 @@ import { ProductsSearchMessagePattern } from '~/apps/search/products-search';
 import { GetProductsDTO } from '~/apps/search/products-search/dtos';
 import { CreateProductRequestDTO } from '~/apps/managements/products-mnt/dtos';
 import { ProductIdParamsDTO } from '~/apps/managements/products-mnt/dtos/params.dto';
+import { UpdateProductRequestDTO } from '~/apps/managements/products-mnt/dtos/update-product-request.dto';
 
+@ApiTooManyRequestsResponse({
+    description: 'Too many requests',
+})
+@ApiInternalServerErrorResponse({
+    description: 'Internal server error',
+})
 @ApiTags('products')
 @ApiExtraModels(CreateProductRequestDTO)
 @Controller('products')
@@ -41,6 +53,9 @@ export class ProductsController {
         @Inject(SEARCH_SERVICE) private readonly searchService: ClientRMQ,
     ) {}
 
+    @ApiOperation({
+        summary: 'Get products list',
+    })
     @ApiOkResponse({ description: 'Get products successfully!' })
     @ApiNotFoundResponse({ description: 'Products not found.' })
     @Get('/')
@@ -117,10 +132,53 @@ export class ProductsController {
             .pipe(catchException());
     }
 
+    @ApiOperation({
+        summary: 'Get product by id',
+    })
     @Get('/:productId')
     async getProductById(@Param() { productId }: ProductIdParamsDTO) {
         return this.searchService
             .send(ProductsSearchMessagePattern.getProductById, { productId })
+            .pipe(catchException());
+    }
+
+    @ApiOperation({
+        summary: 'Update product by id',
+    })
+    @ApiOkResponse({
+        description: 'Update product information(just modified, CAN NOT add new)',
+    })
+    @ApiBadRequestResponse({
+        description: 'Invalid request',
+    })
+    @Put('/:productId')
+    async updateProduct(
+        @Param() { productId }: ProductIdParamsDTO,
+        @Body() { ...payload }: UpdateProductRequestDTO,
+    ) {
+        return this.managementsService
+            .send(ProductsMntMessagePattern.updateProductGeneral, { productId, ...payload })
+            .pipe(catchException());
+    }
+
+    @ApiOkResponse({
+        description: 'Update product data, can add new variations, images ...',
+    })
+    @Patch('/:productId/:sku')
+    async updateProductVariations(
+        @Param('productId') productId: string,
+        @Param('sku') sku: string,
+        @Body() { ...payload }: any,
+    ) {
+        return { productId, sku, payload };
+    }
+
+    @ApiHideProperty()
+    @UseGuards(SuperAdminGuard)
+    @Post('/gen-clone')
+    async gen(@Query() { num }: { num: number }) {
+        return this.managementsService
+            .send(ProductsMntMessagePattern.generateProducts, { num })
             .pipe(catchException());
     }
 }
