@@ -105,7 +105,7 @@ export async function validateDTO(data: any, dto: any) {
         }
     } catch (error) {
         if (!isUnexpected) {
-            Logger.error(error);
+            Logger.error(`[validateDTO] ${error}]`);
         }
         throw new RpcException(new BadRequestException(error.message));
     }
