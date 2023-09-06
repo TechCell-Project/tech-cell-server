@@ -161,7 +161,7 @@ export class CreateProductRequestDTO {
     description: string;
 
     @ApiProperty({
-        type: String,
+        type: [String],
         required: true,
         description: 'Categories of product, (#label)',
         example: ['iphone'],
