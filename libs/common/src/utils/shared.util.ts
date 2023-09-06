@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, Logger } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
@@ -90,20 +90,24 @@ export function replaceWhitespaceTo(str: string, replaceTo = '_') {
  * @param dto The DTO to validate
  */
 export async function validateDTO(data: any, dto: any) {
-    const errors = await validate(plainToInstance(dto, data));
-    if (errors.length > 0) {
-        let constraints = [];
-        try {
-            constraints = errors.flatMap((error) => {
-                if (error.constraints) {
-                    return Object.values(error.constraints);
-                }
-                return [];
-            });
-        } catch (error) {
-            throw new RpcException(new BadRequestException('Invalid data'));
+    let isUnexpected = true;
+    try {
+        const errors = await validate(plainToInstance(dto, data));
+        if (errors.length > 0) {
+            const constraints = errors.reduce((acc, error) => {
+                Object.values(error.constraints).forEach((constraint) => {
+                    acc.push(constraint);
+                });
+                return acc;
+            }, []);
+            isUnexpected = false;
+            throw new RpcException(new BadRequestException(constraints));
         }
-        throw new RpcException(new BadRequestException(constraints));
+    } catch (error) {
+        if (!isUnexpected) {
+            Logger.error(error);
+        }
+        throw new RpcException(new BadRequestException(error.message));
     }
 }
 
