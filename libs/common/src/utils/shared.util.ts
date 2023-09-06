@@ -85,15 +85,24 @@ export function replaceWhitespaceTo(str: string, replaceTo = '_') {
     return str.replace(/\s+/g, replaceTo);
 }
 
+/**
+ * @param data The data to validate
+ * @param dto The DTO to validate
+ */
 export async function validateDTO(data: any, dto: any) {
     const errors = await validate(plainToInstance(dto, data));
     if (errors.length > 0) {
-        const constraints = errors.reduce((acc, error) => {
-            Object.values(error.constraints).forEach((constraint) => {
-                acc.push(constraint);
+        let constraints = [];
+        try {
+            constraints = errors.flatMap((error) => {
+                if (error.constraints) {
+                    return Object.values(error.constraints);
+                }
+                return [];
             });
-            return acc;
-        }, []);
+        } catch (error) {
+            throw new RpcException(new BadRequestException('Invalid data'));
+        }
         throw new RpcException(new BadRequestException(constraints));
     }
 }
