@@ -5,25 +5,29 @@ import { RpcException } from '@nestjs/microservices';
 import { CreateProductDTO } from '@app/resource';
 import { compareTwoObjectAndGetDifferent, validateDTO } from '@app/common';
 import { UpdateProductRequestDTO } from './dtos/update-product-request.dto';
-import { Types } from 'mongoose';
+import { ProductDataDTO } from './dtos/productData.dto';
+import { ProductIdParamsDTO } from './dtos/params.dto';
+import { UpdateProductGeneralImagesDTO } from './dtos/update-product-general-images-request.dto';
 
 @Injectable()
 export class ProductsMntService extends ProductsMntUtilService {
     async createProduct({
         productData,
         files,
-    }: {
-        productData: string;
+    }: ProductDataDTO & {
         files: Express.Multer.File[];
     }) {
-        if (!productData) {
-            throw new RpcException(new BadRequestException(`productData is required`));
+        let productParse: CreateProductRequestDTO;
+        try {
+            productParse = JSON.parse(productData);
+        } catch (error) {
+            this.logger.error(error);
+            throw new RpcException(new BadRequestException(`productData is invalid`));
         }
 
-        const productParse = JSON.parse(productData) as CreateProductRequestDTO;
         await validateDTO(productParse, CreateProductRequestDTO);
-
         await this.validProductAttributes({ ...productParse });
+
         const productToCreate: CreateProductDTO = this.updateProductWithSku(productParse);
 
         const isProductExist = await this.isProductExist(productToCreate);
@@ -47,25 +51,17 @@ export class ProductsMntService extends ProductsMntUtilService {
     async updateProductGeneral({
         productId,
         ...productUpdatedData
-    }: UpdateProductRequestDTO & { productId: Types.ObjectId }) {
-        if (!productUpdatedData) {
-            throw new RpcException(new BadRequestException(`No data to updated`));
-        }
-
+    }: ProductIdParamsDTO & UpdateProductRequestDTO) {
         const oldProduct = await this.productsService.getProduct({
             filterQueries: {
                 _id: productId,
             },
         });
 
-        const diff: any = compareTwoObjectAndGetDifferent(oldProduct, productUpdatedData, [
-            'generalImages',
-            'variations',
-            'updatedAt',
-            'createdAt',
-            '__v',
-            '_id',
-        ]);
+        const diff = compareTwoObjectAndGetDifferent(oldProduct, productUpdatedData, {
+            type: 'omit',
+            omitKey: ['generalImages', 'variations', 'updatedAt', 'createdAt', '__v', '_id'],
+        });
 
         // Check if there is any data to update
         if (Object.keys(diff).length === 0) {
@@ -74,15 +70,36 @@ export class ProductsMntService extends ProductsMntUtilService {
 
         // Check if there is any new field added to product
         if (Object.values(diff).some((value: any) => value?.kind === 'N')) {
-            throw new RpcException(new BadRequestException(`Can not add new field to product`));
+            const newFields = Object.values(diff)
+                .filter((value: any) => value?.kind === 'N')
+                .map((value: any) => value?.path?.join('.'))
+                .join(', ');
+            throw new RpcException(
+                new BadRequestException(`Can not add new field(s) ${newFields} to product`),
+            );
         }
+
+        // Prepare product data to validate and update if passing validation
+        const prepareProduct = Object.assign(oldProduct, productUpdatedData);
+        await this.validProductAttributes(prepareProduct);
 
         const productUpdated = await this.productsService.updateProductById(
             oldProduct._id,
-            Object.assign(oldProduct, new UpdateProductRequestDTO(productUpdatedData)),
+            prepareProduct,
         );
 
         return { ...productUpdated };
+    }
+
+    async updateProductGeneralImages({
+        productId,
+        images,
+        files,
+    }: ProductIdParamsDTO &
+        UpdateProductGeneralImagesDTO & {
+            files: Express.Multer.File[];
+        }) {
+        return '';
     }
 
     async gen(num: number) {

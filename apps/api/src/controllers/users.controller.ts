@@ -16,8 +16,8 @@ import {
     ApiBadRequestResponse,
     ApiBearerAuth,
     ApiCreatedResponse,
+    ApiExcludeEndpoint,
     ApiForbiddenResponse,
-    ApiHideProperty,
     ApiNotFoundResponse,
     ApiOkResponse,
     ApiTags,
@@ -146,7 +146,7 @@ export class UsersController {
             .pipe(catchException());
     }
 
-    @ApiHideProperty()
+    @ApiExcludeEndpoint(true)
     @UseGuards(SuperAdminGuard)
     @Post('/gen-clone')
     async gen(@Query() { num }: { num: number }) {

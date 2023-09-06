@@ -74,6 +74,7 @@ export class AttributeDTO {
         example: 'gb',
     })
     @IsString()
+    @IsOptional()
     u?: string;
 }
 

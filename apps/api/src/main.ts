@@ -26,7 +26,11 @@ async function bootstrap() {
     app.useGlobalFilters(new RpcExceptionFilter());
 
     // Use to validate DTOs and throw exceptions if they are not valid
-    app.useGlobalPipes(new ValidationPipe());
+    app.useGlobalPipes(
+        new ValidationPipe({
+            transform: true,
+        }),
+    );
 
     // Use swagger to generate documentations
     const config = new DocumentBuilder()

@@ -3,8 +3,10 @@ import { MessagePattern, RmqContext, Payload, Ctx } from '@nestjs/microservices'
 import { RabbitMQService } from '@app/common';
 import { ProductsMntService } from './products-mnt.service';
 import { ProductsMntMessagePattern } from './products-mnt.pattern';
-import { UpdateProductRequestDTO } from './dtos/update-product-request.dto';
 import { ProductIdParamsDTO } from './dtos/params.dto';
+import { ProductDataDTO } from './dtos/productData.dto';
+import { UpdateProductRequestDTO } from './dtos/update-product-request.dto';
+import { UpdateProductGeneralImagesDTO } from './dtos/update-product-general-images-request.dto';
 
 @Controller()
 export class ProductsMntController {
@@ -25,8 +27,7 @@ export class ProductsMntController {
         {
             productData,
             files,
-        }: {
-            productData: string; //CreateProductRequestDTO;
+        }: ProductDataDTO & {
             files: Express.Multer.File[];
         },
     ) {
@@ -34,22 +35,40 @@ export class ProductsMntController {
         return await this.productsMntService.createProduct({ productData, files });
     }
 
-    @MessagePattern(ProductsMntMessagePattern.updateProductGeneral)
-    async updateProductGeneral(
-        @Ctx() context: RmqContext,
-        @Payload()
-        { productId, ...payload }: UpdateProductRequestDTO & ProductIdParamsDTO,
-    ) {
-        this.rabbitMqService.acknowledgeMessage(context);
-        return await this.productsMntService.updateProductGeneral({
-            productId,
-            ...payload,
-        });
-    }
-
     @MessagePattern(ProductsMntMessagePattern.generateProducts)
     async gen(@Ctx() context: RmqContext, @Payload() { num }: { num: number }) {
         this.rabbitMqService.acknowledgeMessage(context);
         return await this.productsMntService.gen(num);
+    }
+
+    @MessagePattern(ProductsMntMessagePattern.updateProductGeneral)
+    async updateProductGeneral(
+        @Ctx() context: RmqContext,
+        @Payload()
+        { ...payload }: ProductIdParamsDTO & UpdateProductRequestDTO,
+    ) {
+        this.rabbitMqService.acknowledgeMessage(context);
+        return await this.productsMntService.updateProductGeneral({ ...payload });
+    }
+
+    @MessagePattern(ProductsMntMessagePattern.updateProductGeneralImages)
+    async updateProductGeneralImages(
+        @Ctx() context: RmqContext,
+        @Payload()
+        {
+            productId,
+            images,
+            files,
+        }: ProductIdParamsDTO &
+            UpdateProductGeneralImagesDTO & {
+                files: Express.Multer.File[];
+            },
+    ) {
+        this.rabbitMqService.acknowledgeMessage(context);
+        return await this.productsMntService.updateProductGeneralImages({
+            productId,
+            images,
+            files,
+        });
     }
 }

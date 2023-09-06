@@ -125,3 +125,23 @@ export function isEnable(envVariable: string | number | boolean = undefined) {
 export function isTrueSet(stringValue: string | boolean) {
     return !!stringValue && String(stringValue)?.toLowerCase()?.trim() === 'true';
 }
+
+/**
+ * Find duplicates in an array.
+ * @param arr - The array to search for duplicates.
+ * @returns A `Set` containing the duplicate items in the array.
+ */
+export function findDuplicates<T>(arr: T[]): Set<T> {
+    const seen = new Set<T>();
+    const duplicates = new Set<T>();
+
+    for (const item of arr) {
+        if (seen.has(item)) {
+            duplicates.add(item);
+        } else {
+            seen.add(item);
+        }
+    }
+
+    return duplicates;
+}

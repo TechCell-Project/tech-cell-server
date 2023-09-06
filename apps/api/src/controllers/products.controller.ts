@@ -28,7 +28,7 @@ import {
     ApiBadRequestResponse,
     ApiInternalServerErrorResponse,
     ApiTooManyRequestsResponse,
-    ApiHideProperty,
+    ApiExcludeEndpoint,
 } from '@nestjs/swagger';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { ProductsMntMessagePattern } from '~/apps/managements/products-mnt';
@@ -37,6 +37,9 @@ import { GetProductsDTO } from '~/apps/search/products-search/dtos';
 import { CreateProductRequestDTO } from '~/apps/managements/products-mnt/dtos';
 import { ProductIdParamsDTO } from '~/apps/managements/products-mnt/dtos/params.dto';
 import { UpdateProductRequestDTO } from '~/apps/managements/products-mnt/dtos/update-product-request.dto';
+import { ProductDataDTO } from '~/apps/managements/products-mnt/dtos/productData.dto';
+import { UpdateProductGeneralImagesDTO } from '~/apps/managements/products-mnt/dtos/update-product-general-images-request.dto';
+import { FilesDTO } from '~/apps/managements/products-mnt/dtos/files.dto';
 
 @ApiTooManyRequestsResponse({
     description: 'Too many requests',
@@ -45,7 +48,7 @@ import { UpdateProductRequestDTO } from '~/apps/managements/products-mnt/dtos/up
     description: 'Internal server error',
 })
 @ApiTags('products')
-@ApiExtraModels(CreateProductRequestDTO)
+@ApiExtraModels(CreateProductRequestDTO, UpdateProductRequestDTO)
 @Controller('products')
 export class ProductsController {
     constructor(
@@ -121,7 +124,7 @@ export class ProductsController {
         }),
     )
     async createProduct(
-        @Body('productData') productData: string,
+        @Body() { productData }: ProductDataDTO,
         @UploadedFiles() files: Array<Express.Multer.File>,
     ) {
         return this.managementsService
@@ -146,7 +149,7 @@ export class ProductsController {
         summary: 'Update product by id',
     })
     @ApiOkResponse({
-        description: 'Update product information(just modified, CAN NOT add new)',
+        description: 'Update product information',
     })
     @ApiBadRequestResponse({
         description: 'Invalid request',
@@ -154,13 +157,17 @@ export class ProductsController {
     @Put('/:productId')
     async updateProduct(
         @Param() { productId }: ProductIdParamsDTO,
-        @Body() { ...payload }: UpdateProductRequestDTO,
+        @Body() { ...productData }: UpdateProductRequestDTO,
     ) {
         return this.managementsService
-            .send(ProductsMntMessagePattern.updateProductGeneral, { productId, ...payload })
+            .send(ProductsMntMessagePattern.updateProductGeneral, {
+                productId,
+                ...productData,
+            })
             .pipe(catchException());
     }
 
+    @ApiExcludeEndpoint(true)
     @ApiOkResponse({
         description: 'Update product data, can add new variations, images ...',
     })
@@ -173,12 +180,29 @@ export class ProductsController {
         return { productId, sku, payload };
     }
 
-    @ApiHideProperty()
+    @ApiExcludeEndpoint(true)
     @UseGuards(SuperAdminGuard)
     @Post('/gen-clone')
     async gen(@Query() { num }: { num: number }) {
         return this.managementsService
             .send(ProductsMntMessagePattern.generateProducts, { num })
+            .pipe(catchException());
+    }
+
+    @ApiExcludeEndpoint(true)
+    @Post('/:productId/images')
+    async updateProductGeneralImages(
+        @Param() { productId }: ProductIdParamsDTO,
+        @Body() { images }: UpdateProductGeneralImagesDTO,
+        @UploadedFiles()
+        { files }: FilesDTO,
+    ) {
+        return this.managementsService
+            .send(ProductsMntMessagePattern.updateProductGeneralImages, {
+                productId,
+                images,
+                files,
+            })
             .pipe(catchException());
     }
 }

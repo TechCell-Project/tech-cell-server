@@ -5,7 +5,7 @@ import {
     ProductsService,
 } from '@app/resource';
 import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common';
-import { delStartWith, replaceWhitespaceTo } from '@app/common/utils';
+import { delStartWith, findDuplicates, replaceWhitespaceTo } from '@app/common/utils';
 import { REDIS_CACHE, PRODUCTS_CACHE_PREFIX, ProductImageFieldname } from '~/constants';
 import { Store } from 'cache-manager';
 import { CreateProductRequestDTO } from './dtos';
@@ -234,8 +234,10 @@ export class ProductsMntUtilService {
     }
 
     /**
-     * @param product product data when create
-     * @returns true if all attributes are valid, otherwise throw error
+     * Validates the attributes of a product.
+     * @param product The product to validate.
+     * @returns `true` if the validation succeeds.
+     * @throws `BadRequestException` if the validation fails.
      */
     protected async validProductAttributes(product: CreateProductRequestDTO) {
         const {
@@ -244,32 +246,58 @@ export class ProductsMntUtilService {
             generalAttributes = [],
         } = product;
 
-        // Find all categories to get require attributes each category
         const foundCategories = await Promise.all(
             categoryLabels.map((label) =>
                 this.categoriesService.getCategory({ filterQueries: { label } }),
             ),
         );
 
-        // Must to have attributes
-        const requireAttributes = foundCategories.flatMap((category) =>
-            category.requireAttributes.map((attribute) => attribute.label),
-        );
-
-        // All attributes in user import
-        const allAttributesUserImport = [
-            ...variations.flatMap((variation) =>
-                variation.attributes.map((attribute) => attribute.k),
+        const requireAttributes = [
+            ...new Set(
+                foundCategories.flatMap((category) =>
+                    category.requireAttributes.map((attribute) => attribute.label),
+                ),
             ),
-            ...generalAttributes.map((attribute) => attribute.k),
         ];
 
-        // Check if all required attributes exist in user import
+        // Checking duplicate attributes in one variation
+        for (const [index, variation] of variations.entries()) {
+            const duplicateAttributes = [...findDuplicates(variation.attributes.map((a) => a.k))];
+            if (duplicateAttributes.length > 0) {
+                throw new RpcException(
+                    new BadRequestException(
+                        `Duplicate attributes in variation ${index}: ${duplicateAttributes.join(
+                            ', ',
+                        )}`,
+                    ),
+                );
+            }
+        }
+
+        // After pass the duplicate attributes check, we can get all attributes in all variations as a set
+        const variationAttributesUserImport = new Set(
+            ...variations.map((variation) => variation.attributes.map((attribute) => attribute.k)),
+        );
+        const generalAttributesUserImport = generalAttributes.map((attribute) => attribute.k);
+
+        // All attributes in all variations and general
+        const allAttributesUserImport = [
+            ...variationAttributesUserImport,
+            ...generalAttributesUserImport,
+        ];
+
+        // Checking duplicate attributes in all variations with general
+        const duplicateAttributes = [...findDuplicates(allAttributesUserImport)];
+        if (duplicateAttributes.length > 0) {
+            throw new RpcException(
+                new BadRequestException(`Duplicate attributes: ${duplicateAttributes.join(', ')}`),
+            );
+        }
+
+        // Checking missing attributes in all variations and general
         const missingAttributes = requireAttributes.filter(
             (attribute) => !allAttributesUserImport.includes(attribute),
         );
-
-        // Throw error if missing required attributes
         if (missingAttributes.length > 0) {
             throw new RpcException(
                 new BadRequestException(
@@ -278,15 +306,15 @@ export class ProductsMntUtilService {
             );
         }
 
-        // All added attributes in user import
-        const addedAttributes = allAttributesUserImport.filter(
-            (attribute) => !requireAttributes.includes(attribute),
-        );
-
-        // Check if all added attributes exist in attributes
-        await Promise.all(
-            addedAttributes.map((label) => this.attributesService.getAttributeByLabel(label)),
-        );
+        try {
+            await Promise.all(
+                allAttributesUserImport.map((label) =>
+                    this.attributesService.getAttributeByLabel(label),
+                ),
+            );
+        } catch (error) {
+            throw new RpcException(new BadRequestException(error.message));
+        }
 
         return true;
     }
