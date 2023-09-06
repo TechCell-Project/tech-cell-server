@@ -10,6 +10,7 @@ program
     .option('-b, --build', 'Build Docker images')
     .option('-u, --up', 'Deploy Docker images')
     .option('-d, --down', 'Remove Docker images')
+    .option('-p, --pull', 'Pull Docker images')
     .option('-ro, --remove-orphans', 'Remove orphaned Docker containers')
     .option('-rv, --remove-volumes', 'Remove Docker volumes')
     .option('-ri, --remove-image', 'Remove Docker images and its cache')
@@ -39,6 +40,9 @@ program
         if (program.down) {
             args.push('down');
         }
+        if (program.pull) {
+            args.push('pull');
+        }
         if (program.removeImage) {
             args.push('down', '--rmi', 'all');
         }
@@ -55,7 +59,7 @@ program
             args.push('down', '--rmi', 'all', '--volumes');
         }
 
-        console.log(`Exec on file: '${composeFile}'`);
+        console.log(`Executing command: docker compose ${args.join(' ')}`);
 
         const deployProcess = spawn('docker compose', args, {
             stdio: 'inherit',

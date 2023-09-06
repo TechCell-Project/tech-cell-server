@@ -1,5 +1,5 @@
 {
-    "name": "tech-cell-web-server",
+    "name": "tech-cell-server",
     "version": "0.0.1",
     "description": "",
     "author": "TechCell Teams <teams@techcell.cloud>",
@@ -28,9 +28,9 @@
         "up:dev": "docker compose -f docker-compose.dev.yml up -d",
         "up:dev:build": "docker compose -f docker-compose.dev.yml up -d --build",
         "down:dev": "docker compose -f docker-compose.dev.yml down",
-        "up:deploy": "docker compose -f docker-compose.yml up -d",
-        "up:deploy:build": "docker compose -f docker-compose.yml up -d --build",
-        "down:deploy": "docker compose -f docker-compose.yml down",
+        "up:deploy": "docker compose -f docker-compose.prod.yml up -d",
+        "up:deploy:build": "docker compose -f docker-compose.prod.yml up -d --build",
+        "down:deploy": "docker compose -f docker-compose.prod.yml down",
         "compodoc": "npx @compodoc/compodoc -p tsconfig.json -s",
         "get-logs": "docker cp tech-cell-web-server-sample-1:/usr/src/app/logs .",
         "tc-cli": "node ./scripts/deploy-docker.js"
