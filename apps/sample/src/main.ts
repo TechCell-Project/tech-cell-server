@@ -11,7 +11,7 @@ async function bootstrap() {
     app.useGlobalFilters(new RpcExceptionFilter());
     useRabbitMQ(app, 'RABBITMQ_SAMPLE_QUEUE');
 
-    const port: string = process.env.SAMPLE_PORT || '3000';
+    const port: string = process.env.SAMPLE_PORT || '3971';
     const server = net.createServer().listen(port);
 
     server.on('listening', () => {
