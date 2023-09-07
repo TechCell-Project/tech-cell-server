@@ -14,12 +14,14 @@ export class RabbitMQModule {
             {
                 provide: service,
                 useFactory: (configService: ConfigService) => {
-                    const URLS = configService.get('RABBITMQ_URLS') || process.env.RABBITMQ_URLS;
+                    const URLS =
+                        configService.get('RABBITMQ_URLS')?.split(', ') ||
+                        process.env.RABBITMQ_URLS?.split(', ');
 
                     return ClientProxyFactory.create({
                         transport: Transport.RMQ,
                         options: {
-                            urls: [URLS],
+                            urls: URLS,
                             queue,
                             queueOptions: {
                                 durable: true, // queue survives broker restart

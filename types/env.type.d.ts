@@ -147,9 +147,9 @@ declare namespace NodeJS {
 
         /**
          * The `RabbitMq` urls
-         * @description This value is used for `amqplib` module
+         * @description This value is used for `amqplib` module and is a comma separated list
          * @example
-         * RABBITMQ_URLS = 'amqp://localhost:5672'
+         * RABBITMQ_URLS = amqp://localhost:5672, amqp://localhost:5673
          * @see https://www.rabbitmq.com/uri-spec.html
          */
         RABBITMQ_URLS: string;
