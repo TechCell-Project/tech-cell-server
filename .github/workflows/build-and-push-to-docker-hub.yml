@@ -3,11 +3,11 @@ name: Build and Push Docker Images
 on:
   push:
     branches:
-      - main
+      - development
 
 env:
-  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+  DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
 
 jobs:
   build-and-push:
@@ -15,27 +15,23 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Login to Docker Hub
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
-          username: ${{ env.DOCKER_USERNAME }}
-          password: ${{ env.DOCKER_PASSWORD }}
+          username: ${{ env.DOCKERHUB_USERNAME }}
+          password: ${{ env.DOCKERHUB_PASSWORD }}
 
       - name: Build and push images
         run: |
-          docker-compose -f docker-compose.prod.yml build
+          docker-compose -f docker-compose.prod.yml build --no-cache
           docker-compose -f docker-compose.prod.yml push
 
       - name: Stop and remove containers
         run: |
-          docker-compose -f docker-compose.prod.yml down
+          docker-compose -f docker-compose.prod.yml down --remove-orphans
 
       - name: Remove unused resources
         run: |
           docker system prune -af
-
-      - name: Start containers
-        run: |
-          docker-compose -f docker-compose.prod.yml up -d
