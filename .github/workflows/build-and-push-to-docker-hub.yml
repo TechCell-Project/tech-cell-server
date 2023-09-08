@@ -27,11 +27,3 @@ jobs:
         run: |
           docker-compose -f docker-compose.prod.yml build --no-cache
           docker-compose -f docker-compose.prod.yml push
-
-      - name: Stop and remove containers
-        run: |
-          docker-compose -f docker-compose.prod.yml down --remove-orphans
-
-      - name: Remove unused resources
-        run: |
-          docker system prune -af
