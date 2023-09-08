@@ -23,6 +23,14 @@ jobs:
           username: ${{ env.DOCKERHUB_USERNAME }}
           password: ${{ env.DOCKERHUB_PASSWORD }}
           
+      - name: 'Create .env file'
+        run: |
+          touch .env
+          echo COMPOSE_PROJECT_NAME=tech-cell-server >> .env
+          echo CURRENT_USER=0:0 >> .env
+          echo DOCKER_GROUP=0 >> .env
+          cat .env
+
       - name: Extract environment variables
         run: echo ${{ secrets.ENV_VARS }} | jq -r 'to_entries | map("\(.key)=\(.value|tostring)") | .[]' > .env
 
