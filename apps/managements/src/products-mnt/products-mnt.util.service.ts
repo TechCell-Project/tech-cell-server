@@ -246,6 +246,21 @@ export class ProductsMntUtilService {
             generalAttributes = [],
         } = product;
 
+        // Reassign the lowercase attribute keys to the original product object, remove u if null or undefined
+        product.variations = variations.map((variation) => ({
+            ...variation,
+            attributes: variation.attributes.map((attribute) => ({
+                k: attribute.k.toLowerCase(), // lowercase attribute key
+                v: attribute.v,
+                ...(attribute.u != null && attribute.u != undefined ? { u: attribute.u } : {}), // remove unit if null
+            })),
+        }));
+        product.generalAttributes = generalAttributes.map((attribute) => ({
+            k: attribute.k.toLowerCase(), // lowercase attribute key
+            v: attribute.v,
+            ...(attribute.u != null && attribute.u != undefined ? { u: attribute.u } : {}), // remove unit if null
+        }));
+
         const foundCategories = await Promise.all(
             categoryLabels.map((label) =>
                 this.categoriesService.getCategory({ filterQueries: { label } }),
@@ -316,6 +331,6 @@ export class ProductsMntUtilService {
             throw new RpcException(new BadRequestException(error.message));
         }
 
-        return true;
+        return product;
     }
 }

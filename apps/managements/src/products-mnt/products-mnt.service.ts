@@ -26,7 +26,7 @@ export class ProductsMntService extends ProductsMntUtilService {
         }
 
         await validateDTO(productParse, CreateProductRequestDTO);
-        await this.validProductAttributes({ ...productParse });
+        productParse = await this.validProductAttributes({ ...productParse });
 
         const productToCreate: CreateProductDTO = this.updateProductWithSku(productParse);
 
