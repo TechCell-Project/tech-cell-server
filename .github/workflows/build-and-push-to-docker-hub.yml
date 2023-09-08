@@ -1,4 +1,4 @@
-name: Build and Push Docker Images
+name: Build and Push Docker Images to Docker Hub
 
 on:
   push:
@@ -8,6 +8,9 @@ on:
 env:
   DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
   DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
+  COMPOSE_PROJECT_NAME: tech-cell-server
+  CURRENT_USER: 0:0
+  DOCKER_GROUP: 0
 
 jobs:
   build-and-push:
@@ -26,15 +29,17 @@ jobs:
       - name: 'Create .env file'
         run: |
           touch .env
-          echo COMPOSE_PROJECT_NAME=tech-cell-server >> .env
-          echo CURRENT_USER=0:0 >> .env
-          echo DOCKER_GROUP=0 >> .env
+          echo COMPOSE_PROJECT_NAME= ${{ env.COMPOSE_PROJECT_NAME }} >> .env
+          echo CURRENT_USER= ${{ env.CURRENT_USER }} >> .env
+          echo DOCKER_GROUP= ${{ env.DOCKER_GROUP }} >> .env
           cat .env
-
-      - name: Extract environment variables
-        run: echo ${{ secrets.ENV_VARS }} | jq -r 'to_entries | map("\(.key)=\(.value|tostring)") | .[]' > .env
 
       - name: Build and push images
         run: |
           docker-compose -f docker-compose.prod.yml build --no-cache
           docker-compose -f docker-compose.prod.yml push
+
+      - name: Remove .env file
+        run: |
+          rm .env
+
