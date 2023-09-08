@@ -10,14 +10,14 @@ export class RabbitMQService implements RabbitMQServiceInterface {
 
     getRmqOptions(queue: string, noAck = false): RmqOptions {
         const rabbitmqUrlsEnvName = 'RABBITMQ_URLS';
-        const URLS = this.configService.get(rabbitmqUrlsEnvName);
+        const URLS = this.configService.get(rabbitmqUrlsEnvName)?.split(', ');
         if (!URLS) {
             throw new Error(`Urls rabbitmq env is not set:: ${rabbitmqUrlsEnvName}`);
         }
         return {
             transport: Transport.RMQ,
             options: {
-                urls: [URLS],
+                urls: URLS,
                 noAck,
                 queue,
                 queueOptions: {

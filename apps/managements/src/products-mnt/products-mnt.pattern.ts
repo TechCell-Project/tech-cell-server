@@ -1,8 +1,9 @@
 export const ProductsMntMessagePattern = {
-    createProduct: { cmd: 'mnt_create_product' },
-    updateProduct: { cmd: 'mnt_update_product' },
-    getAllProducts: { cmd: 'mnt_get_all_product' },
-    changeStatus: { cmd: 'mnt_change_status' },
+    createProduct: { cmd: 'products_mnt_create_product' },
+    updateProductGeneral: { cmd: 'products_mnt_update_product_general' },
+    updateProductGeneralImages: { cmd: 'products_mnt_update_product_general_images' },
+    getAllProducts: { cmd: 'products_mnt_get_all_product' },
+    generateProducts: { cmd: 'products_mnt_gen_product_gen' },
 };
 
 export const ProductsMntEventPattern = {};

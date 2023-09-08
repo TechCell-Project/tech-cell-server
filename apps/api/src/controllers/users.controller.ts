@@ -16,6 +16,7 @@ import {
     ApiBadRequestResponse,
     ApiBearerAuth,
     ApiCreatedResponse,
+    ApiExcludeEndpoint,
     ApiForbiddenResponse,
     ApiNotFoundResponse,
     ApiOkResponse,
@@ -142,6 +143,15 @@ export class UsersController {
                 actorId: user._id,
                 role,
             })
+            .pipe(catchException());
+    }
+
+    @ApiExcludeEndpoint(true)
+    @UseGuards(SuperAdminGuard)
+    @Post('/gen-clone')
+    async gen(@Query() { num }: { num: number }) {
+        return this.managementsService
+            .send(UsersMntMessagePattern.generateUsers, { num })
             .pipe(catchException());
     }
 }

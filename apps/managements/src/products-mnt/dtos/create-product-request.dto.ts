@@ -74,6 +74,7 @@ export class AttributeDTO {
         example: 'gb',
     })
     @IsString()
+    @IsOptional()
     u?: string;
 }
 
@@ -160,7 +161,7 @@ export class CreateProductRequestDTO {
     description: string;
 
     @ApiProperty({
-        type: String,
+        type: [String],
         required: true,
         description: 'Categories of product, (#label)',
         example: ['iphone'],

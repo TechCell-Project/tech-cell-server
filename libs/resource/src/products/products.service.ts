@@ -3,7 +3,7 @@ import { CreateProductDTO } from './dtos';
 import { ProductsRepository } from './products.repository';
 import { IBaseQuery } from '../interfaces';
 import { Product } from './schemas';
-import { FilterQuery } from 'mongoose';
+import { FilterQuery, Types, UpdateQuery } from 'mongoose';
 
 @Injectable()
 export class ProductsService {
@@ -30,5 +30,13 @@ export class ProductsService {
 
     async countProducts(filterQueries: FilterQuery<Product> = {}) {
         return this.productsRepository.count(filterQueries);
+    }
+
+    async updateProductById(
+        productId: Types.ObjectId,
+        updateQueries: UpdateQuery<Partial<Product>>,
+    ) {
+        const product = await this.productsRepository.findOneAndUpdate(productId, updateQueries);
+        return product;
     }
 }

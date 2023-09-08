@@ -1,4 +1,5 @@
 import { delStartWith } from '@app/common/utils';
+import { Store } from 'cache-manager';
 import { USERS_ALL, USERS_CACHE_PREFIX, USERS_PAGE, USERS_PAGESIZE } from '~/constants';
 
 export function buildCacheKeyUsers({
@@ -31,6 +32,6 @@ export function buildCacheKeyUsers({
  *
  * @returns remove all users cache
  */
-export async function delCacheUsers() {
-    return await delStartWith(USERS_CACHE_PREFIX, this.cacheManager);
+export async function delCacheUsers(cacheManager: Store) {
+    return await delStartWith(USERS_CACHE_PREFIX, cacheManager);
 }
