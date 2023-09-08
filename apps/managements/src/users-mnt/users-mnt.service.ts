@@ -83,7 +83,7 @@ export class UsersMntService extends UsersMntUtilService {
                 },
             ),
             this.setUserRequiredRefresh({ user: victimUser }),
-            delCacheUsers(),
+            delCacheUsers(this.cacheManager),
         ]);
 
         return userReturn;
@@ -133,7 +133,7 @@ export class UsersMntService extends UsersMntUtilService {
                 },
             ),
             this.setUserRequiredRefresh({ user: victimUser }),
-            delCacheUsers(),
+            delCacheUsers(this.cacheManager),
         ]);
 
         return userReturn;
@@ -161,7 +161,7 @@ export class UsersMntService extends UsersMntUtilService {
         const [changeRole] = await Promise.all([
             this.usersService.findOneAndUpdateUser({ _id: victimId }, { role: role }),
             this.setUserRequiredRefresh({ user }),
-            delCacheUsers(),
+            delCacheUsers(this.cacheManager),
         ]);
 
         return changeRole;
