@@ -1,4 +1,9 @@
-import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import {
+    Injectable,
+    InternalServerErrorException,
+    Logger,
+    NotFoundException,
+} from '@nestjs/common';
 import { CloudinaryService } from '@app/common/Cloudinary';
 import { ImageUploadedResponseDTO } from './dtos/image-uploaded-response.dto';
 import { RpcException } from '@nestjs/microservices';
@@ -14,6 +19,21 @@ export class ImagesMntService {
             return { images };
         } catch (error) {
             this.logger.error(error);
+            throw new RpcException(
+                new InternalServerErrorException('Get image failed, try again later'),
+            );
+        }
+    }
+
+    async getImageByPublicId(publicId: string) {
+        try {
+            const image = await this.cloudinaryService.getImageByPublicId(publicId);
+            return { image };
+        } catch (error) {
+            this.logger.error(error);
+            if (error.http_code === 404) {
+                throw new RpcException(new NotFoundException('Image not found'));
+            }
             throw new RpcException(
                 new InternalServerErrorException('Get image failed, try again later'),
             );

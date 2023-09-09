@@ -6,6 +6,7 @@ import {
     Get,
     Inject,
     MaxFileSizeValidator,
+    Param,
     ParseFilePipe,
     PayloadTooLargeException,
     Post,
@@ -21,7 +22,6 @@ import {
     ApiBody,
     ApiConsumes,
     ApiCreatedResponse,
-    ApiExcludeEndpoint,
     ApiInternalServerErrorResponse,
     ApiOperation,
     ApiPayloadTooLargeResponse,
@@ -29,6 +29,7 @@ import {
     ApiTooManyRequestsResponse,
 } from '@nestjs/swagger';
 import { ImageUploadedResponseDTO } from '~/apps/managements/images-mnt/dtos/image-uploaded-response.dto';
+import { PublicIdDTO } from '~/apps/managements/images-mnt/dtos/publicId.dto';
 import { ImagesMntMessagePattern } from '~/apps/managements/images-mnt/images-mnt.pattern';
 import { MANAGEMENTS_SERVICE } from '~/constants/services.constant';
 
@@ -44,15 +45,13 @@ import { MANAGEMENTS_SERVICE } from '~/constants/services.constant';
 @ApiBearerAuth('accessToken')
 @ApiTags('images')
 @Controller('images')
-// @UseGuards(AdminGuard)
 export class ImagesController {
     constructor(@Inject(MANAGEMENTS_SERVICE) private readonly managementsService: ClientRMQ) {}
 
-    @ApiExcludeEndpoint(true)
-    @Get('/')
-    async getImages() {
+    @Get('/:publicId')
+    async getImageByPublicId(@Param() { publicId }: PublicIdDTO) {
         return this.managementsService
-            .send(ImagesMntMessagePattern.getImages, {})
+            .send(ImagesMntMessagePattern.getImageByPublicId, { publicId })
             .pipe(catchException());
     }
 
@@ -98,6 +97,7 @@ export class ImagesController {
         },
     })
     @Post('/')
+    @UseGuards(AdminGuard)
     async uploadImages(
         @UploadedFile(
             new ParseFilePipe({
