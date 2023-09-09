@@ -85,13 +85,13 @@ export class ProductsMntUtilService {
 
         // Upload general images
         const generalImagesUploaded = await Promise.all(
-            generalImagesToUpload.map(({ file }) => this.cloudinaryService.uploadFile(file)),
+            generalImagesToUpload.map(({ file }) => this.cloudinaryService.uploadImage(file)),
         );
 
         // Upload variation images
         const variationImagesUploaded = await Promise.all(
             variationImagesToUpload.map((files) =>
-                Promise.all(files.map(({ file }) => this.cloudinaryService.uploadFile(file))),
+                Promise.all(files.map(({ file }) => this.cloudinaryService.uploadImage(file))),
             ),
         );
 

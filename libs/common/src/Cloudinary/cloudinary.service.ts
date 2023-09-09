@@ -1,15 +1,17 @@
 import { Injectable } from '@nestjs/common';
-import { v2 as cloudinary, UploadApiOptions } from 'cloudinary';
+import { v2 as cloudinary, ResourceApiResponse, UploadApiOptions } from 'cloudinary';
 import { CloudinaryResponse } from './cloudinary-response';
 import * as streamifier from 'streamifier';
+import { CLOUDINARY_ALLOW_IMAGE_FORMATS, CLOUDINARY_ROOT_FOLDER_NAME } from './cloudinary.constant';
+import { buildPublicId } from './cloudinary.util';
 
 @Injectable()
 export class CloudinaryService {
-    uploadFile(file: Express.Multer.File): Promise<CloudinaryResponse> {
+    uploadImage(file: Express.Multer.File): Promise<CloudinaryResponse> {
         const options: UploadApiOptions = {
-            folder: 'TechCell',
-            allowedFormats: ['jpg', 'png', 'webp'],
-            public_id: file.fieldname + Date.now(),
+            folder: CLOUDINARY_ROOT_FOLDER_NAME,
+            allowedFormats: CLOUDINARY_ALLOW_IMAGE_FORMATS,
+            public_id: buildPublicId(file),
         };
 
         return new Promise<CloudinaryResponse>((resolve, reject) => {
@@ -36,6 +38,30 @@ export class CloudinaryService {
                     resolve(result);
                 }
             });
+        });
+    }
+
+    getImagesInFolder(
+        startAt = 1,
+        maxResults = 10,
+        folderName = CLOUDINARY_ROOT_FOLDER_NAME,
+    ): Promise<ResourceApiResponse> {
+        return new Promise<ResourceApiResponse>((resolve, reject) => {
+            cloudinary.api.resources(
+                {
+                    type: 'upload',
+                    prefix: folderName,
+                    start_at: startAt,
+                    max_results: maxResults,
+                },
+                (error, result) => {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        resolve(result);
+                    }
+                },
+            );
         });
     }
 }
