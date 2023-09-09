@@ -15,8 +15,19 @@ import { Type } from 'class-transformer';
 import { ProductStatus } from '../enums';
 import { AttributeSchema, VariationSchema } from '../schemas';
 import { ImageSchema } from '../schemas/image.schema';
+import { CreateProductRequestDTO } from '~/apps/managements/products-mnt/dtos';
 
 export class CreateProductDTO {
+    constructor(data: CreateProductRequestDTO) {
+        this.name = data.name;
+        this.description = data.description;
+        this.categories = data.categories;
+        this.status = data.status;
+        this.generalAttributes = data.generalAttributes;
+        this.generalImages = [];
+        this.variations = [];
+    }
+
     @IsString()
     @IsNotEmpty()
     name: string;
@@ -92,7 +103,13 @@ class AttributeDTO implements AttributeSchema {
     u?: string;
 }
 
-class ImageDTO implements ImageSchema {
+export class ImageDTO implements ImageSchema {
+    constructor(data: ImageSchema) {
+        this.url = data.url;
+        this.publicId = data.publicId;
+        this.isThumbnail = data.isThumbnail ?? false;
+    }
+
     @IsString()
     @IsNotEmpty()
     url: string;
@@ -104,10 +121,6 @@ class ImageDTO implements ImageSchema {
     @IsOptional()
     @IsBoolean()
     isThumbnail?: boolean;
-
-    @IsOptional()
-    @IsBoolean()
-    isDeleted?: boolean;
 }
 
 class PriceDTO {

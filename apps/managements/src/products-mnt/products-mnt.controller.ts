@@ -7,6 +7,7 @@ import { ProductIdParamsDTO } from './dtos/params.dto';
 import { ProductDataDTO } from './dtos/productData.dto';
 import { UpdateProductRequestDTO } from './dtos/update-product-request.dto';
 import { UpdateProductGeneralImagesDTO } from './dtos/update-product-general-images-request.dto';
+import { CreateProductRequestDTO } from './dtos';
 
 @Controller()
 export class ProductsMntController {
@@ -24,15 +25,10 @@ export class ProductsMntController {
     async createProduct(
         @Ctx() context: RmqContext,
         @Payload()
-        {
-            productData,
-            files,
-        }: ProductDataDTO & {
-            files: Express.Multer.File[];
-        },
+        { ...data }: CreateProductRequestDTO,
     ) {
         this.rabbitMqService.acknowledgeMessage(context);
-        return await this.productsMntService.createProduct({ productData, files });
+        return await this.productsMntService.createProduct({ ...data });
     }
 
     @MessagePattern(ProductsMntMessagePattern.generateProducts)

@@ -3,33 +3,25 @@ import { ProductsMntUtilService } from './products-mnt.util.service';
 import { CreateProductRequestDTO } from './dtos';
 import { RpcException } from '@nestjs/microservices';
 import { CreateProductDTO } from '@app/resource';
-import { compareTwoObjectAndGetDifferent, validateDTO } from '@app/common';
+import { compareTwoObjectAndGetDifferent } from '@app/common';
 import { UpdateProductRequestDTO } from './dtos/update-product-request.dto';
-import { ProductDataDTO } from './dtos/productData.dto';
 import { ProductIdParamsDTO } from './dtos/params.dto';
 import { UpdateProductGeneralImagesDTO } from './dtos/update-product-general-images-request.dto';
 
 @Injectable()
 export class ProductsMntService extends ProductsMntUtilService {
-    async createProduct({
-        productData,
-        files,
-    }: ProductDataDTO & {
-        files: Express.Multer.File[];
-    }) {
-        let productParse: CreateProductRequestDTO;
-        try {
-            productParse = JSON.parse(productData);
-        } catch (error) {
-            this.logger.error(error);
-            throw new RpcException(new BadRequestException(`productData is invalid`));
-        }
+    async createProduct({ ...productData }: CreateProductRequestDTO) {
+        // Validate the attributes of product
+        // Check if the attributes is valid or not
+        // Check if the attributes is exits in db or not
+        // If not, throw the exception
+        // If pass return the new version that attributes have been sorted
+        productData = await this.validProductAttributes({ ...productData });
 
-        await validateDTO(productParse, CreateProductRequestDTO);
-        productParse = await this.validProductAttributes({ ...productParse });
+        // Base on variation's attributes to generate sku
+        const productToCreate: CreateProductDTO = this.updateProductWithSku(productData);
 
-        const productToCreate: CreateProductDTO = this.updateProductWithSku(productParse);
-
+        // Check if product is already exist or not with the same sku
         const isProductExist = await this.isProductExist(productToCreate);
         if (isProductExist) {
             throw new RpcException(
@@ -37,13 +29,19 @@ export class ProductsMntService extends ProductsMntUtilService {
             );
         }
 
+        // Resolve images to add the url to image object
+        // Because user just post the `publicId` of image
         const { generalImages, variations } = await this.resolveImages({
-            productData: productToCreate,
-            files,
+            productData: productData,
         });
-
+        // Assign `generalImages` product
         productToCreate.generalImages = generalImages;
-        productToCreate.variations = variations;
+
+        // Assign `variations` product, merge with the old one
+        // The `variations` is new one, it updated the image object with more data
+        // The `productToCreate.variations` is old one, it update the sku
+        // Merge two object to get the new one
+        productToCreate.variations = Object.assign(variations, productToCreate.variations);
 
         return await this.productsService.createProduct(productToCreate);
     }

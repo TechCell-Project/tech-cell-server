@@ -44,7 +44,7 @@ import { MANAGEMENTS_SERVICE } from '~/constants/services.constant';
 @ApiBearerAuth('accessToken')
 @ApiTags('images')
 @Controller('images')
-@UseGuards(AdminGuard)
+// @UseGuards(AdminGuard)
 export class ImagesController {
     constructor(@Inject(MANAGEMENTS_SERVICE) private readonly managementsService: ClientRMQ) {}
 

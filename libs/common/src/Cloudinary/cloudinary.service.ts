@@ -41,6 +41,18 @@ export class CloudinaryService {
         });
     }
 
+    getImageByPublicId(publicId: string): Promise<any> {
+        return new Promise<any>((resolve, reject) => {
+            cloudinary.api.resource(publicId, (error, result) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve(result);
+                }
+            });
+        });
+    }
+
     getImagesInFolder(
         startAt = 1,
         maxResults = 10,

@@ -9,6 +9,7 @@ import {
     Min,
     Max,
     IsOptional,
+    IsBoolean,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ProductStatus } from '@app/resource/products/enums';
@@ -44,6 +45,29 @@ export class PriceDTO {
     @IsNumber()
     @IsOptional()
     special?: number;
+}
+
+export class ImageRequestDTO {
+    @ApiProperty({
+        type: String,
+        required: true,
+        description: 'Public id of image',
+        example: 'publicId',
+    })
+    @IsString()
+    @IsNotEmpty()
+    publicId: string;
+
+    @ApiProperty({
+        type: String,
+        description: 'Is image thumbnail',
+        required: false,
+        example: false,
+        default: false,
+    })
+    @IsOptional()
+    @IsBoolean()
+    isThumbnail?: boolean;
 }
 
 export class AttributeDTO {
@@ -136,6 +160,15 @@ export class VariationDTO {
     @IsOptional()
     @IsEnum(ProductStatus)
     status?: number;
+
+    @ApiProperty({
+        type: [ImageRequestDTO],
+        required: false,
+        description: 'Images of product',
+    })
+    @IsArray()
+    @IsOptional()
+    images?: ImageRequestDTO[];
 }
 
 export class CreateProductRequestDTO {
@@ -191,6 +224,15 @@ export class CreateProductRequestDTO {
     @IsArray()
     @IsOptional()
     generalAttributes: Array<AttributeDTO>;
+
+    @ApiProperty({
+        type: [ImageRequestDTO],
+        required: false,
+        description: 'General images of product',
+    })
+    @IsArray()
+    @IsOptional()
+    generalImages?: ImageRequestDTO[];
 
     @ApiProperty({
         type: [VariationDTO],

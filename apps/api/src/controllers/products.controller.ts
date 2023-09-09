@@ -34,7 +34,6 @@ import { GetProductsDTO } from '~/apps/search/products-search/dtos';
 import { CreateProductRequestDTO } from '~/apps/managements/products-mnt/dtos';
 import { ProductIdParamsDTO } from '~/apps/managements/products-mnt/dtos/params.dto';
 import { UpdateProductRequestDTO } from '~/apps/managements/products-mnt/dtos/update-product-request.dto';
-import { ProductDataDTO } from '~/apps/managements/products-mnt/dtos/productData.dto';
 import { UpdateProductGeneralImagesDTO } from '~/apps/managements/products-mnt/dtos/update-product-general-images-request.dto';
 import { FilesDTO } from '~/apps/managements/products-mnt/dtos/files.dto';
 import { ValidateImageFileInterceptor } from '@app/common/interceptors/file-upload.interceptor';
@@ -72,53 +71,11 @@ export class ProductsController {
     @ApiOperation({
         summary: 'Create a new product',
     })
-    @ApiConsumes('multipart/form-data')
-    @ApiBody({
-        description:
-            'Create product request.\n\n' +
-            'Product data rules:\n' +
-            `- Follow the ${getSchemaPath(CreateProductRequestDTO.name)}\n\n` +
-            'File rules:\n' +
-            '- Only image files are allowed.\n' +
-            '- Maximum 30 files.\n' +
-            '- Maximum 10 MB per file.\n' +
-            '- Allowed file extensions: jpg, jpeg, png, gif, webp.\n' +
-            '- Allowed file mime types: image/jpeg, image/png, image/gif, image/webp.\n\n' +
-            '- `FieldName` of file must follow above rule:\n' +
-            `   - Each name should be separated by \`underscore(_)\`\n` +
-            `   - Start with \`${ProductImageFieldname.GENERAL}\` or \`${ProductImageFieldname.VARIATION}\`.\n` +
-            `   - If start with \`${ProductImageFieldname.VARIATION}\`, must end with a number to define variation index.\n` +
-            `   - The next field name could be \`${ProductImageFieldname.IS_THUMBNAIL}\` to define thumbnail image.\n` +
-            `   - Example: \`${ProductImageFieldname.GENERAL}\`, \`${ProductImageFieldname.VARIATION}_1\`, \`${ProductImageFieldname.VARIATION}_${ProductImageFieldname.IS_THUMBNAIL}_2\`.\n\n`,
-        required: true,
-        schema: {
-            type: 'object',
-            properties: {
-                productData: {
-                    type: 'object',
-                    description: 'Product data',
-                    $ref: getSchemaPath(CreateProductRequestDTO.name),
-                },
-                files: {
-                    type: 'array',
-                    items: {
-                        type: 'string',
-                        format: 'binary',
-                    },
-                },
-            },
-        },
-    })
     @Post('/')
-    @ValidateImageFileInterceptor()
-    async createProduct(
-        @Body() { productData }: ProductDataDTO,
-        @UploadedFiles() files: Array<Express.Multer.File>,
-    ) {
+    async createProduct(@Body() { ...data }: CreateProductRequestDTO) {
         return this.managementsService
             .send(ProductsMntMessagePattern.createProduct, {
-                productData,
-                files,
+                ...data,
             })
             .pipe(catchException());
     }
@@ -139,6 +96,7 @@ export class ProductsController {
     @ApiOkResponse({
         description: 'Update product information',
     })
+    @ApiExcludeEndpoint(true)
     @Put('/:productId')
     async updateProduct(
         @Param() { productId }: ProductIdParamsDTO,
@@ -214,6 +172,7 @@ export class ProductsController {
             },
         },
     })
+    @ApiExcludeEndpoint(true)
     @ValidateImageFileInterceptor()
     @Post('/:productId/images')
     async updateProductGeneralImages(
