@@ -6,7 +6,7 @@ import { CreateProductDTO } from '@app/resource';
 import { compareTwoObjectAndGetDifferent } from '@app/common';
 import { UpdateProductRequestDTO } from './dtos/update-product-request.dto';
 import { ProductIdParamsDTO } from './dtos/params.dto';
-import { UpdateProductGeneralImagesDTO } from './dtos/update-product-general-images-request.dto';
+import sanitizeHtml from 'sanitize-html';
 
 @Injectable()
 export class ProductsMntService extends ProductsMntUtilService {
@@ -17,6 +17,7 @@ export class ProductsMntService extends ProductsMntUtilService {
         // If not, throw the exception
         // If pass return the new version that attributes have been sorted
         productData = await this.validProductAttributes({ ...productData });
+        productData.description = sanitizeHtml(productData.description);
 
         // Base on variation's attributes to generate sku
         const productToCreate: CreateProductDTO = this.updateProductWithSku(productData);
@@ -104,17 +105,6 @@ export class ProductsMntService extends ProductsMntUtilService {
         );
 
         return { ...productUpdated };
-    }
-
-    async updateProductGeneralImages({
-        productId,
-        images,
-        files,
-    }: ProductIdParamsDTO &
-        UpdateProductGeneralImagesDTO & {
-            files: Express.Multer.File[];
-        }) {
-        return '';
     }
 
     async gen(num: number) {
