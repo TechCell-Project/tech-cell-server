@@ -4,7 +4,6 @@ import { RabbitMQService } from '@app/common';
 import { ProductsMntService } from './products-mnt.service';
 import { ProductsMntMessagePattern } from './products-mnt.pattern';
 import { ProductIdParamsDTO } from './dtos/params.dto';
-import { ProductDataDTO } from './dtos/productData.dto';
 import { UpdateProductRequestDTO } from './dtos/update-product-request.dto';
 import { UpdateProductGeneralImagesDTO } from './dtos/update-product-general-images-request.dto';
 import { CreateProductRequestDTO } from './dtos';
@@ -15,11 +14,6 @@ export class ProductsMntController {
         @Inject(RabbitMQService) private readonly rabbitMqService: RabbitMQService,
         private readonly productsMntService: ProductsMntService,
     ) {}
-
-    @Get('ping')
-    getHello() {
-        return { message: 'pong' };
-    }
 
     @MessagePattern(ProductsMntMessagePattern.createProduct)
     async createProduct(

@@ -31,17 +31,34 @@ export class ProductsMntService extends ProductsMntUtilService {
 
         // Resolve images to add the url to image object
         // Because user just post the `publicId` of image
-        const { generalImages, variations } = await this.resolveImages({
+        const { generalImages, descriptionImages, variations } = await this.resolveImages({
             productData: productData,
         });
         // Assign `generalImages` product
-        productToCreate.generalImages = generalImages;
+        if (generalImages.length > 0) {
+            productToCreate.generalImages = generalImages;
+        } else {
+            delete productToCreate?.generalImages;
+        }
+
+        // Assign `descriptionImages` product
+        if (descriptionImages.length > 0) {
+            productToCreate.descriptionImages = descriptionImages;
+        } else {
+            delete productToCreate?.descriptionImages;
+        }
 
         // Assign `variations` product, merge with the old one
-        // The `variations` is new one, it updated the image object with more data
         // The `productToCreate.variations` is old one, it update the sku
+        // The `variations` is new one, it updated the image object with more data
         // Merge two object to get the new one
-        productToCreate.variations = Object.assign(variations, productToCreate.variations);
+        for (let i = 0; i < productToCreate.variations.length; i++) {
+            if (variations[i]?.images.length > 0) {
+                productToCreate.variations[i].images = variations[i].images;
+            } else {
+                delete productToCreate.variations[i]?.images;
+            }
+        }
 
         return await this.productsService.createProduct(productToCreate);
     }

@@ -26,6 +26,7 @@ export class CreateProductDTO {
         this.generalAttributes = data.generalAttributes;
         this.generalImages = [];
         this.variations = [];
+        this.descriptionImages = [];
     }
 
     @IsString()
@@ -55,13 +56,17 @@ export class CreateProductDTO {
 
     @IsArray()
     @IsNotEmpty()
+    descriptionImages: ImageDTO[];
+
+    @IsArray()
+    @IsNotEmpty()
     @ArrayMinSize(1)
     @ValidateNested({ each: true })
     @Type(() => VariationDTO)
     variations: VariationDTO[];
 }
 
-class VariationDTO implements VariationSchema {
+export class VariationDTO implements VariationSchema {
     @IsString()
     @IsNotEmpty()
     sku: string;

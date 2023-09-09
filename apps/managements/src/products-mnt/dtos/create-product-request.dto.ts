@@ -102,7 +102,7 @@ export class AttributeDTO {
     u?: string;
 }
 
-export class VariationDTO {
+export class VariationRequestDTO {
     @ApiProperty({
         type: [AttributeDTO],
         required: true,
@@ -204,6 +204,18 @@ export class CreateProductRequestDTO {
     categories: string[];
 
     @ApiProperty({
+        type: [VariationRequestDTO],
+        required: true,
+        description: 'Variations of product',
+    })
+    @IsArray()
+    @IsNotEmpty()
+    @ArrayMinSize(1)
+    @ValidateNested({ each: true })
+    @Type(() => VariationRequestDTO)
+    variations: VariationRequestDTO[];
+
+    @ApiProperty({
         type: Number,
         enum: Object.entries(ProductStatus).map(([key, value]) => `${key}: ${value}`),
         required: false,
@@ -235,14 +247,11 @@ export class CreateProductRequestDTO {
     generalImages?: ImageRequestDTO[];
 
     @ApiProperty({
-        type: [VariationDTO],
-        required: true,
-        description: 'Variations of product',
+        type: [ImageRequestDTO],
+        required: false,
+        description: 'Description images of product',
     })
     @IsArray()
-    @IsNotEmpty()
-    @ArrayMinSize(1)
-    @ValidateNested({ each: true })
-    @Type(() => VariationDTO)
-    variations: VariationDTO[];
+    @IsOptional()
+    descriptionImages: ImageRequestDTO[];
 }

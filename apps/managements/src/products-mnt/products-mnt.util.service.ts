@@ -7,7 +7,7 @@ import {
 } from '@app/resource';
 import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common';
 import { delStartWith, findDuplicates, replaceWhitespaceTo } from '@app/common/utils';
-import { REDIS_CACHE, PRODUCTS_CACHE_PREFIX, ProductImageFieldname } from '~/constants';
+import { REDIS_CACHE, PRODUCTS_CACHE_PREFIX } from '~/constants';
 import { Store } from 'cache-manager';
 import { CreateProductRequestDTO } from './dtos';
 import { RpcException } from '@nestjs/microservices';
@@ -26,13 +26,26 @@ export class ProductsMntUtilService {
     ) {}
 
     protected async resolveImages({ productData }: { productData: CreateProductRequestDTO }) {
-        const { generalImages, variations } = productData;
+        const { generalImages = [], descriptionImages = [], variations = [] } = productData;
         const imagesId = new Set(
             [
                 ...generalImages.map((i) => i?.publicId),
+                ...descriptionImages.map((i) => i?.publicId),
                 ...variations.flatMap((variation) => variation?.images?.map((i) => i?.publicId)),
             ].filter((publicId) => !!publicId),
         );
+
+        let newGeneralImages: ImageDTO[] = [];
+        let newDescriptionImages: ImageDTO[] = [];
+        let newVar = [];
+
+        if (imagesId.size === 0) {
+            return {
+                generalImages: newGeneralImages,
+                descriptionImages: newDescriptionImages,
+                variations: newVar,
+            };
+        }
 
         const invalidImages: string[] = [];
         const validAll = await Promise.all(
@@ -53,29 +66,42 @@ export class ProductsMntUtilService {
             );
         }
 
-        const newGeneralImages = generalImages?.map((image) => {
+        newGeneralImages = generalImages?.map((image) => {
             const validImage = validAll.find((valid) => valid.public_id === image.publicId);
             return new ImageDTO({
                 publicId: validImage?.public_id,
-                url: validImage?.url,
+                url: validImage?.secure_url,
                 isThumbnail: image.isThumbnail,
             });
         });
 
-        const newVar = variations?.map((variation) => {
+        newDescriptionImages = descriptionImages?.map((image) => {
+            const validImage = validAll.find((valid) => valid.public_id === image.publicId);
+            return new ImageDTO({
+                publicId: validImage?.public_id,
+                url: validImage?.secure_url,
+                isThumbnail: image.isThumbnail,
+            });
+        });
+
+        newVar = variations?.map((variation) => {
             const { images } = variation;
             const validImages = images?.map((image) => {
                 const validImage = validAll.find((valid) => valid.public_id === image.publicId);
                 return new ImageDTO({
                     publicId: validImage?.public_id,
-                    url: validImage?.url,
+                    url: validImage?.secure_url,
                     isThumbnail: image.isThumbnail,
                 });
             });
             return { ...variation, images: validImages };
         });
 
-        return { generalImages: newGeneralImages, variations: newVar };
+        return {
+            generalImages: newGeneralImages,
+            descriptionImages: newDescriptionImages,
+            variations: newVar,
+        };
     }
 
     protected async isProductExist(product: CreateProductDTO) {
@@ -252,6 +278,7 @@ export class ProductsMntUtilService {
         const newProduct: CreateProductDTO = {
             ...productData,
             generalImages: [],
+            descriptionImages: [],
             variations: variations.map((variation) => {
                 const { attributes } = variation;
                 const sortedAttributes = attributes.slice().sort((a, b) => a.k.localeCompare(b.k));
