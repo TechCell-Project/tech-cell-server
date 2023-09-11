@@ -20,7 +20,7 @@ export class CartsService {
     }
 
     async getCarts(userId: Types.ObjectId) {
-        return this.cartRepository.find({ userId });
+        return this.cartRepository.find({ filterQuery: { userId } });
     }
 
     async getCartByProduct({ userId, productId, sku }: IGetCartByProduct) {

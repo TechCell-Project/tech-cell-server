@@ -3,33 +3,26 @@ import { ProductsMntUtilService } from './products-mnt.util.service';
 import { CreateProductRequestDTO } from './dtos';
 import { RpcException } from '@nestjs/microservices';
 import { CreateProductDTO } from '@app/resource';
-import { compareTwoObjectAndGetDifferent, validateDTO } from '@app/common';
+import { compareTwoObjectAndGetDifferent } from '@app/common';
 import { UpdateProductRequestDTO } from './dtos/update-product-request.dto';
-import { ProductDataDTO } from './dtos/productData.dto';
 import { ProductIdParamsDTO } from './dtos/params.dto';
-import { UpdateProductGeneralImagesDTO } from './dtos/update-product-general-images-request.dto';
+import * as sanitizeHtml from 'sanitize-html';
 
 @Injectable()
 export class ProductsMntService extends ProductsMntUtilService {
-    async createProduct({
-        productData,
-        files,
-    }: ProductDataDTO & {
-        files: Express.Multer.File[];
-    }) {
-        let productParse: CreateProductRequestDTO;
-        try {
-            productParse = JSON.parse(productData);
-        } catch (error) {
-            this.logger.error(error);
-            throw new RpcException(new BadRequestException(`productData is invalid`));
-        }
+    async createProduct({ ...productData }: CreateProductRequestDTO) {
+        // Validate the attributes of product
+        // Check if the attributes is valid or not
+        // Check if the attributes is exits in db or not
+        // If not, throw the exception
+        // If pass return the new version that attributes have been sorted
+        productData = await this.validProductAttributes({ ...productData });
+        productData.description = sanitizeHtml(productData.description);
 
-        await validateDTO(productParse, CreateProductRequestDTO);
-        productParse = await this.validProductAttributes({ ...productParse });
+        // Base on variation's attributes to generate sku
+        const productToCreate: CreateProductDTO = this.updateProductWithSku(productData);
 
-        const productToCreate: CreateProductDTO = this.updateProductWithSku(productParse);
-
+        // Check if product is already exist or not with the same sku
         const isProductExist = await this.isProductExist(productToCreate);
         if (isProductExist) {
             throw new RpcException(
@@ -37,13 +30,36 @@ export class ProductsMntService extends ProductsMntUtilService {
             );
         }
 
-        const { generalImages, variations } = await this.resolveImages({
-            productData: productToCreate,
-            files,
+        // Resolve images to add the url to image object
+        // Because user just post the `publicId` of image
+        const { generalImages, descriptionImages, variations } = await this.resolveImages({
+            productData: productData,
         });
+        // Assign `generalImages` product
+        if (generalImages.length > 0) {
+            productToCreate.generalImages = generalImages;
+        } else {
+            delete productToCreate?.generalImages;
+        }
 
-        productToCreate.generalImages = generalImages;
-        productToCreate.variations = variations;
+        // Assign `descriptionImages` product
+        if (descriptionImages.length > 0) {
+            productToCreate.descriptionImages = descriptionImages;
+        } else {
+            delete productToCreate?.descriptionImages;
+        }
+
+        // Assign `variations` product, merge with the old one
+        // The `productToCreate.variations` is old one, it update the sku
+        // The `variations` is new one, it updated the image object with more data
+        // Merge two object to get the new one
+        for (let i = 0; i < productToCreate.variations.length; i++) {
+            if (variations[i]?.images.length > 0) {
+                productToCreate.variations[i].images = variations[i].images;
+            } else {
+                delete productToCreate.variations[i]?.images;
+            }
+        }
 
         return await this.productsService.createProduct(productToCreate);
     }
@@ -89,17 +105,6 @@ export class ProductsMntService extends ProductsMntUtilService {
         );
 
         return { ...productUpdated };
-    }
-
-    async updateProductGeneralImages({
-        productId,
-        images,
-        files,
-    }: ProductIdParamsDTO &
-        UpdateProductGeneralImagesDTO & {
-            files: Express.Multer.File[];
-        }) {
-        return '';
     }
 
     async gen(num: number) {

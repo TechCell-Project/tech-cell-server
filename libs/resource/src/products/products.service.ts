@@ -24,7 +24,7 @@ export class ProductsService {
     }
 
     async getProducts() {
-        const products = await this.productsRepository.find({});
+        const products = await this.productsRepository.find({ filterQuery: {} });
         return products;
     }
 
@@ -38,5 +38,33 @@ export class ProductsService {
     ) {
         const product = await this.productsRepository.findOneAndUpdate(productId, updateQueries);
         return product;
+    }
+
+    async isImageInUse(publicId: string) {
+        try {
+            const products = await this.productsRepository.find({
+                filterQuery: {
+                    $or: [
+                        {
+                            'generalImages.publicId': publicId,
+                        },
+                        {
+                            'desImages.publicId': publicId,
+                        },
+                        {
+                            variations: {
+                                $elemMatch: {
+                                    'images.publicId': publicId,
+                                },
+                            },
+                        },
+                    ],
+                },
+                logEnabled: false,
+            });
+            return products.length > 0;
+        } catch (error) {
+            return false;
+        }
     }
 }

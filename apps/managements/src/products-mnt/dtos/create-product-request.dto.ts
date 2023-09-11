@@ -9,6 +9,7 @@ import {
     Min,
     Max,
     IsOptional,
+    IsBoolean,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ProductStatus } from '@app/resource/products/enums';
@@ -46,6 +47,29 @@ export class PriceDTO {
     special?: number;
 }
 
+export class ImageRequestDTO {
+    @ApiProperty({
+        type: String,
+        required: true,
+        description: 'Public id of image',
+        example: 'publicId',
+    })
+    @IsString()
+    @IsNotEmpty()
+    publicId: string;
+
+    @ApiProperty({
+        type: String,
+        description: 'Is image thumbnail',
+        required: false,
+        example: false,
+        default: false,
+    })
+    @IsOptional()
+    @IsBoolean()
+    isThumbnail?: boolean;
+}
+
 export class AttributeDTO {
     @ApiProperty({
         type: String,
@@ -78,7 +102,7 @@ export class AttributeDTO {
     u?: string;
 }
 
-export class VariationDTO {
+export class VariationRequestDTO {
     @ApiProperty({
         type: [AttributeDTO],
         required: true,
@@ -136,6 +160,15 @@ export class VariationDTO {
     @IsOptional()
     @IsEnum(ProductStatus)
     status?: number;
+
+    @ApiProperty({
+        type: [ImageRequestDTO],
+        required: false,
+        description: 'Images of product',
+    })
+    @IsArray()
+    @IsOptional()
+    images?: ImageRequestDTO[];
 }
 
 export class CreateProductRequestDTO {
@@ -171,6 +204,18 @@ export class CreateProductRequestDTO {
     categories: string[];
 
     @ApiProperty({
+        type: [VariationRequestDTO],
+        required: true,
+        description: 'Variations of product',
+    })
+    @IsArray()
+    @IsNotEmpty()
+    @ArrayMinSize(1)
+    @ValidateNested({ each: true })
+    @Type(() => VariationRequestDTO)
+    variations: VariationRequestDTO[];
+
+    @ApiProperty({
         type: Number,
         enum: Object.entries(ProductStatus).map(([key, value]) => `${key}: ${value}`),
         required: false,
@@ -193,14 +238,20 @@ export class CreateProductRequestDTO {
     generalAttributes: Array<AttributeDTO>;
 
     @ApiProperty({
-        type: [VariationDTO],
-        required: true,
-        description: 'Variations of product',
+        type: [ImageRequestDTO],
+        required: false,
+        description: 'General images of product',
     })
     @IsArray()
-    @IsNotEmpty()
-    @ArrayMinSize(1)
-    @ValidateNested({ each: true })
-    @Type(() => VariationDTO)
-    variations: VariationDTO[];
+    @IsOptional()
+    generalImages?: ImageRequestDTO[];
+
+    @ApiProperty({
+        type: [ImageRequestDTO],
+        required: false,
+        description: 'Description images of product',
+    })
+    @IsArray()
+    @IsOptional()
+    descriptionImages: ImageRequestDTO[];
 }

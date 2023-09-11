@@ -11,7 +11,11 @@ export class AttributesService {
     constructor(private readonly attributesRepository: AttributesRepository) {}
 
     async getAttributes({ filterQueries, queryOptions, projectionArgs }: IBaseQuery<Attribute>) {
-        return this.attributesRepository.find(filterQueries, queryOptions, projectionArgs);
+        return this.attributesRepository.find({
+            filterQuery: filterQueries,
+            queryOptions: queryOptions,
+            projection: projectionArgs,
+        });
     }
 
     async getAttributeById(id: string | Types.ObjectId) {

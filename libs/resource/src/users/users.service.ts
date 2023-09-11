@@ -81,7 +81,11 @@ export class UsersService {
         queryArgs?: Partial<QueryOptions<User>>,
         projectionArgs?: Partial<ProjectionType<User>>,
     ) {
-        return this.usersRepository.find(getUserArgs, queryArgs, projectionArgs);
+        return this.usersRepository.find({
+            filterQuery: getUserArgs,
+            queryOptions: queryArgs,
+            projection: projectionArgs,
+        });
     }
 
     async findOneAndUpdateUser(filterQuery: FilterQuery<User>, updateUserArgs: Partial<User>) {
