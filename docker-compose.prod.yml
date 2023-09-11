@@ -182,6 +182,20 @@ services:
             - techcell_backend
         restart: always
 
+    task:
+        build:
+            context: ./
+            dockerfile: ./apps/task/Dockerfile
+        image: lehuygiang28/techcell_task
+        env_file:
+            - .env
+        volumes:
+            - .:/usr/src/techcell_app
+            - /usr/src/techcell_app/node_modules
+        networks:
+            - techcell_backend
+        restart: always
+
 networks:
     techcell_backend:
         driver: bridge
