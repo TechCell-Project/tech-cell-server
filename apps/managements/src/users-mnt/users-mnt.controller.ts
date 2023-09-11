@@ -71,4 +71,13 @@ export class UsersMntController {
             role,
         });
     }
+
+    @MessagePattern(UsersMntMessagePattern.generateUsers)
+    async generateUsers(@Ctx() context: RmqContext, @Payload() payload: { num: number }) {
+        this.rabbitMqService.acknowledgeMessage(context);
+
+        const { num } = payload;
+
+        return await this.usersMntService.generateUsers(num);
+    }
 }

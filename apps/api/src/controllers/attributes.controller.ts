@@ -22,9 +22,9 @@ import {
 import {
     DeleteAttributeByIdRequestDTO,
     UpdateAttributeRequestDTO,
+    CreateAttributeRequestDTO,
 } from '~/apps/managements/attributes-mnt/dtos';
 import { AttributesMntMessagePattern } from '~/apps/managements/attributes-mnt/attributes-mnt.pattern';
-import { CreateAttributeRequestDTO } from '~/apps/managements/attributes-mnt/dtos';
 import {
     ApiBadRequestResponse,
     ApiCreatedResponse,

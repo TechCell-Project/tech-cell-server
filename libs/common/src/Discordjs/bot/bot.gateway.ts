@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Once, InjectDiscordClient } from '@discord-nestjs/core';
 import { Client, TextChannel } from 'discord.js';
+import { formatJsonLogsDiscord } from '@app/common/utils';
 
 @Injectable()
 export class BotGateway {
@@ -19,13 +20,18 @@ export class BotGateway {
         this.logger.log(`Bot ${this.client.user.tag} was started!`);
     }
 
-    async writeLogs(message: any) {
+    async writeLogs(message: string) {
         if (!this.serverLogsChannelId) {
             this.logger.warn('[env] DISCORD_LOGS_CHANNEL_ID not found!');
             return;
         }
-
+        const messages = formatJsonLogsDiscord(message);
+        if (!messages) {
+            return;
+        }
         const channel = this.client.channels.cache.get(this.serverLogsChannelId) as TextChannel;
-        return await channel.send(message);
+        for (const msg of messages) {
+            await channel.send(msg);
+        }
     }
 }

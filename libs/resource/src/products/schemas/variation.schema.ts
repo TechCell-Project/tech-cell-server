@@ -34,10 +34,10 @@ export class VariationSchema {
     @Prop({ required: true })
     price: PriceSchema;
 
-    @Prop({ required: true })
+    @Prop({ required: true, default: 0 })
     stock: number;
 
-    @Prop({ required: true })
+    @Prop({ required: false, default: [] })
     images: ImageSchema[];
 
     @Prop({ required: false, default: ProductStatus.Hide })

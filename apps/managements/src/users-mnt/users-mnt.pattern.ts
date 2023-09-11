@@ -3,6 +3,7 @@ export const UsersMntMessagePattern = {
     blockUser: { cmd: 'mnt_block_user' },
     unblockUser: { cmd: 'mnt_unblock_user' },
     changeRoleUser: { cmd: 'mnt_change_role_user' },
+    generateUsers: { cmd: 'mnt_gen_user_gen_clone' },
 };
 
 export const UsersMntEventPattern = {};

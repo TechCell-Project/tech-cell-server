@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, Logger } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
@@ -85,16 +85,29 @@ export function replaceWhitespaceTo(str: string, replaceTo = '_') {
     return str.replace(/\s+/g, replaceTo);
 }
 
+/**
+ * @param data The data to validate
+ * @param dto The DTO to validate
+ */
 export async function validateDTO(data: any, dto: any) {
-    const errors = await validate(plainToInstance(dto, data));
-    if (errors.length > 0) {
-        const constraints = errors.reduce((acc, error) => {
-            Object.values(error.constraints).forEach((constraint) => {
-                acc.push(constraint);
-            });
-            return acc;
-        }, []);
-        throw new RpcException(new BadRequestException(constraints));
+    let isUnexpected = true;
+    try {
+        const errors = await validate(plainToInstance(dto, data));
+        if (errors.length > 0) {
+            const constraints = errors.reduce((acc, error) => {
+                Object.values(error.constraints).forEach((constraint) => {
+                    acc.push(constraint);
+                });
+                return acc;
+            }, []);
+            isUnexpected = false;
+            throw new RpcException(new BadRequestException(constraints));
+        }
+    } catch (error) {
+        if (!isUnexpected) {
+            Logger.error(`[validateDTO] ${error}]`);
+        }
+        throw new RpcException(new BadRequestException(error.message));
     }
 }
 
@@ -124,4 +137,24 @@ export function isEnable(envVariable: string | number | boolean = undefined) {
  */
 export function isTrueSet(stringValue: string | boolean) {
     return !!stringValue && String(stringValue)?.toLowerCase()?.trim() === 'true';
+}
+
+/**
+ * Find duplicates in an array.
+ * @param arr - The array to search for duplicates.
+ * @returns A `Set` containing the duplicate items in the array.
+ */
+export function findDuplicates<T>(arr: T[]): Set<T> {
+    const seen = new Set<T>();
+    const duplicates = new Set<T>();
+
+    for (const item of arr) {
+        if (seen.has(item)) {
+            duplicates.add(item);
+        } else {
+            seen.add(item);
+        }
+    }
+
+    return duplicates;
 }

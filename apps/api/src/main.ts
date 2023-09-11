@@ -1,37 +1,36 @@
-import * as express from 'express';
-import { createServer as createHttpServer } from 'http';
 import { NestFactory } from '@nestjs/core';
 import { Logger, ValidationPipe } from '@nestjs/common';
-import { ExpressAdapter } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
-import { RpcExceptionFilter } from '@app/common/filters/';
-import { SwaggerModule, DocumentBuilder, SwaggerCustomOptions } from '@nestjs/swagger';
+import { RpcExceptionFilter } from '@app/common/filters';
+import {
+    SwaggerModule,
+    DocumentBuilder,
+    SwaggerCustomOptions,
+    SwaggerDocumentOptions,
+} from '@nestjs/swagger';
 import helmet from 'helmet';
 import * as compression from 'compression';
 
 async function bootstrap() {
     const port = process.env.API_PORT || 8000;
-    const logger = new Logger('api gateway');
+    const logger = new Logger('api-gateway');
 
-    const server = express();
-    const app = await NestFactory.create(AppModule, new ExpressAdapter(server));
+    const app = await NestFactory.create(AppModule);
 
     app.enableCors();
-    app.use(
-        helmet({
-            contentSecurityPolicy: {
-                directives: {
-                    ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-                    'script-src': ["'self'", "'unsafe-inline'"],
-                },
-            },
-        }),
-    );
+    app.use(helmet());
+    // Use to compress responses to improve performance
     app.use(compression());
 
     // Use to catch exceptions and send them to responses
     app.useGlobalFilters(new RpcExceptionFilter());
-    app.useGlobalPipes(new ValidationPipe());
+
+    // Use to validate DTOs and throw exceptions if they are not valid
+    app.useGlobalPipes(
+        new ValidationPipe({
+            transform: true,
+        }),
+    );
 
     // Use swagger to generate documentations
     const config = new DocumentBuilder()
@@ -48,18 +47,20 @@ async function bootstrap() {
                 type: 'http', // 'apiKey' too
                 in: 'Header',
             },
-            'accessToken', // This name here is important for matching up with @ApiBearerAuth() in your controller!
+            'accessToken', // This name here is important for matching up with @ApiBearerAuth() in controller!
         )
         .build();
-    const document = SwaggerModule.createDocument(app, config);
-    const swaggerOptions: SwaggerCustomOptions = {
-        // Change the page title
-        customJsStr: 'document.title = "TechCell documentations"',
+    const swaggerDocumentOptions: SwaggerDocumentOptions = {
+        // re-define the url for each method in controller
+        operationIdFactory: (controllerKey: string, methodKey: string) => methodKey,
     };
-    SwaggerModule.setup('/', app, document, swaggerOptions);
+    const document = SwaggerModule.createDocument(app, config, swaggerDocumentOptions);
+    const swaggerCustomOptions: SwaggerCustomOptions = {
+        customSiteTitle: 'TechCell documentations',
+    };
+    SwaggerModule.setup('/', app, document, swaggerCustomOptions);
 
-    await app.init();
-    createHttpServer(server).listen(port, () =>
+    await app.listen(port, () =>
         logger.log(`⚡️ [http] ready on port: ${port}, url: http://localhost:${port}`),
     );
 }

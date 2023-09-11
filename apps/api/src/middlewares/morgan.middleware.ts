@@ -4,7 +4,7 @@ import * as morgan from 'morgan';
 import { TokenIndexer } from 'morgan';
 import { SAMPLE_SERVICE } from '~/constants';
 import { ClientRMQ } from '@nestjs/microservices';
-import { formatLogsDiscord, isEnable } from '@app/common';
+import { isEnable } from '@app/common';
 import { SampleEventPattern } from '~/apps/sample';
 import { LogType } from 'apps/sample/enums';
 
@@ -55,7 +55,7 @@ export class MorganMiddleware implements NestMiddleware {
 
                 if (isEnable(process.env.LOGS_TO_DISCORD)) {
                     this.sampleService.emit(SampleEventPattern.writeLogsToDiscord, {
-                        message: formatLogsDiscord(messageExpected),
+                        message: messageExpected,
                     });
                 }
             } catch (error) {

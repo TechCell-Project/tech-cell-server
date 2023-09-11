@@ -4,15 +4,16 @@ import {
     Get,
     Post,
     UploadedFiles,
-    UseInterceptors,
     Body,
     Query,
-    BadRequestException,
     Param,
+    Patch,
+    Put,
+    UseGuards,
 } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import { MANAGEMENTS_SERVICE, ProductImageFieldname, SEARCH_SERVICE } from '~/constants';
-import { catchException } from '@app/common';
+import { SuperAdminGuard, catchException } from '@app/common';
 import {
     ApiBody,
     ApiConsumes,
@@ -22,15 +23,32 @@ import {
     ApiExtraModels,
     getSchemaPath,
     ApiOkResponse,
+    ApiBadRequestResponse,
+    ApiInternalServerErrorResponse,
+    ApiTooManyRequestsResponse,
+    ApiExcludeEndpoint,
 } from '@nestjs/swagger';
-import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import { ProductsMntMessagePattern } from '~/apps/managements/products-mnt';
 import { ProductsSearchMessagePattern } from '~/apps/search/products-search';
 import { GetProductsDTO } from '~/apps/search/products-search/dtos';
 import { CreateProductRequestDTO } from '~/apps/managements/products-mnt/dtos';
+import { ProductIdParamsDTO } from '~/apps/managements/products-mnt/dtos/params.dto';
+import { UpdateProductRequestDTO } from '~/apps/managements/products-mnt/dtos/update-product-request.dto';
+import { UpdateProductGeneralImagesDTO } from '~/apps/managements/products-mnt/dtos/update-product-general-images-request.dto';
+import { FilesDTO } from '~/apps/managements/products-mnt/dtos/files.dto';
+import { ValidateImageFileInterceptor } from '@app/common/interceptors/file-upload.interceptor';
 
+@ApiBadRequestResponse({
+    description: 'Invalid request',
+})
+@ApiTooManyRequestsResponse({
+    description: 'Too many requests',
+})
+@ApiInternalServerErrorResponse({
+    description: 'Internal server error',
+})
 @ApiTags('products')
-@ApiExtraModels(CreateProductRequestDTO)
+@ApiExtraModels(CreateProductRequestDTO, UpdateProductRequestDTO, UpdateProductGeneralImagesDTO)
 @Controller('products')
 export class ProductsController {
     constructor(
@@ -38,6 +56,9 @@ export class ProductsController {
         @Inject(SEARCH_SERVICE) private readonly searchService: ClientRMQ,
     ) {}
 
+    @ApiOperation({
+        summary: 'Get products list',
+    })
     @ApiOkResponse({ description: 'Get products successfully!' })
     @ApiNotFoundResponse({ description: 'Products not found.' })
     @Get('/')
@@ -50,12 +71,76 @@ export class ProductsController {
     @ApiOperation({
         summary: 'Create a new product',
     })
+    @Post('/')
+    async createProduct(@Body() { ...data }: CreateProductRequestDTO) {
+        return this.managementsService
+            .send(ProductsMntMessagePattern.createProduct, {
+                ...data,
+            })
+            .pipe(catchException());
+    }
+
+    @ApiOperation({
+        summary: 'Get product by id',
+    })
+    @Get('/:productId')
+    async getProductById(@Param() { productId }: ProductIdParamsDTO) {
+        return this.searchService
+            .send(ProductsSearchMessagePattern.getProductById, { productId })
+            .pipe(catchException());
+    }
+
+    @ApiOperation({
+        summary: 'Update product by id',
+    })
+    @ApiOkResponse({
+        description: 'Update product information',
+    })
+    @ApiExcludeEndpoint(true)
+    @Put('/:productId')
+    async updateProduct(
+        @Param() { productId }: ProductIdParamsDTO,
+        @Body() { ...productData }: UpdateProductRequestDTO,
+    ) {
+        return this.managementsService
+            .send(ProductsMntMessagePattern.updateProductGeneral, {
+                productId,
+                ...productData,
+            })
+            .pipe(catchException());
+    }
+
+    @ApiExcludeEndpoint(true)
+    @ApiOkResponse({
+        description: 'Update product data, can add new variations, images ...',
+    })
+    @Patch('/:productId/:sku')
+    async updateProductVariations(
+        @Param('productId') productId: string,
+        @Param('sku') sku: string,
+        @Body() { ...payload }: any,
+    ) {
+        return { productId, sku, payload };
+    }
+
+    @ApiExcludeEndpoint(true)
+    @UseGuards(SuperAdminGuard)
+    @Post('/gen-clone')
+    async gen(@Query() { num }: { num: number }) {
+        return this.managementsService
+            .send(ProductsMntMessagePattern.generateProducts, { num })
+            .pipe(catchException());
+    }
+
+    @ApiOperation({
+        summary: 'Update product general images',
+    })
     @ApiConsumes('multipart/form-data')
     @ApiBody({
         description:
             'Create product request.\n\n' +
             'Product data rules:\n' +
-            `- Follow the ${getSchemaPath(CreateProductRequestDTO.name)}\n\n` +
+            `- Follow the ${getSchemaPath(UpdateProductGeneralImagesDTO.name)}\n\n` +
             'File rules:\n' +
             '- Only image files are allowed.\n' +
             '- Maximum 30 files.\n' +
@@ -75,7 +160,7 @@ export class ProductsController {
                 productData: {
                     type: 'object',
                     description: 'Product data',
-                    $ref: getSchemaPath(CreateProductRequestDTO.name),
+                    $ref: getSchemaPath(UpdateProductGeneralImagesDTO.name),
                 },
                 files: {
                     type: 'array',
@@ -87,51 +172,21 @@ export class ProductsController {
             },
         },
     })
-    @Post('/')
-    @UseInterceptors(
-        AnyFilesInterceptor({
-            limits: {
-                files: 30,
-                fileSize: 10 * 1024 * 1024, // 10 MB
-            },
-            fileFilter: (req, file, cb) => {
-                if (!file.originalname.match(/\.(jpg|jpeg|png|gif|webp)$/)) {
-                    return cb(new BadRequestException('Only image files are allowed!'), false);
-                }
-                cb(null, true);
-            },
-        }),
-    )
-    async createProduct(
-        @Body('productData') productData: string,
-        @UploadedFiles() files: Array<Express.Multer.File>,
+    @ApiExcludeEndpoint(true)
+    @ValidateImageFileInterceptor()
+    @Post('/:productId/images')
+    async updateProductGeneralImages(
+        @Param() { productId }: ProductIdParamsDTO,
+        @Body() { images }: UpdateProductGeneralImagesDTO,
+        @UploadedFiles()
+        { files }: FilesDTO,
     ) {
         return this.managementsService
-            .send(ProductsMntMessagePattern.createProduct, {
-                productData,
+            .send(ProductsMntMessagePattern.updateProductGeneralImages, {
+                productId,
+                images,
                 files,
             })
             .pipe(catchException());
     }
-
-    @Get('/:productId')
-    async getProductById(@Param() { productId }: { productId: string }) {
-        return this.searchService
-            .send(ProductsSearchMessagePattern.getProductById, { productId })
-            .pipe(catchException());
-    }
-
-    // @ApiOkResponse({
-    //     description: 'Product status change successful',
-    //     type: ProductsMntResponseDto,
-    // })
-    // @ApiBadRequestResponse({
-    //     description: 'Invalid request',
-    // })
-    // @Patch('/:id/change-status')
-    // async changeStatus(@Param('id') idParam: string, @Body() { status }: ChangeStatusRequestDTO) {
-    //     return this.managementsService
-    //         .send(ProductsMntMessagePattern.changeStatus, { productId: idParam, status })
-    //         .pipe(catchException());
-    // }
 }

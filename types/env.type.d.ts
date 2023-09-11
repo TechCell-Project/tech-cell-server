@@ -6,30 +6,6 @@ declare namespace NodeJS {
         API_PORT: string;
 
         /**
-         * HTTP port of service sample
-         * @description This port can not need to be exposed to outside
-         */
-        SERVICE_SAMPLE_PORT: string;
-
-        /**
-         * HTTP port of service `search`
-         * @description This port maybe not need to be exposed to outside
-         */
-        SERVICE_SEARCH_PORT: string;
-
-        /**
-         * HTTP port of service auth
-         * @description This port can not need to be exposed to outside
-         */
-        SERVICE_AUTH_PORT: string;
-
-        /**
-         * HTTP port of service managements
-         * @description This port can not need to be exposed to outside
-         */
-        SERVICE_MAIL_PORT: string;
-
-        /**
          * The Global TTL(Time to live) of throttle
          * @description This value is used for `throttle` module, and is a second unit
          * @example
@@ -171,9 +147,9 @@ declare namespace NodeJS {
 
         /**
          * The `RabbitMq` urls
-         * @description This value is used for `amqplib` module
+         * @description This value is used for `amqplib` module and is a comma separated list
          * @example
-         * RABBITMQ_URLS = 'amqp://localhost:5672'
+         * RABBITMQ_URLS = amqp://localhost:5672, amqp://localhost:5673
          * @see https://www.rabbitmq.com/uri-spec.html
          */
         RABBITMQ_URLS: string;
@@ -190,6 +166,7 @@ declare namespace NodeJS {
         RABBITMQ_MAIL_QUEUE: string;
         RABBITMQ_MANAGEMENTS_QUEUE: string;
         RABBITMQ_ORDER_QUEUE: string;
+        RABBITMQ_TASK_QUEUE: string;
 
         /**
          * The `RabbitMq` default user

@@ -27,6 +27,9 @@ export class Product extends AbstractDocument {
     @Prop({ required: false, default: [] })
     generalImages: ImageSchema[];
 
+    @Prop({ required: false, default: [] })
+    descriptionImages: ImageSchema[];
+
     @Prop({ required: true })
     variations: VariationSchema[];
 }

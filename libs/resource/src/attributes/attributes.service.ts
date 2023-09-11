@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { AttributesRepository } from './attributes.repository';
 import { FilterQuery, Types } from 'mongoose';
 import { CreateAttributeDTO, UpdateAttributeDTO } from './dtos';
@@ -11,7 +11,11 @@ export class AttributesService {
     constructor(private readonly attributesRepository: AttributesRepository) {}
 
     async getAttributes({ filterQueries, queryOptions, projectionArgs }: IBaseQuery<Attribute>) {
-        return this.attributesRepository.find(filterQueries, queryOptions, projectionArgs);
+        return this.attributesRepository.find({
+            filterQuery: filterQueries,
+            queryOptions: queryOptions,
+            projection: projectionArgs,
+        });
     }
 
     async getAttributeById(id: string | Types.ObjectId) {
@@ -24,7 +28,12 @@ export class AttributesService {
     }
 
     async getAttributeByLabel(label: string) {
-        return this.attributesRepository.findOne({ label });
+        try {
+            const attribute = await this.attributesRepository.findOne({ label });
+            return attribute;
+        } catch (error) {
+            throw new RpcException(new NotFoundException(`Attribute '${label}' is not found.`));
+        }
     }
 
     async createAttribute({ label, name, description }: CreateAttributeDTO) {
