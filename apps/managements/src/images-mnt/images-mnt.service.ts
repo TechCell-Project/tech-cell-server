@@ -15,7 +15,9 @@ export class ImagesMntService {
 
     async getImages() {
         try {
-            const images = await this.cloudinaryService.getImagesInFolder();
+            const images = await this.cloudinaryService.getImagesInFolder({
+                next_cursor: null,
+            });
             return { images };
         } catch (error) {
             this.logger.error(error);

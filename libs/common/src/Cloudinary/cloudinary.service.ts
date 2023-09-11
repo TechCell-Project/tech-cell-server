@@ -1,5 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { v2 as cloudinary, ResourceApiResponse, UploadApiOptions } from 'cloudinary';
+import {
+    AdminAndResourceOptions,
+    v2 as cloudinary,
+    ResourceApiResponse,
+    UploadApiOptions,
+} from 'cloudinary';
 import { CloudinaryResponse } from './cloudinary-response';
 import * as streamifier from 'streamifier';
 import { CLOUDINARY_ALLOW_IMAGE_FORMATS, CLOUDINARY_ROOT_FOLDER_NAME } from './cloudinary.constant';
@@ -53,27 +58,31 @@ export class CloudinaryService {
         });
     }
 
-    getImagesInFolder(
-        startAt = 1,
+    getImagesInFolder({
         maxResults = 10,
         folderName = CLOUDINARY_ROOT_FOLDER_NAME,
-    ): Promise<ResourceApiResponse> {
+        next_cursor = null,
+    }: {
+        maxResults?: number;
+        folderName?: string;
+        next_cursor?: string;
+    }): Promise<ResourceApiResponse> {
+        const options: AdminAndResourceOptions = {
+            resource_type: 'image',
+            type: 'upload',
+            prefix: folderName,
+            max_results: maxResults,
+            next_cursor: next_cursor,
+        };
+
         return new Promise<ResourceApiResponse>((resolve, reject) => {
-            cloudinary.api.resources(
-                {
-                    type: 'upload',
-                    prefix: folderName,
-                    start_at: startAt,
-                    max_results: maxResults,
-                },
-                (error, result) => {
-                    if (error) {
-                        reject(error);
-                    } else {
-                        resolve(result);
-                    }
-                },
-            );
+            cloudinary.api.resources(options, (error, result) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve(result);
+                }
+            });
         });
     }
 }
