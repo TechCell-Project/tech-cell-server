@@ -37,8 +37,12 @@ export class CategoriesService {
         filterQueries,
         queryOptions,
         projectionArgs,
-    }: IBaseQuery<Category>): Promise<Category[] | undefined> {
-        return this.categoriesRepository.find(filterQueries, queryOptions, projectionArgs);
+    }: IBaseQuery<Partial<Category>>): Promise<Category[] | undefined> {
+        return this.categoriesRepository.find({
+            filterQuery: filterQueries,
+            queryOptions: queryOptions,
+            projection: projectionArgs,
+        });
     }
 
     async updateCategory({

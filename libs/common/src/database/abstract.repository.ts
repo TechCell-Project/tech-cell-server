@@ -68,15 +68,35 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
         });
     }
 
-    async find(
-        filterQuery: FilterQuery<TDocument>,
-        options?: Partial<QueryOptions<TDocument>>,
-        projection?: ProjectionType<TDocument>,
-    ) {
-        const document = await this.model.find(filterQuery, projection, { lean: true, ...options });
+    // async find(
+    //     filterQuery: FilterQuery<TDocument>,
+    //     options?: Partial<QueryOptions<TDocument>>,
+    //     projection?: ProjectionType<TDocument>,
+    //     logEnabled = true,
+    // ) {
+    async find({
+        filterQuery,
+        queryOptions,
+        projection,
+        logEnabled = true,
+    }: {
+        filterQuery: FilterQuery<TDocument>;
+        queryOptions?: Partial<QueryOptions<TDocument>>;
+        projection?: ProjectionType<TDocument>;
+        logEnabled?: boolean;
+    }) {
+        const document = await this.model.find(filterQuery, projection, {
+            lean: true,
+            ...queryOptions,
+        });
 
         if (!document || document.length <= 0) {
-            this.logger.warn(`${this.model.modelName}s not found with filterQuery:`, filterQuery);
+            if (logEnabled) {
+                this.logger.warn(
+                    `${this.model.modelName}s not found with filterQuery:`,
+                    filterQuery,
+                );
+            }
             throw new RpcException(new NotFoundException(`${this.model.modelName}s not found.`));
         }
 
