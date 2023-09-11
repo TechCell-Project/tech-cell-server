@@ -6,7 +6,7 @@ import { CreateProductDTO } from '@app/resource';
 import { compareTwoObjectAndGetDifferent } from '@app/common';
 import { UpdateProductRequestDTO } from './dtos/update-product-request.dto';
 import { ProductIdParamsDTO } from './dtos/params.dto';
-import sanitizeHtml from 'sanitize-html';
+import * as sanitizeHtml from 'sanitize-html';
 
 @Injectable()
 export class ProductsMntService extends ProductsMntUtilService {
