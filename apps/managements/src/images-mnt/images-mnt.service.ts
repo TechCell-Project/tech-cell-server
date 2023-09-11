@@ -42,7 +42,7 @@ export class ImagesMntService {
         }
     }
 
-    async uploadImages(image: Express.Multer.File) {
+    async uploadSingleImage(image: Express.Multer.File) {
         try {
             const uploadedImage = await this.cloudinaryService.uploadImage(image);
             return { ...new ImageUploadedResponseDTO(uploadedImage) };

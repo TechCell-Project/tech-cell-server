@@ -24,12 +24,12 @@ export class ImagesMntController {
         return this.imagesMntService.getImageByPublicId(publicId);
     }
 
-    @MessagePattern(ImagesMntMessagePattern.uploadImages)
-    async uploadImages(
+    @MessagePattern(ImagesMntMessagePattern.uploadSingleImage)
+    async uploadSingleImage(
         @Ctx() context: RmqContext,
         @Payload() { image }: { image: Express.Multer.File },
     ) {
         this.rabbitmqService.acknowledgeMessage(context);
-        return this.imagesMntService.uploadImages(image);
+        return this.imagesMntService.uploadSingleImage(image);
     }
 }

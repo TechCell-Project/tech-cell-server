@@ -98,7 +98,7 @@ export class ImagesController {
     })
     @Post('/')
     @UseGuards(AdminGuard)
-    async uploadImages(
+    async uploadSingleImage(
         @UploadedFile(
             new ParseFilePipe({
                 validators: [
@@ -113,7 +113,7 @@ export class ImagesController {
         image: Express.Multer.File,
     ) {
         return this.managementsService
-            .send(ImagesMntMessagePattern.uploadImages, { image })
+            .send(ImagesMntMessagePattern.uploadSingleImage, { image })
             .pipe(catchException());
     }
 }
