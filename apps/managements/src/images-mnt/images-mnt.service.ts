@@ -18,7 +18,9 @@ export class ImagesMntService {
             const images = await this.cloudinaryService.getImagesInFolder({
                 next_cursor: null,
             });
-            return { images };
+            return {
+                images,
+            };
         } catch (error) {
             this.logger.error(error);
             throw new RpcException(
@@ -30,7 +32,7 @@ export class ImagesMntService {
     async getImageByPublicId(publicId: string) {
         try {
             const image = await this.cloudinaryService.getImageByPublicId(publicId);
-            return { image };
+            return new ImageUploadedResponseDTO(image);
         } catch (error) {
             this.logger.error(error);
             if (error.http_code === 404) {
@@ -46,6 +48,22 @@ export class ImagesMntService {
         try {
             const uploadedImage = await this.cloudinaryService.uploadImage(image);
             return { ...new ImageUploadedResponseDTO(uploadedImage) };
+        } catch (error) {
+            this.logger.error(error);
+            throw new RpcException(
+                new InternalServerErrorException('Upload image failed, try again later'),
+            );
+        }
+    }
+
+    async uploadArrayImage(images: Express.Multer.File[]) {
+        try {
+            const uploadedImages = await Promise.all(
+                images.map((image) => this.cloudinaryService.uploadImage(image)),
+            );
+            return {
+                data: uploadedImages.map((image) => new ImageUploadedResponseDTO(image)),
+            };
         } catch (error) {
             this.logger.error(error);
             throw new RpcException(

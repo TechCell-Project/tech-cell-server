@@ -13,9 +13,10 @@ import {
     UploadedFile,
     UseGuards,
     UseInterceptors,
+    UploadedFiles,
 } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import {
     ApiBadRequestResponse,
     ApiBearerAuth,
@@ -23,6 +24,8 @@ import {
     ApiConsumes,
     ApiCreatedResponse,
     ApiInternalServerErrorResponse,
+    ApiNotFoundResponse,
+    ApiOkResponse,
     ApiOperation,
     ApiPayloadTooLargeResponse,
     ApiTags,
@@ -31,6 +34,12 @@ import {
 import { ImageUploadedResponseDTO } from '~/apps/managements/images-mnt/dtos/image-uploaded-response.dto';
 import { PublicIdDTO } from '~/apps/managements/images-mnt/dtos/publicId.dto';
 import { ImagesMntMessagePattern } from '~/apps/managements/images-mnt/images-mnt.pattern';
+import {
+    ARRAY_IMAGE_FILE_MAX_COUNT,
+    IMAGE_FILE_MAX_SIZE_IN_BYTES,
+    IMAGE_FILE_MAX_SIZE_IN_MB,
+    SINGLE_IMAGE_FILE_MAX_COUNT,
+} from '~/constants/api.constant';
 import { MANAGEMENTS_SERVICE } from '~/constants/services.constant';
 
 @ApiBadRequestResponse({
@@ -48,6 +57,16 @@ import { MANAGEMENTS_SERVICE } from '~/constants/services.constant';
 export class ImagesController {
     constructor(@Inject(MANAGEMENTS_SERVICE) private readonly managementsService: ClientRMQ) {}
 
+    @ApiOperation({
+        summary: 'Get image by public id',
+    })
+    @ApiOkResponse({
+        description: 'Image found',
+        type: ImageUploadedResponseDTO,
+    })
+    @ApiNotFoundResponse({
+        description: 'Image not found',
+    })
     @Get('/:publicId')
     async getImageByPublicId(@Param() { publicId }: PublicIdDTO) {
         return this.managementsService
@@ -69,14 +88,14 @@ export class ImagesController {
     @UseInterceptors(
         FileInterceptor('image', {
             limits: {
-                files: 1,
-                fileSize: 1024 * 1024 * 10, // default 10 MB
+                files: SINGLE_IMAGE_FILE_MAX_COUNT,
+                fileSize: IMAGE_FILE_MAX_SIZE_IN_BYTES,
             },
             fileFilter: (req, file, cb) => {
                 if (!RegExp(/\.(jpg|jpeg|png|gif|webp)$/).exec(file.originalname)) {
                     return cb(new BadRequestException('Only image files are allowed!'), false);
                 }
-                if (file.size > 1024 * 1024 * 10) {
+                if (file.size > IMAGE_FILE_MAX_SIZE_IN_BYTES) {
                     return cb(new PayloadTooLargeException('Image size too large'), false);
                 }
                 cb(null, true);
@@ -91,7 +110,7 @@ export class ImagesController {
                 image: {
                     type: 'string',
                     format: 'binary',
-                    description: 'Maximum image size is 10 MB (10,485,760 bytes)',
+                    description: `Maximum image size is ${IMAGE_FILE_MAX_SIZE_IN_MB} MB (${IMAGE_FILE_MAX_SIZE_IN_BYTES} bytes)`,
                 },
             },
         },
@@ -102,7 +121,7 @@ export class ImagesController {
         @UploadedFile(
             new ParseFilePipe({
                 validators: [
-                    new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 10 }),
+                    new MaxFileSizeValidator({ maxSize: IMAGE_FILE_MAX_SIZE_IN_BYTES }),
                     new FileTypeValidator({
                         fileType: 'image',
                     }),
@@ -114,6 +133,71 @@ export class ImagesController {
     ) {
         return this.managementsService
             .send(ImagesMntMessagePattern.uploadSingleImage, { image })
+            .pipe(catchException());
+    }
+
+    @ApiOperation({
+        summary: 'Upload array of image',
+    })
+    @ApiConsumes('multipart/form-data')
+    @ApiCreatedResponse({
+        description: 'Images uploaded',
+        type: [ImageUploadedResponseDTO],
+    })
+    @ApiPayloadTooLargeResponse({
+        description: `Image size too large, maximum ${IMAGE_FILE_MAX_SIZE_IN_MB} MB`,
+    })
+    @ApiBody({
+        description: 'Image files to upload as multipart/form-data',
+        schema: {
+            type: 'object',
+            properties: {
+                images: {
+                    type: 'array',
+                    items: {
+                        type: 'string',
+                        format: 'binary',
+                        description: `Maximum image size is ${IMAGE_FILE_MAX_SIZE_IN_MB} MB (${IMAGE_FILE_MAX_SIZE_IN_BYTES} bytes)`,
+                    },
+                },
+            },
+        },
+    })
+    @UseInterceptors(
+        FilesInterceptor('images', ARRAY_IMAGE_FILE_MAX_COUNT, {
+            limits: {
+                files: ARRAY_IMAGE_FILE_MAX_COUNT,
+                fileSize: IMAGE_FILE_MAX_SIZE_IN_BYTES,
+            },
+            fileFilter: (req, file, cb) => {
+                if (!RegExp(/\.(jpg|jpeg|png|gif|webp)$/).exec(file.originalname)) {
+                    return cb(new BadRequestException('Only image files are allowed!'), false);
+                }
+                if (file.size > IMAGE_FILE_MAX_SIZE_IN_BYTES) {
+                    return cb(new PayloadTooLargeException('Image size too large'), false);
+                }
+                cb(null, true);
+            },
+        }),
+    )
+    @Post('/array')
+    @UseGuards(AdminGuard)
+    async uploadArrayImages(
+        @UploadedFiles(
+            new ParseFilePipe({
+                validators: [
+                    new MaxFileSizeValidator({ maxSize: IMAGE_FILE_MAX_SIZE_IN_BYTES }),
+                    new FileTypeValidator({
+                        fileType: 'image',
+                    }),
+                ],
+                fileIsRequired: true,
+            }),
+        )
+        images: Express.Multer.File[],
+    ) {
+        return this.managementsService
+            .send(ImagesMntMessagePattern.uploadArrayImage, { images })
             .pipe(catchException());
     }
 }

@@ -32,4 +32,13 @@ export class ImagesMntController {
         this.rabbitmqService.acknowledgeMessage(context);
         return this.imagesMntService.uploadSingleImage(image);
     }
+
+    @MessagePattern(ImagesMntMessagePattern.uploadArrayImage)
+    async uploadArrayImage(
+        @Ctx() context: RmqContext,
+        @Payload() { images }: { images: Express.Multer.File[] },
+    ) {
+        this.rabbitmqService.acknowledgeMessage(context);
+        return this.imagesMntService.uploadArrayImage(images);
+    }
 }
