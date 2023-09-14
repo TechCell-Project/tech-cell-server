@@ -19,8 +19,11 @@ export class ProductsMntService extends ProductsMntUtilService {
         productData = await this.validProductAttributes({ ...productData });
         productData.description = sanitizeHtmlString(productData.description);
 
-        // Base on variation's attributes to generate sku
-        const productToCreate: CreateProductDTO = this.updateProductWithSku(productData);
+        // Validate the variations of product
+        const productToCreate: CreateProductDTO = this.validVariations(productData);
+        if (productToCreate['_id'] !== undefined) {
+            delete productToCreate['_id'];
+        }
 
         // Check if product is already exist or not with the same sku
         const isProductExist = await this.isProductExist(productToCreate);
@@ -82,18 +85,15 @@ export class ProductsMntService extends ProductsMntUtilService {
             },
         });
 
+        // safe delete _id
+        if (productUpdatedData['_id'] !== undefined) {
+            delete productUpdatedData['_id'];
+        }
+
         const isAllow = this.allowFieldsToUpdateProduct(oldProduct, productUpdatedData);
         if (isAllow !== true) {
             throw new RpcException(new BadRequestException(isAllow));
         }
-
-        // Resolve add new variations
-        // If the variation is already exist, throw the exception
-        // If not, add the new one
-        // If pass return the new version that attributes have been sorted
-        productUpdatedData = await this.validProductAttributes({ ...productUpdatedData });
-        // Base on variation's attributes to generate sku
-        productUpdatedData = this.updateProductWithSku(productUpdatedData);
 
         // Resolve images to add the url to image object
         // Because user just post the `publicId` of image
@@ -101,18 +101,26 @@ export class ProductsMntService extends ProductsMntUtilService {
             productData: productUpdatedData,
         });
 
+        // Resolve add new variations
+        // If the variation is already exist, throw the exception
+        // If not, add the new one
+        // If pass return the new version that attributes have been sorted
+        productUpdatedData = await this.validProductAttributes({ ...productUpdatedData });
+        // Base on variation's attributes to generate sku
+        productUpdatedData = this.validVariations(productUpdatedData);
+
         // Assign `generalImages` product
         if (generalImages.length > 0) {
             productUpdatedData.generalImages = generalImages;
         } else {
-            delete productUpdatedData?.generalImages;
+            productUpdatedData.generalImages = [];
         }
 
         // Assign `descriptionImages` product
         if (descriptionImages.length > 0) {
             productUpdatedData.descriptionImages = descriptionImages;
         } else {
-            delete productUpdatedData?.descriptionImages;
+            productUpdatedData.descriptionImages = [];
         }
 
         // Assign `variations` product, merge with the old one
@@ -123,7 +131,7 @@ export class ProductsMntService extends ProductsMntUtilService {
             if (variations[i]?.images.length > 0) {
                 productUpdatedData.variations[i].images = variations[i].images;
             } else {
-                delete productUpdatedData.variations[i]?.images;
+                productUpdatedData.variations[i].images = [];
             }
         }
 
