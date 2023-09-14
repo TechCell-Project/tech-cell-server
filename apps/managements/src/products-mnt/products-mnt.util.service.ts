@@ -3,15 +3,23 @@ import {
     CategoriesService,
     CreateProductDTO,
     ImageDTO,
+    Product,
     ProductsService,
 } from '@app/resource';
 import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common';
-import { delStartWith, findDuplicates, replaceWhitespaceTo } from '@app/common/utils';
+import {
+    allowToAction,
+    compareTwoObjectAndGetDifferent,
+    delStartWith,
+    findDuplicates,
+    replaceWhitespaceTo,
+} from '@app/common/utils';
 import { REDIS_CACHE, PRODUCTS_CACHE_PREFIX } from '~/constants';
 import { Store } from 'cache-manager';
 import { CreateProductRequestDTO } from './dtos';
 import { RpcException } from '@nestjs/microservices';
 import { CloudinaryService } from '@app/common/Cloudinary';
+import { UpdateProductRequestDTO } from './dtos/update-product-request.dto';
 
 @Injectable()
 export class ProductsMntUtilService {
@@ -172,7 +180,7 @@ export class ProductsMntUtilService {
      * @returns `true` if the validation succeeds.
      * @throws `BadRequestException` if the validation fails.
      */
-    protected async validProductAttributes(product: CreateProductRequestDTO) {
+    protected async validProductAttributes(product: CreateProductRequestDTO | CreateProductDTO) {
         const {
             categories: categoryLabels = [],
             variations = [],
@@ -296,6 +304,66 @@ export class ProductsMntUtilService {
             }),
         };
 
+        // Check if sku is duplicated
+        const duplicateSkus = [...findDuplicates(newProduct.variations.map((v) => v.sku))];
+        if (duplicateSkus.length > 0) {
+            throw new RpcException(
+                new BadRequestException(`Duplicate skus: ${duplicateSkus.join(', ')}`),
+            );
+        }
+
         return newProduct;
+    }
+
+    protected allowFieldsToUpdateProduct(
+        oldProduct: Product,
+        productUpdatedData: UpdateProductRequestDTO,
+    ) {
+        // get diff between old product and new product
+        const diff = compareTwoObjectAndGetDifferent(oldProduct, productUpdatedData, {
+            type: 'omit',
+            omitKey: [
+                '_id',
+                'createdAt',
+                'updatedAt',
+                '__v',
+                'generalImages.#.url',
+                'descriptionImages.#.url',
+                'variations.#.images.#.url',
+            ],
+        });
+
+        const isAllow = allowToAction(diff, [
+            {
+                kind: 'N', // new
+                paths: ['generalImages', 'descriptionImages', 'variations.#.images'],
+            },
+            {
+                kind: 'E', // edit
+                paths: [
+                    'description',
+                    'status',
+                    'generalImages.#.publicId',
+                    'generalImages.#.isThumbnail',
+                    'descriptionImages.#.publicId',
+                    'descriptionImages.#.isThumbnail',
+                    'variations.#.stock',
+                    'variations.#.images.#.publicId',
+                    'variations.#.images.#.isThumbnail',
+                ],
+            },
+            {
+                kind: 'A', // array
+                paths: [
+                    'generalAttributes',
+                    'generalImages',
+                    'descriptionImages',
+                    'variations.#.images',
+                    'variations',
+                ],
+            },
+        ]);
+
+        return isAllow;
     }
 }
