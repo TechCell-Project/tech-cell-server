@@ -3,10 +3,10 @@ import { ProductsMntUtilService } from './products-mnt.util.service';
 import { CreateProductRequestDTO } from './dtos';
 import { RpcException } from '@nestjs/microservices';
 import { CreateProductDTO } from '@app/resource';
-import { compareTwoObjectAndGetDifferent } from '@app/common';
 import { UpdateProductRequestDTO } from './dtos/update-product-request.dto';
 import { ProductIdParamsDTO } from './dtos/params.dto';
-import * as sanitizeHtml from 'sanitize-html';
+import { Types } from 'mongoose';
+import { sanitizeHtmlString } from '@app/common/utils';
 
 @Injectable()
 export class ProductsMntService extends ProductsMntUtilService {
@@ -17,10 +17,13 @@ export class ProductsMntService extends ProductsMntUtilService {
         // If not, throw the exception
         // If pass return the new version that attributes have been sorted
         productData = await this.validProductAttributes({ ...productData });
-        productData.description = sanitizeHtml(productData.description);
+        productData.description = sanitizeHtmlString(productData.description);
 
-        // Base on variation's attributes to generate sku
-        const productToCreate: CreateProductDTO = this.updateProductWithSku(productData);
+        // Validate the variations of product
+        const productToCreate: CreateProductDTO = this.validVariations(productData);
+        if (productToCreate['_id'] !== undefined) {
+            delete productToCreate['_id'];
+        }
 
         // Check if product is already exist or not with the same sku
         const isProductExist = await this.isProductExist(productToCreate);
@@ -64,47 +67,80 @@ export class ProductsMntService extends ProductsMntUtilService {
         return await this.productsService.createProduct(productToCreate);
     }
 
-    async updateProductGeneral({
+    async updateProductPutMethod({
         productId,
         ...productUpdatedData
     }: ProductIdParamsDTO & UpdateProductRequestDTO) {
+        try {
+            productId = new Types.ObjectId(productId);
+        } catch (error) {
+            throw new RpcException(new BadRequestException('Invalid product id'));
+        }
+
+        // Find product by id to check if it is exist or not
+        // If not, throw the exception
         const oldProduct = await this.productsService.getProduct({
             filterQueries: {
                 _id: productId,
             },
         });
 
-        const diff = compareTwoObjectAndGetDifferent(oldProduct, productUpdatedData, {
-            type: 'omit',
-            omitKey: ['generalImages', 'variations', 'updatedAt', 'createdAt', '__v', '_id'],
+        // safe delete _id
+        if (productUpdatedData['_id'] !== undefined) {
+            delete productUpdatedData['_id'];
+        }
+
+        const isAllow = this.allowFieldsToUpdateProduct(oldProduct, productUpdatedData);
+        if (isAllow !== true) {
+            throw new RpcException(new BadRequestException(isAllow));
+        }
+
+        // Resolve images to add the url to image object
+        // Because user just post the `publicId` of image
+        const { generalImages, descriptionImages, variations } = await this.resolveImages({
+            productData: productUpdatedData,
         });
 
-        // Check if there is any data to update
-        if (Object.keys(diff).length === 0) {
-            throw new RpcException(new BadRequestException(`No data to updated`));
+        // Resolve add new variations
+        // If the variation is already exist, throw the exception
+        // If not, add the new one
+        // If pass return the new version that attributes have been sorted
+        productUpdatedData = await this.validProductAttributes({ ...productUpdatedData });
+        // Base on variation's attributes to generate sku
+        productUpdatedData = this.validVariations(productUpdatedData);
+
+        // Assign `generalImages` product
+        if (generalImages.length > 0) {
+            productUpdatedData.generalImages = generalImages;
+        } else {
+            productUpdatedData.generalImages = [];
         }
 
-        // Check if there is any new field added to product
-        if (Object.values(diff).some((value: any) => value?.kind === 'N')) {
-            const newFields = Object.values(diff)
-                .filter((value: any) => value?.kind === 'N')
-                .map((value: any) => value?.path?.join('.'))
-                .join(', ');
-            throw new RpcException(
-                new BadRequestException(`Can not add new field(s) ${newFields} to product`),
-            );
+        // Assign `descriptionImages` product
+        if (descriptionImages.length > 0) {
+            productUpdatedData.descriptionImages = descriptionImages;
+        } else {
+            productUpdatedData.descriptionImages = [];
         }
 
-        // Prepare product data to validate and update if passing validation
-        const prepareProduct = Object.assign(oldProduct, productUpdatedData);
-        await this.validProductAttributes(prepareProduct);
+        // Assign `variations` product, merge with the old one
+        // The `productUpdatedData.variations` is old one, it update the sku
+        // The `variations` is new one, it updated the image object with more data
+        // Merge two object to get the new one
+        for (let i = 0; i < productUpdatedData.variations.length; i++) {
+            if (variations[i]?.images.length > 0) {
+                productUpdatedData.variations[i].images = variations[i].images;
+            } else {
+                productUpdatedData.variations[i].images = [];
+            }
+        }
 
-        const productUpdated = await this.productsService.updateProductById(
-            oldProduct._id,
-            prepareProduct,
-        );
-
-        return { ...productUpdated };
+        return await this.productsService.updateProductById(productId, {
+            $set: {
+                ...productUpdatedData,
+                updatedAt: new Date(),
+            },
+        });
     }
 
     async gen(num: number) {
