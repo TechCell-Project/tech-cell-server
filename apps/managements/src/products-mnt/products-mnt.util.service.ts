@@ -20,6 +20,7 @@ import { CreateProductRequestDTO } from './dtos';
 import { RpcException } from '@nestjs/microservices';
 import { CloudinaryService } from '@app/common/Cloudinary';
 import { UpdateProductRequestDTO } from './dtos/update-product-request.dto';
+import { ProductStatus } from '@app/resource/products/enums';
 
 @Injectable()
 export class ProductsMntUtilService {
@@ -280,17 +281,20 @@ export class ProductsMntUtilService {
      * @param productData the product data when create
      * @returns the product data with sku in each variation
      */
-    protected updateProductWithSku(productData: CreateProductRequestDTO): CreateProductDTO {
+    protected validVariations(productData: CreateProductRequestDTO): CreateProductDTO {
         const { name, variations } = productData;
 
         const newProduct: CreateProductDTO = {
             ...productData,
-            generalImages: [],
-            descriptionImages: [],
+            // The empty array is required to avoid the error when create product
+            // This will be updated when resolve images after
+            generalImages: [], // default generalImages is empty array
+            descriptionImages: [], // default descriptionImages is empty array
             variations: variations.map((variation) => {
                 const { attributes } = variation;
                 const sortedAttributes = attributes.slice().sort((a, b) => a.k.localeCompare(b.k));
 
+                // Base on variation's attributes to generate sku
                 const sku = `${replaceWhitespaceTo(name)}-${sortedAttributes
                     .map(({ k, v, u }) => {
                         const attributeValue = `${replaceWhitespaceTo(k)}.${replaceWhitespaceTo(
@@ -300,7 +304,13 @@ export class ProductsMntUtilService {
                     })
                     .join('-')}`.toLowerCase();
 
-                return { ...variation, attributes: sortedAttributes, sku, images: [] };
+                return {
+                    ...variation,
+                    attributes: sortedAttributes,
+                    sku,
+                    images: [],
+                    status: variation.status ? variation.status : ProductStatus.Hide, // default status is hide
+                };
             }),
         };
 
