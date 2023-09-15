@@ -3,3 +3,5 @@ export const ProductImageFieldname = {
     VARIATION: 'variation',
     IS_THUMBNAIL: 'isthumbnail',
 };
+
+export const MAX_PRODUCTS_PER_PAGE = 500;

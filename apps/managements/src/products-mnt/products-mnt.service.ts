@@ -145,7 +145,7 @@ export class ProductsMntService extends ProductsMntUtilService {
 
     async gen(num: number) {
         try {
-            const list = await this.productsService.getProducts();
+            const list = await this.productsService.getProducts({});
             const one = list[list.length - 1];
             delete one._id;
             Object.assign(one, {

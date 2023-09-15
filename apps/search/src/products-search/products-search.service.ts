@@ -1,56 +1,74 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ProductsSearchUtilService } from './products-search.util.service';
-import { QueryProductParamsDTO } from './dtos';
-import { QueryOptions, Types } from 'mongoose';
+import { GetProductsDTO } from './dtos';
+import { FilterQuery, QueryOptions, Types } from 'mongoose';
 import { RpcException } from '@nestjs/microservices';
 import { Product } from '@app/resource';
 import { ListDataResponseDTO } from '@app/common/dtos';
+import { isTrueSet } from '@app/common';
 
 @Injectable()
 export class ProductsSearchService extends ProductsSearchUtilService {
-    async getProducts({ page = 1, pageSize = 10, ...payload }: QueryProductParamsDTO) {
-        const { all } = payload;
+    async getProducts({
+        page = 1,
+        pageSize = 10,
+        detail = false,
+        keyword = undefined,
+    }: GetProductsDTO) {
+        try {
+            if (typeof page !== 'number') {
+                page = Number(page);
+            }
 
-        if (typeof page !== 'number') {
-            page = Number(page);
+            if (typeof pageSize !== 'number') {
+                pageSize = Number(pageSize);
+            }
+        } catch (error) {
+            throw new RpcException(new BadRequestException('Page and page size must be a number'));
         }
 
-        if (typeof pageSize !== 'number') {
-            pageSize = Number(pageSize);
+        let filterOpt: FilterQuery<Product> = {};
+        if (keyword) {
+            const regex = new RegExp(keyword, 'i');
+            filterOpt = {
+                $or: [
+                    { name: regex },
+                    { description: regex },
+                    { categories: regex },
+                    {
+                        'variations.k': regex,
+                    },
+                    {
+                        'variations.v': regex,
+                    },
+                    {
+                        'variations.u': regex,
+                    },
+                ],
+            };
         }
 
-        const options: QueryOptions<Product> = {
+        const queryOpt: QueryOptions<Product> = {
             skip: page ? (page - 1) * pageSize : 0,
-            limit: pageSize || 10,
+            limit: pageSize > 500 ? 500 : pageSize,
         };
 
-        // const cacheKey = this.buildCacheKeyProducts({ page, pageSize, all });
-        // const productsFromCache = await this.cacheManager.get(cacheKey);
-        // if (productsFromCache) {
-        //     Logger.log(`CACHE HIT: ${cacheKey}`);
-        //     return productsFromCache;
-        // }
-
-        if (all) {
-            delete options.limit;
-            delete options.skip;
-        }
-
-        // Logger.warn(`CACHE MISS: ${cacheKey}`);
-
         const [productsFromDb, totalRecord] = await Promise.all([
-            this.productsService.getProducts(),
+            this.productsService.getProducts({
+                filterQueries: filterOpt,
+                queryOptions: queryOpt,
+            }),
             this.productsService.countProducts(),
         ]);
         const totalPage = Math.ceil(totalRecord / pageSize);
 
-        // await this.cacheManager.set(cacheKey, productsFromDb, timeStringToMs('1h'));
-
         return new ListDataResponseDTO({
-            data: productsFromDb,
+            data: isTrueSet(detail)
+                ? await this.assignDetailToProducts(productsFromDb)
+                : productsFromDb,
             page,
-            pageSize: all ? totalRecord : pageSize,
-            totalPage: all ? 1 : totalPage,
+            pageSize: pageSize,
+            totalPage: totalPage,
             totalRecord,
         });
     }
