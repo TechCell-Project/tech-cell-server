@@ -1,20 +1,10 @@
-import { IsBoolean, IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { SelectType } from '../enums';
-import { Transform, Type } from 'class-transformer';
+import { Type } from 'class-transformer';
+import { MAX_ATTRIBUTES_PER_PAGE } from '~/constants/attribute.constant';
 
 export class GetAttributesRequestDTO {
-    @ApiProperty({
-        type: Boolean,
-        description: 'All of attributes to be returned',
-        default: false,
-        required: false,
-    })
-    @IsOptional()
-    @IsBoolean()
-    @Transform(({ value }) => value === 'true')
-    no_limit?: boolean;
-
     @ApiProperty({
         type: String,
         enum: SelectType,
@@ -35,6 +25,8 @@ export class GetAttributesRequestDTO {
     @IsOptional()
     @Type(() => Number)
     @IsNumber()
+    @Min(1)
+    @Max(Number.MAX_SAFE_INTEGER)
     page?: number;
 
     @ApiProperty({
@@ -45,5 +37,16 @@ export class GetAttributesRequestDTO {
     @IsOptional()
     @Type(() => Number)
     @IsNumber()
+    @Min(1)
+    @Max(MAX_ATTRIBUTES_PER_PAGE)
     pageSize?: number;
+
+    @ApiProperty({
+        type: String,
+        description: 'Keyword to search',
+        required: false,
+    })
+    @IsOptional()
+    @IsString()
+    keyword?: string;
 }

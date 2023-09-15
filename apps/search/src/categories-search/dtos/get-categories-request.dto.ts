@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsNumber, IsOptional } from 'class-validator';
+import { IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
+import { MAX_CATEGORY_PER_PAGE } from '~/constants/category.constant';
 
 export class GetCategoriesRequestDTO {
     @ApiProperty({
@@ -11,7 +12,9 @@ export class GetCategoriesRequestDTO {
     @Type(() => Number)
     @IsNumber()
     @IsOptional()
-    page: number;
+    @Min(1)
+    @Max(Number.MAX_SAFE_INTEGER)
+    page?: number;
 
     @ApiProperty({
         required: false,
@@ -21,14 +24,16 @@ export class GetCategoriesRequestDTO {
     @Type(() => Number)
     @IsNumber()
     @IsOptional()
-    pageSize: number;
+    @Min(1)
+    @Max(MAX_CATEGORY_PER_PAGE)
+    pageSize?: number;
 
     @ApiProperty({
+        type: String,
+        description: 'Keyword to search',
         required: false,
-        type: Boolean,
-        default: false,
     })
-    @Type(() => Boolean)
     @IsOptional()
-    no_limit: boolean;
+    @IsString()
+    keyword?: string;
 }

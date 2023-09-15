@@ -35,3 +35,8 @@ export class Product extends AbstractDocument {
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);
+ProductSchema.index({
+    name: 'text',
+    categories: 'text',
+    description: 'text',
+});

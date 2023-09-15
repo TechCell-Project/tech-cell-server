@@ -1,7 +1,7 @@
 import { CategoriesService, Category } from '@app/resource/categories';
 import { Injectable } from '@nestjs/common';
 import { GetCategoriesRequestDTO } from './dtos';
-import { QueryOptions } from 'mongoose';
+import { FilterQuery, QueryOptions } from 'mongoose';
 import { ListDataResponseDTO } from '@app/common/dtos';
 import { isTrueSet } from '@app/common';
 
@@ -17,7 +17,7 @@ export class CategoriesSearchService {
     //     return await this.categoriesService.getCategory();
     // }
 
-    async getCategories({ page = 1, pageSize = 10, no_limit = false }: GetCategoriesRequestDTO) {
+    async getCategories({ page = 1, pageSize = 10, keyword = undefined }: GetCategoriesRequestDTO) {
         /**
          * @default page = 1
          * @default pageSize = 10
@@ -34,13 +34,19 @@ export class CategoriesSearchService {
             limit: pageSize || 10,
         };
 
-        if (isTrueSet(no_limit)) {
-            delete queryOptions.skip;
-            delete queryOptions.limit;
+        let filterQueries: FilterQuery<Category> = {};
+        if (keyword) {
+            filterQueries = {
+                $or: [
+                    { name: { $regex: keyword, $options: 'i' } },
+                    { label: { $regex: keyword, $options: 'i' } },
+                    { description: { $regex: keyword, $options: 'i' } },
+                ],
+            };
         }
 
         const [dataFromDb, totalRecord] = await Promise.all([
-            this.categoriesService.getCategories({ queryOptions }),
+            this.categoriesService.getCategories({ filterQueries, queryOptions }),
             this.categoriesService.countCategories(),
         ]);
         const totalPage = Math.ceil(totalRecord / pageSize);

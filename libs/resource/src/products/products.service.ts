@@ -23,8 +23,12 @@ export class ProductsService {
         return product;
     }
 
-    async getProducts() {
-        const products = await this.productsRepository.find({ filterQuery: {} });
+    async getProducts({ filterQueries, queryOptions, projectionArgs }: IBaseQuery<Product>) {
+        const products = await this.productsRepository.find({
+            filterQuery: filterQueries,
+            queryOptions,
+            projection: projectionArgs,
+        });
         return products;
     }
 

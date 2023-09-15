@@ -17,7 +17,6 @@ export class CartsSearchService {
     }
 
     async getCarts({
-        no_limit = false,
         page = 1,
         pageSize = 10,
         userId,
@@ -33,11 +32,6 @@ export class CartsSearchService {
         if (typeof pageSize !== 'number') {
             pageSize = Number(pageSize);
             queryOptions.limit = pageSize;
-        }
-
-        if (isTrueSet(no_limit)) {
-            queryOptions.limit = undefined;
-            queryOptions.skip = undefined;
         }
 
         return await this.cartsService.getCartByUserId(new Types.ObjectId(userId));
