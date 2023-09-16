@@ -16,40 +16,21 @@ env:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    if: "!contains(github.event.issue.labels.*.name, 'no_push_docker')"
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Check for no_push_docker label
-        id: check-label
-        run: |
-          gh issue view ${{ github.event.issue.number }} --json labels --jq '.labels[].name' > labels.txt
-          if grep -q no_push_docker labels.txt; then
-            echo "Skipping build and push because no_push_docker label is present"
-            exit 0
-          fi
+      - name: Get issue number
+        id: get-issue-number
+        run: echo "::set-output name=issue_number::$(gh issue view --json number | jq -r '.')"
 
       - name: Login to Docker Hub
-        if: steps.check-label.outputs.hasNoPushDockerLabel != true
         uses: docker/login-action@v2
         with:
           username: ${{ env.DOCKERHUB_USERNAME }}
           password: ${{ env.DOCKERHUB_PASSWORD }}
-          
-      - name: 'Create .env file'
-        run: |
-          touch .env
-          echo COMPOSE_PROJECT_NAME= ${{ env.COMPOSE_PROJECT_NAME }} >> .env
-          echo CURRENT_USER= ${{ env.CURRENT_USER }} >> .env
-          echo DOCKER_GROUP= ${{ env.DOCKER_GROUP }} >> .env
-          cat .env
 
       - name: Build and push images
-        run: |
-          docker-compose -f docker-compose.prod.yml build --no-cache
-          docker-compose -f docker-compose.prod.yml push
-
-      - name: Remove .env file
-        run: |
-          rm .env
+        run: docker-compose -f docker-compose.prod.yml build --no-cache && docker-compose -f docker-compose.prod.yml push
