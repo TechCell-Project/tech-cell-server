@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - development
+      - test-action
 
 env:
   DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -15,6 +16,7 @@ env:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    if: contains(github.event.pull_request.labels.*.name, 'no_push_docker') == false
 
     steps:
       - name: Checkout code
