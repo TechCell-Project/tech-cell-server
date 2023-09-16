@@ -20,7 +20,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Get issue number
         id: get-issue-number
@@ -31,6 +31,21 @@ jobs:
         with:
           username: ${{ env.DOCKERHUB_USERNAME }}
           password: ${{ env.DOCKERHUB_PASSWORD }}
+          
+      - name: 'Create .env file'
+        run: |
+          touch .env
+          echo COMPOSE_PROJECT_NAME= ${{ env.COMPOSE_PROJECT_NAME }} >> .env
+          echo CURRENT_USER= ${{ env.CURRENT_USER }} >> .env
+          echo DOCKER_GROUP= ${{ env.DOCKER_GROUP }} >> .env
+          cat .env
 
       - name: Build and push images
-        run: docker-compose -f docker-compose.prod.yml build --no-cache && docker-compose -f docker-compose.prod.yml push
+        run: |
+          docker-compose -f docker-compose.prod.yml build --no-cache
+          docker-compose -f docker-compose.prod.yml push
+
+      - name: Remove .env file
+        run: |
+          rm .env
+
