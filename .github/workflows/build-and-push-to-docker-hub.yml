@@ -19,7 +19,16 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
+
+      - name: Check for no_push_docker label
+        id: check-label
+        run: |
+          gh issue view ${{ github.event.issue.number }} --json labels --jq '.labels[].name' > labels.txt
+          if grep -q no_push_docker labels.txt; then
+            echo "Skipping build and push because no_push_docker label is present"
+            exit 0
+          fi
 
       - name: Check for no_push_docker label
         id: check-label
@@ -65,4 +74,3 @@ jobs:
         if: steps.check-label.outputs.hasNoPushDockerLabel != true
         run: |
           rm .env
-
