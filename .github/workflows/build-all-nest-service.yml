@@ -1,6 +1,8 @@
 name: Build all Nest services
 
 on:
+  push:
+    branches: [ stable, development ]
   pull_request:
     branches: [ '*' ]
 
