@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ProductsSearchUtilService } from './products-search.util.service';
-import { GetProductsDTO } from './dtos';
+import { GetProductByIdQueryDTO, GetProductsDTO } from './dtos';
 import { FilterQuery, QueryOptions, Types } from 'mongoose';
 import { RpcException } from '@nestjs/microservices';
 import { Product } from '@app/resource';
@@ -64,7 +64,7 @@ export class ProductsSearchService extends ProductsSearchUtilService {
 
         return new ListDataResponseDTO({
             data: isTrueSet(detail)
-                ? await this.assignDetailToProducts(productsFromDb)
+                ? await this.assignDetailToProductLists(productsFromDb)
                 : productsFromDb,
             page,
             pageSize: pageSize,
@@ -73,12 +73,19 @@ export class ProductsSearchService extends ProductsSearchUtilService {
         });
     }
 
-    async getProductById(id: string | Types.ObjectId) {
-        try {
-            const idSearch: Types.ObjectId = typeof id === 'string' ? new Types.ObjectId(id) : id;
-            return await this.productsService.getProduct({ filterQueries: { _id: idSearch } });
-        } catch (error) {
-            throw new RpcException(new BadRequestException('Product Id is invalid'));
+    async getProductById({
+        id,
+        ...query
+    }: { id: string | Types.ObjectId } & GetProductByIdQueryDTO) {
+        const resultFromDb = await this.productsService.getProduct({
+            filterQueries: { _id: id },
+        });
+        let prodReturn = resultFromDb;
+
+        if (isTrueSet(query.detail)) {
+            prodReturn = await this.assignDetailToProduct(resultFromDb);
         }
+
+        return prodReturn;
     }
 }

@@ -14,10 +14,12 @@ import {
     ApiTooManyRequestsResponse,
     ApiExcludeEndpoint,
     ApiCreatedResponse,
+    ApiQuery,
+    ApiParam,
 } from '@nestjs/swagger';
 import { ProductsMntMessagePattern } from '~/apps/managements/products-mnt';
 import { ProductsSearchMessagePattern } from '~/apps/search/products-search';
-import { GetProductsDTO } from '~/apps/search/products-search/dtos';
+import { GetProductByIdQueryDTO, GetProductsDTO } from '~/apps/search/products-search/dtos';
 import { CreateProductRequestDTO } from '~/apps/managements/products-mnt/dtos';
 import { ProductIdParamsDTO } from '~/apps/managements/products-mnt/dtos/params.dto';
 import { UpdateProductRequestDTO } from '~/apps/managements/products-mnt/dtos/update-product-request.dto';
@@ -79,9 +81,12 @@ export class ProductsController {
         description: 'Get product information successfully!',
     })
     @Get('/:productId')
-    async getProductById(@Param() { productId }: ProductIdParamsDTO) {
+    async getProductById(
+        @Param() { productId }: ProductIdParamsDTO,
+        @Query() { ...query }: GetProductByIdQueryDTO,
+    ) {
         return this.searchService
-            .send(ProductsSearchMessagePattern.getProductById, { productId })
+            .send(ProductsSearchMessagePattern.getProductById, { productId, ...query })
             .pipe(catchException());
     }
 

@@ -53,14 +53,14 @@ export class ProductsSearchUtilService {
         return await delStartWith(PRODUCTS_CACHE_PREFIX, this.cacheManager);
     }
 
-    protected async assignDetailToProducts(productsFromDb: Product[]) {
-        productsFromDb = await this.assignAttributesToProducts(productsFromDb);
+    protected async assignDetailToProductLists(productsFromDb: Product[]) {
+        productsFromDb = await this.assignAttributesToProductLists(productsFromDb);
         productsFromDb = await this.assignCategoriesToProducts(productsFromDb);
 
         return productsFromDb;
     }
 
-    private async assignAttributesToProducts(productsFromDb: Product[]) {
+    private async assignAttributesToProductLists(productsFromDb: Product[]) {
         const attributesSet = new Set(
             ...productsFromDb.map((product) => {
                 const { generalAttributes, variations: varAttributes } = product;
@@ -133,5 +133,50 @@ export class ProductsSearchUtilService {
         // }
 
         return productsFromDb;
+    }
+
+    protected async assignDetailToProduct(product: Product) {
+        product = await this.assignAttributesToProduct(product);
+
+        return product;
+    }
+
+    private async assignAttributesToProduct(product: Product) {
+        const { generalAttributes, variations: varAttributes } = product;
+        const attributes = [...generalAttributes.map((attr) => attr.k)];
+        varAttributes.forEach((variation) => {
+            attributes.push(...variation.attributes.map((attr) => attr.k));
+        });
+
+        const attributesSet = new Set(attributes);
+
+        const att = await Promise.all(
+            Array.from(attributesSet).map((attr) =>
+                this.attributesService.getAttributeByLabel(attr),
+            ),
+        );
+
+        product.generalAttributes.forEach((attr) => {
+            const attribute = att.find((a) => a.label === attr.k);
+            if (attribute) {
+                Object.assign(attr, {
+                    name: attribute.name,
+                    description: attribute.description,
+                });
+            }
+        });
+        product.variations.forEach((variation) => {
+            variation.attributes.forEach((attr) => {
+                const attribute = att.find((a) => a.label === attr.k);
+                if (attribute) {
+                    Object.assign(attr, {
+                        name: attribute.name,
+                        description: attribute.description,
+                    });
+                }
+            });
+        });
+
+        return product;
     }
 }

@@ -1,4 +1,3 @@
-import { isTrueSet } from '@app/common/utils';
 import { PaginationQuery } from '@app/common/dtos';
 import { Cart, CartsService } from '@app/resource/carts';
 import { Inject, Injectable, Logger } from '@nestjs/common';
