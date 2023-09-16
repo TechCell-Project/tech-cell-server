@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsMongoId } from 'class-validator';
+import { Types } from 'mongoose';
 
 export class ProductIdParamsDTO {
     @ApiProperty({
@@ -10,5 +11,5 @@ export class ProductIdParamsDTO {
     })
     @IsNotEmpty()
     @IsMongoId({ message: 'Invalid product id' })
-    productId: string;
+    productId: string | Types.ObjectId;
 }
