@@ -16,7 +16,7 @@ env:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-    if: "!contains(github.event.issue.labels.*.name, 'no_push_docker')"
+    if: "!contains(github.event.pull_request.labels.*.name, 'no_push_docker')"
 
     steps:
       - name: Checkout code
@@ -35,9 +35,9 @@ jobs:
       - name: 'Create .env file'
         run: |
           touch .env
-          echo COMPOSE_PROJECT_NAME= ${{ env.COMPOSE_PROJECT_NAME }} >> .env
-          echo CURRENT_USER= ${{ env.CURRENT_USER }} >> .env
-          echo DOCKER_GROUP= ${{ env.DOCKER_GROUP }} >> .env
+          echo COMPOSE_PROJECT_NAME=${{ env.COMPOSE_PROJECT_NAME }} >> .env
+          echo CURRENT_USER=${{ env.CURRENT_USER }} >> .env
+          echo DOCKER_GROUP=${{ env.DOCKER_GROUP }} >> .env
           cat .env
 
       - name: Build and push images
