@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - development
+      - test-action
 
 env:
   DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -20,13 +21,33 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Check for no_push_docker label
+        id: check-label
+        uses: actions/github-script@v4
+        with:
+          script: |
+            const labels = await github.issues.listLabelsOnIssue({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number
+            });
+            const hasNoPushDockerLabel = labels.data.some(label => label.name === 'no_push_docker');
+            console.log(`Has no_push_docker label: ${hasNoPushDockerLabel}`);
+            return { hasNoPushDockerLabel: hasNoPushDockerLabel }
+
+      - name: Skip build and push if no_push_docker label is present
+        if: steps.check-label.outputs.hasNoPushDockerLabel == true
+        run: echo "Skipping build and push because no_push_docker label is present"
+
       - name: Login to Docker Hub
+        if: steps.check-label.outputs.hasNoPushDockerLabel != true
         uses: docker/login-action@v2
         with:
           username: ${{ env.DOCKERHUB_USERNAME }}
           password: ${{ env.DOCKERHUB_PASSWORD }}
           
       - name: 'Create .env file'
+        if: steps.check-label.outputs.hasNoPushDockerLabel != true
         run: |
           touch .env
           echo COMPOSE_PROJECT_NAME= ${{ env.COMPOSE_PROJECT_NAME }} >> .env
@@ -35,11 +56,13 @@ jobs:
           cat .env
 
       - name: Build and push images
+        if: steps.check-label.outputs.hasNoPushDockerLabel != true
         run: |
           docker-compose -f docker-compose.prod.yml build --no-cache
           docker-compose -f docker-compose.prod.yml push
 
       - name: Remove .env file
+        if: steps.check-label.outputs.hasNoPushDockerLabel != true
         run: |
           rm .env
 
