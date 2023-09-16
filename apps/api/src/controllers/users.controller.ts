@@ -57,7 +57,7 @@ export class UsersController {
 
     @ApiOkResponse({ description: 'Get users success', type: ListDataResponseDTO })
     @ApiNotFoundResponse({ description: 'No users found' })
-    @UseGuards(ModGuard)
+    // @UseGuards(ModGuard)
     @Get('/')
     async getUsers(@Query() requestQuery: GetUsersDTO) {
         return this.searchService

@@ -1,68 +1,33 @@
 import { RpcException } from '@nestjs/microservices';
-import { Types } from 'mongoose';
-import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common';
+import { FilterQuery, ProjectionFields, QueryOptions, Types } from 'mongoose';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { ListDataResponseDTO } from '@app/common/dtos';
-import { timeStringToMs } from '@app/common/utils';
-import { GetUsersDTO, QueryUserParamsDTO } from './dtos';
-import { buildCacheKeyUsers } from '@app/resource/users/utils';
-import { REDIS_CACHE } from '~/constants';
-import { UsersService } from '@app/resource/users';
-import { Store } from 'cache-manager';
+import { GetUsersDTO } from './dtos';
+import { User } from '@app/resource/users';
+import { UsersSearchUtilService } from './users-search.util.service';
 
 @Injectable()
-export class UsersSearchService {
-    constructor(
-        private readonly usersService: UsersService,
-        @Inject(REDIS_CACHE) protected cacheManager: Store,
-        private readonly logger: Logger,
-    ) {
-        this.logger = new Logger(UsersSearchService.name);
-    }
+export class UsersSearchService extends UsersSearchUtilService {
+    async getUsers(payload: GetUsersDTO) {
+        const { page = 1, pageSize = 10 } = payload;
 
-    async getUsers({ page = 1, pageSize = 10, ...payload }: QueryUserParamsDTO) {
-        const { all } = payload;
+        const filterQuery: FilterQuery<User> = this.buildFilterQuery(payload);
+        const queryOptions: QueryOptions<User> = this.buildQueryOptions(payload);
+        const projection: ProjectionFields<User> = ['-password'];
 
-        if (typeof page !== 'number') {
-            page = Number(page);
-        }
-
-        if (typeof pageSize !== 'number') {
-            pageSize = Number(pageSize);
-        }
-
-        const query: GetUsersDTO = {};
-        const options = {
-            skip: page ? (page - 1) * pageSize : 0,
-            limit: pageSize || 10,
-        };
-
-        const cacheKey = buildCacheKeyUsers({ page, pageSize, all });
-        const usersFromCache = await this.cacheManager.get(cacheKey);
-        if (usersFromCache) {
-            this.logger.log(`CACHE HIT: ${cacheKey}`);
-            return usersFromCache;
-        }
-
-        if (all) {
-            delete options.limit;
-            delete options.skip;
-        }
-
-        this.logger.warn(`CACHE MISS: ${cacheKey}`);
         const [usersFromDb, totalRecord] = await Promise.all([
-            this.usersService.getUsers({ ...query }, { ...options }, ['-password']),
+            this.usersService.getUsers(filterQuery, queryOptions, projection),
             this.usersService.countUsers({}),
         ]);
 
         const dataResponse = new ListDataResponseDTO({
             data: usersFromDb,
-            page: all ? 1 : page,
-            pageSize: all ? totalRecord : pageSize,
-            totalPage: all ? 1 : Math.ceil(totalRecord / pageSize),
+            page: page,
+            pageSize: pageSize,
+            totalPage: Math.ceil(totalRecord / pageSize),
             totalRecord,
         });
 
-        await this.cacheManager.set(cacheKey, dataResponse, timeStringToMs('1h'));
         return dataResponse;
     }
 

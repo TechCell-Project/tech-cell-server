@@ -5,3 +5,4 @@ export * from './product.constant';
 export * from './auth.constant';
 export * from './regex.constant';
 export * from './attribute.constant';
+export * from './user.constant';
