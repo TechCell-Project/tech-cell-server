@@ -19,25 +19,16 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
 
       - name: Check for no_push_docker label
         id: check-label
-        uses: actions/github-script@v4
-        with:
-          script: |
-            const labels = await github.issues.listLabelsOnIssue({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number
-            });
-            const hasNoPushDockerLabel = labels.data.some(label => label.name === 'no_push_docker');
-            console.log(`Has no_push_docker label: ${hasNoPushDockerLabel}`);
-            return { hasNoPushDockerLabel: hasNoPushDockerLabel }
-
-      - name: Skip build and push if no_push_docker label is present
-        if: steps.check-label.outputs.hasNoPushDockerLabel == true
-        run: echo "Skipping build and push because no_push_docker label is present"
+        run: |
+          gh issue view ${{ github.event.issue.number }} --json labels --jq '.labels[].name' > labels.txt
+          if grep -q no_push_docker labels.txt; then
+            echo "Skipping build and push because no_push_docker label is present"
+            exit 0
+          fi
 
       - name: Login to Docker Hub
         if: steps.check-label.outputs.hasNoPushDockerLabel != true
@@ -47,7 +38,6 @@ jobs:
           password: ${{ env.DOCKERHUB_PASSWORD }}
           
       - name: 'Create .env file'
-        if: steps.check-label.outputs.hasNoPushDockerLabel != true
         run: |
           touch .env
           echo COMPOSE_PROJECT_NAME= ${{ env.COMPOSE_PROJECT_NAME }} >> .env
@@ -56,13 +46,10 @@ jobs:
           cat .env
 
       - name: Build and push images
-        if: steps.check-label.outputs.hasNoPushDockerLabel != true
         run: |
           docker-compose -f docker-compose.prod.yml build --no-cache
           docker-compose -f docker-compose.prod.yml push
 
       - name: Remove .env file
-        if: steps.check-label.outputs.hasNoPushDockerLabel != true
         run: |
           rm .env
-
