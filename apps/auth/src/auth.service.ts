@@ -300,14 +300,12 @@ export class AuthService extends AuthUtilService {
             throw new RpcException(new BadRequestException('Login with Google failed'));
         }
 
-        let userFound: User | undefined = undefined;
-        let newUser: User | undefined = undefined;
+        let userFound: User | undefined;
         try {
-            // will throw exception if not found
             userFound = await this.usersService.getUser({ email: user.email });
         } catch (error) {
-            // if not found, create new user
-            newUser = await this.usersService.createUser({
+            // If user not found, create a new user
+            const newUser = await this.usersService.createUser({
                 email: user.email,
                 userName: buildUniqueUserNameFromEmail(user.email),
                 firstName: user.firstName,
@@ -316,19 +314,14 @@ export class AuthService extends AuthUtilService {
                     MAX_PASSWORD_LENGTH - user.openid.length,
                 )}`,
             });
+            return this.buildUserTokenResponse(newUser);
         }
 
-        if (!userFound && !newUser) {
+        if (!userFound) {
             throw new RpcException(new BadRequestException('Login with Google failed'));
         }
 
-        if (userFound) {
-            return this.buildUserTokenResponse(userFound);
-        }
-
-        if (newUser) {
-            return this.buildUserTokenResponse(newUser);
-        }
+        return this.buildUserTokenResponse(userFound);
     }
 
     async facebookLogin({ user }: { user: IUserFacebookResponse }) {
