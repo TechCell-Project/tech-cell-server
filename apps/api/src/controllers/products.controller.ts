@@ -1,7 +1,7 @@
 import { Controller, Inject, Get, Post, Body, Query, Param, Put, UseGuards } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~/constants';
-import { SuperAdminGuard, catchException } from '@app/common';
+import { ModGuard, SuperAdminGuard, catchException } from '@app/common';
 import {
     ApiBody,
     ApiNotFoundResponse,
@@ -14,8 +14,6 @@ import {
     ApiTooManyRequestsResponse,
     ApiExcludeEndpoint,
     ApiCreatedResponse,
-    ApiQuery,
-    ApiParam,
 } from '@nestjs/swagger';
 import { ProductsMntMessagePattern } from '~/apps/managements/products-mnt';
 import { ProductsSearchMessagePattern } from '~/apps/search/products-search';
@@ -66,6 +64,7 @@ export class ProductsController {
         description: 'Create product successfully!',
     })
     @Post('/')
+    @UseGuards(ModGuard)
     async createProduct(@Body() { ...data }: CreateProductRequestDTO) {
         return this.managementsService
             .send(ProductsMntMessagePattern.createProduct, {
@@ -97,6 +96,7 @@ export class ProductsController {
         description: 'Update product information',
     })
     @Put('/:productId')
+    @UseGuards(ModGuard)
     async updateProduct(
         @Param() { productId }: ProductIdParamsDTO,
         @Body() { ...productData }: UpdateProductRequestDTO,

@@ -25,7 +25,6 @@ import {
     ApiTooManyRequestsResponse,
     ApiNotAcceptableResponse,
     ApiOAuth2,
-    ApiResponse,
 } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import {
@@ -185,7 +184,7 @@ export class AuthController {
     }
 
     @ApiOAuth2(['openid', 'profile', 'email'], 'login with google')
-    @ApiResponse({
+    @ApiOkResponse({
         type: UserDataResponseDTO,
     })
     @Get('google')
@@ -197,7 +196,7 @@ export class AuthController {
     }
 
     @ApiOAuth2(['email'], 'login with facebook')
-    @ApiResponse({
+    @ApiOkResponse({
         type: UserDataResponseDTO,
     })
     @Get('facebook')
