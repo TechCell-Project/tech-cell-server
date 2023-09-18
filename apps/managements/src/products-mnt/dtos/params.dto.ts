@@ -11,5 +11,5 @@ export class ProductIdParamsDTO {
     })
     @IsNotEmpty()
     @IsMongoId({ message: 'Invalid product id' })
-    productId: Types.ObjectId;
+    productId: string | Types.ObjectId;
 }

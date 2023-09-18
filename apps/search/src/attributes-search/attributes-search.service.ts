@@ -15,22 +15,16 @@ export class AttributesSearchService {
     ) {}
 
     async getAttributes({
-        no_limit = false,
         page = 1,
         pageSize = 10,
         select_type = SelectType.onlyActive,
+        keyword = undefined,
     }: GetAttributesRequestDTO) {
         const attributeArgs: FilterQuery<Attribute> = {};
         const options: QueryOptions<Attribute> = {
             skip: page ? (page - 1) * pageSize : 0,
             limit: Number(pageSize) || 10,
         };
-
-        // const cacheKey = 'attributes';
-        // const attributesFromCache = await this.cacheManager.get(cacheKey);
-        // if (attributesFromCache) {
-        //     return attributesFromCache;
-        // }
 
         switch (select_type) {
             case SelectType.onlyActive:
@@ -46,13 +40,14 @@ export class AttributesSearchService {
                 break;
         }
 
-        if (typeof no_limit === 'string') {
-            no_limit = no_limit === 'true';
-        }
-
-        if (no_limit) {
-            delete options.skip;
-            delete options.limit;
+        if (keyword) {
+            Object.assign(attributeArgs, {
+                $or: [
+                    { name: { $regex: keyword, $options: 'i' } },
+                    { label: { $regex: keyword, $options: 'i' } },
+                    { description: { $regex: keyword, $options: 'i' } },
+                ],
+            });
         }
 
         const [attributesFromDb, totalRecord] = await Promise.all([
@@ -63,13 +58,11 @@ export class AttributesSearchService {
             this.attributesService.countAttributes({ ...attributeArgs }),
         ]);
 
-        // await this.cacheManager.set(cacheKey, attributesFromDb);
-
         return new ListDataResponseDTO({
             data: attributesFromDb,
-            page: no_limit ? 1 : page,
-            pageSize: no_limit ? totalRecord : pageSize,
-            totalPage: no_limit ? 1 : Math.ceil(totalRecord / pageSize),
+            page: page,
+            pageSize: pageSize,
+            totalPage: Math.ceil(totalRecord / pageSize),
             totalRecord,
         });
     }

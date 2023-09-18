@@ -1,64 +1,105 @@
 import { UserRole } from '@app/resource/users/enums';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsOptional } from 'class-validator';
-
-class BlockSchema {
-    @IsOptional()
-    isBlocked: boolean;
-}
+import { IsEnum, IsOptional, Max, Min } from 'class-validator';
+import {
+    UserSearchBlock,
+    UserSearchEmailVerified,
+    UserSearchSortField,
+    UserSearchSortOrder,
+    UserSearchRole,
+} from '../enums';
+import { MAX_USERS_PER_PAGE } from '~/constants';
+import { Type } from 'class-transformer';
 
 export class GetUsersDTO {
-    @ApiProperty({ type: Boolean, description: 'All of users to be returned', required: false })
+    @ApiProperty({
+        type: Number,
+        description: 'Page of users to be returned',
+        required: false,
+        minimum: 1,
+        maximum: Number.MAX_SAFE_INTEGER,
+        default: 1,
+    })
+    @Type(() => Number)
     @IsOptional()
-    all?: boolean;
-
-    @ApiProperty({ type: Number, description: 'Page of users to be returned', required: false })
-    @IsOptional()
+    @Min(1)
+    @Max(Number.MAX_SAFE_INTEGER)
     page?: number;
 
     @ApiProperty({
         type: Number,
         description: 'Size of page for users to be returned',
         required: false,
+        minimum: 1,
+        maximum: MAX_USERS_PER_PAGE,
+        default: 10,
     })
+    @Type(() => Number)
     @IsOptional()
+    @Min(1)
+    @Max(MAX_USERS_PER_PAGE)
     pageSize?: number;
 
-    // @ApiProperty({ type: String, description: 'Sort of users to be returned', required: false })
+    @ApiProperty({
+        type: String,
+        description: 'Order of users to be returned',
+        required: false,
+        enum: UserSearchSortField,
+        default: UserSearchSortField.CREATED_AT,
+    })
+    @IsEnum(UserSearchSortField)
     @IsOptional()
-    sort?: string;
+    order_field?: string;
 
-    // @ApiProperty({ type: String, description: 'Order of users to be returned', required: false })
+    @ApiProperty({
+        type: String,
+        description: 'Sort of users to be returned',
+        required: false,
+        enum: UserSearchSortOrder,
+        default: UserSearchSortOrder.DESC,
+    })
+    @IsEnum(UserSearchSortOrder)
     @IsOptional()
-    order?: string;
+    sort_order?: string;
 
-    // @ApiProperty({
-    //     type: String,
-    //     description: 'Search key of users to be returned',
-    //     required: false,
-    // })
+    @ApiProperty({
+        type: String,
+        description: 'Search key of users to be returned',
+        required: false,
+    })
     @IsOptional()
-    search?: string;
+    keyword?: string;
 
-    // @ApiProperty({ type: String, description: 'Status of users to be returned', required: false })
+    @ApiProperty({
+        type: String,
+        description: 'Status of users to be returned',
+        required: false,
+        enum: UserSearchBlock,
+        default: UserSearchBlock.ALL,
+    })
+    @IsEnum(UserSearchBlock)
     @IsOptional()
     status?: string;
 
-    // @ApiProperty({ enum: UserRole, description: 'Role of users to be returned', required: false })
+    @ApiProperty({
+        type: String,
+        enum: UserSearchRole,
+        description: 'Role of users to be returned',
+        required: false,
+        default: UserSearchRole.ALL,
+    })
     @IsOptional()
-    @IsEnum(UserRole)
+    @IsEnum(UserSearchRole)
     role?: string;
 
-    // @IsOptional()
-    // isDeleted?: boolean;
-
+    @ApiProperty({
+        type: String,
+        description: 'User with email verified',
+        required: false,
+        enum: UserSearchEmailVerified,
+        default: UserSearchEmailVerified.ALL,
+    })
     @IsOptional()
-    block?: BlockSchema;
-
-    @IsOptional()
-    isVerified?: boolean;
-
-    // @ApiProperty({ type: Boolean, description: 'User with email verified', required: false })
-    @IsOptional()
-    emailVerified?: boolean;
+    @IsEnum(UserSearchEmailVerified)
+    emailVerified?: string;
 }

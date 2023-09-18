@@ -4,6 +4,7 @@ import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { catchError, throwError } from 'rxjs';
 import { emailRegex } from '~/constants/regex.constant';
+import * as sanitizeHtml from 'sanitize-html';
 
 export function isEmail(email: string): boolean {
     if (typeof email !== 'string') return false;
@@ -157,4 +158,13 @@ export function findDuplicates<T>(arr: T[]): Set<T> {
     }
 
     return duplicates;
+}
+
+/**
+ *
+ * @param html Sanitize html string
+ * @returns A string after sanitize
+ */
+export function sanitizeHtmlString(html = ''): string {
+    return sanitizeHtml(html);
 }

@@ -1,0 +1,1 @@
+export const MAX_ATTRIBUTES_PER_PAGE = 500;

@@ -90,28 +90,54 @@ function shouldBypassKey(currentPath: string, typeKey: OmitOrPickKey) {
     });
 }
 
-export function removeFieldsFromObject<T>(obj: T, fields: string[]) {
-    if (typeof obj !== 'object' || obj === null) {
-        return obj;
-    }
-    if (Array.isArray(obj)) {
-        return obj.map((item) => removeFieldsFromObject(item, fields));
-    }
-    const result: any = { ...obj };
-    for (const field of fields) {
-        if (field.endsWith('.#')) {
-            const key = field.slice(0, -2);
-            if (key in result) {
-                result[key] = result[key].map((item) => removeFieldsFromObject(item, fields));
-            }
+export function allowToAction(
+    diff: Record<string, any>,
+    allowArray: { kind: 'N' | 'D' | 'E' | 'A'; paths: string[] }[],
+) {
+    const result = {};
+    const notAllowed = [];
+    for (const key in diff) {
+        const kind = diff[key]?.kind;
+        const allowedPaths = allowArray.find((allow) => allow.kind === kind)?.paths ?? [];
+        const allowed = allowedPaths.some((path) => isAllowed(key, path));
+        if (allowed) {
+            result[key] = diff[key];
         } else {
-            delete result[field];
+            notAllowed.push(key);
         }
     }
-    for (const key in result) {
-        if (result.hasOwnProperty(key)) {
-            result[key] = removeFieldsFromObject(result[key], fields);
-        }
+
+    if (notAllowed.length > 0) {
+        const kindDescriptions = {
+            N: 'add new',
+            D: 'delete',
+            E: 'edit',
+            A: 'change in array',
+        };
+        const errors = notAllowed.map((key) => {
+            const kind = diff[key].kind;
+            const description = kindDescriptions[kind];
+            return `${key} is not allowed to ${description}`;
+        });
+        return errors;
     }
-    return result;
+
+    return true;
+}
+
+function isAllowed(key: string, path: string) {
+    const keyParts = key.split('.');
+    const pathParts = path.split('.');
+    if (keyParts.length !== pathParts.length) {
+        return false;
+    }
+    return keyParts.every((part, index) => {
+        if (pathParts[index] === '#') {
+            return true;
+        }
+        if (pathParts[index] === '*') {
+            return !isNaN(Number(part));
+        }
+        return part === pathParts[index];
+    });
 }

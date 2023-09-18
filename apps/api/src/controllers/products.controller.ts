@@ -1,42 +1,27 @@
-import {
-    Controller,
-    Inject,
-    Get,
-    Post,
-    UploadedFiles,
-    Body,
-    Query,
-    Param,
-    Patch,
-    Put,
-    UseGuards,
-} from '@nestjs/common';
+import { Controller, Inject, Get, Post, Body, Query, Param, Put, UseGuards } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
-import { MANAGEMENTS_SERVICE, ProductImageFieldname, SEARCH_SERVICE } from '~/constants';
-import { SuperAdminGuard, catchException } from '@app/common';
+import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~/constants';
+import { ModGuard, SuperAdminGuard, catchException } from '@app/common';
 import {
     ApiBody,
-    ApiConsumes,
     ApiNotFoundResponse,
     ApiOperation,
     ApiTags,
     ApiExtraModels,
-    getSchemaPath,
     ApiOkResponse,
     ApiBadRequestResponse,
     ApiInternalServerErrorResponse,
     ApiTooManyRequestsResponse,
     ApiExcludeEndpoint,
+    ApiCreatedResponse,
 } from '@nestjs/swagger';
 import { ProductsMntMessagePattern } from '~/apps/managements/products-mnt';
 import { ProductsSearchMessagePattern } from '~/apps/search/products-search';
-import { GetProductsDTO } from '~/apps/search/products-search/dtos';
+import { GetProductByIdQueryDTO, GetProductsDTO } from '~/apps/search/products-search/dtos';
 import { CreateProductRequestDTO } from '~/apps/managements/products-mnt/dtos';
 import { ProductIdParamsDTO } from '~/apps/managements/products-mnt/dtos/params.dto';
 import { UpdateProductRequestDTO } from '~/apps/managements/products-mnt/dtos/update-product-request.dto';
 import { UpdateProductGeneralImagesDTO } from '~/apps/managements/products-mnt/dtos/update-product-general-images-request.dto';
-import { FilesDTO } from '~/apps/managements/products-mnt/dtos/files.dto';
-import { ValidateImageFileInterceptor } from '@app/common/interceptors/file-upload.interceptor';
 
 @ApiBadRequestResponse({
     description: 'Invalid request',
@@ -71,7 +56,15 @@ export class ProductsController {
     @ApiOperation({
         summary: 'Create a new product',
     })
+    @ApiBody({
+        description: 'Create product request',
+        type: CreateProductRequestDTO,
+    })
+    @ApiCreatedResponse({
+        description: 'Create product successfully!',
+    })
     @Post('/')
+    @UseGuards(ModGuard)
     async createProduct(@Body() { ...data }: CreateProductRequestDTO) {
         return this.managementsService
             .send(ProductsMntMessagePattern.createProduct, {
@@ -83,10 +76,16 @@ export class ProductsController {
     @ApiOperation({
         summary: 'Get product by id',
     })
+    @ApiOkResponse({
+        description: 'Get product information successfully!',
+    })
     @Get('/:productId')
-    async getProductById(@Param() { productId }: ProductIdParamsDTO) {
+    async getProductById(
+        @Param() { productId }: ProductIdParamsDTO,
+        @Query() { ...query }: GetProductByIdQueryDTO,
+    ) {
         return this.searchService
-            .send(ProductsSearchMessagePattern.getProductById, { productId })
+            .send(ProductsSearchMessagePattern.getProductById, { productId, ...query })
             .pipe(catchException());
     }
 
@@ -96,31 +95,18 @@ export class ProductsController {
     @ApiOkResponse({
         description: 'Update product information',
     })
-    @ApiExcludeEndpoint(true)
     @Put('/:productId')
+    @UseGuards(ModGuard)
     async updateProduct(
         @Param() { productId }: ProductIdParamsDTO,
         @Body() { ...productData }: UpdateProductRequestDTO,
     ) {
         return this.managementsService
-            .send(ProductsMntMessagePattern.updateProductGeneral, {
+            .send(ProductsMntMessagePattern.updateProductPutMethod, {
                 productId,
                 ...productData,
             })
             .pipe(catchException());
-    }
-
-    @ApiExcludeEndpoint(true)
-    @ApiOkResponse({
-        description: 'Update product data, can add new variations, images ...',
-    })
-    @Patch('/:productId/:sku')
-    async updateProductVariations(
-        @Param('productId') productId: string,
-        @Param('sku') sku: string,
-        @Body() { ...payload }: any,
-    ) {
-        return { productId, sku, payload };
     }
 
     @ApiExcludeEndpoint(true)
@@ -129,64 +115,6 @@ export class ProductsController {
     async gen(@Query() { num }: { num: number }) {
         return this.managementsService
             .send(ProductsMntMessagePattern.generateProducts, { num })
-            .pipe(catchException());
-    }
-
-    @ApiOperation({
-        summary: 'Update product general images',
-    })
-    @ApiConsumes('multipart/form-data')
-    @ApiBody({
-        description:
-            'Create product request.\n\n' +
-            'Product data rules:\n' +
-            `- Follow the ${getSchemaPath(UpdateProductGeneralImagesDTO.name)}\n\n` +
-            'File rules:\n' +
-            '- Only image files are allowed.\n' +
-            '- Maximum 30 files.\n' +
-            '- Maximum 10 MB per file.\n' +
-            '- Allowed file extensions: jpg, jpeg, png, gif, webp.\n' +
-            '- Allowed file mime types: image/jpeg, image/png, image/gif, image/webp.\n\n' +
-            '- `FieldName` of file must follow above rule:\n' +
-            `   - Each name should be separated by \`underscore(_)\`\n` +
-            `   - Start with \`${ProductImageFieldname.GENERAL}\` or \`${ProductImageFieldname.VARIATION}\`.\n` +
-            `   - If start with \`${ProductImageFieldname.VARIATION}\`, must end with a number to define variation index.\n` +
-            `   - The next field name could be \`${ProductImageFieldname.IS_THUMBNAIL}\` to define thumbnail image.\n` +
-            `   - Example: \`${ProductImageFieldname.GENERAL}\`, \`${ProductImageFieldname.VARIATION}_1\`, \`${ProductImageFieldname.VARIATION}_${ProductImageFieldname.IS_THUMBNAIL}_2\`.\n\n`,
-        required: true,
-        schema: {
-            type: 'object',
-            properties: {
-                productData: {
-                    type: 'object',
-                    description: 'Product data',
-                    $ref: getSchemaPath(UpdateProductGeneralImagesDTO.name),
-                },
-                files: {
-                    type: 'array',
-                    items: {
-                        type: 'string',
-                        format: 'binary',
-                    },
-                },
-            },
-        },
-    })
-    @ApiExcludeEndpoint(true)
-    @ValidateImageFileInterceptor()
-    @Post('/:productId/images')
-    async updateProductGeneralImages(
-        @Param() { productId }: ProductIdParamsDTO,
-        @Body() { images }: UpdateProductGeneralImagesDTO,
-        @UploadedFiles()
-        { files }: FilesDTO,
-    ) {
-        return this.managementsService
-            .send(ProductsMntMessagePattern.updateProductGeneralImages, {
-                productId,
-                images,
-                files,
-            })
             .pipe(catchException());
     }
 }

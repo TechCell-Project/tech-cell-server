@@ -30,13 +30,13 @@ export class ProductsMntController {
         return await this.productsMntService.gen(num);
     }
 
-    @MessagePattern(ProductsMntMessagePattern.updateProductGeneral)
-    async updateProductGeneral(
+    @MessagePattern(ProductsMntMessagePattern.updateProductPutMethod)
+    async updateProductPutMethod(
         @Ctx() context: RmqContext,
         @Payload()
         { ...payload }: ProductIdParamsDTO & UpdateProductRequestDTO,
     ) {
         this.rabbitMqService.acknowledgeMessage(context);
-        return await this.productsMntService.updateProductGeneral({ ...payload });
+        return await this.productsMntService.updateProductPutMethod({ ...payload });
     }
 }
