@@ -42,7 +42,7 @@ export class ImageTaskService {
 
         // Continue remove unused image if next_cursor is not null
         if (images['next_cursor'] != null) {
-            if (images['rate_limit_remaining'] <= RESULT_PER_REQUEST) {
+            if (images['rate_limit_remaining'] < RESULT_PER_REQUEST) {
                 const resetAt = new Date(images['rate_limit_reset_at'] * 1000);
                 this.logger.log(`Rate limit exceeded. Reset at ${resetAt}`);
 
