@@ -53,7 +53,7 @@ export class ProductsService {
                             'generalImages.publicId': publicId,
                         },
                         {
-                            'desImages.publicId': publicId,
+                            'descriptionImages.publicId': publicId,
                         },
                         {
                             variations: {
