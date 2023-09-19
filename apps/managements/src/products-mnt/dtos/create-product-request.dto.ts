@@ -11,28 +11,48 @@ import {
     IsOptional,
     IsBoolean,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import { ProductStatus } from '@app/resource/products/enums';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class PriceDTO {
     @ApiProperty({
-        type: 'number',
+        type: Number,
         required: true,
         description: 'Base price of product',
         example: 1000000,
+        minimum: 0,
+        maximum: Number.MAX_SAFE_INTEGER,
     })
-    @IsNumber()
+    @Transform(({ value }) => Number(String(value).replace(/,/g, '')))
+    @IsNumber(
+        { maxDecimalPlaces: 0 },
+        {
+            message: 'base must be integer',
+        },
+    )
+    @Min(0)
+    @Max(Number.MAX_SAFE_INTEGER)
     @IsNotEmpty()
     base: number;
 
     @ApiProperty({
-        type: 'number',
+        type: Number,
         required: true,
         description: 'Sale price of product',
         example: 900000,
+        minimum: 0,
+        maximum: Number.MAX_SAFE_INTEGER,
     })
-    @IsNumber()
+    @Transform(({ value }) => Number(String(value).replace(/,/g, '')))
+    @IsNumber(
+        { maxDecimalPlaces: 0 },
+        {
+            message: 'sale must be integer',
+        },
+    )
+    @Min(0)
+    @Max(Number.MAX_SAFE_INTEGER)
     @IsOptional()
     sale?: number;
 
@@ -41,9 +61,19 @@ export class PriceDTO {
         required: true,
         description: 'Special price of product',
         example: 800000,
+        minimum: 0,
+        maximum: Number.MAX_SAFE_INTEGER,
     })
-    @IsNumber()
     @IsOptional()
+    @Transform(({ value }) => Number(String(value).replace(/,/g, '')))
+    @IsNumber(
+        { maxDecimalPlaces: 0 },
+        {
+            message: 'special must be integer',
+        },
+    )
+    @Min(0)
+    @Max(Number.MAX_SAFE_INTEGER)
     special?: number;
 }
 
@@ -77,6 +107,7 @@ export class AttributeDTO {
         description: 'Key of attribute',
         example: 'ram',
     })
+    @Type(() => String)
     @IsString()
     @IsNotEmpty()
     k: string;
@@ -87,6 +118,7 @@ export class AttributeDTO {
         description: 'Value of attribute',
         example: '8',
     })
+    @Type(() => String)
     @IsString()
     @IsNotEmpty()
     v: string;
@@ -97,6 +129,7 @@ export class AttributeDTO {
         description: 'Unit of attribute',
         example: 'gb',
     })
+    @Type(() => String)
     @IsString()
     @IsOptional()
     u?: string;
@@ -122,7 +155,9 @@ export class VariationRequestDTO {
     @IsArray()
     @IsNotEmpty()
     @ArrayMinSize(1)
-    attributes: Array<AttributeDTO>;
+    @ValidateNested({ each: true })
+    @Type(() => AttributeDTO)
+    attributes: AttributeDTO[];
 
     @ApiProperty({
         type: 'number',
@@ -146,6 +181,8 @@ export class VariationRequestDTO {
             special: 800000,
         },
     })
+    @ValidateNested()
+    @Type(() => PriceDTO)
     price: PriceDTO;
 
     @ApiProperty({
@@ -168,6 +205,8 @@ export class VariationRequestDTO {
     })
     @IsArray()
     @IsOptional()
+    @ValidateNested({ each: true })
+    @Type(() => ImageRequestDTO)
     images?: ImageRequestDTO[];
 }
 
@@ -235,7 +274,9 @@ export class CreateProductRequestDTO {
     })
     @IsArray()
     @IsOptional()
-    generalAttributes: Array<AttributeDTO>;
+    @ValidateNested({ each: true })
+    @Type(() => AttributeDTO)
+    generalAttributes: AttributeDTO[];
 
     @ApiProperty({
         type: [ImageRequestDTO],
@@ -244,6 +285,8 @@ export class CreateProductRequestDTO {
     })
     @IsArray()
     @IsOptional()
+    @ValidateNested({ each: true })
+    @Type(() => ImageRequestDTO)
     generalImages?: ImageRequestDTO[];
 
     @ApiProperty({
@@ -253,5 +296,7 @@ export class CreateProductRequestDTO {
     })
     @IsArray()
     @IsOptional()
-    descriptionImages: ImageRequestDTO[];
+    @ValidateNested({ each: true })
+    @Type(() => ImageRequestDTO)
+    descriptionImages?: ImageRequestDTO[];
 }
