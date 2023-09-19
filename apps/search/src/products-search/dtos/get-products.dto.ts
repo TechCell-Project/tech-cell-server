@@ -10,8 +10,8 @@ export class GetProductsDTO {
         required: false,
     })
     @IsOptional()
-    @IsNumber()
     @Type(() => Number)
+    @IsNumber()
     @Min(1)
     @Max(MAX_PRODUCTS_PER_PAGE)
     page?: number;
@@ -22,8 +22,8 @@ export class GetProductsDTO {
         required: false,
     })
     @IsOptional()
-    @IsNumber()
     @Type(() => Number)
+    @IsNumber()
     @Min(1)
     @Max(MAX_PRODUCTS_PER_PAGE)
     pageSize?: number;

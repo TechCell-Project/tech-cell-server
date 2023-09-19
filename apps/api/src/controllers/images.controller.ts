@@ -83,7 +83,7 @@ export class ImagesController {
         type: ImageUploadedResponseDTO,
     })
     @ApiPayloadTooLargeResponse({
-        description: 'Image size too large, maximum 10 MB',
+        description: `Image size too large, maximum 10 MB, and maximum ${SINGLE_IMAGE_FILE_MAX_COUNT} image`,
     })
     @UseInterceptors(
         FileInterceptor('image', {
@@ -145,7 +145,7 @@ export class ImagesController {
         type: [ImageUploadedResponseDTO],
     })
     @ApiPayloadTooLargeResponse({
-        description: `Image size too large, maximum ${IMAGE_FILE_MAX_SIZE_IN_MB} MB`,
+        description: `Image size too large, maximum ${IMAGE_FILE_MAX_SIZE_IN_MB} MB, and maximum ${ARRAY_IMAGE_FILE_MAX_COUNT} images`,
     })
     @ApiBody({
         description: 'Image files to upload as multipart/form-data',

@@ -38,6 +38,7 @@ export class ProductsMntService extends ProductsMntUtilService {
         const { generalImages, descriptionImages, variations } = await this.resolveImages({
             productData: productData,
         });
+
         // Assign `generalImages` product
         if (generalImages.length > 0) {
             productToCreate.generalImages = generalImages;
