@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RabbitMQService } from '@app/common';
 import { Ctx, MessagePattern, Payload, RmqContext } from '@nestjs/microservices';
@@ -22,11 +22,6 @@ export class AuthController {
         private readonly authService: AuthService,
         private readonly rabbitMqService: RabbitMQService,
     ) {}
-
-    @Get('ping')
-    getPing() {
-        return this.authService.getPing();
-    }
 
     @MessagePattern(AuthMessagePattern.login)
     async login(

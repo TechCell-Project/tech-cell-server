@@ -76,7 +76,7 @@ export class AuthUtilService {
     async validateUser(input: string, password: string) {
         const query = isEmail(input) ? { email: input } : { userName: input };
 
-        const user = await this.usersService.getUser(query);
+        const user = await this.usersService.getUser(query, { lean: true });
 
         const doesUserExist = !!user;
         if (!doesUserExist) return null;

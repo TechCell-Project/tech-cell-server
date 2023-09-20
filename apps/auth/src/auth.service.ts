@@ -28,13 +28,6 @@ import { MAX_PASSWORD_LENGTH, USERS_CACHE_PREFIX } from '~/constants';
 
 @Injectable()
 export class AuthService extends AuthUtilService {
-    getPing() {
-        return {
-            message: 'pong',
-            services: 'auth',
-        };
-    }
-
     async login({ emailOrUsername, password }: LoginRequestDTO) {
         const user = await this.validateUser(emailOrUsername, password);
 
