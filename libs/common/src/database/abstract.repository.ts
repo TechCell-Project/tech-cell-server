@@ -34,7 +34,6 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
         projection?: ProjectionType<TDocument>,
     ): Promise<TDocument> {
         const document = await this.model.findOne(filterQuery, projection, {
-            lean: true,
             ...options,
         });
 
@@ -43,12 +42,11 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
             throw new RpcException(new NotFoundException(`${this.model.modelName} not found.`));
         }
 
-        return document;
+        return document as unknown as TDocument;
     }
 
     async findOneAndUpdate(filterQuery: FilterQuery<TDocument>, update: UpdateQuery<TDocument>) {
         const document = await this.model.findOneAndUpdate(filterQuery, update, {
-            lean: true,
             new: true,
         });
 
@@ -62,18 +60,11 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
 
     async upsert(filterQuery: FilterQuery<TDocument>, document: Partial<TDocument>) {
         return this.model.findOneAndUpdate(filterQuery, document, {
-            lean: true,
             upsert: true,
             new: true,
         });
     }
 
-    // async find(
-    //     filterQuery: FilterQuery<TDocument>,
-    //     options?: Partial<QueryOptions<TDocument>>,
-    //     projection?: ProjectionType<TDocument>,
-    //     logEnabled = true,
-    // ) {
     async find({
         filterQuery,
         queryOptions,
@@ -86,7 +77,6 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
         logEnabled?: boolean;
     }) {
         const document = await this.model.find(filterQuery, projection, {
-            lean: true,
             ...queryOptions,
         });
 

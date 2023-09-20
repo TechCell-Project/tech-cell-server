@@ -4,6 +4,7 @@ import * as mongoose from 'mongoose';
 import { ProductStatus } from '../enums';
 import { AttributeSchema, VariationSchema } from './variation.schema';
 import { ImageSchema } from './image.schema';
+import { Types } from 'mongoose';
 
 export type ProductDocument = mongoose.HydratedDocument<Product>;
 
@@ -15,8 +16,8 @@ export class Product extends AbstractDocument {
     @Prop({ required: true })
     description: string;
 
-    @Prop({ required: true })
-    categories: string[];
+    @Prop({ required: true, ref: 'Category', autopopulate: true })
+    category: Types.ObjectId;
 
     @Prop({ required: false, type: Number, enum: ProductStatus, default: ProductStatus.Hide })
     status?: number;

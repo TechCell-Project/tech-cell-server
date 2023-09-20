@@ -7,6 +7,11 @@ import { MongooseModule } from '@nestjs/mongoose';
         MongooseModule.forRootAsync({
             useFactory: (configService: ConfigService) => ({
                 uri: configService.get<string>('MONGODB_URI') || process.env.MONGODB_URI,
+                connectionFactory: (connection) => {
+                    // eslint-disable-next-line @typescript-eslint/no-var-requires
+                    connection.plugin(require('mongoose-autopopulate'));
+                    return connection;
+                },
             }),
             inject: [ConfigService],
         }),
