@@ -10,10 +10,13 @@ import {
     Max,
     IsOptional,
     IsBoolean,
+    IsMongoId,
+    IsNotEmptyObject,
 } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 import { ProductStatus } from '@app/resource/products/enums';
 import { ApiProperty } from '@nestjs/swagger';
+import { Types } from 'mongoose';
 
 export class PriceDTO {
     @ApiProperty({
@@ -210,6 +213,18 @@ export class VariationRequestDTO {
     images?: ImageRequestDTO[];
 }
 
+export class CategoryDTO {
+    @ApiProperty({
+        type: String,
+        required: true,
+        description: 'Id of category',
+        example: '612f5e4c1f5c3d0012a0f0b4',
+    })
+    @IsNotEmpty()
+    @IsMongoId({ message: 'Invalid product id' })
+    _id: string | Types.ObjectId;
+}
+
 export class CreateProductRequestDTO {
     @ApiProperty({
         type: String,
@@ -233,14 +248,14 @@ export class CreateProductRequestDTO {
     description: string;
 
     @ApiProperty({
-        type: [String],
+        type: CategoryDTO,
         required: true,
-        description: 'Categories of product, (#label)',
-        example: ['iphone'],
+        description: 'Category of product',
     })
-    @IsArray()
-    @IsNotEmpty()
-    categories: string[];
+    @ValidateNested()
+    @IsNotEmptyObject()
+    @Type(() => CategoryDTO)
+    category: CategoryDTO;
 
     @ApiProperty({
         type: [VariationRequestDTO],

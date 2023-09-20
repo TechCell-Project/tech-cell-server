@@ -21,6 +21,7 @@ import { RpcException } from '@nestjs/microservices';
 import { CloudinaryService } from '@app/common/Cloudinary';
 import { UpdateProductRequestDTO } from './dtos/update-product-request.dto';
 import { ProductStatus } from '@app/resource/products/enums';
+import { Types } from 'mongoose';
 
 @Injectable()
 export class ProductsMntUtilService {
@@ -141,32 +142,6 @@ export class ProductsMntUtilService {
         }
     }
 
-    // protected buildCacheKeyProducts({
-    //     limit,
-    //     offset,
-    //     all,
-    // }: {
-    //     limit?: number;
-    //     offset?: number;
-    //     all?: boolean;
-    // }) {
-    //     const arrCacheKey = [];
-
-    //     if (all) {
-    //         return PRODUCTS_ALL;
-    //     }
-
-    //     if (limit) {
-    //         arrCacheKey.push(`${PRODUCTS_LIMIT}_${limit}`);
-    //     }
-
-    //     if (offset) {
-    //         arrCacheKey.push(`${PRODUCTS_OFFSET}_${offset}`);
-    //     }
-
-    //     return arrCacheKey.join('_');
-    // }
-
     /**
      *
      * @returns remove all products cache
@@ -182,11 +157,7 @@ export class ProductsMntUtilService {
      * @throws `BadRequestException` if the validation fails.
      */
     protected async validProductAttributes(product: CreateProductRequestDTO | CreateProductDTO) {
-        const {
-            categories: categoryLabels = [],
-            variations = [],
-            generalAttributes = [],
-        } = product;
+        const { category, variations = [], generalAttributes = [] } = product;
 
         // Reassign the lowercase attribute keys to the original product object, remove u if null or undefined
         product.variations = variations.map((variation) => ({
@@ -203,18 +174,17 @@ export class ProductsMntUtilService {
             ...(attribute.u != null && attribute.u != undefined ? { u: attribute.u } : {}), // remove unit if null
         }));
 
-        const foundCategories = await Promise.all(
-            categoryLabels.map((label) =>
-                this.categoriesService.getCategory({ filterQueries: { label } }),
-            ),
-        );
+        // Reassign the category id to the original product object
+        product.category = new Types.ObjectId(category._id);
+
+        const foundCategories = await this.categoriesService.getCategory({
+            filterQueries: {
+                _id: product.category,
+            },
+        });
 
         const requireAttributes = [
-            ...new Set(
-                foundCategories.flatMap((category) =>
-                    category.requireAttributes.map((attribute) => attribute.label),
-                ),
-            ),
+            ...new Set(foundCategories.requireAttributes.map((attribute) => attribute.label)),
         ];
 
         // Checking duplicate attributes in one variation
@@ -282,10 +252,11 @@ export class ProductsMntUtilService {
      * @returns the product data with sku in each variation
      */
     protected validVariations(productData: CreateProductRequestDTO): CreateProductDTO {
-        const { name, variations } = productData;
+        const { name, variations, category } = productData;
 
         const newProduct: CreateProductDTO = {
             ...productData,
+            category: new Types.ObjectId(category._id),
             // The empty array is required to avoid the error when create product
             // This will be updated when resolve images after
             generalImages: [], // default generalImages is empty array

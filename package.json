@@ -72,6 +72,7 @@
     "jsonwebtoken": "^9.0.0",
     "moment-timezone": "^0.5.43",
     "mongoose": "^7.3.3",
+    "mongoose-autopopulate": "^1.0.1",
     "morgan": "^1.10.0",
     "nestjs-throttler-storage-redis": "^0.3.3",
     "nodemailer": "^6.9.3",
