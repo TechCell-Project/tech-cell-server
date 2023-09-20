@@ -70,7 +70,7 @@ export class ProductsMntService extends ProductsMntUtilService {
 
     async updateProductPutMethod({
         productId,
-        ...productUpdatedData
+        ...newData
     }: ProductIdParamsDTO & UpdateProductRequestDTO) {
         try {
             productId = new Types.ObjectId(productId);
@@ -85,6 +85,8 @@ export class ProductsMntService extends ProductsMntUtilService {
                 _id: productId,
             },
         });
+
+        let productUpdatedData = new UpdateProductRequestDTO(newData);
 
         // safe delete _id
         if (productUpdatedData['_id'] !== undefined) {

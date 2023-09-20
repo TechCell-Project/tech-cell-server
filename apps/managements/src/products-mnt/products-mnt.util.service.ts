@@ -157,10 +157,11 @@ export class ProductsMntUtilService {
      * @throws `BadRequestException` if the validation fails.
      */
     protected async validProductAttributes(product: CreateProductRequestDTO | CreateProductDTO) {
-        const { category, variations = [], generalAttributes = [] } = product;
+        const { category } = product;
+        let { variations = [], generalAttributes = [] } = product;
 
         // Reassign the lowercase attribute keys to the original product object, remove u if null or undefined
-        product.variations = variations.map((variation) => ({
+        variations = product.variations = variations.map((variation) => ({
             ...variation,
             attributes: variation.attributes.map((attribute) => ({
                 k: attribute.k.toLowerCase(), // lowercase attribute key
@@ -168,7 +169,7 @@ export class ProductsMntUtilService {
                 ...(attribute.u != null && attribute.u != undefined ? { u: attribute.u } : {}), // remove unit if null
             })),
         }));
-        product.generalAttributes = generalAttributes.map((attribute) => ({
+        generalAttributes = product.generalAttributes = generalAttributes.map((attribute) => ({
             k: attribute.k.toLowerCase(), // lowercase attribute key
             v: attribute.v,
             ...(attribute.u != null && attribute.u != undefined ? { u: attribute.u } : {}), // remove unit if null
@@ -311,6 +312,8 @@ export class ProductsMntUtilService {
                 'generalImages.#.url',
                 'descriptionImages.#.url',
                 'variations.#.images.#.url',
+                'variations.#.sku',
+                'variations.#.status',
             ],
         });
 
@@ -324,13 +327,15 @@ export class ProductsMntUtilService {
                 paths: [
                     'description',
                     'status',
+                    'generalAttributes',
+                    'descriptionImages',
                     'generalImages.#.publicId',
                     'generalImages.#.isThumbnail',
                     'descriptionImages.#.publicId',
                     'descriptionImages.#.isThumbnail',
-                    'variations.#.stock',
                     'variations.#.images.#.publicId',
                     'variations.#.images.#.isThumbnail',
+                    'variations.#.stock',
                 ],
             },
             {
