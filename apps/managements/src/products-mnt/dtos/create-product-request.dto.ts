@@ -255,7 +255,7 @@ export class CreateProductRequestDTO {
     @ValidateNested()
     @IsNotEmptyObject()
     @Type(() => CategoryDTO)
-    category: CategoryDTO;
+    category: CategoryDTO | Types.ObjectId;
 
     @ApiProperty({
         type: [VariationRequestDTO],
