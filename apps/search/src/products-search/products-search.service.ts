@@ -49,6 +49,7 @@ export class ProductsSearchService extends ProductsSearchUtilService {
         }
 
         const queryOpt: QueryOptions<Product> = {
+            lean: false,
             skip: page ? (page - 1) * pageSize : 0,
             limit: pageSize > 500 ? 500 : pageSize,
         };
@@ -79,6 +80,7 @@ export class ProductsSearchService extends ProductsSearchUtilService {
     }: { id: string | Types.ObjectId } & GetProductByIdQueryDTO) {
         const resultFromDb = await this.productsService.getProduct({
             filterQueries: { _id: id },
+            queryOptions: { lean: false },
         });
         let prodReturn = resultFromDb;
 

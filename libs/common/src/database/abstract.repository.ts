@@ -34,6 +34,7 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
         projection?: ProjectionType<TDocument>,
     ): Promise<TDocument> {
         const document = await this.model.findOne(filterQuery, projection, {
+            lean: true,
             ...options,
         });
 
@@ -45,9 +46,15 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
         return document as unknown as TDocument;
     }
 
-    async findOneAndUpdate(filterQuery: FilterQuery<TDocument>, update: UpdateQuery<TDocument>) {
+    async findOneAndUpdate(
+        filterQuery: FilterQuery<TDocument>,
+        update: UpdateQuery<TDocument>,
+        options?: Partial<QueryOptions<TDocument>>,
+    ) {
         const document = await this.model.findOneAndUpdate(filterQuery, update, {
+            lean: true,
             new: true,
+            ...options,
         });
 
         if (!document) {
@@ -60,6 +67,7 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
 
     async upsert(filterQuery: FilterQuery<TDocument>, document: Partial<TDocument>) {
         return this.model.findOneAndUpdate(filterQuery, document, {
+            lean: true,
             upsert: true,
             new: true,
         });
@@ -77,6 +85,7 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
         logEnabled?: boolean;
     }) {
         const document = await this.model.find(filterQuery, projection, {
+            lean: true,
             ...queryOptions,
         });
 
