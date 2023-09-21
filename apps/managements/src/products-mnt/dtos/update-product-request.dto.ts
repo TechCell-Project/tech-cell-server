@@ -4,7 +4,7 @@ import { Types } from 'mongoose';
 
 export class UpdateProductRequestDTO extends IntersectionType(CreateProductRequestDTO) {
     constructor(data: UpdateProductRequestDTO) {
-        super(CreateProductRequestDTO);
+        super(data);
 
         this.name = data?.name;
         this.description = data?.description;
