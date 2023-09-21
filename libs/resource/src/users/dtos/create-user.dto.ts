@@ -1,6 +1,20 @@
-import { IsEmail, IsNotEmpty, IsString, Length } from 'class-validator';
+import { IsBoolean, IsEmail, IsNotEmpty, IsString, Length } from 'class-validator';
+import { CreateUserRequestDto } from '~/apps/managements/users-mnt/dtos';
+import { UserRole } from '../enums';
 
 export class CreateUserDTO {
+    constructor(data: CreateUserRequestDto) {
+        this.userName = data.userName;
+        this.password = data.password;
+        this.role = data?.role ?? UserRole.User;
+        this.firstName = data?.firstName ?? 'systemF';
+        this.lastName = data?.lastName ?? 'systemL';
+
+        // If email is default, then this email is verified
+        this.email = data?.email ?? `${this.userName}_default@techcell.cloud`;
+        this.emailVerified = !data?.email;
+    }
+
     @IsEmail()
     @IsNotEmpty()
     email: string;
@@ -22,4 +36,12 @@ export class CreateUserDTO {
     @IsString()
     @IsNotEmpty()
     lastName: string;
+
+    @IsBoolean()
+    @IsNotEmpty()
+    emailVerified?: boolean;
+
+    @IsString()
+    @IsNotEmpty()
+    role: string;
 }

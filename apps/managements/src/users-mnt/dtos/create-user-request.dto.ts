@@ -1,6 +1,6 @@
 import { UserRole } from '@app/resource/users/enums';
-import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
+import { IsBoolean, IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateUserRequestDto {
     @ApiProperty({
@@ -24,9 +24,10 @@ export class CreateUserRequestDto {
     @ApiProperty({
         description: 'Role of user',
         example: 'admin',
-        required: true,
+        required: false,
     })
     @IsString()
+    @IsOptional()
     @IsEnum(UserRole)
     role: string;
 
