@@ -10,7 +10,9 @@ import { sanitizeHtmlString } from '@app/common/utils';
 
 @Injectable()
 export class ProductsMntService extends ProductsMntUtilService {
-    async createProduct({ ...productData }: CreateProductRequestDTO) {
+    async createProduct({ ...data }: CreateProductRequestDTO) {
+        let productData = new CreateProductRequestDTO(data);
+
         // Validate the attributes of product
         // Check if the attributes is valid or not
         // Check if the attributes is exits in db or not

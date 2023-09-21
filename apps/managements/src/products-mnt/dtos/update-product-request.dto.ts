@@ -6,16 +6,11 @@ export class UpdateProductRequestDTO extends IntersectionType(CreateProductReque
     constructor(data: UpdateProductRequestDTO) {
         super(CreateProductRequestDTO);
 
-        // Remove _id field
-        if (data['_id'] != null && data['_id'] != undefined) {
-            delete data['_id'];
-        }
-
         this.name = data?.name;
         this.description = data?.description;
         this.generalImages = data?.generalImages;
         this.descriptionImages = data?.descriptionImages;
-        this.category = new Types.ObjectId(data?.category._id);
+        this.category = new Types.ObjectId(data?.category?._id);
         this.status = data?.status;
         this.variations = data?.variations.map((variation) => {
             return {
