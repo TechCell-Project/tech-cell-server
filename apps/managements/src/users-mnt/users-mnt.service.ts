@@ -12,27 +12,14 @@ import { delCacheUsers } from '@app/resource/users/utils';
 @Injectable()
 export class UsersMntService extends UsersMntUtilService {
     async createUser({ ...createUserRequestDto }: CreateUserRequestDto) {
-        const newUser = createUserRequestDto;
+        const newUser = new CreateUserDTO(createUserRequestDto);
 
         if (createUserRequestDto.role === UserRole.SuperAdmin) {
             throw new RpcException(new BadRequestException('Cannot create Super Admin'));
         }
 
-        if (!createUserRequestDto.firstName) {
-            Object.assign(newUser, { firstName: `systemF` });
-        }
-
-        if (!createUserRequestDto.lastName) {
-            Object.assign(newUser, { lastName: `systemL` });
-        }
-
-        if (!createUserRequestDto.email) {
-            Object.assign(newUser, { email: `${newUser.userName}_account@techcell.cloud` });
-            Object.assign(newUser, { emailVerified: true });
-        }
-
         const [userCreated] = await Promise.all([
-            this.usersService.createUser(newUser as CreateUserDTO),
+            this.usersService.createUser(newUser),
             delStartWith(USERS_CACHE_PREFIX, this.cacheManager), // remove users cache
         ]);
 

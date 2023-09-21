@@ -112,7 +112,7 @@ export class AuthService extends AuthUtilService {
             userName = await this.createUniqueUserName(email);
         }
 
-        if (userFound || (userFound && userFound?.emailVerified)) {
+        if (userFound || userFound?.emailVerified) {
             throw new RpcException(new ConflictException('Email is already registered'));
         }
 

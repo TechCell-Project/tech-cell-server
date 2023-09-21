@@ -88,11 +88,6 @@ export class ProductsMntService extends ProductsMntUtilService {
 
         let productUpdatedData = new UpdateProductRequestDTO(newData);
 
-        // safe delete _id
-        if (productUpdatedData['_id'] !== undefined) {
-            delete productUpdatedData['_id'];
-        }
-
         const isAllow = this.allowFieldsToUpdateProduct(oldProduct, productUpdatedData);
         if (isAllow !== true) {
             throw new RpcException(new BadRequestException(isAllow));

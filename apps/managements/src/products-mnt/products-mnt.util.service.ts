@@ -320,7 +320,13 @@ export class ProductsMntUtilService {
         const isAllow = allowToAction(diff, [
             {
                 kind: 'N', // new
-                paths: ['generalImages', 'descriptionImages', 'variations.#.images'],
+                paths: [
+                    'generalImages',
+                    'descriptionImages',
+                    'variations.#.images',
+                    'generalAttributes.#.u',
+                    'variations.#.attributes.#.u',
+                ],
             },
             {
                 kind: 'E', // edit
@@ -339,7 +345,7 @@ export class ProductsMntUtilService {
                 ],
             },
             {
-                kind: 'A', // array
+                kind: 'A', // allow change in array
                 paths: [
                     'generalAttributes',
                     'generalImages',
@@ -347,6 +353,10 @@ export class ProductsMntUtilService {
                     'variations.#.images',
                     'variations',
                 ],
+            },
+            {
+                kind: 'D', // delete
+                paths: ['generalAttributes.#.u', 'variations.#.attributes.#.u'],
             },
         ]);
 
