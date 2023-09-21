@@ -1,5 +1,3 @@
-import * as diacritic from 'diacritic';
-
 /**
  * Generates a regular expression that matches a keyword with or without diacritical marks and with different variations of the same letter.
  * @param keyword The keyword to search for.
@@ -8,7 +6,7 @@ import * as diacritic from 'diacritic';
 export function generateSearchQuery(keyword: string, caseSensitive = false) {
     // Remove diacritical marks from the keyword.
     // Lowercase the keyword.
-    const normalizedKeyword: string = diacritic.clean(keyword)?.toLowerCase();
+    const normalizedKeyword: string = keyword.toLowerCase();
 
     // Define the variations for each letter.
     const variations = new Map<string, Set<string>>([
