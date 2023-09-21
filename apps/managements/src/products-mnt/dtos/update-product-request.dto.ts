@@ -1,18 +1,51 @@
 import { IntersectionType } from '@nestjs/swagger';
-import { CreateProductRequestDTO } from './create-product-request.dto';
+import { AttributeDTO, CreateProductRequestDTO } from './create-product-request.dto';
 import { Types } from 'mongoose';
 
 export class UpdateProductRequestDTO extends IntersectionType(CreateProductRequestDTO) {
     constructor(data: UpdateProductRequestDTO) {
         super(CreateProductRequestDTO);
-        this.category = new Types.ObjectId(data?.category._id);
+
+        // Remove _id field
+        if (data['_id'] != null && data['_id'] != undefined) {
+            delete data['_id'];
+        }
+
+        this.name = data?.name;
         this.description = data?.description;
         this.generalImages = data?.generalImages;
         this.descriptionImages = data?.descriptionImages;
-        this.variations = data?.variations;
-        this.name = data?.name;
+        this.category = new Types.ObjectId(data?.category._id);
         this.status = data?.status;
-        this.variations = data?.variations;
-        this.generalAttributes = data?.generalAttributes;
+        this.variations = data?.variations.map((variation) => {
+            return {
+                price: variation.price,
+                stock: variation.stock,
+                images: variation.images,
+                // Sorted allow alphabetical order
+                attributes: variation.attributes
+                    .map((attr): AttributeDTO => {
+                        return {
+                            k: attr?.k?.toLowerCase(),
+                            v: attr?.v,
+                            ...(attr.u != null && attr.u != undefined
+                                ? { u: attr?.u?.toLowerCase() }
+                                : {}), // remove unit if null
+                        };
+                    })
+                    .sort((a, b) => a.k.localeCompare(b.k)),
+            };
+        });
+
+        // Sorted allow alphabetical order
+        this.generalAttributes = data?.generalAttributes
+            ?.map((attr): AttributeDTO => {
+                return {
+                    k: attr.k.toLowerCase(),
+                    v: attr.v,
+                    ...(attr.u != null && attr.u != undefined ? { u: attr.u.toLowerCase() } : {}), // remove unit if null
+                };
+            })
+            .sort((a, b) => a.k.localeCompare(b.k));
     }
 }
