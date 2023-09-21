@@ -1,7 +1,7 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { AbstractDocument } from '@app/common';
 
-@Schema({ timestamps: true })
+@Schema({ timestamps: true, versionKey: false })
 export class ProductReview extends AbstractDocument {
     @Prop({ required: true })
     userId: string;
