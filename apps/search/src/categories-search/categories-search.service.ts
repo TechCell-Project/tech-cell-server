@@ -1,21 +1,12 @@
-import { CategoriesService, Category } from '@app/resource/categories';
+import { CategoriesService, Category, CategoryIdParam } from '@app/resource/categories';
 import { Injectable } from '@nestjs/common';
 import { GetCategoriesRequestDTO } from './dtos';
-import { FilterQuery, QueryOptions } from 'mongoose';
+import { FilterQuery, QueryOptions, Types } from 'mongoose';
 import { ListDataResponseDTO } from '@app/common/dtos';
-import { isTrueSet } from '@app/common';
 
 @Injectable()
 export class CategoriesSearchService {
     constructor(private readonly categoriesService: CategoriesService) {}
-
-    // async createCategory(data: any) {
-    //     return await this.categoriesService.createCategory(data);
-    // }
-
-    // async getCategory() {
-    //     return await this.categoriesService.getCategory();
-    // }
 
     async getCategories({ page = 1, pageSize = 10, keyword = undefined }: GetCategoriesRequestDTO) {
         /**
@@ -62,5 +53,11 @@ export class CategoriesSearchService {
 
     async getCategoryByLabel(label: string) {
         return await this.categoriesService.getCategory({ filterQueries: { label } });
+    }
+
+    async getCategoryById({ categoryId }: CategoryIdParam) {
+        return await this.categoriesService.getCategory({
+            filterQueries: { _id: new Types.ObjectId(categoryId) },
+        });
     }
 }

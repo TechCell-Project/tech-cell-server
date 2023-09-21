@@ -19,6 +19,7 @@ import {
     CreateCategoryRequestDTO,
     UpdateCategoryRequestDTO,
 } from '~/apps/managements/categories-mnt';
+import { CategoryIdParam } from '@app/resource/categories/dtos';
 
 @ApiTags('categories')
 @Controller('categories')
@@ -34,6 +35,15 @@ export class CategoriesController {
     async getCategories(@Query() query: GetCategoriesRequestDTO) {
         return this.searchService
             .send(CategoriesSearchMessagePattern.getCategories, { ...query })
+            .pipe(catchException());
+    }
+
+    @ApiOkResponse({ description: 'Get category successfully!' })
+    @ApiNotFoundResponse({ description: 'Category not found!' })
+    @Get(':categoryId')
+    async getCategoryById(@Param() { categoryId }: CategoryIdParam) {
+        return this.searchService
+            .send(CategoriesSearchMessagePattern.getCategoryById, { categoryId })
             .pipe(catchException());
     }
 
@@ -57,7 +67,7 @@ export class CategoriesController {
 
     @Patch('/:categoryId')
     async updateCategory(
-        @Param('categoryId') categoryId: string,
+        @Param() { categoryId }: CategoryIdParam,
         @Body() data: UpdateCategoryRequestDTO,
     ) {
         return this.managementsService
