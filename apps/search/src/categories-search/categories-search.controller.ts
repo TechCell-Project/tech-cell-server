@@ -4,6 +4,7 @@ import { Ctx, MessagePattern, Payload, RmqContext } from '@nestjs/microservices'
 import { CategoriesSearchService } from './categories-search.service';
 import { CategoriesSearchMessagePattern } from './categories-search.pattern';
 import { GetCategoriesRequestDTO, GetCategoryByLabelRequestDTO } from './dtos';
+import { CategoryIdParam } from '@app/resource/categories/dtos';
 
 @Controller()
 export class CategoriesSearchController {
@@ -30,21 +31,9 @@ export class CategoriesSearchController {
         return await this.categoriesSearchService.getCategoryByLabel(label);
     }
 
-    // @MessagePattern(CategoriesSearchMessagePattern.getCategoryById)
-    // async getCategoryById(
-    //     @Ctx() context: RmqContext,
-    //     @Payload() { categoryId }: { categoryId: string },
-    // ) {
-    //     this.rabbitMqService.acknowledgeMessage(context);
-    //     return await this.categoriesSearchService.getCategoryById(categoryId);
-    // }
-
-    // @MessagePattern(CategoriesSearchMessagePattern.getCategoriesByAttributeId)
-    // async getCategoriesByAttributeId(
-    //     @Ctx() context: RmqContext,
-    //     @Payload() { attributeId }: { attributeId: string },
-    // ) {
-    //     this.rabbitMqService.acknowledgeMessage(context);
-    //     return await this.categoriesSearchService.getCategoriesByAttributeId(attributeId);
-    // }
+    @MessagePattern(CategoriesSearchMessagePattern.getCategoryById)
+    async getCategoryById(@Ctx() context: RmqContext, @Payload() { categoryId }: CategoryIdParam) {
+        this.rabbitMqService.acknowledgeMessage(context);
+        return this.categoriesSearchService.getCategoryById({ categoryId });
+    }
 }

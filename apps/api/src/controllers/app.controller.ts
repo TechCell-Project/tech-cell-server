@@ -2,9 +2,10 @@ import { Controller, Get, Inject, UseGuards } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import { SAMPLE_SERVICE } from '~/constants';
 import { AuthGuard, catchException } from '@app/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiExcludeController, ApiTags } from '@nestjs/swagger';
 import { SampleMessagePattern } from '~/apps/sample';
 
+@ApiExcludeController()
 @ApiTags('commons')
 @Controller('/')
 export class AppController {

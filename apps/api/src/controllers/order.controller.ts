@@ -1,9 +1,9 @@
 import { Controller, Inject, Get, Request } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import { ORDER_SERVICE } from '~/constants';
-import { catchException } from '@app/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiExcludeController, ApiTags } from '@nestjs/swagger';
 
+@ApiExcludeController()
 @ApiTags('order')
 @Controller('order')
 export class OrderController {
