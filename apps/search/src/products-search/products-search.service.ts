@@ -5,7 +5,7 @@ import { FilterQuery, QueryOptions, Types } from 'mongoose';
 import { RpcException } from '@nestjs/microservices';
 import { Product } from '@app/resource';
 import { ListDataResponseDTO } from '@app/common/dtos';
-import { isTrueSet } from '@app/common';
+import { generateSearchQuery, isTrueSet } from '@app/common';
 
 @Injectable()
 export class ProductsSearchService extends ProductsSearchUtilService {
@@ -29,20 +29,20 @@ export class ProductsSearchService extends ProductsSearchUtilService {
 
         let filterOpt: FilterQuery<Product> = {};
         if (keyword) {
-            const regex = new RegExp(keyword, 'i');
+            const keywordRegex = generateSearchQuery(keyword);
             filterOpt = {
                 $or: [
-                    { name: regex },
-                    { description: regex },
-                    { categories: regex },
+                    { name: keywordRegex },
+                    { description: keywordRegex },
+                    { categories: keywordRegex },
                     {
-                        'variations.k': regex,
+                        'variations.k': keywordRegex,
                     },
                     {
-                        'variations.v': regex,
+                        'variations.v': keywordRegex,
                     },
                     {
-                        'variations.u': regex,
+                        'variations.u': keywordRegex,
                     },
                 ],
             };

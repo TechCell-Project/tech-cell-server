@@ -6,6 +6,7 @@ import { GetAttributesRequestDTO } from './dtos';
 import { SelectType } from './enums';
 import { FilterQuery, QueryOptions } from 'mongoose';
 import { ListDataResponseDTO } from '@app/common/dtos';
+import { generateSearchQuery } from '@app/common/utils';
 
 @Injectable()
 export class AttributesSearchService {
@@ -20,7 +21,7 @@ export class AttributesSearchService {
         select_type = SelectType.onlyActive,
         keyword = undefined,
     }: GetAttributesRequestDTO) {
-        const attributeArgs: FilterQuery<Attribute> = {};
+        const filter: FilterQuery<Attribute> = {};
         const options: QueryOptions<Attribute> = {
             skip: page ? (page - 1) * pageSize : 0,
             limit: Number(pageSize) || 10,
@@ -28,34 +29,35 @@ export class AttributesSearchService {
 
         switch (select_type) {
             case SelectType.onlyActive:
-                Object.assign(attributeArgs, {
+                Object.assign(filter, {
                     $or: [{ isDeleted: false }, { isDeleted: { $exists: false } }],
                 });
                 break;
             case SelectType.onlyDeleted:
-                Object.assign(attributeArgs, { isDelete: true });
+                Object.assign(filter, { isDelete: true });
                 break;
             case SelectType.both:
-                delete attributeArgs['isDeleted'];
+                delete filter['isDeleted'];
                 break;
         }
 
         if (keyword) {
-            Object.assign(attributeArgs, {
+            const keywordRegex = generateSearchQuery(keyword);
+            Object.assign(filter, {
                 $or: [
-                    { name: { $regex: keyword, $options: 'i' } },
-                    { label: { $regex: keyword, $options: 'i' } },
-                    { description: { $regex: keyword, $options: 'i' } },
+                    { name: keywordRegex },
+                    { label: keywordRegex },
+                    { description: keywordRegex },
                 ],
             });
         }
 
         const [attributesFromDb, totalRecord] = await Promise.all([
             this.attributesService.getAttributes({
-                filterQueries: { ...attributeArgs },
+                filterQueries: { ...filter },
                 queryOptions: { ...options },
             }),
-            this.attributesService.countAttributes({ ...attributeArgs }),
+            this.attributesService.countAttributes({ ...filter }),
         ]);
 
         return new ListDataResponseDTO({

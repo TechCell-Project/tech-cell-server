@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { GetCategoriesRequestDTO } from './dtos';
 import { FilterQuery, QueryOptions, Types } from 'mongoose';
 import { ListDataResponseDTO } from '@app/common/dtos';
+import { generateSearchQuery } from '@app/common/utils';
 
 @Injectable()
 export class CategoriesSearchService {
@@ -27,11 +28,12 @@ export class CategoriesSearchService {
 
         let filterQueries: FilterQuery<Category> = {};
         if (keyword) {
+            const keywordRegex = generateSearchQuery(keyword);
             filterQueries = {
                 $or: [
-                    { name: { $regex: keyword, $options: 'i' } },
-                    { label: { $regex: keyword, $options: 'i' } },
-                    { description: { $regex: keyword, $options: 'i' } },
+                    { name: keywordRegex },
+                    { label: keywordRegex },
+                    { description: keywordRegex },
                 ],
             };
         }
