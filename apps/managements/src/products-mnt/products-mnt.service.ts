@@ -4,9 +4,10 @@ import { CreateProductRequestDTO } from './dtos';
 import { RpcException } from '@nestjs/microservices';
 import { CreateProductDTO } from '@app/resource';
 import { UpdateProductRequestDTO } from './dtos/update-product-request.dto';
-import { ProductIdParamsDTO } from './dtos/params.dto';
+import { ProductIdParamsDTO, ProductSkuParamsDTO } from './dtos/params.dto';
 import { Types } from 'mongoose';
 import { sanitizeHtmlString } from '@app/common/utils';
+import { ProductStatus } from '@app/resource/products/enums';
 
 @Injectable()
 export class ProductsMntService extends ProductsMntUtilService {
@@ -167,5 +168,59 @@ export class ProductsMntService extends ProductsMntUtilService {
             this.logger.error(error);
             throw new RpcException(new BadRequestException(error.message));
         }
+    }
+
+    async deleteProduct({ productId }: ProductIdParamsDTO) {
+        try {
+            productId = new Types.ObjectId(productId);
+        } catch (error) {
+            throw new RpcException(new BadRequestException('Invalid product id'));
+        }
+
+        // Find product by id to check if it is exist or not
+        // If not, throw the exception
+        const product = await this.productsService.getProduct({
+            filterQueries: {
+                _id: productId,
+            },
+        });
+
+        return await this.productsService.deleteProductById(product._id);
+    }
+
+    async deleteProductVariation({ productId, sku }: ProductIdParamsDTO & ProductSkuParamsDTO) {
+        try {
+            productId = new Types.ObjectId(productId);
+        } catch (error) {
+            throw new RpcException(new BadRequestException('Invalid product id'));
+        }
+
+        // Find product by id to check if it is exist or not
+        // If not, throw the exception
+        const product = await this.productsService.getProduct({
+            filterQueries: {
+                _id: productId,
+                variations: {
+                    $elemMatch: {
+                        sku: sku,
+                    },
+                },
+            },
+        });
+
+        // Find the variation by sku to check if it is exist or not
+        // If not, throw the exception
+        product.variations.forEach((variation) => {
+            if (variation.sku === sku) {
+                variation.status = ProductStatus.Deleted;
+            }
+        });
+
+        return await this.productsService.updateProductById(product._id, {
+            $set: {
+                variations: product.variations,
+                updatedAt: new Date(),
+            },
+        });
     }
 }

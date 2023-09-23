@@ -3,7 +3,7 @@ import { MessagePattern, RmqContext, Payload, Ctx } from '@nestjs/microservices'
 import { RabbitMQService } from '@app/common';
 import { ProductsMntService } from './products-mnt.service';
 import { ProductsMntMessagePattern } from './products-mnt.pattern';
-import { ProductIdParamsDTO } from './dtos/params.dto';
+import { ProductIdParamsDTO, ProductSkuParamsDTO } from './dtos/params.dto';
 import { UpdateProductRequestDTO } from './dtos/update-product-request.dto';
 import { CreateProductRequestDTO } from './dtos';
 
@@ -38,5 +38,20 @@ export class ProductsMntController {
     ) {
         this.rabbitMqService.acknowledgeMessage(context);
         return await this.productsMntService.updateProductPutMethod({ ...payload });
+    }
+
+    @MessagePattern(ProductsMntMessagePattern.deleteProduct)
+    async deleteProduct(@Ctx() context: RmqContext, @Payload() { productId }: ProductIdParamsDTO) {
+        this.rabbitMqService.acknowledgeMessage(context);
+        return await this.productsMntService.deleteProduct({ productId });
+    }
+
+    @MessagePattern(ProductsMntMessagePattern.deleteProductVariation)
+    async deleteProductVariation(
+        @Ctx() context: RmqContext,
+        @Payload() { productId, sku }: ProductIdParamsDTO & ProductSkuParamsDTO,
+    ) {
+        this.rabbitMqService.acknowledgeMessage(context);
+        return await this.productsMntService.deleteProductVariation({ productId, sku });
     }
 }

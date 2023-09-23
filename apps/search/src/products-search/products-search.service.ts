@@ -1,36 +1,21 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ProductsSearchUtilService } from './products-search.util.service';
 import { GetProductByIdQueryDTO, GetProductsDTO } from './dtos';
 import { FilterQuery, QueryOptions, Types } from 'mongoose';
-import { RpcException } from '@nestjs/microservices';
 import { Product } from '@app/resource';
 import { ListDataResponseDTO } from '@app/common/dtos';
 import { generateSearchQuery, isTrueSet } from '@app/common';
 
 @Injectable()
 export class ProductsSearchService extends ProductsSearchUtilService {
-    async getProducts({
-        page = 1,
-        pageSize = 10,
-        detail = false,
-        keyword = undefined,
-    }: GetProductsDTO) {
-        try {
-            if (typeof page !== 'number') {
-                page = Number(page);
-            }
+    async getProducts(queryData: GetProductsDTO) {
+        const searchQuery = new GetProductsDTO(queryData);
+        const { page, pageSize, detail } = searchQuery;
 
-            if (typeof pageSize !== 'number') {
-                pageSize = Number(pageSize);
-            }
-        } catch (error) {
-            throw new RpcException(new BadRequestException('Page and page size must be a number'));
-        }
-
-        let filterOpt: FilterQuery<Product> = {};
-        if (keyword) {
-            const keywordRegex = generateSearchQuery(keyword);
-            filterOpt = {
+        const filterOpt: FilterQuery<Product> = {};
+        if (searchQuery.keyword) {
+            const keywordRegex = generateSearchQuery(searchQuery.keyword);
+            Object.assign(filterOpt, {
                 $or: [
                     { name: keywordRegex },
                     { description: keywordRegex },
@@ -45,7 +30,7 @@ export class ProductsSearchService extends ProductsSearchUtilService {
                         'variations.u': keywordRegex,
                     },
                 ],
-            };
+            });
         }
 
         const queryOpt: QueryOptions<Product> = {
@@ -58,15 +43,15 @@ export class ProductsSearchService extends ProductsSearchUtilService {
             this.productsService.getProducts({
                 filterQueries: filterOpt,
                 queryOptions: queryOpt,
+                selectType: searchQuery.select_type,
             }),
-            this.productsService.countProducts(),
+            this.productsService.countProducts(filterOpt),
         ]);
+
         const totalPage = Math.ceil(totalRecord / pageSize);
 
         return new ListDataResponseDTO({
-            data: isTrueSet(detail)
-                ? await this.assignDetailToProductLists(productsFromDb)
-                : productsFromDb,
+            data: detail ? await this.assignDetailToProductLists(productsFromDb) : productsFromDb,
             page,
             pageSize: pageSize,
             totalPage: totalPage,
