@@ -1,4 +1,15 @@
-import { Controller, Inject, Get, Post, Body, Query, Param, Put, UseGuards } from '@nestjs/common';
+import {
+    Controller,
+    Inject,
+    Get,
+    Post,
+    Body,
+    Query,
+    Param,
+    Put,
+    UseGuards,
+    Delete,
+} from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~/constants';
 import { ModGuard, SuperAdminGuard, catchException } from '@app/common';
@@ -19,7 +30,10 @@ import { ProductsMntMessagePattern } from '~/apps/managements/products-mnt';
 import { ProductsSearchMessagePattern } from '~/apps/search/products-search';
 import { GetProductByIdQueryDTO, GetProductsDTO } from '~/apps/search/products-search/dtos';
 import { CreateProductRequestDTO } from '~/apps/managements/products-mnt/dtos';
-import { ProductIdParamsDTO } from '~/apps/managements/products-mnt/dtos/params.dto';
+import {
+    ProductIdParamsDTO,
+    ProductSkuParamsDTO,
+} from '~/apps/managements/products-mnt/dtos/params.dto';
 import { UpdateProductRequestDTO } from '~/apps/managements/products-mnt/dtos/update-product-request.dto';
 import { UpdateProductGeneralImagesDTO } from '~/apps/managements/products-mnt/dtos/update-product-general-images-request.dto';
 
@@ -115,6 +129,37 @@ export class ProductsController {
     async gen(@Query() { num }: { num: number }) {
         return this.managementsService
             .send(ProductsMntMessagePattern.generateProducts, { num })
+            .pipe(catchException());
+    }
+
+    @ApiOperation({
+        summary: 'Delete product by id',
+    })
+    @ApiOkResponse({
+        description: 'Delete product successfully!',
+    })
+    @Delete('/:productId')
+    @UseGuards(ModGuard)
+    async deleteProduct(@Param() { productId }: ProductIdParamsDTO) {
+        return this.managementsService
+            .send(ProductsMntMessagePattern.deleteProduct, { productId })
+            .pipe(catchException());
+    }
+
+    @ApiOperation({
+        summary: 'Delete product variation',
+    })
+    @ApiOkResponse({
+        description: 'Delete product variation successfully!',
+    })
+    @Delete('/:productId/:sku')
+    @UseGuards(ModGuard)
+    async deleteProductVariation(
+        @Param() { productId }: ProductIdParamsDTO,
+        @Param() { sku }: ProductSkuParamsDTO,
+    ) {
+        return this.managementsService
+            .send(ProductsMntMessagePattern.deleteProductVariation, { productId, sku })
             .pipe(catchException());
     }
 }

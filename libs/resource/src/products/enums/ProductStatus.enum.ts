@@ -1,4 +1,5 @@
 export enum ProductStatus {
+    Deleted = -1,
     ComingSoon = 1,
     NewArrival = 2,
     Pre_order = 3,
