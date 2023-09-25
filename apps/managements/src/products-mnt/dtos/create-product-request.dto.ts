@@ -17,6 +17,7 @@ import { Transform, Type } from 'class-transformer';
 import { ProductStatus } from '@app/resource/products/enums';
 import { ApiProperty } from '@nestjs/swagger';
 import { Types } from 'mongoose';
+import { sanitizeHtmlString } from '@app/common/utils';
 
 export class PriceDTO {
     @ApiProperty({
@@ -228,7 +229,7 @@ export class CategoryDTO {
 export class CreateProductRequestDTO {
     constructor(data: CreateProductRequestDTO) {
         this.name = data?.name;
-        this.description = data?.description;
+        this.description = sanitizeHtmlString(data?.description);
         this.generalImages = data?.generalImages;
         this.descriptionImages = data?.descriptionImages;
         this.category = new Types.ObjectId(data?.category?._id);
@@ -244,9 +245,7 @@ export class CreateProductRequestDTO {
                         return {
                             k: attr?.k?.toLowerCase(),
                             v: attr?.v,
-                            ...(attr.u != null && attr.u != undefined
-                                ? { u: attr?.u?.toLowerCase() }
-                                : {}), // remove unit if null
+                            ...(attr.u != null && attr.u != undefined ? { u: attr?.u } : {}), // remove unit if null
                         };
                     })
                     .sort((a, b) => a.k.localeCompare(b.k)),
@@ -259,7 +258,7 @@ export class CreateProductRequestDTO {
                 return {
                     k: attr.k.toLowerCase(),
                     v: attr.v,
-                    ...(attr.u != null && attr.u != undefined ? { u: attr.u.toLowerCase() } : {}), // remove unit if null
+                    ...(attr.u != null && attr.u != undefined ? { u: attr.u } : {}), // remove unit if null
                 };
             })
             .sort((a, b) => a.k.localeCompare(b.k));
