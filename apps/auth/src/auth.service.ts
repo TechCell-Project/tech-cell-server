@@ -29,7 +29,7 @@ import { MAX_PASSWORD_LENGTH, USERS_CACHE_PREFIX } from '~/constants';
 @Injectable()
 export class AuthService extends AuthUtilService {
     async login({ emailOrUsername, password }: LoginRequestDTO) {
-        const user = await this.validateUser(emailOrUsername, password);
+        const user = await this.validateUserLogin(emailOrUsername, password);
 
         if (!user) {
             throw new RpcException(
