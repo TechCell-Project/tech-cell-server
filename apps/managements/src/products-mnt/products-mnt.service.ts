@@ -10,48 +10,59 @@ import { ProductStatus } from '@app/resource/products/enums';
 
 @Injectable()
 export class ProductsMntService extends ProductsMntUtilService {
-    async createProduct({ ...data }: CreateProductRequestDTO) {
-        let productData = new CreateProductRequestDTO(data);
+    async createProduct(data: CreateProductRequestDTO) {
+        const productData = new CreateProductRequestDTO(data);
+
+        // Need to reassign image
+        // Because the image object in `productData` is not the same object with the image object in `CreateProductDTO`
+        const productToCreate = new CreateProductDTO(productData);
 
         // Validate the attributes of product
         // Check if the attributes is valid or not
         // Check if the attributes is exits in db or not
         // If not, throw the exception
         // If pass return the new version that attributes have been sorted
-        productData = await this.validProductAttributes({ ...productData });
+        const {
+            generalAttributes: generalAttrValidated,
+            variations: variationsAttributeValidated,
+        } = await this.validProductAttributes(productData);
+        productData.variations = variationsAttributeValidated;
+        const { variations: variationSku } = this.updateSkuVariations(productData);
 
-        // Validate the variations of product
-        const productToCreate: CreateProductDTO = this.validVariations(productData);
-        if (productToCreate['_id'] !== undefined) {
-            delete productToCreate['_id'];
-        }
+        // Assign the attributes to product
+        productToCreate.generalAttributes = generalAttrValidated;
+        // Reassign the sku for variation
+        productToCreate.variations = variationSku;
 
         // Check if product is already exist or not with the same sku
-        const isProductExist = await this.isProductExist(productToCreate);
+        const isProductExist = await this.isProductExist({
+            variations: productToCreate.variations,
+        });
         if (isProductExist) {
             throw new RpcException(
                 new ConflictException(`Product '${isProductExist}' is already exist`),
             );
         }
 
+        /* REASSIGN IMAGE */
         // Resolve images to add the url to image object
         // Because user just post the `publicId` of image
-        const { generalImages, descriptionImages, variations } = await this.resolveImages({
-            productData: productData,
-        });
+        const { generalImages, descriptionImages, variations } = await this.resolveImages(
+            productData,
+        );
 
         // Assign `generalImages` product
-        if (generalImages.length > 0) {
+        if (generalImages?.length > 0) {
             productToCreate.generalImages = generalImages;
         } else {
-            delete productToCreate?.generalImages;
+            delete productToCreate.generalImages;
         }
 
         // Assign `descriptionImages` product
-        if (descriptionImages.length > 0) {
+        if (descriptionImages?.length > 0) {
             productToCreate.descriptionImages = descriptionImages;
         } else {
-            delete productToCreate?.descriptionImages;
+            delete productToCreate.descriptionImages;
         }
 
         // Assign `variations` product, merge with the old one
@@ -65,6 +76,7 @@ export class ProductsMntService extends ProductsMntUtilService {
                 delete productToCreate.variations[i]?.images;
             }
         }
+        /* REASSIGN IMAGE END */
 
         return await this.productsService.createProduct(productToCreate);
     }
@@ -87,7 +99,7 @@ export class ProductsMntService extends ProductsMntUtilService {
             },
         });
 
-        let productUpdatedData = new UpdateProductRequestDTO(newData);
+        const productUpdatedData = new UpdateProductRequestDTO(newData);
 
         const isAllow = this.allowFieldsToUpdateProduct(oldProduct, productUpdatedData);
         if (isAllow !== true) {
@@ -96,27 +108,31 @@ export class ProductsMntService extends ProductsMntUtilService {
 
         // Resolve images to add the url to image object
         // Because user just post the `publicId` of image
-        const { generalImages, descriptionImages, variations } = await this.resolveImages({
-            productData: productUpdatedData,
-        });
+        const { generalImages, descriptionImages, variations } = await this.resolveImages(
+            productUpdatedData,
+        );
 
         // Resolve add new variations
         // If the variation is already exist, throw the exception
         // If not, add the new one
         // If pass return the new version that attributes have been sorted
-        productUpdatedData = await this.validProductAttributes({ ...productUpdatedData });
+        const { variations: variationValidated, generalAttributes: generalAttrValidated } =
+            await this.validProductAttributes(productUpdatedData);
+        productUpdatedData.generalAttributes = generalAttrValidated;
+        productUpdatedData.variations = variationValidated;
+
         // Base on variation's attributes to generate sku
-        productUpdatedData = this.validVariations(productUpdatedData);
+        productUpdatedData.variations = this.updateSkuVariations(productUpdatedData).variations;
 
         // Assign `generalImages` product
-        if (generalImages.length > 0) {
+        if (generalImages?.length > 0) {
             productUpdatedData.generalImages = generalImages;
         } else {
             productUpdatedData.generalImages = [];
         }
 
         // Assign `descriptionImages` product
-        if (descriptionImages.length > 0) {
+        if (descriptionImages?.length > 0) {
             productUpdatedData.descriptionImages = descriptionImages;
         } else {
             productUpdatedData.descriptionImages = [];
@@ -127,19 +143,14 @@ export class ProductsMntService extends ProductsMntUtilService {
         // The `variations` is new one, it updated the image object with more data
         // Merge two object to get the new one
         for (let i = 0; i < productUpdatedData.variations.length; i++) {
-            if (variations[i]?.images.length > 0) {
+            if (variations[i]?.images?.length > 0) {
                 productUpdatedData.variations[i].images = variations[i].images;
             } else {
                 productUpdatedData.variations[i].images = [];
             }
         }
 
-        return await this.productsService.updateProductById(productId, {
-            $set: {
-                ...productUpdatedData,
-                updatedAt: new Date(),
-            },
-        });
+        return await this.productsService.updateProductById(productId, productUpdatedData);
     }
 
     async gen(num: number) {

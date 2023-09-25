@@ -166,5 +166,10 @@ export function findDuplicates<T>(arr: T[]): Set<T> {
  * @returns A string after sanitize
  */
 export function sanitizeHtmlString(html = ''): string {
-    return sanitizeHtml(html);
+    const result = sanitizeHtml(html, {
+        allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img']),
+        allowedAttributes: { img: ['src', 'alt', 'width', 'height'] },
+        allowedSchemes: ['data', 'http', 'https'],
+    });
+    return result;
 }
