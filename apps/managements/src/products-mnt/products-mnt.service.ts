@@ -6,7 +6,6 @@ import { CreateProductDTO } from '@app/resource';
 import { UpdateProductRequestDTO } from './dtos/update-product-request.dto';
 import { ProductIdParamsDTO, ProductSkuParamsDTO } from './dtos/params.dto';
 import { Types } from 'mongoose';
-import { sanitizeHtmlString } from '@app/common/utils';
 import { ProductStatus } from '@app/resource/products/enums';
 
 @Injectable()
@@ -20,7 +19,6 @@ export class ProductsMntService extends ProductsMntUtilService {
         // If not, throw the exception
         // If pass return the new version that attributes have been sorted
         productData = await this.validProductAttributes({ ...productData });
-        productData.description = sanitizeHtmlString(productData.description);
 
         // Validate the variations of product
         const productToCreate: CreateProductDTO = this.validVariations(productData);

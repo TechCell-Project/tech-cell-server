@@ -5,6 +5,7 @@ import {
     ImageDTO,
     Product,
     ProductsService,
+    VariationDTO,
 } from '@app/resource';
 import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common';
 import {
@@ -16,7 +17,7 @@ import {
 } from '@app/common/utils';
 import { REDIS_CACHE, PRODUCTS_CACHE_PREFIX } from '~/constants';
 import { Store } from 'cache-manager';
-import { CreateProductRequestDTO } from './dtos';
+import { AttributeDTO, CreateProductRequestDTO } from './dtos';
 import { RpcException } from '@nestjs/microservices';
 import { CloudinaryService } from '@app/common/Cloudinary';
 import { UpdateProductRequestDTO } from './dtos/update-product-request.dto';
@@ -156,28 +157,8 @@ export class ProductsMntUtilService {
      * @returns `true` if the validation succeeds.
      * @throws `BadRequestException` if the validation fails.
      */
-    protected async validProductAttributes(product: CreateProductRequestDTO | CreateProductDTO) {
-        const { category } = product;
-        let { variations = [], generalAttributes = [] } = product;
-
-        // Reassign the lowercase attribute keys to the original product object, remove u if null or undefined
-        variations = product.variations = variations.map((variation) => ({
-            ...variation,
-            attributes: variation.attributes.map((attribute) => ({
-                k: attribute.k.toLowerCase(), // lowercase attribute key
-                v: attribute.v,
-                ...(attribute.u != null && attribute.u != undefined ? { u: attribute.u } : {}), // remove unit if null
-            })),
-        }));
-        generalAttributes = product.generalAttributes = generalAttributes.map((attribute) => ({
-            k: attribute.k.toLowerCase(), // lowercase attribute key
-            v: attribute.v,
-            ...(attribute.u != null && attribute.u != undefined ? { u: attribute.u } : {}), // remove unit if null
-        }));
-
-        // Reassign the category id to the original product object
-        product.category = new Types.ObjectId(category._id);
-
+    protected async validProductAttributes(product: CreateProductRequestDTO) {
+        const { variations, generalAttributes } = product;
         const foundCategories = await this.categoriesService.getCategory({
             filterQueries: {
                 _id: product.category,
@@ -204,7 +185,9 @@ export class ProductsMntUtilService {
 
         // After pass the duplicate attributes check, we can get all attributes in all variations as a set
         const variationAttributesUserImport = new Set(
-            ...variations.map((variation) => variation.attributes.map((attribute) => attribute.k)),
+            ...variations.map((variation: VariationDTO) =>
+                variation.attributes.map((attribute: AttributeDTO) => attribute.k),
+            ),
         );
         const generalAttributesUserImport = generalAttributes.map((attribute) => attribute.k);
 
@@ -236,7 +219,7 @@ export class ProductsMntUtilService {
 
         try {
             await Promise.all(
-                allAttributesUserImport.map((label) =>
+                allAttributesUserImport.map((label: string) =>
                     this.attributesService.getAttributeByLabel(label),
                 ),
             );
