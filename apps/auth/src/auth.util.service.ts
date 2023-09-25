@@ -73,22 +73,21 @@ export class AuthUtilService {
         return { accessToken, refreshToken, ...this.cleanUserBeforeResponse(user) };
     }
 
-    async validateUser(input: string, password: string) {
+    async validateUserLogin(input: string, password: string) {
         const query = isEmail(input) ? { email: input } : { userName: input };
-
         const user = await this.usersService.getUser(query, { lean: true });
 
         const doesUserExist = !!user;
-        if (!doesUserExist) return null;
+        if (!doesUserExist) return false;
 
         const doesPasswordMatch = await this.doesPasswordMatch(password, user.password);
-        if (!doesPasswordMatch) return null;
+        if (!doesPasswordMatch) return false;
 
         return user;
     }
 
     async doesPasswordMatch(password: string, hashedPassword: string): Promise<boolean> {
-        return bcrypt.compare(password, hashedPassword);
+        return await bcrypt.compare(password, hashedPassword);
     }
 
     protected async revokeAccessToken(accessToken: string): Promise<boolean> {

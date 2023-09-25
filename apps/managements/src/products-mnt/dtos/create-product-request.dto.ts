@@ -15,9 +15,9 @@ import {
 } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 import { ProductStatus } from '@app/resource/products/enums';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { Types } from 'mongoose';
-import { sanitizeHtmlString } from '@app/common/utils';
+import { replaceWhitespaceTo, sanitizeHtmlString } from '@app/common/utils';
 
 export class PriceDTO {
     @ApiProperty({
@@ -212,6 +212,11 @@ export class VariationRequestDTO {
     @ValidateNested({ each: true })
     @Type(() => ImageRequestDTO)
     images?: ImageRequestDTO[];
+
+    @ApiHideProperty()
+    @IsString()
+    @IsOptional()
+    sku: string;
 }
 
 export class CategoryDTO {
@@ -232,23 +237,36 @@ export class CreateProductRequestDTO {
         this.description = sanitizeHtmlString(data?.description);
         this.generalImages = data?.generalImages;
         this.descriptionImages = data?.descriptionImages;
-        this.category = new Types.ObjectId(data?.category?._id);
-        this.status = data?.status;
+        this.category = data?.category;
+        this.status = data?.status ?? ProductStatus.Hide;
         this.variations = data?.variations.map((variation) => {
+            // Sorted allow alphabetical order
+            const sortedAttributes = variation.attributes
+                .map((attr): AttributeDTO => {
+                    return {
+                        k: attr?.k?.toLowerCase(),
+                        v: attr?.v,
+                        ...(attr.u != null && attr.u != undefined ? { u: attr?.u } : {}), // remove unit if null
+                    };
+                })
+                .sort((a, b) => a.k.localeCompare(b.k));
+
+            // Base on variation's attributes to generate sku
+            const sku = `${replaceWhitespaceTo(this.name)}-${sortedAttributes
+                .map(({ k, v, u }) => {
+                    const attributeValue = `${replaceWhitespaceTo(k)}.${replaceWhitespaceTo(v)}`;
+                    return u ? `${attributeValue}.${replaceWhitespaceTo(u)}` : attributeValue;
+                })
+                .join('-')}`.toLowerCase();
+
             return {
+                status: variation?.status ?? ProductStatus.Hide,
                 price: variation.price,
                 stock: variation.stock,
                 images: variation.images,
                 // Sorted allow alphabetical order
-                attributes: variation.attributes
-                    .map((attr): AttributeDTO => {
-                        return {
-                            k: attr?.k?.toLowerCase(),
-                            v: attr?.v,
-                            ...(attr.u != null && attr.u != undefined ? { u: attr?.u } : {}), // remove unit if null
-                        };
-                    })
-                    .sort((a, b) => a.k.localeCompare(b.k)),
+                attributes: sortedAttributes,
+                sku: sku,
             };
         });
 
@@ -293,7 +311,7 @@ export class CreateProductRequestDTO {
     @ValidateNested()
     @IsNotEmptyObject()
     @Type(() => CategoryDTO)
-    category: CategoryDTO | Types.ObjectId;
+    category: CategoryDTO;
 
     @ApiProperty({
         type: [VariationRequestDTO],

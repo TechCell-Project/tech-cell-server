@@ -22,7 +22,6 @@ import { RpcException } from '@nestjs/microservices';
 import { CloudinaryService } from '@app/common/Cloudinary';
 import { UpdateProductRequestDTO } from './dtos/update-product-request.dto';
 import { ProductStatus } from '@app/resource/products/enums';
-import { Types } from 'mongoose';
 
 @Injectable()
 export class ProductsMntUtilService {
@@ -36,8 +35,16 @@ export class ProductsMntUtilService {
         private readonly cloudinaryService: CloudinaryService,
     ) {}
 
-    protected async resolveImages({ productData }: { productData: CreateProductRequestDTO }) {
-        const { generalImages = [], descriptionImages = [], variations = [] } = productData;
+    /**
+     * Find images by publicId and return the object of image
+     * @param param0 Product data when create
+     * @returns the data of images after resolve
+     */
+    protected async resolveImages({
+        generalImages = [],
+        descriptionImages = [],
+        variations = [],
+    }: Partial<CreateProductRequestDTO>) {
         const imagesId = new Set(
             [
                 ...generalImages.map((i) => i?.publicId),
@@ -48,13 +55,13 @@ export class ProductsMntUtilService {
 
         let newGeneralImages: ImageDTO[] = [];
         let newDescriptionImages: ImageDTO[] = [];
-        let newVar = [];
+        let newVariations: VariationDTO[] = [];
 
         if (imagesId.size === 0) {
             return {
                 generalImages: newGeneralImages,
                 descriptionImages: newDescriptionImages,
-                variations: newVar,
+                variations: newVariations,
             };
         }
 
@@ -95,7 +102,7 @@ export class ProductsMntUtilService {
             });
         });
 
-        newVar = variations?.map((variation) => {
+        newVariations = variations?.map((variation) => {
             const { images } = variation;
             const validImages = images?.map((image) => {
                 const validImage = validAll.find((valid) => valid.public_id === image.publicId);
@@ -111,18 +118,23 @@ export class ProductsMntUtilService {
         return {
             generalImages: newGeneralImages,
             descriptionImages: newDescriptionImages,
-            variations: newVar,
+            variations: newVariations,
         };
     }
 
-    protected async isProductExist(product: CreateProductDTO) {
+    /**
+     *
+     * @param param0 variation data when create
+     * @returns if product exist, return the sku of variation, else return false
+     */
+    protected async isProductExist({ variations }: Partial<CreateProductRequestDTO>) {
         try {
             const foundProduct = await this.productsService.getProduct({
                 filterQueries: {
                     variations: {
                         $elemMatch: {
                             sku: {
-                                $in: product.variations.map((variation) => variation.sku),
+                                $in: variations.map((variation) => variation.sku),
                             },
                         },
                     },
@@ -131,7 +143,7 @@ export class ProductsMntUtilService {
 
             if (foundProduct) {
                 const foundVariation = foundProduct.variations.find((variation) =>
-                    product.variations.some((pVariation) => pVariation.sku === variation.sku),
+                    variations.some((pVariation) => pVariation.sku === variation.sku),
                 );
 
                 return foundVariation?.sku || false;
@@ -157,11 +169,11 @@ export class ProductsMntUtilService {
      * @returns `true` if the validation succeeds.
      * @throws `BadRequestException` if the validation fails.
      */
-    protected async validProductAttributes(product: CreateProductRequestDTO) {
-        const { variations, generalAttributes } = product;
+    protected async validProductAttributes(product: Partial<CreateProductRequestDTO>) {
+        const { category, variations, generalAttributes } = product;
         const foundCategories = await this.categoriesService.getCategory({
             filterQueries: {
-                _id: product.category,
+                _id: category,
             },
         });
 
@@ -235,51 +247,48 @@ export class ProductsMntUtilService {
      * @param productData the product data when create
      * @returns the product data with sku in each variation
      */
-    protected validVariations(productData: CreateProductRequestDTO): CreateProductDTO {
-        const { name, variations, category } = productData;
+    protected updateSkuVariations({
+        name,
+        variations,
+    }: Partial<CreateProductRequestDTO>): Partial<CreateProductDTO> {
+        const variationsNew = variations.map((variation) => {
+            const { attributes } = variation;
+            const sortedAttributes = attributes.slice().sort((a, b) => a.k.localeCompare(b.k));
 
-        const newProduct: CreateProductDTO = {
-            ...productData,
-            category: new Types.ObjectId(category._id),
-            // The empty array is required to avoid the error when create product
-            // This will be updated when resolve images after
-            generalImages: [], // default generalImages is empty array
-            descriptionImages: [], // default descriptionImages is empty array
-            variations: variations.map((variation) => {
-                const { attributes } = variation;
-                const sortedAttributes = attributes.slice().sort((a, b) => a.k.localeCompare(b.k));
+            // Base on variation's attributes to generate sku
+            const sku = `${replaceWhitespaceTo(name)}-${sortedAttributes
+                .map(({ k, v, u }) => {
+                    const attributeValue = `${replaceWhitespaceTo(k)}.${replaceWhitespaceTo(v)}`;
+                    return u ? `${attributeValue}.${replaceWhitespaceTo(u)}` : attributeValue;
+                })
+                .join('-')}`.toLowerCase();
 
-                // Base on variation's attributes to generate sku
-                const sku = `${replaceWhitespaceTo(name)}-${sortedAttributes
-                    .map(({ k, v, u }) => {
-                        const attributeValue = `${replaceWhitespaceTo(k)}.${replaceWhitespaceTo(
-                            v,
-                        )}`;
-                        return u ? `${attributeValue}.${replaceWhitespaceTo(u)}` : attributeValue;
-                    })
-                    .join('-')}`.toLowerCase();
-
-                return {
-                    ...variation,
-                    attributes: sortedAttributes,
-                    sku,
-                    images: [],
-                    status: variation.status ? variation.status : ProductStatus.Hide, // default status is hide
-                };
-            }),
-        };
+            return {
+                ...variation,
+                attributes: sortedAttributes,
+                sku,
+                images: [],
+                status: variation.status ? variation.status : ProductStatus.Hide, // default status is hide
+            };
+        });
 
         // Check if sku is duplicated
-        const duplicateSkus = [...findDuplicates(newProduct.variations.map((v) => v.sku))];
+        const duplicateSkus = [...findDuplicates(variationsNew.map((v) => v.sku))];
         if (duplicateSkus.length > 0) {
             throw new RpcException(
                 new BadRequestException(`Duplicate skus: ${duplicateSkus.join(', ')}`),
             );
         }
 
-        return newProduct;
+        return { variations: variationsNew };
     }
 
+    /**
+     *
+     * @param oldProduct left hand side is old product
+     * @param productUpdatedData right hand side is new product
+     * @returns if allow to update, return true, otherwise return array of error message
+     */
     protected allowFieldsToUpdateProduct(
         oldProduct: Product,
         productUpdatedData: UpdateProductRequestDTO,
@@ -307,6 +316,8 @@ export class ProductsMntUtilService {
                     'generalImages',
                     'descriptionImages',
                     'variations.#.images',
+                    'generalAttributes.#.k',
+                    'generalAttributes.#.v',
                     'generalAttributes.#.u',
                     'variations.#.attributes.#.u',
                 ],
@@ -318,10 +329,14 @@ export class ProductsMntUtilService {
                     'status',
                     'generalAttributes',
                     'descriptionImages',
+                    'generalAttributes.#.k',
+                    'generalAttributes.#.v',
+                    'generalAttributes.#.u',
                     'generalImages.#.publicId',
                     'generalImages.#.isThumbnail',
                     'descriptionImages.#.publicId',
                     'descriptionImages.#.isThumbnail',
+                    'variations.#.images',
                     'variations.#.images.#.publicId',
                     'variations.#.images.#.isThumbnail',
                     'variations.#.stock',
@@ -339,7 +354,7 @@ export class ProductsMntUtilService {
             },
             {
                 kind: 'D', // delete
-                paths: ['generalAttributes.#.u', 'variations.#.attributes.#.u'],
+                paths: ['generalAttributes.#.k', 'generalAttributes.#.v', 'generalAttributes.#.u'],
             },
         ]);
 

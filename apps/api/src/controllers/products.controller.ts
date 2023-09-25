@@ -35,7 +35,6 @@ import {
     ProductSkuParamsDTO,
 } from '~/apps/managements/products-mnt/dtos/params.dto';
 import { UpdateProductRequestDTO } from '~/apps/managements/products-mnt/dtos/update-product-request.dto';
-import { UpdateProductGeneralImagesDTO } from '~/apps/managements/products-mnt/dtos/update-product-general-images-request.dto';
 
 @ApiBadRequestResponse({
     description: 'Invalid request',
@@ -47,7 +46,7 @@ import { UpdateProductGeneralImagesDTO } from '~/apps/managements/products-mnt/d
     description: 'Internal server error',
 })
 @ApiTags('products')
-@ApiExtraModels(CreateProductRequestDTO, UpdateProductRequestDTO, UpdateProductGeneralImagesDTO)
+@ApiExtraModels(CreateProductRequestDTO, UpdateProductRequestDTO)
 @Controller('products')
 export class ProductsController {
     constructor(

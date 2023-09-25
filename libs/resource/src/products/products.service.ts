@@ -12,8 +12,8 @@ import { SelectTypeDTO } from '~/apps/search/dtos';
 export class ProductsService {
     constructor(private readonly productsRepository: ProductsRepository) {}
 
-    async createProduct({ ...createProductDto }: CreateProductDTO) {
-        return await this.productsRepository.create({ ...createProductDto });
+    async createProduct(createProductDto: CreateProductDTO) {
+        return await this.productsRepository.create(createProductDto);
     }
 
     async getProduct({
