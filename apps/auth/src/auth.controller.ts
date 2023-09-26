@@ -8,13 +8,15 @@ import {
     NewTokenRequestDTO,
     VerifyEmailRequestDTO,
     LoginRequestDTO,
-    CheckEmailRequestDTO,
+    EmailRequestDTO,
     ForgotPasswordDTO,
     VerifyForgotPasswordDTO,
+    ChangePasswordRequestDTO,
 } from './dtos';
 import { JwtGuard } from './guards/jwt.guard';
 import { IUserFacebookResponse, IUserGoogleResponse } from './interfaces';
 import { AuthMessagePattern } from './auth.pattern';
+import { ICurrentUser } from '@app/common/interfaces';
 
 @Controller()
 export class AuthController {
@@ -33,7 +35,7 @@ export class AuthController {
     }
 
     @MessagePattern(AuthMessagePattern.checkEmail)
-    async checkEmail(@Ctx() context: RmqContext, @Payload() { email }: CheckEmailRequestDTO) {
+    async checkEmail(@Ctx() context: RmqContext, @Payload() { email }: EmailRequestDTO) {
         this.rabbitMqService.acknowledgeMessage(context);
         return this.authService.checkEmail({ email });
     }
@@ -97,10 +99,36 @@ export class AuthController {
 
     @MessagePattern(AuthMessagePattern.facebookAuth)
     async facebookAuthRedirect(
-        @Ctx() context,
+        @Ctx() context: RmqContext,
         @Payload() { user }: { user: IUserFacebookResponse },
     ) {
         this.rabbitMqService.acknowledgeMessage(context);
         return this.authService.facebookLogin({ user });
+    }
+
+    @MessagePattern(AuthMessagePattern.resendVerifyEmailOtp)
+    async resendVerifyEmailOtp(@Ctx() context, @Payload() { email }: EmailRequestDTO) {
+        this.rabbitMqService.acknowledgeMessage(context);
+        return this.authService.resendVerifyEmailOtp({ email });
+    }
+
+    @MessagePattern(AuthMessagePattern.changePassword)
+    async changePassword(
+        @Ctx() context: RmqContext,
+        @Payload()
+        {
+            changePwData,
+            user,
+        }: {
+            changePwData: ChangePasswordRequestDTO;
+            user: ICurrentUser;
+        },
+    ) {
+        console.log({
+            changePwData,
+            user,
+        });
+        this.rabbitMqService.acknowledgeMessage(context);
+        return this.authService.changePassword({ changePwData, user });
     }
 }

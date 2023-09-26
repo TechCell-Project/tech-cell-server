@@ -9,7 +9,7 @@ import {
     UnprocessableEntityException,
 } from '@nestjs/common';
 import {
-    CheckEmailRequestDTO,
+    EmailRequestDTO,
     ForgotPasswordDTO,
     LoginRequestDTO,
     VerifyEmailRequestDTO,
@@ -17,6 +17,7 @@ import {
     RegisterRequestDTO,
     NewTokenRequestDTO,
     UserDataResponseDTO,
+    ChangePasswordRequestDTO,
 } from '~/apps/auth/dtos';
 import { User } from '@app/resource/users/schemas';
 import { RpcException } from '@nestjs/microservices';
@@ -25,6 +26,8 @@ import { OtpType } from '@app/resource/otp';
 import { IUserFacebookResponse, IUserGoogleResponse, ITokenVerifiedResponse } from './interfaces';
 import { buildUniqueUserNameFromEmail, delStartWith, generateRandomString } from '@app/common';
 import { MAX_PASSWORD_LENGTH, USERS_CACHE_PREFIX } from '~/constants';
+import { ICurrentUser } from '@app/common/interfaces';
+import { Types } from 'mongoose';
 
 @Injectable()
 export class AuthService extends AuthUtilService {
@@ -46,19 +49,6 @@ export class AuthService extends AuthUtilService {
         }
 
         if (!user.emailVerified) {
-            const otp = await this.otpService.createOrRenewOtp({
-                email: user.email,
-                otpType: OtpType.VerifyEmail,
-            });
-            const emailContext: ConfirmEmailRegisterDTO = {
-                otpCode: otp.otpCode,
-            };
-
-            this.mailService.emit(MailEventPattern.sendMailConfirm, {
-                email: user.email,
-                emailContext,
-            });
-
             throw new RpcException(
                 new NotAcceptableException(
                     'Email is not verified, please check your email to verify it.',
@@ -69,7 +59,7 @@ export class AuthService extends AuthUtilService {
         return await this.buildUserTokenResponse(user);
     }
 
-    async checkEmail({ email }: CheckEmailRequestDTO) {
+    async checkEmail({ email }: EmailRequestDTO) {
         const userFound = await this.usersService.countUser({ email });
 
         if (userFound > 0) {
@@ -176,6 +166,30 @@ export class AuthService extends AuthUtilService {
         };
     }
 
+    async resendVerifyEmailOtp({ email }: EmailRequestDTO) {
+        const user = await this.usersService.getUser({ email });
+        if (user.emailVerified) {
+            throw new RpcException(new BadRequestException('Email is already verified'));
+        }
+
+        const otp = await this.otpService.createOrRenewOtp({
+            email: user.email,
+            otpType: OtpType.VerifyEmail,
+        });
+        const emailContext = new ConfirmEmailRegisterDTO({
+            otpCode: otp.otpCode,
+        });
+
+        this.mailService.emit(MailEventPattern.sendMailConfirm, {
+            email: user.email,
+            emailContext,
+        });
+
+        return {
+            message: 'An email has already been sent to you email address, please check your email',
+        };
+    }
+
     async getNewToken({
         refreshToken: oldRefreshToken,
     }: NewTokenRequestDTO): Promise<UserDataResponseDTO> {
@@ -221,6 +235,43 @@ export class AuthService extends AuthUtilService {
 
         return {
             message: 'An email has already been sent to you email address, please check your email',
+        };
+    }
+
+    async changePassword({
+        changePwData,
+        user,
+    }: {
+        changePwData: ChangePasswordRequestDTO;
+        user: ICurrentUser;
+    }) {
+        const { oldPassword, newPassword, reNewPassword } = new ChangePasswordRequestDTO(
+            changePwData,
+        );
+
+        if (newPassword !== reNewPassword) {
+            throw new RpcException(new BadRequestException('Password does not match'));
+        }
+
+        const userFound = await this.usersService.getUser({ _id: new Types.ObjectId(user._id) });
+        const validateLogin = await this.validateUserLogin(userFound.email, oldPassword);
+        if (!validateLogin) {
+            throw new RpcException(new UnauthorizedException('Your password is incorrect'));
+        }
+
+        const userUpdated = await this.usersService.changeUserPassword({
+            email: validateLogin.email,
+            password: newPassword,
+        });
+
+        if (!userUpdated) {
+            throw new RpcException(
+                new BadRequestException('Something went wrong, please try again'),
+            );
+        }
+
+        return {
+            message: 'Password changed successfully',
         };
     }
 
