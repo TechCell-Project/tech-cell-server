@@ -10,6 +10,7 @@ import {
 } from '@nestjs/swagger';
 import helmet from 'helmet';
 import * as compression from 'compression';
+import { ACCESS_TOKEN_NAME } from '~/constants/api.constant';
 
 async function bootstrap() {
     const port = process.env.API_PORT || 8000;
@@ -50,7 +51,7 @@ async function bootstrap() {
                 type: 'http', // 'apiKey' too
                 in: 'Header',
             },
-            'accessToken', // This name here is important for matching up with @ApiBearerAuth() in controller!
+            ACCESS_TOKEN_NAME, // This name here is important for matching up with @ApiBearerAuth() in controller!
         )
         .build();
     const swaggerDocumentOptions: SwaggerDocumentOptions = {

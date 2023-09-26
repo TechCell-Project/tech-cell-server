@@ -9,6 +9,8 @@ export const AuthMessagePattern = {
     verifyForgotPassword: { cmd: 'auth_verify_forgot_password' },
     googleAuth: { cmd: 'auth_google_login' },
     facebookAuth: { cmd: 'auth_facebook_login' },
+    resendVerifyEmailOtp: { cmd: 'auth_resend_verify_email_otp' },
+    changePassword: { cmd: 'auth_change_password' },
 };
 
 export const AuthEventPattern = {};

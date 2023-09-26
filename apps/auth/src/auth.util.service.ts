@@ -73,8 +73,10 @@ export class AuthUtilService {
         return { accessToken, refreshToken, ...this.cleanUserBeforeResponse(user) };
     }
 
-    async validateUserLogin(input: string, password: string) {
-        const query = isEmail(input) ? { email: input } : { userName: input };
+    async validateUserLogin(emailOrUsername: string, password: string) {
+        const query = isEmail(emailOrUsername)
+            ? { email: emailOrUsername }
+            : { userName: emailOrUsername };
         const user = await this.usersService.getUser(query, { lean: true });
 
         const doesUserExist = !!user;

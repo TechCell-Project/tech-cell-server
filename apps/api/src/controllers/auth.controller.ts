@@ -25,6 +25,7 @@ import {
     ApiTooManyRequestsResponse,
     ApiNotAcceptableResponse,
     ApiOAuth2,
+    ApiBearerAuth,
 } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import {
@@ -35,7 +36,8 @@ import {
     VerifyEmailRequestDTO,
     ForgotPasswordDTO,
     VerifyForgotPasswordDTO,
-    CheckEmailRequestDTO,
+    EmailRequestDTO,
+    ChangePasswordRequestDTO,
 } from '~/apps/auth/dtos';
 import {
     GoogleOAuthGuard,
@@ -45,6 +47,10 @@ import {
     AuthMessagePattern,
 } from '~/apps/auth';
 import { catchException } from '@app/common';
+import { CurrentUser } from '@app/common/decorators';
+import { ICurrentUser } from '@app/common/interfaces';
+import { AuthGuard } from '@app/common/guards';
+import { ACCESS_TOKEN_NAME } from '~/constants/api.constant';
 
 @ApiTags('authentication')
 @ApiTooManyRequestsResponse({ description: 'Too many requests, please try again later' })
@@ -78,7 +84,7 @@ export class AuthController {
             .pipe(catchException());
     }
 
-    @ApiBody({ type: CheckEmailRequestDTO })
+    @ApiBody({ type: EmailRequestDTO })
     @ApiOkResponse({ description: 'Email is not in use. Can register' })
     @ApiConflictResponse({
         description: 'User already registered',
@@ -86,7 +92,7 @@ export class AuthController {
     })
     @HttpCode(HttpStatus.OK)
     @Post('check-email')
-    async checkEmail(@Body() { email }: CheckEmailRequestDTO) {
+    async checkEmail(@Body() { email }: EmailRequestDTO) {
         return this.authService
             .send(AuthMessagePattern.checkEmail, { email })
             .pipe(catchException());
@@ -130,6 +136,21 @@ export class AuthController {
     async verifyEmail(@Body() { email, otpCode }: VerifyEmailRequestDTO) {
         return this.authService
             .send(AuthMessagePattern.verifyEmail, { email, otpCode })
+            .pipe(catchException());
+    }
+
+    @ApiBody({ type: EmailRequestDTO })
+    @ApiOkResponse({
+        description: 'An email has already been sent to you email address, please check your email',
+    })
+    @ApiNotFoundResponse({ description: 'Email not found' })
+    @ApiBadRequestResponse({ description: 'Email has already been verified.' })
+    @Throttle(5, 60) // limit 5 requests per 60 seconds
+    @HttpCode(HttpStatus.OK)
+    @Post('resend-verify-email-otp')
+    async resendVerifyEmailOtp(@Body() { email }: EmailRequestDTO) {
+        return this.authService
+            .send(AuthMessagePattern.resendVerifyEmailOtp, { email })
             .pipe(catchException());
     }
 
@@ -204,6 +225,23 @@ export class AuthController {
     async facebookAuth(@Request() { user }: { user: IUserFacebookResponse }) {
         return this.authService
             .send(AuthMessagePattern.facebookAuth, { user })
+            .pipe(catchException());
+    }
+
+    @ApiBody({ type: ChangePasswordRequestDTO })
+    @ApiOkResponse({ description: 'Password change successful' })
+    @ApiNotFoundResponse({ description: 'Your information is not found' })
+    @ApiBadRequestResponse({ description: 'Your information is invalid' })
+    @ApiBearerAuth(ACCESS_TOKEN_NAME)
+    @UseGuards(AuthGuard)
+    @HttpCode(HttpStatus.OK)
+    @Post('change-password')
+    async changePassword(
+        @Body() changePwData: ChangePasswordRequestDTO,
+        @CurrentUser() user: ICurrentUser,
+    ) {
+        return this.authService
+            .send(AuthMessagePattern.changePassword, { changePwData, user })
             .pipe(catchException());
     }
 }

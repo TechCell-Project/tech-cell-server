@@ -76,6 +76,7 @@ export class UsersService {
             { email },
             {
                 password: await this.hashPassword({ password }),
+                updatedAt: new Date(),
             },
         );
     }
