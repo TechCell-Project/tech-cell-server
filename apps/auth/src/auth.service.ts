@@ -25,7 +25,7 @@ import { ConfirmEmailRegisterDTO, ForgotPasswordEmailDTO, MailEventPattern } fro
 import { OtpType } from '@app/resource/otp';
 import { IUserFacebookResponse, IUserGoogleResponse, ITokenVerifiedResponse } from './interfaces';
 import { buildUniqueUserNameFromEmail, delStartWith, generateRandomString } from '@app/common';
-import { MAX_PASSWORD_LENGTH, USERS_CACHE_PREFIX } from '~/constants';
+import { PASSWORD_MAX_LENGTH, USERS_CACHE_PREFIX } from '~/constants';
 import { ICurrentUser } from '@app/common/interfaces';
 import { Types } from 'mongoose';
 
@@ -49,11 +49,7 @@ export class AuthService extends AuthUtilService {
         }
 
         if (!user.emailVerified) {
-            throw new RpcException(
-                new NotAcceptableException(
-                    'Email is not verified, please check your email to verify it.',
-                ),
-            );
+            throw new RpcException(new NotAcceptableException('Email is not verified'));
         }
 
         return await this.buildUserTokenResponse(user);
@@ -355,7 +351,7 @@ export class AuthService extends AuthUtilService {
                 firstName: user.firstName,
                 lastName: user.lastName,
                 password: `${user.openid}${generateRandomString(
-                    MAX_PASSWORD_LENGTH - user.openid.length,
+                    PASSWORD_MAX_LENGTH - user.openid.length,
                 )}`,
             });
             return this.buildUserTokenResponse(newUser);
@@ -386,7 +382,7 @@ export class AuthService extends AuthUtilService {
                 firstName: user.firstName,
                 lastName: user.lastName,
                 password: `${user.email}${generateRandomString(
-                    MAX_PASSWORD_LENGTH - user.email.length,
+                    PASSWORD_MAX_LENGTH - user.email.length,
                 )}`,
             });
         }

@@ -1,5 +1,15 @@
 import { IsEmail, IsNotEmpty, IsOptional, IsString, Length } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import {
+    PASSWORD_MAX_LENGTH,
+    USERNAME_MAX_LENGTH,
+    PASSWORD_MIN_LENGTH,
+    USERNAME_MIN_LENGTH,
+    FIRSTNAME_MIN_LENGTH,
+    FIRSTNAME_MAX_LENGTH,
+    LASTNAME_MIN_LENGTH,
+    LASTNAME_MAX_LENGTH,
+} from '~/constants/common.constant';
 
 export class RegisterRequestDTO {
     @ApiProperty({
@@ -12,55 +22,57 @@ export class RegisterRequestDTO {
 
     @ApiProperty({
         description: 'Username of user to register',
-        minimum: 8,
-        maximum: 50,
         example: 'example-username',
         required: false,
+        minLength: USERNAME_MIN_LENGTH,
+        maxLength: USERNAME_MAX_LENGTH,
     })
     @IsString()
     @IsOptional()
-    @Length(8, 50)
+    @Length(USERNAME_MIN_LENGTH, USERNAME_MAX_LENGTH)
     userName?: string;
 
     @ApiProperty({
         description: 'Password of user to register',
-        minimum: 8,
-        maximum: 24,
         example: 'the-password-what-will-super-strong',
+        minLength: PASSWORD_MIN_LENGTH,
+        maxLength: PASSWORD_MAX_LENGTH,
     })
     @IsString()
     @IsNotEmpty()
-    @Length(8, 24)
+    @Length(PASSWORD_MIN_LENGTH, PASSWORD_MAX_LENGTH)
     password: string;
 
     @ApiProperty({
         description: 'Re-password of user to register, must to be same as password',
-        minimum: 8,
-        maximum: 24,
         example: 'the-re-password-what-must-same-as-password',
+        minLength: PASSWORD_MIN_LENGTH,
+        maxLength: PASSWORD_MAX_LENGTH,
     })
     @IsString()
     @IsNotEmpty()
-    @Length(8, 24)
+    @Length(PASSWORD_MIN_LENGTH, PASSWORD_MAX_LENGTH)
     re_password: string;
 
     @ApiProperty({
         description: 'First name of user',
-        minimum: 8,
-        maximum: 24,
         example: 'example-first-name',
+        minLength: FIRSTNAME_MIN_LENGTH,
+        maxLength: FIRSTNAME_MAX_LENGTH,
     })
     @IsString()
     @IsNotEmpty()
+    @Length(FIRSTNAME_MIN_LENGTH, FIRSTNAME_MAX_LENGTH)
     firstName: string;
 
     @ApiProperty({
         description: 'Last name of user',
-        minimum: 8,
-        maximum: 24,
         example: 'example-last-name',
+        minLength: LASTNAME_MIN_LENGTH,
+        maxLength: LASTNAME_MAX_LENGTH,
     })
     @IsString()
     @IsNotEmpty()
+    @Length(LASTNAME_MIN_LENGTH, LASTNAME_MAX_LENGTH)
     lastName: string;
 }

@@ -1,5 +1,6 @@
 import { IsNotEmpty, IsString, Length } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH } from '~/constants';
 
 export class ChangePasswordRequestDTO {
     constructor(data: ChangePasswordRequestDTO) {
@@ -16,22 +17,22 @@ export class ChangePasswordRequestDTO {
     @ApiProperty({
         description: 'New password to change',
         type: String,
-        minLength: 8,
-        maxLength: 24,
+        minLength: PASSWORD_MIN_LENGTH,
+        maxLength: PASSWORD_MAX_LENGTH,
     })
     @IsString()
     @IsNotEmpty()
-    @Length(8, 24)
+    @Length(PASSWORD_MIN_LENGTH, PASSWORD_MAX_LENGTH)
     newPassword: string;
 
     @ApiProperty({
         description: 'Re-new password to change, must be same with `newPassword`',
         type: String,
-        minLength: 8,
-        maxLength: 24,
+        minLength: PASSWORD_MIN_LENGTH,
+        maxLength: PASSWORD_MAX_LENGTH,
     })
     @IsString()
     @IsNotEmpty()
-    @Length(8, 24)
+    @Length(PASSWORD_MIN_LENGTH, PASSWORD_MAX_LENGTH)
     reNewPassword: string;
 }
