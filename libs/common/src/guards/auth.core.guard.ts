@@ -21,6 +21,9 @@ import {
 import { TCurrentUser } from '../types';
 import { UserRole } from '@app/resource/users/enums';
 
+/**
+ * @description Base Auth Guard, verify jwt token from request and add user to request if login success
+ */
 @Injectable()
 export class AuthCoreGuard implements CanActivate {
     @Inject(AUTH_SERVICE) protected readonly authService: ClientRMQ;
