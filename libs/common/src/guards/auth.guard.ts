@@ -3,6 +3,9 @@ import { UserRole } from '@app/resource/users/enums';
 import { AuthCoreGuard } from './auth.core.guard';
 import { Reflector } from '@nestjs/core';
 
+/**
+ * @description AuthGuard: required login for all user roles
+ */
 @Injectable()
 export class AuthGuard extends AuthCoreGuard {
     constructor() {

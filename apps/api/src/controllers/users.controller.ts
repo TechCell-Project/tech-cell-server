@@ -31,7 +31,7 @@ import {
 import { catchException } from '@app/common';
 import { UserMntResponseDto } from '@app/resource/users/dtos';
 import { CurrentUser } from '@app/common/decorators';
-import { ICurrentUser } from '@app/common/interfaces';
+import { TCurrentUser } from '@app/common/types';
 import { ListDataResponseDTO } from '@app/common/dtos';
 import { UsersSearchMessagePattern } from '~/apps/search/users-search';
 import { GetUsersDTO } from '~/apps/search/users-search/dtos';
@@ -68,7 +68,7 @@ export class UsersController {
     @ApiOkResponse({ description: 'Get current user info success', type: UserMntResponseDto })
     @UseGuards(AuthGuard)
     @Get('/me')
-    async getMe(@CurrentUser() user: ICurrentUser) {
+    async getMe(@CurrentUser() user: TCurrentUser) {
         return this.searchService
             .send(UsersSearchMessagePattern.getUserById, { id: user._id })
             .pipe(catchException());
@@ -93,7 +93,7 @@ export class UsersController {
     async blockUser(
         @Param('id') idParam: string,
         @Body() { reason = '', note = '' }: BlockUnblockRequestDTO,
-        @CurrentUser() user: ICurrentUser,
+        @CurrentUser() user: TCurrentUser,
     ) {
         return this.managementsService
             .send(UsersMntMessagePattern.blockUser, {
@@ -114,7 +114,7 @@ export class UsersController {
     async unblockUser(
         @Param('id') idParam: string,
         @Body() { reason = '', note = '' }: BlockUnblockRequestDTO,
-        @CurrentUser() user: ICurrentUser,
+        @CurrentUser() user: TCurrentUser,
     ) {
         return this.managementsService
             .send(UsersMntMessagePattern.unblockUser, {
@@ -135,7 +135,7 @@ export class UsersController {
     async changeRoleUser(
         @Param('id') idParam: string,
         @Body() { role }: ChangeRoleRequestDTO,
-        @CurrentUser() user: ICurrentUser,
+        @CurrentUser() user: TCurrentUser,
     ) {
         return this.managementsService
             .send(UsersMntMessagePattern.changeRoleUser, {

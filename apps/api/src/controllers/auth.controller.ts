@@ -48,7 +48,7 @@ import {
 } from '~/apps/auth';
 import { catchException } from '@app/common';
 import { CurrentUser } from '@app/common/decorators';
-import { ICurrentUser } from '@app/common/interfaces';
+import { TCurrentUser } from '@app/common/types';
 import { AuthGuard } from '@app/common/guards';
 import { ACCESS_TOKEN_NAME } from '~/constants/api.constant';
 
@@ -238,7 +238,7 @@ export class AuthController {
     @Post('change-password')
     async changePassword(
         @Body() changePwData: ChangePasswordRequestDTO,
-        @CurrentUser() user: ICurrentUser,
+        @CurrentUser() user: TCurrentUser,
     ) {
         return this.authService
             .send(AuthMessagePattern.changePassword, { changePwData, user })
