@@ -16,7 +16,7 @@ import {
 import { JwtGuard } from './guards/jwt.guard';
 import { IUserFacebookResponse, IUserGoogleResponse } from './interfaces';
 import { AuthMessagePattern } from './auth.pattern';
-import { ICurrentUser } from '@app/common/interfaces';
+import { TCurrentUser } from '@app/common/types';
 
 @Controller()
 export class AuthController {
@@ -121,7 +121,7 @@ export class AuthController {
             user,
         }: {
             changePwData: ChangePasswordRequestDTO;
-            user: ICurrentUser;
+            user: TCurrentUser;
         },
     ) {
         console.log({

@@ -18,7 +18,7 @@ import {
     SKIP_AUTH_MOD_GUARD,
     SKIP_AUTH_GUARD,
 } from '~/constants';
-import { ICurrentUser } from '../interfaces';
+import { TCurrentUser } from '../types';
 import { UserRole } from '@app/resource/users/enums';
 
 @Injectable()
@@ -73,7 +73,7 @@ export class AuthCoreGuard implements CanActivate {
         return isJwtValid;
     }
 
-    protected addUserToRequest(user: ICurrentUser, context: ExecutionContext) {
+    protected addUserToRequest(user: TCurrentUser, context: ExecutionContext) {
         if (context.getType() === 'http') {
             const request = context.switchToHttp().getRequest();
             request.user = user;

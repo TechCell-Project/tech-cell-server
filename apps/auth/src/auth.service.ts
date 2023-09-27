@@ -26,7 +26,7 @@ import { OtpType } from '@app/resource/otp';
 import { IUserFacebookResponse, IUserGoogleResponse, ITokenVerifiedResponse } from './interfaces';
 import { buildUniqueUserNameFromEmail, delStartWith, generateRandomString } from '@app/common';
 import { PASSWORD_MAX_LENGTH, USERS_CACHE_PREFIX } from '~/constants';
-import { ICurrentUser } from '@app/common/interfaces';
+import { TCurrentUser } from '@app/common/types';
 import { Types } from 'mongoose';
 
 @Injectable()
@@ -239,7 +239,7 @@ export class AuthService extends AuthUtilService {
         user,
     }: {
         changePwData: ChangePasswordRequestDTO;
-        user: ICurrentUser;
+        user: TCurrentUser;
     }) {
         const { oldPassword, newPassword, reNewPassword } = new ChangePasswordRequestDTO(
             changePwData,
