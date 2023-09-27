@@ -8,7 +8,7 @@ RUN yarn install
 
 COPY . . 
 
-RUN yarn run build sample
+RUN yarn run build utility
 
 FROM node:18-alpine AS production
 
@@ -20,4 +20,4 @@ RUN yarn install --prod
 
 COPY --from=development /usr/src/app/dist ./dist
 
-CMD ["node", "dist/apps/sample/main"]
+CMD ["node", "dist/apps/utility/main"]

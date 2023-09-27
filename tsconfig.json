@@ -45,11 +45,11 @@
       "~/apps/search/*": [
         "apps/search/src/*"
       ],
-      "~/apps/sample": [
-        "apps/sample/src"
+      "~/apps/utility": [
+        "apps/utility/src"
       ],
-      "~/apps/sample/*": [
-        "apps/sample/src/*"
+      "~/apps/utility/*": [
+        "apps/utility/src/*"
       ],
       "~/apps/mail": [
         "apps/mail/src"

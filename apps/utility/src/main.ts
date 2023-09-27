@@ -1,14 +1,14 @@
 import { NestFactory } from '@nestjs/core';
-import { SampleModule } from './sample.module';
+import { UtilityModule } from './utility.module';
 import { useRabbitMQ } from '@app/common';
 import { Logger } from '@nestjs/common';
 import { RpcExceptionFilter } from '@app/common/filters/';
 
 async function bootstrap(port: number) {
-    const logger = new Logger('sample');
-    const app = await NestFactory.create(SampleModule);
+    const logger = new Logger('utility');
+    const app = await NestFactory.create(UtilityModule);
     app.useGlobalFilters(new RpcExceptionFilter());
-    useRabbitMQ(app, 'RABBITMQ_SAMPLE_QUEUE');
+    useRabbitMQ(app, 'RABBITMQ_UTILITY_QUEUE');
 
     app.listen(port)
         .then(async () => {
@@ -23,4 +23,4 @@ async function bootstrap(port: number) {
         });
 }
 
-bootstrap(parseInt(process.env.SAMPLE_PORT || '0', 10));
+bootstrap(parseInt(process.env.UTILITY_PORT || '0', 10));

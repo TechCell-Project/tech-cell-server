@@ -4,7 +4,7 @@ import { RabbitMQModule, HealthModule, AppConfigModule } from '@app/common';
 import Controller from './controllers';
 import {
     SEARCH_SERVICE,
-    SAMPLE_SERVICE,
+    UTILITY_SERVICE,
     AUTH_SERVICE,
     MANAGEMENTS_SERVICE,
     ORDER_SERVICE,
@@ -34,7 +34,7 @@ import { CloudinaryModule } from '@app/common/Cloudinary';
         }),
         CloudinaryModule,
         HealthModule,
-        RabbitMQModule.registerRmq(SAMPLE_SERVICE, process.env.RABBITMQ_SAMPLE_QUEUE),
+        RabbitMQModule.registerRmq(UTILITY_SERVICE, process.env.RABBITMQ_UTILITY_QUEUE),
         RabbitMQModule.registerRmq(SEARCH_SERVICE, process.env.RABBITMQ_SEARCH_QUEUE),
         RabbitMQModule.registerRmq(AUTH_SERVICE, process.env.RABBITMQ_AUTH_QUEUE),
         RabbitMQModule.registerRmq(MANAGEMENTS_SERVICE, process.env.RABBITMQ_MANAGEMENTS_QUEUE),
