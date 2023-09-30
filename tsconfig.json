@@ -71,7 +71,13 @@
       ],
       "@app/payment/*": [
         "libs/payment/src/*"
-      ]
+      ],
+      "~/apps/order": [
+        "apps/order/src"
+      ],
+      "~/apps/order/*": [
+        "apps/order/src/*"
+      ],
     }
   }
 }
