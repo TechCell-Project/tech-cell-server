@@ -132,10 +132,10 @@ services:
             - techcell_backend
         restart: always
 
-    sample:
+    utility:
         build:
             context: ./
-            dockerfile: ./apps/sample/Dockerfile
+            dockerfile: ./apps/utility/Dockerfile
         env_file:
             - .env
         volumes:

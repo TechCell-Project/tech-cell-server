@@ -5,7 +5,6 @@ import { UsersMntModule } from '~/apps/managements/users-mnt';
 import { ProductsMntModule } from '~/apps/managements/products-mnt';
 import { AttributesMntModule } from './attributes-mnt';
 import { CategoriesMntModule } from './categories-mnt';
-import { CartsMntModule } from './carts-mnt';
 import { ImagesMntModule } from './images-mnt/images-mnt.module';
 
 @Module({
@@ -16,7 +15,6 @@ import { ImagesMntModule } from './images-mnt/images-mnt.module';
         ProductsMntModule,
         AttributesMntModule,
         CategoriesMntModule,
-        CartsMntModule,
         ImagesMntModule,
     ],
     providers: [RabbitMQService],
