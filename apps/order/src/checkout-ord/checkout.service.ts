@@ -23,7 +23,7 @@ export class CheckoutService {
         if (!userAddress) {
             throw new RpcException(new BadRequestException('User has no address'));
         }
-        const provincesData = await this.ghnService.calculateShippingFee(userAddress);
+        const provincesData = await this.ghnService.calculateShippingFee({ address: userAddress });
         return provincesData;
     }
 }

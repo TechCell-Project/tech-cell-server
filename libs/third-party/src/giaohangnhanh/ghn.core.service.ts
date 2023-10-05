@@ -5,6 +5,7 @@ import { catchError, firstValueFrom, map } from 'rxjs';
 import { GhnProvinceDTO } from './dtos/province.dto';
 import { GhnDistrictDTO } from './dtos/district.dto';
 import { GhnWardDTO } from './dtos/ward.dto';
+import { GetShippingFeeDTO } from './dtos/get-shipping-fee.dto';
 
 export class GhnCoreService {
     private GHN_URL: string = process.env.GHN_URL;
@@ -89,5 +90,22 @@ export class GhnCoreService {
         );
 
         return data;
+    }
+
+    protected async getShippingFee(data: GetShippingFeeDTO) {
+        const url = '/shiip/public-api/v2/shipping-order/fee';
+        const bodyPayload = new GetShippingFeeDTO(data);
+        const response = await firstValueFrom(
+            this.httpService.post(url, bodyPayload).pipe(
+                catchError((error: AxiosError) => {
+                    this.logger.error(error);
+                    console.error(error);
+                    throw new Error(error.message);
+                }),
+                map((response) => response.data.data),
+            ),
+        );
+
+        return response;
     }
 }
