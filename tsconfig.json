@@ -78,6 +78,12 @@
       "~/apps/order/*": [
         "apps/order/src/*"
       ],
+      "@app/third-party": [
+        "libs/third-party/src"
+      ],
+      "@app/third-party/*": [
+        "libs/third-party/src/*"
+      ]
     }
   }
 }
