@@ -145,7 +145,7 @@ export class AuthController {
     })
     @ApiNotFoundResponse({ description: 'Email not found' })
     @ApiBadRequestResponse({ description: 'Email has already been verified.' })
-    @Throttle(1, 60) // limit 1 requests per 60 seconds
+    @Throttle(5, 60) // limit 5 requests per 60 seconds
     @HttpCode(HttpStatus.OK)
     @Post('resend-verify-email-otp')
     async resendVerifyEmailOtp(@Body() { email }: EmailRequestDTO) {
