@@ -41,3 +41,15 @@ ProductSchema.index({
     categories: 'text',
     description: 'text',
 });
+
+ProductSchema.post('save', function () {
+    this.set({ createdAt: new Date(), updatedAt: new Date() });
+});
+
+ProductSchema.post('updateOne', function () {
+    this.set({ updatedAt: new Date() });
+});
+
+ProductSchema.post('findOneAndUpdate', function () {
+    this.set({ updatedAt: new Date() });
+});
