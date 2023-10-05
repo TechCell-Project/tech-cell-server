@@ -176,6 +176,7 @@ export class AuthService extends AuthUtilService {
             otpCode: otp.otpCode,
         });
 
+        await this.limitEmailSent(user.email);
         this.mailService.emit(MailEventPattern.sendMailConfirm, {
             email: user.email,
             emailContext,

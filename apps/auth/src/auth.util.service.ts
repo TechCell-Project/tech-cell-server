@@ -1,4 +1,11 @@
-import { Injectable, UnauthorizedException, Inject, Logger } from '@nestjs/common';
+import {
+    Injectable,
+    UnauthorizedException,
+    Inject,
+    Logger,
+    HttpException,
+    HttpStatus,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { TokenExpiredError } from 'jsonwebtoken';
 import { UsersService } from '@app/resource/users';
@@ -205,5 +212,29 @@ export class AuthUtilService {
             accessToken,
             refreshToken,
         };
+    }
+
+    protected async limitEmailSent(email: string) {
+        const cacheKey = `EMAIL_SENT_${email}`;
+        const isEmailSentTimes = await this.cacheManager.get(cacheKey);
+        if (!isEmailSentTimes) {
+            return await this.cacheManager.set(cacheKey, { times: 1 }, timeStringToMs('30m'));
+        }
+
+        const times = Number(isEmailSentTimes['times']);
+        if (times >= 3) {
+            throw new RpcException(
+                new HttpException(
+                    {
+                        statusCode: HttpStatus.TOO_MANY_REQUESTS,
+                        message: 'You have sent too many emails, please try again later.',
+                        error: 'Too Many Requests',
+                    },
+                    HttpStatus.TOO_MANY_REQUESTS,
+                ),
+            );
+        }
+
+        return await this.cacheManager.set(cacheKey, { times: times + 1 }, timeStringToMs('30m'));
     }
 }
