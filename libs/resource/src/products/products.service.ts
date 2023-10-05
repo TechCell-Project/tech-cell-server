@@ -114,14 +114,7 @@ export class ProductsService {
         productId: Types.ObjectId,
         updateQueries: UpdateQuery<Partial<Product>>,
     ) {
-        return await this.productsRepository.findOneAndUpdate(
-            productId,
-            Object.assign(updateQueries, {
-                $set: {
-                    updatedAt: new Date(),
-                },
-            }),
-        );
+        return await this.productsRepository.findOneAndUpdate(productId, updateQueries);
     }
 
     async isImageInUse(publicId: string) {

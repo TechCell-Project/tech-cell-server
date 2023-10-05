@@ -225,11 +225,6 @@ export class ProductsMntService extends ProductsMntUtilService {
             }
         });
 
-        return await this.productsService.updateProductById(product._id, {
-            $set: {
-                variations: product.variations,
-                updatedAt: new Date(),
-            },
-        });
+        return await this.productsService.updateProductById(product._id, product);
     }
 }
