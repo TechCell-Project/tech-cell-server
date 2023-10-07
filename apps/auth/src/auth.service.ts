@@ -7,6 +7,7 @@ import {
     BadRequestException,
     NotAcceptableException,
     UnprocessableEntityException,
+    Logger,
 } from '@nestjs/common';
 import {
     EmailRequestDTO,
@@ -28,9 +29,12 @@ import { buildUniqueUserNameFromEmail, delStartWith, generateRandomString } from
 import { PASSWORD_MAX_LENGTH, USERS_CACHE_PREFIX } from '~/constants';
 import { TCurrentUser } from '@app/common/types';
 import { Types } from 'mongoose';
+import { LoginTicket, OAuth2Client, OAuth2ClientOptions } from 'google-auth-library';
 
 @Injectable()
 export class AuthService extends AuthUtilService {
+    protected logger = new Logger(AuthService.name);
+
     async login({ emailOrUsername, password }: LoginRequestDTO) {
         const user = await this.validateUserLogin(emailOrUsername, password);
 
@@ -334,6 +338,48 @@ export class AuthService extends AuthUtilService {
             refreshToken,
             this.configService.get<string>('JWT_REFRESH_TOKEN_SECRET'),
         )) as ITokenVerifiedResponse;
+    }
+
+    async google(idToken: string) {
+        const options: OAuth2ClientOptions = {
+            clientId: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        };
+        const client = new OAuth2Client(options);
+
+        let ticket: LoginTicket;
+        try {
+            ticket = await client.verifyIdToken({
+                idToken: idToken,
+                audience: process.env.GOOGLE_CLIENT_ID,
+            });
+        } catch (error) {
+            this.logger.error(error.message);
+            throw new RpcException(new UnauthorizedException('Login with Google failed'));
+        }
+        const user = ticket.getPayload();
+
+        if (user.email_verified !== true) {
+            throw new RpcException(new UnauthorizedException(`Google's email is not verified`));
+        }
+
+        try {
+            const userFound = await this.usersService.getUser({ email: user.email });
+            return this.buildUserTokenResponse(userFound);
+        } catch (error) {
+            // If user not found, create a new user
+            const newUser = await this.usersService.createUser({
+                email: user.email,
+                emailVerified: user.email_verified,
+                userName: buildUniqueUserNameFromEmail(user.email),
+                firstName: user.family_name,
+                lastName: user.given_name,
+                password: `${user.at_hash}${generateRandomString(
+                    PASSWORD_MAX_LENGTH - user.at_hash.length,
+                )}`,
+            });
+            return this.buildUserTokenResponse(newUser);
+        }
     }
 
     async googleLogin({ user }: { user: IUserGoogleResponse }) {

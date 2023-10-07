@@ -8,6 +8,7 @@ export const AuthMessagePattern = {
     forgotPassword: { cmd: 'auth_forgot_password' },
     verifyForgotPassword: { cmd: 'auth_verify_forgot_password' },
     googleAuth: { cmd: 'auth_google_login' },
+    google: { cmd: 'auth_id_token_google_login' },
     facebookAuth: { cmd: 'auth_facebook_login' },
     resendVerifyEmailOtp: { cmd: 'auth_resend_verify_email_otp' },
     changePassword: { cmd: 'auth_change_password' },

@@ -26,6 +26,7 @@ import {
     ApiNotAcceptableResponse,
     ApiOAuth2,
     ApiBearerAuth,
+    ApiExcludeEndpoint,
 } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import {
@@ -38,6 +39,7 @@ import {
     VerifyForgotPasswordDTO,
     EmailRequestDTO,
     ChangePasswordRequestDTO,
+    GoogleLoginRequestDTO,
 } from '~/apps/auth/dtos';
 import {
     GoogleOAuthGuard,
@@ -204,30 +206,6 @@ export class AuthController {
             .pipe(catchException());
     }
 
-    @ApiOAuth2(['openid', 'profile', 'email'], 'login with google')
-    @ApiOkResponse({
-        type: UserDataResponseDTO,
-    })
-    @Get('google')
-    @UseGuards(GoogleOAuthGuard)
-    async googleAuth(@Request() { user }: { user: IUserGoogleResponse }) {
-        return this.authService
-            .send(AuthMessagePattern.googleAuth, { user })
-            .pipe(catchException());
-    }
-
-    @ApiOAuth2(['email'], 'login with facebook')
-    @ApiOkResponse({
-        type: UserDataResponseDTO,
-    })
-    @Get('facebook')
-    @UseGuards(FacebookOAuthGuard)
-    async facebookAuth(@Request() { user }: { user: IUserFacebookResponse }) {
-        return this.authService
-            .send(AuthMessagePattern.facebookAuth, { user })
-            .pipe(catchException());
-    }
-
     @ApiBody({ type: ChangePasswordRequestDTO })
     @ApiOkResponse({ description: 'Password change successful' })
     @ApiNotFoundResponse({ description: 'Your information is not found' })
@@ -242,6 +220,41 @@ export class AuthController {
     ) {
         return this.authService
             .send(AuthMessagePattern.changePassword, { changePwData, user })
+            .pipe(catchException());
+    }
+
+    @ApiOkResponse({
+        type: UserDataResponseDTO,
+    })
+    @ApiUnauthorizedResponse({ description: 'Your information is invalid' })
+    @HttpCode(HttpStatus.OK)
+    @Post('/google')
+    async google(@Body() { idToken }: GoogleLoginRequestDTO) {
+        return this.authService.send(AuthMessagePattern.google, { idToken }).pipe(catchException());
+    }
+
+    @ApiExcludeEndpoint()
+    @ApiOkResponse({
+        type: UserDataResponseDTO,
+    })
+    @Get('google')
+    @UseGuards(GoogleOAuthGuard)
+    async googleAuth(@Request() { user }: { user: IUserGoogleResponse }) {
+        return this.authService
+            .send(AuthMessagePattern.googleAuth, { user })
+            .pipe(catchException());
+    }
+
+    @ApiExcludeEndpoint()
+    @ApiOAuth2(['email'], 'login with facebook  ')
+    @ApiOkResponse({
+        type: UserDataResponseDTO,
+    })
+    @Get('facebook')
+    @UseGuards(FacebookOAuthGuard)
+    async facebookAuth(@Request() { user }: { user: IUserFacebookResponse }) {
+        return this.authService
+            .send(AuthMessagePattern.facebookAuth, { user })
             .pipe(catchException());
     }
 }
