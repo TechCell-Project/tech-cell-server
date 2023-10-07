@@ -12,6 +12,7 @@ import {
     ForgotPasswordDTO,
     VerifyForgotPasswordDTO,
     ChangePasswordRequestDTO,
+    GoogleLoginRequestDTO,
 } from './dtos';
 import { JwtGuard } from './guards/jwt.guard';
 import { IUserFacebookResponse, IUserGoogleResponse } from './interfaces';
@@ -91,8 +92,17 @@ export class AuthController {
         return this.authService.verifyForgotPassword({ email, otpCode, password, re_password });
     }
 
+    @MessagePattern(AuthMessagePattern.google)
+    async google(@Ctx() context: RmqContext, @Payload() { idToken }: GoogleLoginRequestDTO) {
+        this.rabbitMqService.acknowledgeMessage(context);
+        return this.authService.google(idToken);
+    }
+
     @MessagePattern(AuthMessagePattern.googleAuth)
-    async googleAuthRedirect(@Ctx() context, @Payload() { user }: { user: IUserGoogleResponse }) {
+    async googleAuthRedirect(
+        @Ctx() context: RmqContext,
+        @Payload() { user }: { user: IUserGoogleResponse },
+    ) {
         this.rabbitMqService.acknowledgeMessage(context);
         return this.authService.googleLogin({ user });
     }
