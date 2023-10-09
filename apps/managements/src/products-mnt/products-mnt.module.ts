@@ -3,7 +3,7 @@ import { ProductsModule } from '@app/resource/products';
 import { ProductsMntController } from './products-mnt.controller';
 import { ProductsMntService } from './products-mnt.service';
 import { RabbitMQService, RedisCacheModule } from '@app/common';
-import { CloudinaryService } from '@app/common/Cloudinary';
+import { CloudinaryService } from '@app/third-party/cloudinary.com';
 import { AttributesModule, CategoriesModule } from '@app/resource';
 
 @Module({

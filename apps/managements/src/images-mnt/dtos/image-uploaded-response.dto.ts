@@ -1,4 +1,4 @@
-import { CloudinaryResponse } from '@app/common/Cloudinary/cloudinary-response';
+import { CloudinaryResponse } from '@app/third-party/cloudinary.com/cloudinary-response';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString } from 'class-validator';
 
