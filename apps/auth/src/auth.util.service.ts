@@ -22,8 +22,8 @@ import {
     buildRevokeRefreshTokenKey,
     buildUniqueUserNameFromEmail,
     isEmail,
-    timeStringToMs,
 } from '@app/common';
+import { convertTimeString, TimeUnitOutPut } from 'convert-time-string';
 
 @Injectable()
 export class AuthUtilService {
@@ -108,7 +108,10 @@ export class AuthUtilService {
                     revoked: true,
                     accessToken,
                 },
-                timeStringToMs(process.env.JWT_ACCESS_TOKEN_EXPIRE_TIME_STRING),
+                convertTimeString(
+                    process.env.JWT_ACCESS_TOKEN_EXPIRE_TIME_STRING,
+                    TimeUnitOutPut.MILLISECOND,
+                ),
             );
             return true;
         } catch (error) {
@@ -138,7 +141,7 @@ export class AuthUtilService {
                     revoked: true,
                     refreshToken,
                 },
-                timeStringToMs(process.env.JWT_REFRESH_TOKEN_EXPIRE_TIME_STRING),
+                convertTimeString(process.env.JWT_REFRESH_TOKEN_EXPIRE_TIME_STRING),
             );
             return true;
         } catch (error) {
@@ -218,7 +221,7 @@ export class AuthUtilService {
         const cacheKey = `EMAIL_SENT_${email}`;
         const isEmailSentTimes = await this.cacheManager.get(cacheKey);
         if (!isEmailSentTimes) {
-            return await this.cacheManager.set(cacheKey, { times: 1 }, timeStringToMs('30m'));
+            return await this.cacheManager.set(cacheKey, { times: 1 }, convertTimeString('30m'));
         }
 
         const times = Number(isEmailSentTimes['times']);
@@ -235,6 +238,10 @@ export class AuthUtilService {
             );
         }
 
-        return await this.cacheManager.set(cacheKey, { times: times + 1 }, timeStringToMs('30m'));
+        return await this.cacheManager.set(
+            cacheKey,
+            { times: times + 1 },
+            convertTimeString('30m'),
+        );
     }
 }

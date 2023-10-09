@@ -1,11 +1,12 @@
 import { UsersService } from '@app/resource';
 import { BadRequestException, ForbiddenException, Inject, Injectable } from '@nestjs/common';
-import { isAdmin, isMod, isSuperAdmin, isUser, timeStringToMs } from '@app/common/utils';
+import { isAdmin, isMod, isSuperAdmin, isUser } from '@app/common/utils';
 import { RpcException } from '@nestjs/microservices';
 import { User } from '@app/resource/users/schemas';
 import { REDIS_CACHE, REQUIRE_USER_REFRESH } from '~/constants';
 import { Store } from 'cache-manager';
 import { UserRole } from '@app/resource/users/enums';
+import { convertTimeString } from 'convert-time-string';
 
 @Injectable()
 export class UsersMntUtilService {
@@ -26,7 +27,7 @@ export class UsersMntUtilService {
         await this.cacheManager.set(
             `${REQUIRE_USER_REFRESH}_${user._id}`,
             true,
-            timeStringToMs(process.env.JWT_ACCESS_TOKEN_EXPIRE_TIME_STRING),
+            convertTimeString(process.env.JWT_ACCESS_TOKEN_EXPIRE_TIME_STRING),
         );
         return true;
     }

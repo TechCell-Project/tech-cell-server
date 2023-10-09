@@ -4,7 +4,8 @@ import { GetProductByIdQueryDTO, GetProductsDTO } from './dtos';
 import { FilterQuery, QueryOptions, Types } from 'mongoose';
 import { Product } from '@app/resource';
 import { ListDataResponseDTO } from '@app/common/dtos';
-import { generateSearchQuery, isTrueSet } from '@app/common';
+import { isTrueSet } from '@app/common/utils/shared.util';
+import { generateRegexQuery } from 'regex-vietnamese';
 
 @Injectable()
 export class ProductsSearchService extends ProductsSearchUtilService {
@@ -14,7 +15,7 @@ export class ProductsSearchService extends ProductsSearchUtilService {
 
         const filterOpt: FilterQuery<Product> = {};
         if (searchQuery.keyword) {
-            const keywordRegex = generateSearchQuery(searchQuery.keyword);
+            const keywordRegex = generateRegexQuery(searchQuery.keyword);
             Object.assign(filterOpt, {
                 $or: [
                     { name: keywordRegex },
