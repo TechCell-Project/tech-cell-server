@@ -8,6 +8,7 @@ import {
     AUTH_SERVICE,
     MANAGEMENTS_SERVICE,
     ORDER_SERVICE,
+    TASK_SERVICE,
 } from '~/constants';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
@@ -39,6 +40,7 @@ import { CloudinaryModule } from '@app/third-party/cloudinary.com';
         RabbitMQModule.registerRmq(AUTH_SERVICE, process.env.RABBITMQ_AUTH_QUEUE),
         RabbitMQModule.registerRmq(MANAGEMENTS_SERVICE, process.env.RABBITMQ_MANAGEMENTS_QUEUE),
         RabbitMQModule.registerRmq(ORDER_SERVICE, process.env.RABBITMQ_ORDER_QUEUE),
+        RabbitMQModule.registerRmq(TASK_SERVICE, process.env.RABBITMQ_TASK_QUEUE),
     ],
     controllers: [...Controller],
     providers: [
