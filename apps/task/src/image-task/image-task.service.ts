@@ -1,4 +1,4 @@
-import { CloudinaryService } from '@app/common/Cloudinary';
+import { CloudinaryService } from '@app/third-party/cloudinary.com';
 import { ProductsService } from '@app/resource/products';
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';

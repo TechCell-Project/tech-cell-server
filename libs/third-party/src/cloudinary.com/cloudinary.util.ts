@@ -1,4 +1,4 @@
-import { generateRandomString } from '../utils';
+import { generateRandomString } from '../../../common/src/utils';
 
 /**
  *

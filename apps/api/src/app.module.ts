@@ -14,7 +14,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerStorageRedisService } from 'nestjs-throttler-storage-redis';
 import { MorganMiddleware } from './middlewares';
 import { GoogleStrategy, AccessTokenStrategy, FacebookStrategy } from '~/apps/auth/strategies';
-import { CloudinaryModule } from '@app/common/Cloudinary';
+import { CloudinaryModule } from '@app/third-party/cloudinary.com';
 
 @Module({
     imports: [
