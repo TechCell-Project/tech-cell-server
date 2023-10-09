@@ -6,7 +6,7 @@ import { GetAttributesRequestDTO } from './dtos';
 import { SelectType } from './enums';
 import { FilterQuery, QueryOptions } from 'mongoose';
 import { ListDataResponseDTO } from '@app/common/dtos';
-import { generateSearchQuery } from '@app/common/utils';
+import { generateRegexQuery } from 'regex-vietnamese';
 
 @Injectable()
 export class AttributesSearchService {
@@ -42,7 +42,7 @@ export class AttributesSearchService {
         }
 
         if (keyword) {
-            const keywordRegex = generateSearchQuery(keyword);
+            const keywordRegex = generateRegexQuery(keyword);
             Object.assign(filter, {
                 $or: [
                     { name: keywordRegex },

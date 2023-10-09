@@ -3781,6 +3781,11 @@ convert-source-map@^2.0.0:
   resolved "https://registry.yarnpkg.com/convert-source-map/-/convert-source-map-2.0.0.tgz#4b560f649fc4e918dd0ab75cf4961e8bc882d82a"
   integrity sha512-Kvp459HrV2FEJ1CAsi1Ku+MY3kasH19TFykTz2xWmMeq6bk2NU3XXvfJ+Q61m0xktWwt+1HSYf3JZsTms3aRJg==
 
+convert-time-string@^0.0.1:
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/convert-time-string/-/convert-time-string-0.0.1.tgz#05c1f5de7027ed7231e98e3818849b441dc094cf"
+  integrity sha512-O7SYOPJ38GOiP6cDTlOKgo3FMu+RuCM2P9NRPjnH7I0ij0FDLw9ne0dAXGBSbRy6354rR8ohk7qgVD78jFHYrg==
+
 cookie-signature@1.0.6:
   version "1.0.6"
   resolved "https://registry.yarnpkg.com/cookie-signature/-/cookie-signature-1.0.6.tgz#e303a882b342cc3ee8ca513a79999734dab3ae2c"
@@ -8265,10 +8270,10 @@ regenerator-transform@^0.15.1:
   dependencies:
     "@babel/runtime" "^7.8.4"
 
-regex-vietnamese@^1.1.1:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/regex-vietnamese/-/regex-vietnamese-1.1.1.tgz#afeb765262dc7ee02c71d3c9841c9bf82059d739"
-  integrity sha512-yj5umn5072Cbd2xcGKu5bGJ0ZKcYU+j/aavytNR/OiP1ScJHYsKe5lcDCBgR38vT/YrfAuUEJBn1kHBnboXrdA==
+regex-vietnamese@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/regex-vietnamese/-/regex-vietnamese-2.0.1.tgz#9ecb90616df0126cd7e28046a4f84e8f96c0f7a6"
+  integrity sha512-LK9dxsAcFto548n+dXL/nuyvOOcKkMeHg3EZS3IiTKOGuTxfqspTFI1L1/JjSqs6bYnJadLP1uHpS7PtaUuUlg==
   dependencies:
     diacritics "^1.3.0"
 
