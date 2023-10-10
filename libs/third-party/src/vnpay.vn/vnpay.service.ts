@@ -1,10 +1,8 @@
-import { dateFormat, generateRandomString } from '@app/common';
-import { Logger } from '@nestjs/common';
-import * as crypto from 'crypto';
-import * as timezone from 'moment-timezone';
+import { Injectable, Logger } from '@nestjs/common';
 import { CreateVnpayUrlDto } from './dtos';
-import { IVnpayUrlParams } from './interfaces';
+import { VNPay } from 'vnpay';
 
+@Injectable()
 export class VnpayService {
     private readonly logger = new Logger(VnpayService.name);
     private readonly isConfigured: boolean = true;
@@ -16,8 +14,15 @@ export class VnpayService {
     private readonly vnp_ReturnUrl: string;
     private readonly vnp_SecretKey: string;
     private readonly vnp_PaymentUrl: string;
+    private readonly vnpayInstance: VNPay;
 
     constructor() {
+        this.vnpayInstance = new VNPay({
+            tmnCode: process.env.VNPAY_TMN_CODE,
+            paymentGateway: process.env.VNPAY_PAYMENT_URL,
+            secureSecret: process.env.VNPAY_SECRET_KEY,
+        });
+
         const requiredEnvVars = [
             'VNPAY_CURR_CODE',
             'VNPAY_LOCALE',
@@ -43,46 +48,16 @@ export class VnpayService {
         this.vnp_PaymentUrl = process.env.VNPAY_PAYMENT_URL;
     }
 
-    createPaymentUrl({
-        vnp_Command,
-        vnp_Amount,
-        ipAddress,
-        vnp_OrderInfo,
-        vnp_OrderType,
-        bankCode = undefined,
-    }: CreateVnpayUrlDto) {
+    async createPaymentUrl(data: CreateVnpayUrlDto) {
         try {
-            if (!this.isConfigured) {
-                throw new Error('Vnpay is not configured');
-            }
-            const timeGMT7 = timezone(new Date()).tz('Asia/Ho_Chi_Minh').format();
-            const createDate = dateFormat(new Date(timeGMT7), 'yyyyMMddHHmmss');
-
-            const params: IVnpayUrlParams = {
-                vnp_Amount,
-                vnp_Command,
-                vnp_CreateDate: createDate,
-                vnp_CurrCode: this.vnp_CurrCode,
-                vnp_IpAddr: ipAddress,
-                vnp_Locale: this.vnp_Locale,
-                vnp_OrderInfo,
-                vnp_OrderType,
-                vnp_ReturnUrl: this.vnp_ReturnUrl,
-                vnp_TmnCode: this.vnp_TmnCode,
-                vnp_TxnRef: generateRandomString(20).toUpperCase(),
-                vnp_Version: this.vnp_Version,
-            };
-
-            const urlParams = new URLSearchParams(Object.entries(params));
-            if (bankCode) {
-                urlParams.append('vnp_BankCode', bankCode);
-            }
-
-            const hmac = crypto.createHmac('sha512', this.vnp_SecretKey);
-            const signed = hmac.update(Buffer.from(urlParams.toString(), 'utf-8')).digest('hex');
-            urlParams.append('vnp_SecureHash', signed);
-
-            return `${this.vnp_PaymentUrl}?${urlParams.toString()}`;
+            const url = await this.vnpayInstance.buildPaymentUrl({
+                vnp_Amount: 100000,
+                vnp_IpAddr: '10.10.1.1',
+                vnp_OrderInfo: 'Thanh toan don hang',
+                vnp_ReturnUrl: 'http://localhost:3000/vnpay-return',
+                vnp_TxnRef: '123456789',
+            });
+            return url;
         } catch (error) {
             Logger.error(error);
             return null;

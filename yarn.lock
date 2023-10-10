@@ -9449,6 +9449,14 @@ vm2@^3.9.17:
     acorn "^8.7.0"
     acorn-walk "^8.2.0"
 
+vnpay@^0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/vnpay/-/vnpay-0.0.2.tgz#0bf9288af4b2d824c3409f9e1e4f317f71e8d641"
+  integrity sha512-UmhmqBmcBik2JN93QnsolQPtJIFDxxB5M/HtrBBXdABfp65FZJRDHIILKaHZqt65H6jUvoUKX3q/SxROtkqEdA==
+  dependencies:
+    class-validator "^0.14.0"
+    moment-timezone "^0.5.43"
+
 void-elements@^3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/void-elements/-/void-elements-3.1.0.tgz#614f7fbf8d801f0bb5f0661f5b2f5785750e4f09"

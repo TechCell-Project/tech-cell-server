@@ -1,10 +1,19 @@
-import { IsNotEmpty, IsNumber, IsString, Max, Min, IsIP, IsEnum } from 'class-validator';
+import {
+    IsNotEmpty,
+    IsNumber,
+    IsString,
+    Max,
+    Min,
+    IsIP,
+    IsEnum,
+    IsOptional,
+} from 'class-validator';
 import { ProductCode } from '../enums';
 
 export class CreateVnpayUrlDto {
-    @IsNotEmpty()
+    @IsOptional()
     @IsString()
-    vnp_Command: string;
+    vnp_Command?: string;
 
     @IsNotEmpty()
     @IsNumber()
