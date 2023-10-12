@@ -35,7 +35,7 @@ import { LoginTicket, OAuth2Client, OAuth2ClientOptions } from 'google-auth-libr
 export class AuthService extends AuthUtilService {
     protected logger = new Logger(AuthService.name);
 
-    async login({ emailOrUsername, password }: LoginRequestDTO) {
+    async login({ emailOrUsername, password }: LoginRequestDTO): Promise<UserDataResponseDTO> {
         const user = await this.validateUserLogin(emailOrUsername, password);
 
         if (!user) {
