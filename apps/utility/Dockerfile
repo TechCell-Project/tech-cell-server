@@ -20,4 +20,4 @@ RUN yarn install --prod
 
 COPY --from=build-stage /usr/src/app/dist ./dist
 
-RUN yarn start utility
+CMD ["yarn start", "utility"]
