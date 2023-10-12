@@ -39,6 +39,7 @@
         "@discord-nestjs/core": "^5.3.8",
         "@nestjs-modules/mailer": "^1.8.1",
         "@nestjs/axios": "^3.0.0",
+        "@nestjs/cli": "^10.0.3",
         "@nestjs/cache-manager": "^2.0.1",
         "@nestjs/common": "^10.0.3",
         "@nestjs/config": "^3.0.0",
@@ -94,7 +95,6 @@
     },
     "devDependencies": {
         "@compodoc/compodoc": "^1.1.21",
-        "@nestjs/cli": "^10.0.3",
         "@nestjs/schematics": "^10.0.1",
         "@nestjs/testing": "^10.0.3",
         "@types/bcrypt": "^5.0.0",
