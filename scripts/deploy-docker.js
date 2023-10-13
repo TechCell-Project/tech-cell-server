@@ -10,6 +10,7 @@ program
     .option('-b, --build', 'Build Docker images')
     .option('-u, --up', 'Deploy Docker images')
     .option('-d, --down', 'Remove Docker images')
+    .option('-s, --push', 'Push Docker images')
     .option('-p, --pull', 'Pull Docker images')
     .option('-ro, --remove-orphans', 'Remove orphaned Docker containers')
     .option('-rv, --remove-volumes', 'Remove Docker volumes')
@@ -40,6 +41,9 @@ program
         }
         if (program.down) {
             composeArgs.push('down');
+        }
+        if (program.push) {
+            composeArgs.push('push');
         }
         if (program.pull) {
             composeArgs.push('pull');
