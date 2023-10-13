@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, UnprocessableEntityException } from '@nestjs/common';
+import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { UsersRepository } from './users.repository';
 import { CreateUserDTO } from './dtos';
@@ -10,32 +10,20 @@ import { FilterQuery, ProjectionType, QueryOptions } from 'mongoose';
 export class UsersService {
     constructor(private readonly usersRepository: UsersRepository) {}
 
-    async createUser({
-        email,
-        userName,
-        firstName,
-        lastName,
-        password,
-        emailVerified,
-    }: CreateUserDTO & { emailVerified?: boolean }) {
-        await this.validateCreateUserRequest({ email, userName });
+    /**
+     * create a new user, password will be hashed here before saving to database
+     * @param user the user to be created
+     * @returns the created user
+     */
+    public async createUser(user: CreateUserDTO) {
+        await this.isEmailOrUsernameExist({ email: user.email, userName: user.userName });
         return this.usersRepository.create({
-            email,
-            userName,
-            firstName,
-            lastName,
-            emailVerified: emailVerified ?? false,
-            password: await this.hashPassword({ password }),
+            ...user,
+            password: await this.hashPassword({ password: user.password }),
         });
     }
 
-    private async validateCreateUserRequest({
-        email,
-        userName,
-    }: {
-        email: string;
-        userName: string;
-    }) {
+    private async isEmailOrUsernameExist({ email, userName }: { email: string; userName: string }) {
         const [emailCount, userNameCount] = await Promise.all([
             this.usersRepository.count({
                 email: email,
@@ -52,15 +40,6 @@ export class UsersService {
         if (userNameCount > 0) {
             throw new RpcException(new UnprocessableEntityException('Username already exists.'));
         }
-    }
-
-    async validateUser(email: string, password: string) {
-        const user = await this.usersRepository.findOne({ email });
-        const passwordIsValid = await bcrypt.compare(password, user.password);
-        if (!passwordIsValid) {
-            throw new RpcException(new UnauthorizedException('Credentials are not valid.'));
-        }
-        return user;
     }
 
     /**
@@ -97,6 +76,7 @@ export class UsersService {
             { email },
             {
                 password: await this.hashPassword({ password }),
+                updatedAt: new Date(),
             },
         );
     }
@@ -105,7 +85,7 @@ export class UsersService {
         return await this.usersRepository.count(filterQuery);
     }
 
-    async hashPassword({ password }: { password: string }) {
+    private async hashPassword({ password }: { password: string }) {
         return await bcrypt.hash(password, 10);
     }
 

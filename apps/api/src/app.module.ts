@@ -4,17 +4,18 @@ import { RabbitMQModule, HealthModule, AppConfigModule } from '@app/common';
 import Controller from './controllers';
 import {
     SEARCH_SERVICE,
-    SAMPLE_SERVICE,
+    UTILITY_SERVICE,
     AUTH_SERVICE,
     MANAGEMENTS_SERVICE,
     ORDER_SERVICE,
+    TASK_SERVICE,
 } from '~/constants';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerStorageRedisService } from 'nestjs-throttler-storage-redis';
 import { MorganMiddleware } from './middlewares';
 import { GoogleStrategy, AccessTokenStrategy, FacebookStrategy } from '~/apps/auth/strategies';
-import { CloudinaryModule } from '@app/common/Cloudinary';
+import { CloudinaryModule } from '@app/third-party/cloudinary.com';
 
 @Module({
     imports: [
@@ -34,11 +35,12 @@ import { CloudinaryModule } from '@app/common/Cloudinary';
         }),
         CloudinaryModule,
         HealthModule,
-        RabbitMQModule.registerRmq(SAMPLE_SERVICE, process.env.RABBITMQ_SAMPLE_QUEUE),
+        RabbitMQModule.registerRmq(UTILITY_SERVICE, process.env.RABBITMQ_UTILITY_QUEUE),
         RabbitMQModule.registerRmq(SEARCH_SERVICE, process.env.RABBITMQ_SEARCH_QUEUE),
         RabbitMQModule.registerRmq(AUTH_SERVICE, process.env.RABBITMQ_AUTH_QUEUE),
         RabbitMQModule.registerRmq(MANAGEMENTS_SERVICE, process.env.RABBITMQ_MANAGEMENTS_QUEUE),
         RabbitMQModule.registerRmq(ORDER_SERVICE, process.env.RABBITMQ_ORDER_QUEUE),
+        RabbitMQModule.registerRmq(TASK_SERVICE, process.env.RABBITMQ_TASK_QUEUE),
     ],
     controllers: [...Controller],
     providers: [

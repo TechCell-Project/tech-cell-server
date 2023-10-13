@@ -7,8 +7,10 @@ import { AttributesController } from './attributes.controller';
 import { CategoriesController } from './categories.controller';
 import { CartsController } from './carts.controller';
 import { ImagesController } from './images.controller';
+import { AdminController } from './admin.controller';
 
 export default [
+    AdminController,
     AuthController,
     ImagesController,
     UsersController,

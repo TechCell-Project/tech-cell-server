@@ -25,6 +25,9 @@ jobs:
         with:
           username: ${{ env.DOCKERHUB_USERNAME }}
           password: ${{ env.DOCKERHUB_PASSWORD }}
+
+      - name: Free disk space up
+        run: rm -rf /opt/hostedtoolcache
           
       - name: 'Create .env file'
         run: |

@@ -1,10 +1,17 @@
-import { Injectable, UnauthorizedException, Inject, Logger } from '@nestjs/common';
+import {
+    Injectable,
+    UnauthorizedException,
+    Inject,
+    Logger,
+    HttpException,
+    HttpStatus,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { TokenExpiredError } from 'jsonwebtoken';
 import { UsersService } from '@app/resource/users';
 import { User } from '@app/resource/users/schemas';
 import { ConfigService } from '@nestjs/config';
-import { JwtPayloadDto } from '~/apps/auth/dtos';
+import { JwtPayloadDto, UserDataResponseDTO } from '~/apps/auth/dtos';
 import * as bcrypt from 'bcrypt';
 import { RpcException, ClientRMQ } from '@nestjs/microservices';
 import { MAIL_SERVICE, REDIS_CACHE, REQUIRE_USER_REFRESH } from '~/constants';
@@ -15,8 +22,8 @@ import {
     buildRevokeRefreshTokenKey,
     buildUniqueUserNameFromEmail,
     isEmail,
-    timeStringToMs,
 } from '@app/common';
+import { convertTimeString, TimeUnitOutPut } from 'convert-time-string';
 
 @Injectable()
 export class AuthUtilService {
@@ -56,13 +63,13 @@ export class AuthUtilService {
         await this.cacheManager.del(cacheUserKey);
     }
 
-    protected cleanUserBeforeResponse(user: User) {
+    protected cleanUserBeforeResponse(user: User): Omit<User, 'password' | 'block'> {
         delete user.password;
         if (user.block) delete user.block;
         return user;
     }
 
-    async buildUserTokenResponse(user: User) {
+    async buildUserTokenResponse(user: User): Promise<UserDataResponseDTO> {
         const { _id, email, role } = user;
         const { accessToken, refreshToken } = await this.signTokens({
             _id,
@@ -73,22 +80,23 @@ export class AuthUtilService {
         return { accessToken, refreshToken, ...this.cleanUserBeforeResponse(user) };
     }
 
-    async validateUser(input: string, password: string) {
-        const query = isEmail(input) ? { email: input } : { userName: input };
-
-        const user = await this.usersService.getUser(query);
+    async validateUserLogin(emailOrUsername: string, password: string) {
+        const query = isEmail(emailOrUsername)
+            ? { email: emailOrUsername }
+            : { userName: emailOrUsername };
+        const user = await this.usersService.getUser(query, { lean: true });
 
         const doesUserExist = !!user;
-        if (!doesUserExist) return null;
+        if (!doesUserExist) return false;
 
         const doesPasswordMatch = await this.doesPasswordMatch(password, user.password);
-        if (!doesPasswordMatch) return null;
+        if (!doesPasswordMatch) return false;
 
         return user;
     }
 
     async doesPasswordMatch(password: string, hashedPassword: string): Promise<boolean> {
-        return bcrypt.compare(password, hashedPassword);
+        return await bcrypt.compare(password, hashedPassword);
     }
 
     protected async revokeAccessToken(accessToken: string): Promise<boolean> {
@@ -100,7 +108,10 @@ export class AuthUtilService {
                     revoked: true,
                     accessToken,
                 },
-                timeStringToMs(process.env.JWT_ACCESS_TOKEN_EXPIRE_TIME_STRING),
+                convertTimeString(
+                    process.env.JWT_ACCESS_TOKEN_EXPIRE_TIME_STRING,
+                    TimeUnitOutPut.MILLISECOND,
+                ),
             );
             return true;
         } catch (error) {
@@ -130,7 +141,7 @@ export class AuthUtilService {
                     revoked: true,
                     refreshToken,
                 },
-                timeStringToMs(process.env.JWT_REFRESH_TOKEN_EXPIRE_TIME_STRING),
+                convertTimeString(process.env.JWT_REFRESH_TOKEN_EXPIRE_TIME_STRING),
             );
             return true;
         } catch (error) {
@@ -204,5 +215,33 @@ export class AuthUtilService {
             accessToken,
             refreshToken,
         };
+    }
+
+    protected async limitEmailSent(email: string) {
+        const cacheKey = `EMAIL_SENT_${email}`;
+        const isEmailSentTimes = await this.cacheManager.get(cacheKey);
+        if (!isEmailSentTimes) {
+            return await this.cacheManager.set(cacheKey, { times: 1 }, convertTimeString('30m'));
+        }
+
+        const times = Number(isEmailSentTimes['times']);
+        if (times >= 3) {
+            throw new RpcException(
+                new HttpException(
+                    {
+                        statusCode: HttpStatus.TOO_MANY_REQUESTS,
+                        message: 'You have sent too many emails, please try again later.',
+                        error: 'Too Many Requests',
+                    },
+                    HttpStatus.TOO_MANY_REQUESTS,
+                ),
+            );
+        }
+
+        return await this.cacheManager.set(
+            cacheKey,
+            { times: times + 1 },
+            convertTimeString('30m'),
+        );
     }
 }

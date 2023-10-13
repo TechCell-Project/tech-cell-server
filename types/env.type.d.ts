@@ -155,12 +155,12 @@ declare namespace NodeJS {
         RABBITMQ_URLS: string;
 
         /**
-         * The `RabbitMq` sample queue
+         * The `RabbitMq` utility queue
          * @description This value is used for `amqplib` module
          * @example
-         * RABBITMQ_SAMPLE_QUEUE = 'sample-queue'
+         * RABBITMQ_UTILITY_QUEUE = 'utility-queue'
          */
-        RABBITMQ_SAMPLE_QUEUE: string;
+        RABBITMQ_UTILITY_QUEUE: string;
         RABBITMQ_SEARCH_QUEUE: string;
         RABBITMQ_AUTH_QUEUE: string;
         RABBITMQ_MAIL_QUEUE: string;

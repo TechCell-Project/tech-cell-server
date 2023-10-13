@@ -10,6 +10,7 @@ import {
     Max,
     IsOptional,
     IsBoolean,
+    IsMongoId,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ProductStatus } from '../enums';
@@ -17,6 +18,7 @@ import { AttributeSchema, VariationSchema } from '../schemas';
 import { ImageSchema } from '../schemas/image.schema';
 import { CreateProductRequestDTO } from '~/apps/managements/products-mnt/dtos';
 import { ApiProperty } from '@nestjs/swagger';
+import { Types } from 'mongoose';
 
 class AttributeDTO implements AttributeSchema {
     @ApiProperty({
@@ -168,7 +170,7 @@ export class CreateProductDTO {
     constructor(data: CreateProductRequestDTO) {
         this.name = data.name;
         this.description = data.description;
-        this.categories = data.categories;
+        this.category = new Types.ObjectId(data.category._id);
         this.status = data.status;
         this.generalAttributes = data.generalAttributes;
         this.generalImages = [];
@@ -193,12 +195,13 @@ export class CreateProductDTO {
     description: string;
 
     @ApiProperty({
-        description: 'Categories of product',
-        example: ['iphone', 'apple'],
+        type: String,
+        description: 'Category of product',
+        example: '60f9f7b8c7b2c7b7f4a4b5b3',
     })
-    @IsArray()
+    @IsMongoId()
     @IsNotEmpty()
-    categories: string[];
+    category: Types.ObjectId;
 
     @ApiProperty({
         description: 'Status of product',

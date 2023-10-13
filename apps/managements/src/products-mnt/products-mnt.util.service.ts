@@ -5,6 +5,7 @@ import {
     ImageDTO,
     Product,
     ProductsService,
+    VariationDTO,
 } from '@app/resource';
 import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common';
 import {
@@ -16,9 +17,9 @@ import {
 } from '@app/common/utils';
 import { REDIS_CACHE, PRODUCTS_CACHE_PREFIX } from '~/constants';
 import { Store } from 'cache-manager';
-import { CreateProductRequestDTO } from './dtos';
+import { AttributeDTO, CreateProductRequestDTO } from './dtos';
 import { RpcException } from '@nestjs/microservices';
-import { CloudinaryService } from '@app/common/Cloudinary';
+import { CloudinaryService } from '@app/third-party/cloudinary.com';
 import { UpdateProductRequestDTO } from './dtos/update-product-request.dto';
 import { ProductStatus } from '@app/resource/products/enums';
 
@@ -34,8 +35,16 @@ export class ProductsMntUtilService {
         private readonly cloudinaryService: CloudinaryService,
     ) {}
 
-    protected async resolveImages({ productData }: { productData: CreateProductRequestDTO }) {
-        const { generalImages = [], descriptionImages = [], variations = [] } = productData;
+    /**
+     * Find images by publicId and return the object of image
+     * @param param0 Product data when create
+     * @returns the data of images after resolve
+     */
+    protected async resolveImages({
+        generalImages = [],
+        descriptionImages = [],
+        variations = [],
+    }: Partial<CreateProductRequestDTO>) {
         const imagesId = new Set(
             [
                 ...generalImages.map((i) => i?.publicId),
@@ -46,13 +55,13 @@ export class ProductsMntUtilService {
 
         let newGeneralImages: ImageDTO[] = [];
         let newDescriptionImages: ImageDTO[] = [];
-        let newVar = [];
+        let newVariations: VariationDTO[] = [];
 
         if (imagesId.size === 0) {
             return {
                 generalImages: newGeneralImages,
                 descriptionImages: newDescriptionImages,
-                variations: newVar,
+                variations: newVariations,
             };
         }
 
@@ -93,7 +102,7 @@ export class ProductsMntUtilService {
             });
         });
 
-        newVar = variations?.map((variation) => {
+        newVariations = variations?.map((variation) => {
             const { images } = variation;
             const validImages = images?.map((image) => {
                 const validImage = validAll.find((valid) => valid.public_id === image.publicId);
@@ -109,18 +118,23 @@ export class ProductsMntUtilService {
         return {
             generalImages: newGeneralImages,
             descriptionImages: newDescriptionImages,
-            variations: newVar,
+            variations: newVariations,
         };
     }
 
-    protected async isProductExist(product: CreateProductDTO) {
+    /**
+     *
+     * @param param0 variation data when create
+     * @returns if product exist, return the sku of variation, else return false
+     */
+    protected async isProductExist({ variations }: Partial<CreateProductRequestDTO>) {
         try {
             const foundProduct = await this.productsService.getProduct({
                 filterQueries: {
                     variations: {
                         $elemMatch: {
                             sku: {
-                                $in: product.variations.map((variation) => variation.sku),
+                                $in: variations.map((variation) => variation.sku),
                             },
                         },
                     },
@@ -129,7 +143,7 @@ export class ProductsMntUtilService {
 
             if (foundProduct) {
                 const foundVariation = foundProduct.variations.find((variation) =>
-                    product.variations.some((pVariation) => pVariation.sku === variation.sku),
+                    variations.some((pVariation) => pVariation.sku === variation.sku),
                 );
 
                 return foundVariation?.sku || false;
@@ -140,32 +154,6 @@ export class ProductsMntUtilService {
             return false;
         }
     }
-
-    // protected buildCacheKeyProducts({
-    //     limit,
-    //     offset,
-    //     all,
-    // }: {
-    //     limit?: number;
-    //     offset?: number;
-    //     all?: boolean;
-    // }) {
-    //     const arrCacheKey = [];
-
-    //     if (all) {
-    //         return PRODUCTS_ALL;
-    //     }
-
-    //     if (limit) {
-    //         arrCacheKey.push(`${PRODUCTS_LIMIT}_${limit}`);
-    //     }
-
-    //     if (offset) {
-    //         arrCacheKey.push(`${PRODUCTS_OFFSET}_${offset}`);
-    //     }
-
-    //     return arrCacheKey.join('_');
-    // }
 
     /**
      *
@@ -181,40 +169,16 @@ export class ProductsMntUtilService {
      * @returns `true` if the validation succeeds.
      * @throws `BadRequestException` if the validation fails.
      */
-    protected async validProductAttributes(product: CreateProductRequestDTO | CreateProductDTO) {
-        const {
-            categories: categoryLabels = [],
-            variations = [],
-            generalAttributes = [],
-        } = product;
-
-        // Reassign the lowercase attribute keys to the original product object, remove u if null or undefined
-        product.variations = variations.map((variation) => ({
-            ...variation,
-            attributes: variation.attributes.map((attribute) => ({
-                k: attribute.k.toLowerCase(), // lowercase attribute key
-                v: attribute.v,
-                ...(attribute.u != null && attribute.u != undefined ? { u: attribute.u } : {}), // remove unit if null
-            })),
-        }));
-        product.generalAttributes = generalAttributes.map((attribute) => ({
-            k: attribute.k.toLowerCase(), // lowercase attribute key
-            v: attribute.v,
-            ...(attribute.u != null && attribute.u != undefined ? { u: attribute.u } : {}), // remove unit if null
-        }));
-
-        const foundCategories = await Promise.all(
-            categoryLabels.map((label) =>
-                this.categoriesService.getCategory({ filterQueries: { label } }),
-            ),
-        );
+    protected async validProductAttributes(product: Partial<CreateProductRequestDTO>) {
+        const { category, variations, generalAttributes } = product;
+        const foundCategories = await this.categoriesService.getCategory({
+            filterQueries: {
+                _id: category,
+            },
+        });
 
         const requireAttributes = [
-            ...new Set(
-                foundCategories.flatMap((category) =>
-                    category.requireAttributes.map((attribute) => attribute.label),
-                ),
-            ),
+            ...new Set(foundCategories.requireAttributes.map((attribute) => attribute.label)),
         ];
 
         // Checking duplicate attributes in one variation
@@ -233,7 +197,9 @@ export class ProductsMntUtilService {
 
         // After pass the duplicate attributes check, we can get all attributes in all variations as a set
         const variationAttributesUserImport = new Set(
-            ...variations.map((variation) => variation.attributes.map((attribute) => attribute.k)),
+            ...variations.map((variation: VariationDTO) =>
+                variation.attributes.map((attribute: AttributeDTO) => attribute.k),
+            ),
         );
         const generalAttributesUserImport = generalAttributes.map((attribute) => attribute.k);
 
@@ -265,7 +231,7 @@ export class ProductsMntUtilService {
 
         try {
             await Promise.all(
-                allAttributesUserImport.map((label) =>
+                allAttributesUserImport.map((label: string) =>
                     this.attributesService.getAttributeByLabel(label),
                 ),
             );
@@ -281,50 +247,48 @@ export class ProductsMntUtilService {
      * @param productData the product data when create
      * @returns the product data with sku in each variation
      */
-    protected validVariations(productData: CreateProductRequestDTO): CreateProductDTO {
-        const { name, variations } = productData;
+    protected updateSkuVariations({
+        name,
+        variations,
+    }: Partial<CreateProductRequestDTO>): Partial<CreateProductDTO> {
+        const variationsNew = variations.map((variation) => {
+            const { attributes } = variation;
+            const sortedAttributes = attributes.slice().sort((a, b) => a.k.localeCompare(b.k));
 
-        const newProduct: CreateProductDTO = {
-            ...productData,
-            // The empty array is required to avoid the error when create product
-            // This will be updated when resolve images after
-            generalImages: [], // default generalImages is empty array
-            descriptionImages: [], // default descriptionImages is empty array
-            variations: variations.map((variation) => {
-                const { attributes } = variation;
-                const sortedAttributes = attributes.slice().sort((a, b) => a.k.localeCompare(b.k));
+            // Base on variation's attributes to generate sku
+            const sku = `${replaceWhitespaceTo(name)}-${sortedAttributes
+                .map(({ k, v, u }) => {
+                    const attributeValue = `${replaceWhitespaceTo(k)}.${replaceWhitespaceTo(v)}`;
+                    return u ? `${attributeValue}.${replaceWhitespaceTo(u)}` : attributeValue;
+                })
+                .join('-')}`.toLowerCase();
 
-                // Base on variation's attributes to generate sku
-                const sku = `${replaceWhitespaceTo(name)}-${sortedAttributes
-                    .map(({ k, v, u }) => {
-                        const attributeValue = `${replaceWhitespaceTo(k)}.${replaceWhitespaceTo(
-                            v,
-                        )}`;
-                        return u ? `${attributeValue}.${replaceWhitespaceTo(u)}` : attributeValue;
-                    })
-                    .join('-')}`.toLowerCase();
-
-                return {
-                    ...variation,
-                    attributes: sortedAttributes,
-                    sku,
-                    images: [],
-                    status: variation.status ? variation.status : ProductStatus.Hide, // default status is hide
-                };
-            }),
-        };
+            return {
+                ...variation,
+                attributes: sortedAttributes,
+                sku,
+                images: [],
+                status: variation.status ? variation.status : ProductStatus.Hide, // default status is hide
+            };
+        });
 
         // Check if sku is duplicated
-        const duplicateSkus = [...findDuplicates(newProduct.variations.map((v) => v.sku))];
+        const duplicateSkus = [...findDuplicates(variationsNew.map((v) => v.sku))];
         if (duplicateSkus.length > 0) {
             throw new RpcException(
                 new BadRequestException(`Duplicate skus: ${duplicateSkus.join(', ')}`),
             );
         }
 
-        return newProduct;
+        return { variations: variationsNew };
     }
 
+    /**
+     *
+     * @param oldProduct left hand side is old product
+     * @param productUpdatedData right hand side is new product
+     * @returns if allow to update, return true, otherwise return array of error message
+     */
     protected allowFieldsToUpdateProduct(
         oldProduct: Product,
         productUpdatedData: UpdateProductRequestDTO,
@@ -340,30 +304,46 @@ export class ProductsMntUtilService {
                 'generalImages.#.url',
                 'descriptionImages.#.url',
                 'variations.#.images.#.url',
+                'variations.#.sku',
+                'variations.#.status',
             ],
         });
 
         const isAllow = allowToAction(diff, [
             {
                 kind: 'N', // new
-                paths: ['generalImages', 'descriptionImages', 'variations.#.images'],
+                paths: [
+                    'generalImages',
+                    'descriptionImages',
+                    'variations.#.images',
+                    'generalAttributes.#.k',
+                    'generalAttributes.#.v',
+                    'generalAttributes.#.u',
+                    'variations.#.attributes.#.u',
+                ],
             },
             {
                 kind: 'E', // edit
                 paths: [
                     'description',
                     'status',
+                    'generalAttributes',
+                    'descriptionImages',
+                    'generalAttributes.#.k',
+                    'generalAttributes.#.v',
+                    'generalAttributes.#.u',
                     'generalImages.#.publicId',
                     'generalImages.#.isThumbnail',
                     'descriptionImages.#.publicId',
                     'descriptionImages.#.isThumbnail',
-                    'variations.#.stock',
+                    'variations.#.images',
                     'variations.#.images.#.publicId',
                     'variations.#.images.#.isThumbnail',
+                    'variations.#.stock',
                 ],
             },
             {
-                kind: 'A', // array
+                kind: 'A', // allow change in array
                 paths: [
                     'generalAttributes',
                     'generalImages',
@@ -371,6 +351,10 @@ export class ProductsMntUtilService {
                     'variations.#.images',
                     'variations',
                 ],
+            },
+            {
+                kind: 'D', // delete
+                paths: ['generalAttributes.#.k', 'generalAttributes.#.v', 'generalAttributes.#.u'],
             },
         ]);
 

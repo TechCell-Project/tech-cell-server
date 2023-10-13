@@ -10,29 +10,53 @@ import {
     Max,
     IsOptional,
     IsBoolean,
+    IsMongoId,
+    IsNotEmptyObject,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import { ProductStatus } from '@app/resource/products/enums';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
+import { Types } from 'mongoose';
+import { replaceWhitespaceTo, sanitizeHtmlString } from '@app/common/utils';
 
 export class PriceDTO {
     @ApiProperty({
-        type: 'number',
+        type: Number,
         required: true,
         description: 'Base price of product',
         example: 1000000,
+        minimum: 0,
+        maximum: Number.MAX_SAFE_INTEGER,
     })
-    @IsNumber()
+    @Transform(({ value }) => Number(String(value).replace(/,/g, '')))
+    @IsNumber(
+        { maxDecimalPlaces: 0 },
+        {
+            message: 'base must be integer',
+        },
+    )
+    @Min(0)
+    @Max(Number.MAX_SAFE_INTEGER)
     @IsNotEmpty()
     base: number;
 
     @ApiProperty({
-        type: 'number',
+        type: Number,
         required: true,
         description: 'Sale price of product',
         example: 900000,
+        minimum: 0,
+        maximum: Number.MAX_SAFE_INTEGER,
     })
-    @IsNumber()
+    @Transform(({ value }) => Number(String(value).replace(/,/g, '')))
+    @IsNumber(
+        { maxDecimalPlaces: 0 },
+        {
+            message: 'sale must be integer',
+        },
+    )
+    @Min(0)
+    @Max(Number.MAX_SAFE_INTEGER)
     @IsOptional()
     sale?: number;
 
@@ -41,9 +65,19 @@ export class PriceDTO {
         required: true,
         description: 'Special price of product',
         example: 800000,
+        minimum: 0,
+        maximum: Number.MAX_SAFE_INTEGER,
     })
-    @IsNumber()
     @IsOptional()
+    @Transform(({ value }) => Number(String(value).replace(/,/g, '')))
+    @IsNumber(
+        { maxDecimalPlaces: 0 },
+        {
+            message: 'special must be integer',
+        },
+    )
+    @Min(0)
+    @Max(Number.MAX_SAFE_INTEGER)
     special?: number;
 }
 
@@ -77,6 +111,7 @@ export class AttributeDTO {
         description: 'Key of attribute',
         example: 'ram',
     })
+    @Type(() => String)
     @IsString()
     @IsNotEmpty()
     k: string;
@@ -87,6 +122,7 @@ export class AttributeDTO {
         description: 'Value of attribute',
         example: '8',
     })
+    @Type(() => String)
     @IsString()
     @IsNotEmpty()
     v: string;
@@ -97,6 +133,7 @@ export class AttributeDTO {
         description: 'Unit of attribute',
         example: 'gb',
     })
+    @Type(() => String)
     @IsString()
     @IsOptional()
     u?: string;
@@ -122,7 +159,9 @@ export class VariationRequestDTO {
     @IsArray()
     @IsNotEmpty()
     @ArrayMinSize(1)
-    attributes: Array<AttributeDTO>;
+    @ValidateNested({ each: true })
+    @Type(() => AttributeDTO)
+    attributes: AttributeDTO[];
 
     @ApiProperty({
         type: 'number',
@@ -146,6 +185,8 @@ export class VariationRequestDTO {
             special: 800000,
         },
     })
+    @ValidateNested()
+    @Type(() => PriceDTO)
     price: PriceDTO;
 
     @ApiProperty({
@@ -168,10 +209,79 @@ export class VariationRequestDTO {
     })
     @IsArray()
     @IsOptional()
+    @ValidateNested({ each: true })
+    @Type(() => ImageRequestDTO)
     images?: ImageRequestDTO[];
+
+    @ApiHideProperty()
+    @IsString()
+    @IsOptional()
+    sku: string;
+}
+
+export class CategoryDTO {
+    @ApiProperty({
+        type: String,
+        required: true,
+        description: 'Id of category',
+        example: '612f5e4c1f5c3d0012a0f0b4',
+    })
+    @IsNotEmpty()
+    @IsMongoId({ message: 'Invalid product id' })
+    _id: string | Types.ObjectId;
 }
 
 export class CreateProductRequestDTO {
+    constructor(data: CreateProductRequestDTO) {
+        this.name = data?.name;
+        this.description = sanitizeHtmlString(data?.description);
+        this.generalImages = data?.generalImages;
+        this.descriptionImages = data?.descriptionImages;
+        this.category = data?.category;
+        this.status = data?.status ?? ProductStatus.Hide;
+        this.variations = data?.variations.map((variation) => {
+            // Sorted allow alphabetical order
+            const sortedAttributes = variation.attributes
+                .map((attr): AttributeDTO => {
+                    return {
+                        k: attr?.k?.toLowerCase(),
+                        v: attr?.v,
+                        ...(attr.u != null && attr.u != undefined ? { u: attr?.u } : {}), // remove unit if null
+                    };
+                })
+                .sort((a, b) => a.k.localeCompare(b.k));
+
+            // Base on variation's attributes to generate sku
+            const sku = `${replaceWhitespaceTo(this.name)}-${sortedAttributes
+                .map(({ k, v, u }) => {
+                    const attributeValue = `${replaceWhitespaceTo(k)}.${replaceWhitespaceTo(v)}`;
+                    return u ? `${attributeValue}.${replaceWhitespaceTo(u)}` : attributeValue;
+                })
+                .join('-')}`.toLowerCase();
+
+            return {
+                status: variation?.status ?? ProductStatus.Hide,
+                price: variation.price,
+                stock: variation.stock,
+                images: variation.images,
+                // Sorted allow alphabetical order
+                attributes: sortedAttributes,
+                sku: sku,
+            };
+        });
+
+        // Sorted allow alphabetical order
+        this.generalAttributes = data?.generalAttributes
+            ?.map((attr): AttributeDTO => {
+                return {
+                    k: attr.k.toLowerCase(),
+                    v: attr.v,
+                    ...(attr.u != null && attr.u != undefined ? { u: attr.u } : {}), // remove unit if null
+                };
+            })
+            .sort((a, b) => a.k.localeCompare(b.k));
+    }
+
     @ApiProperty({
         type: String,
         required: true,
@@ -194,14 +304,14 @@ export class CreateProductRequestDTO {
     description: string;
 
     @ApiProperty({
-        type: [String],
+        type: CategoryDTO,
         required: true,
-        description: 'Categories of product, (#label)',
-        example: ['iphone'],
+        description: 'Category of product',
     })
-    @IsArray()
-    @IsNotEmpty()
-    categories: string[];
+    @ValidateNested()
+    @IsNotEmptyObject()
+    @Type(() => CategoryDTO)
+    category: CategoryDTO;
 
     @ApiProperty({
         type: [VariationRequestDTO],
@@ -235,7 +345,9 @@ export class CreateProductRequestDTO {
     })
     @IsArray()
     @IsOptional()
-    generalAttributes: Array<AttributeDTO>;
+    @ValidateNested({ each: true })
+    @Type(() => AttributeDTO)
+    generalAttributes: AttributeDTO[];
 
     @ApiProperty({
         type: [ImageRequestDTO],
@@ -244,6 +356,8 @@ export class CreateProductRequestDTO {
     })
     @IsArray()
     @IsOptional()
+    @ValidateNested({ each: true })
+    @Type(() => ImageRequestDTO)
     generalImages?: ImageRequestDTO[];
 
     @ApiProperty({
@@ -253,5 +367,7 @@ export class CreateProductRequestDTO {
     })
     @IsArray()
     @IsOptional()
-    descriptionImages: ImageRequestDTO[];
+    @ValidateNested({ each: true })
+    @Type(() => ImageRequestDTO)
+    descriptionImages?: ImageRequestDTO[];
 }

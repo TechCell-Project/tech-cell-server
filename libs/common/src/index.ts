@@ -7,4 +7,3 @@ export * from './utils';
 export * from './HealthCheck';
 export * from './Discordjs';
 export * from './appConfig';
-export * from './Cloudinary';

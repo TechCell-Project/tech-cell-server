@@ -7,9 +7,10 @@ import {
     BadRequestException,
     NotAcceptableException,
     UnprocessableEntityException,
+    Logger,
 } from '@nestjs/common';
 import {
-    CheckEmailRequestDTO,
+    EmailRequestDTO,
     ForgotPasswordDTO,
     LoginRequestDTO,
     VerifyEmailRequestDTO,
@@ -17,6 +18,7 @@ import {
     RegisterRequestDTO,
     NewTokenRequestDTO,
     UserDataResponseDTO,
+    ChangePasswordRequestDTO,
 } from '~/apps/auth/dtos';
 import { User } from '@app/resource/users/schemas';
 import { RpcException } from '@nestjs/microservices';
@@ -24,19 +26,17 @@ import { ConfirmEmailRegisterDTO, ForgotPasswordEmailDTO, MailEventPattern } fro
 import { OtpType } from '@app/resource/otp';
 import { IUserFacebookResponse, IUserGoogleResponse, ITokenVerifiedResponse } from './interfaces';
 import { buildUniqueUserNameFromEmail, delStartWith, generateRandomString } from '@app/common';
-import { MAX_PASSWORD_LENGTH, USERS_CACHE_PREFIX } from '~/constants';
+import { PASSWORD_MAX_LENGTH, USERS_CACHE_PREFIX } from '~/constants';
+import { TCurrentUser } from '@app/common/types';
+import { Types } from 'mongoose';
+import { LoginTicket, OAuth2Client, OAuth2ClientOptions } from 'google-auth-library';
 
 @Injectable()
 export class AuthService extends AuthUtilService {
-    getPing() {
-        return {
-            message: 'pong',
-            services: 'auth',
-        };
-    }
+    protected logger = new Logger(AuthService.name);
 
-    async login({ emailOrUsername, password }: LoginRequestDTO) {
-        const user = await this.validateUser(emailOrUsername, password);
+    async login({ emailOrUsername, password }: LoginRequestDTO): Promise<UserDataResponseDTO> {
+        const user = await this.validateUserLogin(emailOrUsername, password);
 
         if (!user) {
             throw new RpcException(
@@ -53,30 +53,13 @@ export class AuthService extends AuthUtilService {
         }
 
         if (!user.emailVerified) {
-            const otp = await this.otpService.createOrRenewOtp({
-                email: user.email,
-                otpType: OtpType.VerifyEmail,
-            });
-            const emailContext: ConfirmEmailRegisterDTO = {
-                otpCode: otp.otpCode,
-            };
-
-            this.mailService.emit(MailEventPattern.sendMailConfirm, {
-                email: user.email,
-                emailContext,
-            });
-
-            throw new RpcException(
-                new NotAcceptableException(
-                    'Email is not verified, please check your email to verify it.',
-                ),
-            );
+            throw new RpcException(new NotAcceptableException('Email is not verified'));
         }
 
         return await this.buildUserTokenResponse(user);
     }
 
-    async checkEmail({ email }: CheckEmailRequestDTO) {
+    async checkEmail({ email }: EmailRequestDTO) {
         const userFound = await this.usersService.countUser({ email });
 
         if (userFound > 0) {
@@ -119,7 +102,7 @@ export class AuthService extends AuthUtilService {
             userName = await this.createUniqueUserName(email);
         }
 
-        if (userFound || (userFound && userFound?.emailVerified)) {
+        if (userFound || userFound?.emailVerified) {
             throw new RpcException(new ConflictException('Email is already registered'));
         }
 
@@ -183,6 +166,31 @@ export class AuthService extends AuthUtilService {
         };
     }
 
+    async resendVerifyEmailOtp({ email }: EmailRequestDTO) {
+        const user = await this.usersService.getUser({ email });
+        if (user.emailVerified) {
+            throw new RpcException(new BadRequestException('Email is already verified'));
+        }
+
+        const otp = await this.otpService.createOrRenewOtp({
+            email: user.email,
+            otpType: OtpType.VerifyEmail,
+        });
+        const emailContext = new ConfirmEmailRegisterDTO({
+            otpCode: otp.otpCode,
+        });
+
+        await this.limitEmailSent(user.email);
+        this.mailService.emit(MailEventPattern.sendMailConfirm, {
+            email: user.email,
+            emailContext,
+        });
+
+        return {
+            message: 'An email has already been sent to you email address, please check your email',
+        };
+    }
+
     async getNewToken({
         refreshToken: oldRefreshToken,
     }: NewTokenRequestDTO): Promise<UserDataResponseDTO> {
@@ -228,6 +236,43 @@ export class AuthService extends AuthUtilService {
 
         return {
             message: 'An email has already been sent to you email address, please check your email',
+        };
+    }
+
+    async changePassword({
+        changePwData,
+        user,
+    }: {
+        changePwData: ChangePasswordRequestDTO;
+        user: TCurrentUser;
+    }) {
+        const { oldPassword, newPassword, reNewPassword } = new ChangePasswordRequestDTO(
+            changePwData,
+        );
+
+        if (newPassword !== reNewPassword) {
+            throw new RpcException(new BadRequestException('Password does not match'));
+        }
+
+        const userFound = await this.usersService.getUser({ _id: new Types.ObjectId(user._id) });
+        const validateLogin = await this.validateUserLogin(userFound.email, oldPassword);
+        if (!validateLogin) {
+            throw new RpcException(new UnauthorizedException('Your password is incorrect'));
+        }
+
+        const userUpdated = await this.usersService.changeUserPassword({
+            email: validateLogin.email,
+            password: newPassword,
+        });
+
+        if (!userUpdated) {
+            throw new RpcException(
+                new BadRequestException('Something went wrong, please try again'),
+            );
+        }
+
+        return {
+            message: 'Password changed successfully',
         };
     }
 
@@ -295,6 +340,48 @@ export class AuthService extends AuthUtilService {
         )) as ITokenVerifiedResponse;
     }
 
+    async google(idToken: string) {
+        const options: OAuth2ClientOptions = {
+            clientId: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        };
+        const client = new OAuth2Client(options);
+
+        let ticket: LoginTicket;
+        try {
+            ticket = await client.verifyIdToken({
+                idToken: idToken,
+                audience: process.env.GOOGLE_CLIENT_ID,
+            });
+        } catch (error) {
+            this.logger.error(error.message);
+            throw new RpcException(new UnauthorizedException('Login with Google failed'));
+        }
+        const user = ticket.getPayload();
+
+        if (user.email_verified !== true) {
+            throw new RpcException(new UnauthorizedException(`Google's email is not verified`));
+        }
+
+        try {
+            const userFound = await this.usersService.getUser({ email: user.email });
+            return this.buildUserTokenResponse(userFound);
+        } catch (error) {
+            // If user not found, create a new user
+            const newUser = await this.usersService.createUser({
+                email: user.email,
+                emailVerified: user.email_verified,
+                userName: buildUniqueUserNameFromEmail(user.email),
+                firstName: user.family_name,
+                lastName: user.given_name,
+                password: `${user.at_hash}${generateRandomString(
+                    PASSWORD_MAX_LENGTH - user.at_hash.length,
+                )}`,
+            });
+            return this.buildUserTokenResponse(newUser);
+        }
+    }
+
     async googleLogin({ user }: { user: IUserGoogleResponse }) {
         if (!user) {
             throw new RpcException(new BadRequestException('Login with Google failed'));
@@ -311,7 +398,7 @@ export class AuthService extends AuthUtilService {
                 firstName: user.firstName,
                 lastName: user.lastName,
                 password: `${user.openid}${generateRandomString(
-                    MAX_PASSWORD_LENGTH - user.openid.length,
+                    PASSWORD_MAX_LENGTH - user.openid.length,
                 )}`,
             });
             return this.buildUserTokenResponse(newUser);
@@ -342,7 +429,7 @@ export class AuthService extends AuthUtilService {
                 firstName: user.firstName,
                 lastName: user.lastName,
                 password: `${user.email}${generateRandomString(
-                    MAX_PASSWORD_LENGTH - user.email.length,
+                    PASSWORD_MAX_LENGTH - user.email.length,
                 )}`,
             });
         }

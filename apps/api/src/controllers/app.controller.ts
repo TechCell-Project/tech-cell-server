@@ -1,30 +1,16 @@
-import { Controller, Get, Inject, UseGuards } from '@nestjs/common';
+import { Controller, Get, Inject } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
-import { SAMPLE_SERVICE } from '~/constants';
-import { AuthGuard, catchException } from '@app/common';
-import { ApiTags } from '@nestjs/swagger';
-import { SampleMessagePattern } from '~/apps/sample';
+import { UTILITY_SERVICE } from '~/constants';
+import { ApiExcludeController, ApiTags } from '@nestjs/swagger';
 
+@ApiExcludeController()
 @ApiTags('commons')
 @Controller('/')
 export class AppController {
-    constructor(@Inject(SAMPLE_SERVICE) private readonly sampleService: ClientRMQ) {}
+    constructor(@Inject(UTILITY_SERVICE) private readonly utilityService: ClientRMQ) {}
 
     @Get('ping')
     async getPing() {
         return { message: 'pong' };
-    }
-
-    @Get('sample')
-    async getSample() {
-        return this.sampleService.send(SampleMessagePattern.getSample, {}).pipe(catchException());
-    }
-
-    @Get('sample-auth')
-    @UseGuards(AuthGuard)
-    async getSampleAuth() {
-        return this.sampleService
-            .send(SampleMessagePattern.getSampleAuth, {})
-            .pipe(catchException());
     }
 }

@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RabbitMQService } from '@app/common';
 import { Ctx, MessagePattern, Payload, RmqContext } from '@nestjs/microservices';
@@ -8,13 +8,16 @@ import {
     NewTokenRequestDTO,
     VerifyEmailRequestDTO,
     LoginRequestDTO,
-    CheckEmailRequestDTO,
+    EmailRequestDTO,
     ForgotPasswordDTO,
     VerifyForgotPasswordDTO,
+    ChangePasswordRequestDTO,
+    GoogleLoginRequestDTO,
 } from './dtos';
 import { JwtGuard } from './guards/jwt.guard';
 import { IUserFacebookResponse, IUserGoogleResponse } from './interfaces';
 import { AuthMessagePattern } from './auth.pattern';
+import { TCurrentUser } from '@app/common/types';
 
 @Controller()
 export class AuthController {
@@ -22,11 +25,6 @@ export class AuthController {
         private readonly authService: AuthService,
         private readonly rabbitMqService: RabbitMQService,
     ) {}
-
-    @Get('ping')
-    getPing() {
-        return this.authService.getPing();
-    }
 
     @MessagePattern(AuthMessagePattern.login)
     async login(
@@ -38,7 +36,7 @@ export class AuthController {
     }
 
     @MessagePattern(AuthMessagePattern.checkEmail)
-    async checkEmail(@Ctx() context: RmqContext, @Payload() { email }: CheckEmailRequestDTO) {
+    async checkEmail(@Ctx() context: RmqContext, @Payload() { email }: EmailRequestDTO) {
         this.rabbitMqService.acknowledgeMessage(context);
         return this.authService.checkEmail({ email });
     }
@@ -94,18 +92,53 @@ export class AuthController {
         return this.authService.verifyForgotPassword({ email, otpCode, password, re_password });
     }
 
+    @MessagePattern(AuthMessagePattern.google)
+    async google(@Ctx() context: RmqContext, @Payload() { idToken }: GoogleLoginRequestDTO) {
+        this.rabbitMqService.acknowledgeMessage(context);
+        return this.authService.google(idToken);
+    }
+
     @MessagePattern(AuthMessagePattern.googleAuth)
-    async googleAuthRedirect(@Ctx() context, @Payload() { user }: { user: IUserGoogleResponse }) {
+    async googleAuthRedirect(
+        @Ctx() context: RmqContext,
+        @Payload() { user }: { user: IUserGoogleResponse },
+    ) {
         this.rabbitMqService.acknowledgeMessage(context);
         return this.authService.googleLogin({ user });
     }
 
     @MessagePattern(AuthMessagePattern.facebookAuth)
     async facebookAuthRedirect(
-        @Ctx() context,
+        @Ctx() context: RmqContext,
         @Payload() { user }: { user: IUserFacebookResponse },
     ) {
         this.rabbitMqService.acknowledgeMessage(context);
         return this.authService.facebookLogin({ user });
+    }
+
+    @MessagePattern(AuthMessagePattern.resendVerifyEmailOtp)
+    async resendVerifyEmailOtp(@Ctx() context, @Payload() { email }: EmailRequestDTO) {
+        this.rabbitMqService.acknowledgeMessage(context);
+        return this.authService.resendVerifyEmailOtp({ email });
+    }
+
+    @MessagePattern(AuthMessagePattern.changePassword)
+    async changePassword(
+        @Ctx() context: RmqContext,
+        @Payload()
+        {
+            changePwData,
+            user,
+        }: {
+            changePwData: ChangePasswordRequestDTO;
+            user: TCurrentUser;
+        },
+    ) {
+        console.log({
+            changePwData,
+            user,
+        });
+        this.rabbitMqService.acknowledgeMessage(context);
+        return this.authService.changePassword({ changePwData, user });
     }
 }

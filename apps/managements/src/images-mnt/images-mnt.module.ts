@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ImagesMntController } from './images-mnt.controller';
 import { RabbitMQService } from '@app/common/RabbitMQ';
-import { CloudinaryService } from '@app/common/Cloudinary';
+import { CloudinaryService } from '@app/third-party/cloudinary.com';
 import { ImagesMntService } from './images-mnt.service';
 
 @Module({

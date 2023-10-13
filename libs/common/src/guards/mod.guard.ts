@@ -3,6 +3,9 @@ import { UserRole } from '@app/resource/users/enums';
 import { AuthCoreGuard } from './auth.core.guard';
 import { Reflector } from '@nestjs/core';
 
+/**
+ * @description ModGuard: required login for mod or higher roles
+ */
 @Injectable()
 export class ModGuard extends AuthCoreGuard {
     constructor() {

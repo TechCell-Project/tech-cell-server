@@ -2,11 +2,10 @@ import { Inject, Injectable, NestMiddleware, Logger } from '@nestjs/common';
 import { NextFunction, Request, Response } from 'express';
 import * as morgan from 'morgan';
 import { TokenIndexer } from 'morgan';
-import { SAMPLE_SERVICE } from '~/constants';
+import { UTILITY_SERVICE } from '~/constants';
 import { ClientRMQ } from '@nestjs/microservices';
 import { isEnable } from '@app/common';
-import { SampleEventPattern } from '~/apps/sample';
-import { LogType } from 'apps/sample/enums';
+import { UtilityEventPattern, LogType } from '~/apps/utility';
 
 interface JsonFormatTokens extends TokenIndexer {
     date: (req: Request, res: Response) => string;
@@ -26,7 +25,7 @@ interface JsonFormatTokens extends TokenIndexer {
 
 @Injectable()
 export class MorganMiddleware implements NestMiddleware {
-    constructor(@Inject(SAMPLE_SERVICE) private readonly sampleService: ClientRMQ) {}
+    constructor(@Inject(UTILITY_SERVICE) private readonly utilityService: ClientRMQ) {}
 
     private readonly _logger: Logger = new Logger(MorganMiddleware.name);
 
@@ -47,14 +46,14 @@ export class MorganMiddleware implements NestMiddleware {
                 }
 
                 if (isEnable(process.env.LOGS_TO_FILE)) {
-                    this.sampleService.emit(SampleEventPattern.writeLogsToFile, {
+                    this.utilityService.emit(UtilityEventPattern.writeLogsToFile, {
                         message: messageExpected,
                         type: LogType.HTTP,
                     });
                 }
 
                 if (isEnable(process.env.LOGS_TO_DISCORD)) {
-                    this.sampleService.emit(SampleEventPattern.writeLogsToDiscord, {
+                    this.utilityService.emit(UtilityEventPattern.writeLogsToDiscord, {
                         message: messageExpected,
                     });
                 }

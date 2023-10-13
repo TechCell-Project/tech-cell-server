@@ -4,7 +4,14 @@ import { User, UsersService } from '@app/resource/users';
 import { Store } from 'cache-manager';
 import { GetUsersDTO } from './dtos';
 import { FilterQuery, QueryOptions } from 'mongoose';
-import { UserSearchBlock, UserSearchRole, UserSearchSortField, UserSearchSortOrder } from './enums';
+import {
+    UserSearchBlock,
+    UserSearchEmailVerified,
+    UserSearchRole,
+    UserSearchSortField,
+    UserSearchSortOrder,
+} from './enums';
+import { generateRegexQuery } from 'regex-vietnamese';
 
 @Injectable()
 export class UsersSearchUtilService {
@@ -19,51 +26,61 @@ export class UsersSearchUtilService {
     protected buildFilterQuery(payload: GetUsersDTO) {
         const filterQuery: FilterQuery<User> = {};
 
-        if (payload.keyword) {
+        if (payload?.keyword) {
+            const keywordRegex = generateRegexQuery(payload.keyword);
             Object.assign(filterQuery, {
                 $or: [
-                    { userName: { $regex: payload.keyword, $options: 'i' } },
-                    { email: { $regex: payload.keyword, $options: 'i' } },
-                    { firstName: { $regex: payload.keyword, $options: 'i' } },
-                    { lastName: { $regex: payload.keyword, $options: 'i' } },
-                    { role: { $regex: payload.keyword, $options: 'i' } },
+                    { userName: keywordRegex },
+                    { email: keywordRegex },
+                    { firstName: keywordRegex },
+                    { lastName: keywordRegex },
+                    { role: keywordRegex },
                 ],
             });
         }
 
-        if (payload.status) {
-            if (payload.status !== UserSearchBlock.ALL) {
-                switch (payload.status) {
-                    case UserSearchBlock.BLOCKED:
-                        filterQuery.block.isBlocked = true;
-                        break;
-                    case UserSearchBlock.UNBLOCKED:
-                        filterQuery.block.isBlocked = false;
-                        break;
-                    default:
-                        delete filterQuery.block;
-                        break;
-                }
-            }
-        }
-
-        if (payload.role) {
-            filterQuery.role = payload.role;
-            if (payload.role === UserSearchRole.ALL) {
-                delete filterQuery.role;
-            }
-        }
-
-        if (payload.emailVerified) {
-            switch (payload.emailVerified) {
+        if (payload?.status) {
+            switch (payload.status) {
                 case UserSearchBlock.BLOCKED:
-                    filterQuery.emailVerified = true;
+                    Object.assign(filterQuery, {
+                        'block.isBlocked': true,
+                    });
                     break;
                 case UserSearchBlock.UNBLOCKED:
-                    filterQuery.emailVerified = false;
+                    Object.assign(filterQuery, {
+                        'block.isBlocked': {
+                            $in: [false, undefined, null],
+                        },
+                    });
                     break;
+                case UserSearchBlock.ALL:
                 default:
-                    delete filterQuery.emailVerified;
+                    delete filterQuery?.block;
+                    break;
+            }
+        }
+
+        if (payload?.role && payload.role !== UserSearchRole.ALL) {
+            Object.assign(filterQuery, {
+                role: payload.role,
+            });
+        }
+
+        if (payload?.emailVerified) {
+            switch (payload.emailVerified) {
+                case UserSearchEmailVerified.VERIFIED:
+                    Object.assign(filterQuery, {
+                        emailVerified: true,
+                    });
+                    break;
+                case UserSearchEmailVerified.UNVERIFIED:
+                    Object.assign(filterQuery, {
+                        emailVerified: false,
+                    });
+                    break;
+                case UserSearchEmailVerified.ALL:
+                default:
+                    delete filterQuery?.emailVerified;
                     break;
             }
         }

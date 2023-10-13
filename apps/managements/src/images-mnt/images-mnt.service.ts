@@ -4,7 +4,7 @@ import {
     Logger,
     NotFoundException,
 } from '@nestjs/common';
-import { CloudinaryService } from '@app/common/Cloudinary';
+import { CloudinaryService } from '@app/third-party/cloudinary.com';
 import { ImageUploadedResponseDTO } from './dtos/image-uploaded-response.dto';
 import { RpcException } from '@nestjs/microservices';
 

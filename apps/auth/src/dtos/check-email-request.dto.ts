@@ -1,7 +1,7 @@
 import { IsEmail, IsNotEmpty } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class CheckEmailRequestDTO {
+export class EmailRequestDTO {
     @ApiProperty({
         description: 'The email of user to check exists',
         example: 'example@techcell.com',

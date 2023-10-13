@@ -9,3 +9,5 @@ export * from './verify-email-request.dto';
 export * from './forgot-password-request.dto';
 export * from './verify-forgot-password-request.dto';
 export * from './check-email-request.dto';
+export * from './change-password-request.dto';
+export * from './google-login-request.dto';

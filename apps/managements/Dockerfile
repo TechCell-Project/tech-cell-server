@@ -1,4 +1,4 @@
-FROM node:18-alpine AS development
+FROM node:18-alpine AS build-stage
 
 WORKDIR /usr/src/app
 
@@ -18,6 +18,6 @@ COPY package.json yarn.lock ./
 
 RUN yarn install --prod
 
-COPY --from=development /usr/src/app/dist ./dist
+COPY --from=build-stage /usr/src/app/dist ./dist
 
 CMD ["node", "dist/apps/managements/main"]

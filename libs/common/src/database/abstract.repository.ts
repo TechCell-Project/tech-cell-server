@@ -43,13 +43,18 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
             throw new RpcException(new NotFoundException(`${this.model.modelName} not found.`));
         }
 
-        return document;
+        return document as unknown as TDocument;
     }
 
-    async findOneAndUpdate(filterQuery: FilterQuery<TDocument>, update: UpdateQuery<TDocument>) {
+    async findOneAndUpdate(
+        filterQuery: FilterQuery<TDocument>,
+        update: UpdateQuery<TDocument>,
+        options?: Partial<QueryOptions<TDocument>>,
+    ) {
         const document = await this.model.findOneAndUpdate(filterQuery, update, {
             lean: true,
             new: true,
+            ...options,
         });
 
         if (!document) {
@@ -68,12 +73,6 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
         });
     }
 
-    // async find(
-    //     filterQuery: FilterQuery<TDocument>,
-    //     options?: Partial<QueryOptions<TDocument>>,
-    //     projection?: ProjectionType<TDocument>,
-    //     logEnabled = true,
-    // ) {
     async find({
         filterQuery,
         queryOptions,

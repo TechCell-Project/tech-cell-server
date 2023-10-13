@@ -1,12 +1,10 @@
 import { Module } from '@nestjs/common';
-import { OrderController } from './order.controller';
-import { OrderService } from './order.service';
 import { AppConfigModule, RabbitMQService } from '@app/common';
-import { PaymentModule } from '@app/payment';
+import { CartsOrdModule } from '~/apps/order/carts-ord';
+import { CheckoutModule } from './checkout-ord/checkout.module';
 
 @Module({
-    imports: [AppConfigModule, PaymentModule],
-    controllers: [OrderController],
-    providers: [OrderService, RabbitMQService],
+    imports: [AppConfigModule, CartsOrdModule, CheckoutModule],
+    providers: [RabbitMQService],
 })
 export class OrderModule {}

@@ -1,77 +1,45 @@
 {
-  "compilerOptions": {
-    "module": "commonjs",
-    "declaration": true,
-    "removeComments": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "allowSyntheticDefaultImports": true,
-    "target": "es2017",
-    "sourceMap": true,
-    "outDir": "./dist",
-    "baseUrl": "./",
-    "incremental": true,
-    "skipLibCheck": true,
-    "strictNullChecks": false,
-    "noImplicitAny": false,
-    "strictBindCallApply": false,
-    "forceConsistentCasingInFileNames": false,
-    "noFallthroughCasesInSwitch": false,
-    "paths": {
-      "@app/common": [
-        "libs/common/src"
-      ],
-      "@app/common/*": [
-        "libs/common/src/*"
-      ],
-      "~/constants": [
-        "constants"
-      ],
-      "~/constants/*": [
-        "constants/*"
-      ],
-      "~/apps/api/*": [
-        "apps/api/src/*"
-      ],
-      "~/apps/auth/*": [
-        "apps/auth/src/*"
-      ],
-      "~/apps/auth": [
-        "apps/auth/src"
-      ],
-      "~/apps/search": [
-        "apps/search/src"
-      ],
-      "~/apps/search/*": [
-        "apps/search/src/*"
-      ],
-      "~/apps/sample": [
-        "apps/sample/src"
-      ],
-      "~/apps/sample/*": [
-        "apps/sample/src/*"
-      ],
-      "~/apps/mail": [
-        "apps/mail/src"
-      ],
-      "~/apps/mail/*": [
-        "apps/mail/src/*"
-      ],
-      "~/apps/managements/*": [
-        "apps/managements/src/*"
-      ],
-      "@app/resource": [
-        "libs/resource/src"
-      ],
-      "@app/resource/*": [
-        "libs/resource/src/*"
-      ],
-      "@app/payment": [
-        "libs/payment/src"
-      ],
-      "@app/payment/*": [
-        "libs/payment/src/*"
-      ]
+    "compilerOptions": {
+        "module": "commonjs",
+        "declaration": true,
+        "removeComments": true,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "allowSyntheticDefaultImports": true,
+        "target": "es2017",
+        "sourceMap": true,
+        "outDir": "./dist",
+        "baseUrl": "./",
+        "incremental": true,
+        "skipLibCheck": true,
+        "strictNullChecks": false,
+        "noImplicitAny": false,
+        "strictBindCallApply": false,
+        "forceConsistentCasingInFileNames": false,
+        "noFallthroughCasesInSwitch": false,
+        "paths": {
+            "@app/common": ["libs/common/src"],
+            "@app/common/*": ["libs/common/src/*"],
+            "~/constants": ["constants"],
+            "~/constants/*": ["constants/*"],
+            "~/apps/api/*": ["apps/api/src/*"],
+            "~/apps/auth/*": ["apps/auth/src/*"],
+            "~/apps/auth": ["apps/auth/src"],
+            "~/apps/search": ["apps/search/src"],
+            "~/apps/search/*": ["apps/search/src/*"],
+            "~/apps/utility": ["apps/utility/src"],
+            "~/apps/utility/*": ["apps/utility/src/*"],
+            "~/apps/mail": ["apps/mail/src"],
+            "~/apps/mail/*": ["apps/mail/src/*"],
+            "~/apps/task": ["apps/task/src"],
+            "~/apps/task/*": ["apps/task/src/*"],
+            "~/apps/managements/*": ["apps/managements/src/*"],
+            "@app/resource": ["libs/resource/src"],
+            "@app/resource/*": ["libs/resource/src/*"],
+            "~/apps/order": ["apps/order/src"],
+            "~/apps/order/*": ["apps/order/src/*"],
+            "@app/third-party": ["libs/third-party/src"],
+            "@app/third-party/*": ["libs/third-party/src/*"]
+        }
     }
-  }
 }

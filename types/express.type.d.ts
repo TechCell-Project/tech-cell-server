@@ -1,7 +1,7 @@
-import { ICurrentUser } from '@app/common/interfaces';
+import { TCurrentUser } from '@app/common/types';
 
 declare namespace Express {
     interface Request {
-        user: ICurrentUser;
+        user: TCurrentUser;
     }
 }

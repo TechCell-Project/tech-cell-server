@@ -103,7 +103,7 @@ describe('UsersService', () => {
         it('should return the user if the credentials are valid', async () => {
             usersRepository.findOne = jest.fn().mockResolvedValue(user);
 
-            const result = await usersService.validateUser(email, password);
+            const result = await usersService.isCredentialsCorrect(email, password);
 
             expect(usersRepository.findOne).toHaveBeenCalledWith({ email });
             expect(bcrypt.compare).toHaveBeenCalledWith(password, user.password);
@@ -118,7 +118,7 @@ describe('UsersService', () => {
 
             // Act
             try {
-                await usersService.validateUser(email, password);
+                await usersService.isCredentialsCorrect(email, password);
             } catch (error) {
                 // Assert
                 expect(error).toBeInstanceOf(RpcException);
