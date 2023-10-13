@@ -10008,10 +10008,10 @@ vm2@^3.9.17:
     acorn "^8.7.0"
     acorn-walk "^8.2.0"
 
-vnpay@^0.1.0:
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/vnpay/-/vnpay-0.1.0.tgz#5decdfb35324213c9acf8a956e4d37ca4ab5280e"
-  integrity sha512-nwgNXJqIgsMRuS7XaiYhKHTtXtvruxIUSP2Qrs+PYwsatdbVoaL8jLTXBt80fKyqzFbEAtLL9rDvTMxQ2ycPiA==
+vnpay@^0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/vnpay/-/vnpay-0.1.1.tgz#a6e352c97d7d68c263c6ceca41b8e1d5494caa7d"
+  integrity sha512-cGrbDvq79DihvJ10Xt3hkJFBarWS3jMY/DH9SS8lqdOh5fcrIdkuEaReuVcieqT8eHXZocsvCATXVFPA7yAJ/g==
   dependencies:
     class-validator "^0.14.0"
     moment-timezone "^0.5.43"
