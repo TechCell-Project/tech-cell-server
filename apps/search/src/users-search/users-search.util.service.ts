@@ -5,6 +5,7 @@ import { Store } from 'cache-manager';
 import { GetUsersDTO } from './dtos';
 import { FilterQuery, QueryOptions } from 'mongoose';
 import { UserSearchBlock, UserSearchRole, UserSearchSortField, UserSearchSortOrder } from './enums';
+import { generateRegexQuery } from 'regex-vietnamese';
 
 @Injectable()
 export class UsersSearchUtilService {
@@ -20,13 +21,14 @@ export class UsersSearchUtilService {
         const filterQuery: FilterQuery<User> = {};
 
         if (payload.keyword) {
+            const keywordRegex = generateRegexQuery(payload.keyword);
             Object.assign(filterQuery, {
                 $or: [
-                    { userName: { $regex: payload.keyword, $options: 'i' } },
-                    { email: { $regex: payload.keyword, $options: 'i' } },
-                    { firstName: { $regex: payload.keyword, $options: 'i' } },
-                    { lastName: { $regex: payload.keyword, $options: 'i' } },
-                    { role: { $regex: payload.keyword, $options: 'i' } },
+                    { userName: keywordRegex },
+                    { email: keywordRegex },
+                    { firstName: keywordRegex },
+                    { lastName: keywordRegex },
+                    { role: keywordRegex },
                 ],
             });
         }
