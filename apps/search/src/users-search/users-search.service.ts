@@ -17,7 +17,7 @@ export class UsersSearchService extends UsersSearchUtilService {
 
         const [usersFromDb, totalRecord] = await Promise.all([
             this.usersService.getUsers(filterQuery, queryOptions, projection),
-            this.usersService.countUsers({}),
+            this.usersService.countUsers(filterQuery),
         ]);
 
         const dataResponse = new ListDataResponseDTO({
