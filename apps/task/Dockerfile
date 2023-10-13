@@ -20,4 +20,4 @@ RUN yarn install --prod
 
 COPY --from=build-stage /usr/src/app/dist ./dist
 
-CMD ["yarn start", "task"]
+CMD ["node", "dist/apps/task/main"]
