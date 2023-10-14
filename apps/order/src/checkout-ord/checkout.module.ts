@@ -16,6 +16,7 @@ import { VnpayModule } from '@app/third-party/vnpay.vn';
             paymentGateway: process.env.VNPAY_PAYMENT_URL,
             secureSecret: process.env.VNPAY_SECRET_KEY,
             tmnCode: process.env.VNPAY_TMN_CODE,
+            returnUrl: 'https://api.techcell.cloud/checkout/vnpay-return',
         }),
     ],
     controllers: [CheckoutController],
