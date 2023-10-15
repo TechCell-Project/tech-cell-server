@@ -1,4 +1,3 @@
-import { UserRole } from '@app/resource/users/enums';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsOptional, Max, Min } from 'class-validator';
 import {
@@ -8,10 +7,10 @@ import {
     UserSearchSortOrder,
     UserSearchRole,
 } from '../enums';
-import { MAX_USERS_PER_PAGE } from '~/constants';
+import { MAX_USERS_PER_PAGE } from '~/constants/user.constant';
 import { Type } from 'class-transformer';
 
-export class GetUsersDTO {
+export class GetUsersQueryDTO {
     @ApiProperty({
         type: Number,
         description: 'Page of users to be returned',

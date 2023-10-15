@@ -34,7 +34,7 @@ import { CurrentUser } from '@app/common/decorators';
 import { TCurrentUser } from '@app/common/types';
 import { ListDataResponseDTO } from '@app/common/dtos';
 import { UsersSearchMessagePattern } from '~/apps/search/users-search';
-import { GetUsersDTO } from '~/apps/search/users-search/dtos';
+import { GetUsersQueryDTO } from '~/apps/search/users-search/dtos';
 
 @ApiTags('users')
 @ApiBearerAuth('accessToken')
@@ -59,7 +59,7 @@ export class UsersController {
     @ApiNotFoundResponse({ description: 'No users found' })
     @UseGuards(ModGuard)
     @Get('/')
-    async getUsers(@Query() requestQuery: GetUsersDTO) {
+    async getUsers(@Query() requestQuery: GetUsersQueryDTO) {
         return this.searchService
             .send(UsersSearchMessagePattern.getUsers, { ...requestQuery })
             .pipe(catchException());
