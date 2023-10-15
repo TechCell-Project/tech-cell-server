@@ -33,6 +33,9 @@ export class User extends AbstractDocument {
     @Prop({ type: BlockSchema })
     block?: BlockSchema;
 
+    @Prop({ default: '' })
+    avatar?: string;
+
     @Prop({ default: Date.now })
     createdAt?: Date;
 
