@@ -1,16 +1,36 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common';
 import { Types } from 'mongoose';
-import { BlockUnblockRequestDTO, ChangeRoleRequestDTO, CreateUserRequestDto } from './dtos';
+import {
+    BlockUnblockRequestDTO,
+    ChangeRoleRequestDTO,
+    CreateUserRequestDto,
+    UpdateUserAddressRequestDTO,
+    UpdateUserRequestDTO,
+} from './dtos';
 import { RpcException } from '@nestjs/microservices';
 import { BlockActivity, UserRole } from '@app/resource/users/enums';
 import { UsersMntUtilService } from './users-mnt.util.service';
 import { delStartWith, generateRandomString } from '@app/common';
 import { CreateUserDTO } from '@app/resource/users/dtos';
-import { USERS_CACHE_PREFIX } from '~/constants';
+import { REDIS_CACHE, USERS_CACHE_PREFIX } from '~/constants';
 import { delCacheUsers } from '@app/resource/users/utils';
+import { TCurrentUser } from '@app/common/types';
+import { UsersService } from '@app/resource/users';
+import { Store } from 'cache-manager';
+import { CloudinaryService } from '@app/third-party/cloudinary.com';
 
 @Injectable()
 export class UsersMntService extends UsersMntUtilService {
+    protected readonly logger: Logger;
+    constructor(
+        protected readonly usersService: UsersService,
+        @Inject(REDIS_CACHE) protected cacheManager: Store,
+        private readonly cloudinaryService: CloudinaryService,
+    ) {
+        super(usersService, cacheManager);
+        this.logger = new Logger(UsersMntService.name);
+    }
+
     async createUser({ ...createUserRequestDto }: CreateUserRequestDto) {
         const newUser = new CreateUserDTO(createUserRequestDto);
 
@@ -176,5 +196,71 @@ export class UsersMntService extends UsersMntUtilService {
             Logger.error(error);
             throw new RpcException(new BadRequestException(error.message));
         }
+    }
+
+    async updateUserInfo({
+        user,
+        dataUpdate,
+    }: {
+        user: TCurrentUser;
+        dataUpdate: UpdateUserRequestDTO;
+    }) {
+        const oldUser = await this.usersService.getUser({ _id: new Types.ObjectId(user._id) });
+        delete oldUser.createdAt;
+        delete oldUser.updatedAt;
+
+        if (dataUpdate?.userName) {
+            const user = await this.usersService.getUser({ userName: dataUpdate.userName });
+            if (user) {
+                throw new RpcException(new BadRequestException('Username already exists'));
+            }
+        }
+
+        if (dataUpdate?.avatar) {
+            try {
+                const avatarUrl = (
+                    await this.cloudinaryService.getImageByPublicId(dataUpdate.avatar)
+                ).secure_url;
+                dataUpdate.avatar = avatarUrl;
+            } catch (error) {
+                delete dataUpdate.avatar;
+                throw new RpcException(new BadRequestException('Avatar not found'));
+            }
+        }
+
+        const newUser = { ...oldUser, ...new UpdateUserRequestDTO(dataUpdate) };
+        const userUpdated = await this.usersService.findOneAndUpdateUser(
+            { _id: user._id },
+            newUser,
+        );
+        return userUpdated;
+    }
+
+    async updateUserAddress({
+        user,
+        addressData,
+    }: {
+        user: TCurrentUser;
+        addressData: UpdateUserAddressRequestDTO;
+    }) {
+        const newAddr = addressData.address;
+        if (newAddr.length > 0 && !newAddr.find((a) => a?.isDefault)) {
+            Object.assign(newAddr[0], {
+                isDefault: true,
+            });
+        }
+
+        if (newAddr.length > 0 && newAddr.filter((a) => a?.isDefault).length > 1) {
+            throw new RpcException(new BadRequestException('Only one address can be default'));
+        }
+
+        const userFound = await this.usersService.getUser({ _id: new Types.ObjectId(user._id) });
+        userFound.address = newAddr;
+        const userUpdated = await this.usersService.findOneAndUpdateUser(
+            { _id: user._id },
+            userFound,
+        );
+        this.logger.verbose(userUpdated);
+        return userUpdated;
     }
 }

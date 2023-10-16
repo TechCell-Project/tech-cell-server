@@ -8,12 +8,14 @@ import { CategoriesController } from './categories.controller';
 import { CartsController } from './carts.controller';
 import { ImagesController } from './images.controller';
 import { AdminController } from './admin.controller';
+import { ProfileController } from './profile.controller';
 
 export default [
     AdminController,
     AuthController,
-    ImagesController,
     UsersController,
+    ProfileController,
+    ImagesController,
     ProductsController,
     CategoriesController,
     AttributesController,

@@ -3,17 +3,21 @@ import { UserRole } from '../enums';
 import { Types } from 'mongoose';
 import { AddressSchemaDTO } from './address.schema.dto';
 import { BlockSchemaDTO } from './block.schema.dto';
+import { User } from '../schemas';
 
-export class UserMntResponseDto {
+export class UserMntResponseDto implements Omit<User, 'password'> {
     @ApiProperty({
         description: 'The user id',
         type: String,
         example: '6493c67dc0ab97f5eb2beca5',
     })
-    _id: string | Types.ObjectId;
+    _id: Types.ObjectId;
 
     @ApiProperty({ description: 'The user email', example: 'example@email.com' })
     email: string;
+
+    @ApiProperty({ description: 'The user username', example: 'example' })
+    userName: string;
 
     @ApiProperty({ description: 'Whether the user email is verified or not', example: false })
     emailVerified?: boolean;
@@ -22,16 +26,25 @@ export class UserMntResponseDto {
     role?: string;
 
     @ApiProperty({
+        description: 'The user avatar',
+        type: String,
+        format: 'url',
+        required: false,
+        example: 'https://cdn.example.com/image.png',
+    })
+    avatar?: string;
+
+    @ApiProperty({
         description: 'The user address',
         type: [AddressSchemaDTO],
     })
     address?: AddressSchemaDTO[];
 
     @ApiProperty({ description: 'The user first name', example: 'John' })
-    firstName?: string;
+    firstName: string;
 
     @ApiProperty({ description: 'The user last name', example: 'Doe' })
-    lastName?: string;
+    lastName: string;
 
     @ApiProperty({
         description: 'The user block',

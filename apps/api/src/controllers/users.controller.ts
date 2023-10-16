@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~/constants';
-import { AuthGuard, ModGuard, SuperAdminGuard } from '@app/common/guards';
+import { ModGuard, SuperAdminGuard } from '@app/common/guards';
 import {
     ApiBadRequestResponse,
     ApiBearerAuth,
@@ -34,10 +34,11 @@ import { CurrentUser } from '@app/common/decorators';
 import { TCurrentUser } from '@app/common/types';
 import { ListDataResponseDTO } from '@app/common/dtos';
 import { UsersSearchMessagePattern } from '~/apps/search/users-search';
-import { GetUsersDTO } from '~/apps/search/users-search/dtos';
+import { GetUsersQueryDTO } from '~/apps/search/users-search/dtos';
+import { ACCESS_TOKEN_NAME } from '~/constants/api.constant';
 
 @ApiTags('users')
-@ApiBearerAuth('accessToken')
+@ApiBearerAuth(ACCESS_TOKEN_NAME)
 @ApiForbiddenResponse({ description: 'Forbidden permission, required Mod or Admin' })
 @Controller('users')
 export class UsersController {
@@ -59,18 +60,9 @@ export class UsersController {
     @ApiNotFoundResponse({ description: 'No users found' })
     @UseGuards(ModGuard)
     @Get('/')
-    async getUsers(@Query() requestQuery: GetUsersDTO) {
+    async getUsers(@Query() requestQuery: GetUsersQueryDTO) {
         return this.searchService
             .send(UsersSearchMessagePattern.getUsers, { ...requestQuery })
-            .pipe(catchException());
-    }
-
-    @ApiOkResponse({ description: 'Get current user info success', type: UserMntResponseDto })
-    @UseGuards(AuthGuard)
-    @Get('/me')
-    async getMe(@CurrentUser() user: TCurrentUser) {
-        return this.searchService
-            .send(UsersSearchMessagePattern.getUserById, { id: user._id })
             .pipe(catchException());
     }
 

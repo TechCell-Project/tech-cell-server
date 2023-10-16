@@ -1,19 +1,23 @@
 import { UsersService } from '@app/resource';
-import { BadRequestException, ForbiddenException, Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, Logger } from '@nestjs/common';
 import { isAdmin, isMod, isSuperAdmin, isUser } from '@app/common/utils';
 import { RpcException } from '@nestjs/microservices';
 import { User } from '@app/resource/users/schemas';
-import { REDIS_CACHE, REQUIRE_USER_REFRESH } from '~/constants';
+import { REQUIRE_USER_REFRESH } from '~/constants';
 import { Store } from 'cache-manager';
 import { UserRole } from '@app/resource/users/enums';
 import { convertTimeString } from 'convert-time-string';
 
 @Injectable()
 export class UsersMntUtilService {
+    protected readonly logger: Logger;
+
     constructor(
         protected readonly usersService: UsersService,
-        @Inject(REDIS_CACHE) protected cacheManager: Store,
-    ) {}
+        protected readonly cacheManager: Store,
+    ) {
+        this.logger = new Logger(UsersMntUtilService.name);
+    }
 
     /**
      * After update user, set user to cache to require user refresh their token

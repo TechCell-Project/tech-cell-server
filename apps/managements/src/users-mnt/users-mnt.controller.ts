@@ -2,8 +2,15 @@ import { Controller } from '@nestjs/common';
 import { MessagePattern, RmqContext, Payload, Ctx } from '@nestjs/microservices';
 import { RabbitMQService } from '@app/common';
 import { UsersMntService } from './users-mnt.service';
-import { BlockUnblockRequestDTO, ChangeRoleRequestDTO, CreateUserRequestDto } from './dtos';
+import {
+    BlockUnblockRequestDTO,
+    ChangeRoleRequestDTO,
+    CreateUserRequestDto,
+    UpdateUserAddressRequestDTO,
+    UpdateUserRequestDTO,
+} from './dtos';
 import { UsersMntMessagePattern } from './users-mnt.pattern';
+import { TCurrentUser } from '@app/common/types';
 
 @Controller()
 export class UsersMntController {
@@ -75,9 +82,27 @@ export class UsersMntController {
     @MessagePattern(UsersMntMessagePattern.generateUsers)
     async generateUsers(@Ctx() context: RmqContext, @Payload() payload: { num: number }) {
         this.rabbitMqService.acknowledgeMessage(context);
-
         const { num } = payload;
-
         return await this.usersMntService.generateUsers(num);
+    }
+
+    @MessagePattern(UsersMntMessagePattern.updateUserInfo)
+    async updateUserInfo(
+        @Ctx() context: RmqContext,
+        @Payload()
+        { user, dataUpdate }: { user: TCurrentUser; dataUpdate: UpdateUserRequestDTO },
+    ) {
+        this.rabbitMqService.acknowledgeMessage(context);
+        return await this.usersMntService.updateUserInfo({ user, dataUpdate });
+    }
+
+    @MessagePattern(UsersMntMessagePattern.updateUserAddress)
+    async updateUserAddress(
+        @Ctx() context: RmqContext,
+        @Payload()
+        { user, addressData }: { user: TCurrentUser; addressData: UpdateUserAddressRequestDTO },
+    ) {
+        this.rabbitMqService.acknowledgeMessage(context);
+        return await this.usersMntService.updateUserAddress({ user, addressData });
     }
 }

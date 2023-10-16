@@ -1,7 +1,7 @@
 import { Controller } from '@nestjs/common';
 import { UsersSearchMessagePattern } from './users-search.pattern';
 import { Ctx, MessagePattern, Payload, RmqContext } from '@nestjs/microservices';
-import { GetUsersDTO } from './dtos';
+import { GetUsersQueryDTO } from './dtos';
 import { RabbitMQService } from '@app/common/RabbitMQ';
 import { UsersSearchService } from './users-search.service';
 
@@ -13,7 +13,7 @@ export class UsersSearchController {
     ) {}
 
     @MessagePattern(UsersSearchMessagePattern.getUsers)
-    async getUsers(@Ctx() context: RmqContext, @Payload() payload: GetUsersDTO) {
+    async getUsers(@Ctx() context: RmqContext, @Payload() payload: GetUsersQueryDTO) {
         this.rabbitMqService.acknowledgeMessage(context);
         return await this.usersSearchService.getUsers({ ...payload });
     }
