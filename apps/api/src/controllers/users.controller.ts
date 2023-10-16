@@ -20,6 +20,7 @@ import {
     ApiForbiddenResponse,
     ApiNotFoundResponse,
     ApiOkResponse,
+    ApiOperation,
     ApiTags,
 } from '@nestjs/swagger';
 import {
@@ -37,7 +38,7 @@ import { UsersSearchMessagePattern } from '~/apps/search/users-search';
 import { GetUsersQueryDTO } from '~/apps/search/users-search/dtos';
 import { ACCESS_TOKEN_NAME } from '~/constants/api.constant';
 
-@ApiTags('users')
+@ApiTags('users (admin only)')
 @ApiBearerAuth(ACCESS_TOKEN_NAME)
 @ApiForbiddenResponse({ description: 'Forbidden permission, required Mod or Admin' })
 @Controller('users')
@@ -47,6 +48,10 @@ export class UsersController {
         @Inject(MANAGEMENTS_SERVICE) private readonly managementsService: ClientRMQ,
     ) {}
 
+    @ApiOperation({
+        summary: 'Create new user',
+        description: 'Create new user',
+    })
     @ApiCreatedResponse({ description: 'Create user success', type: UserMntResponseDto })
     @UseGuards(SuperAdminGuard)
     @Post('/')
@@ -56,6 +61,10 @@ export class UsersController {
             .pipe(catchException());
     }
 
+    @ApiOperation({
+        summary: 'Get list of users',
+        description: 'Get list of users',
+    })
     @ApiOkResponse({ description: 'Get users success', type: ListDataResponseDTO })
     @ApiNotFoundResponse({ description: 'No users found' })
     @UseGuards(ModGuard)
@@ -66,6 +75,10 @@ export class UsersController {
             .pipe(catchException());
     }
 
+    @ApiOperation({
+        summary: 'Get user by id',
+        description: 'Get user by id',
+    })
     @ApiOkResponse({ description: 'Get users success', type: UserMntResponseDto })
     @ApiNotFoundResponse({ description: 'No users found' })
     @UseGuards(ModGuard)
@@ -76,6 +89,10 @@ export class UsersController {
             .pipe(catchException());
     }
 
+    @ApiOperation({
+        summary: 'Block user',
+        description: 'Block user',
+    })
     @ApiOkResponse({ description: 'Block user success', type: UserMntResponseDto })
     @ApiBadRequestResponse({
         description: 'Invalid request',
@@ -97,6 +114,10 @@ export class UsersController {
             .pipe(catchException());
     }
 
+    @ApiOperation({
+        summary: 'Unblock user',
+        description: 'Unblock user',
+    })
     @ApiOkResponse({ description: 'Unblock user success', type: UserMntResponseDto })
     @ApiBadRequestResponse({
         description: 'Invalid request',
@@ -118,6 +139,10 @@ export class UsersController {
             .pipe(catchException());
     }
 
+    @ApiOperation({
+        summary: 'Change role user',
+        description: 'Change role user',
+    })
     @ApiOkResponse({ description: 'Change role user success', type: UserMntResponseDto })
     @ApiBadRequestResponse({
         description: 'Invalid request',

@@ -1,7 +1,13 @@
 import { Body, Controller, Get, Inject, Patch, UseGuards } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~/constants';
-import { ApiBearerAuth, ApiForbiddenResponse, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import {
+    ApiBearerAuth,
+    ApiForbiddenResponse,
+    ApiOkResponse,
+    ApiOperation,
+    ApiTags,
+} from '@nestjs/swagger';
 import { AuthGuard, catchException } from '@app/common';
 import { CurrentUser } from '@app/common/decorators';
 import { TCurrentUser } from '@app/common/types';
@@ -25,6 +31,10 @@ export class ProfileController {
         @Inject(SEARCH_SERVICE) private readonly searchService: ClientRMQ,
     ) {}
 
+    @ApiOperation({
+        summary: 'Get current user info',
+        description: 'Get current user info',
+    })
     @ApiOkResponse({ description: 'Get current user info success', type: UserMntResponseDto })
     @Get('/')
     async getProfile(@CurrentUser() user: TCurrentUser) {
@@ -33,6 +43,10 @@ export class ProfileController {
             .pipe(catchException());
     }
 
+    @ApiOperation({
+        summary: 'Update current user info',
+        description: 'Update current user info',
+    })
     @ApiOkResponse({ description: 'Update current user info success', type: UserMntResponseDto })
     @Patch('/info')
     async updateUserInfo(
@@ -44,6 +58,10 @@ export class ProfileController {
             .pipe(catchException());
     }
 
+    @ApiOperation({
+        summary: 'Update current user address',
+        description: 'Update current user address',
+    })
     @ApiOkResponse({ description: 'Update current user address success', type: UserMntResponseDto })
     @Patch('/address')
     async updateUserAddress(
