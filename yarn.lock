@@ -4124,10 +4124,10 @@ convert-source-map@^2.0.0:
   resolved "https://registry.yarnpkg.com/convert-source-map/-/convert-source-map-2.0.0.tgz#4b560f649fc4e918dd0ab75cf4961e8bc882d82a"
   integrity sha512-Kvp459HrV2FEJ1CAsi1Ku+MY3kasH19TFykTz2xWmMeq6bk2NU3XXvfJ+Q61m0xktWwt+1HSYf3JZsTms3aRJg==
 
-convert-time-string@^0.0.1:
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/convert-time-string/-/convert-time-string-0.0.1.tgz#05c1f5de7027ed7231e98e3818849b441dc094cf"
-  integrity sha512-O7SYOPJ38GOiP6cDTlOKgo3FMu+RuCM2P9NRPjnH7I0ij0FDLw9ne0dAXGBSbRy6354rR8ohk7qgVD78jFHYrg==
+convert-time-string@^0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/convert-time-string/-/convert-time-string-0.0.2.tgz#d6fee6aad9a1ab568906854251a95f440fa45e25"
+  integrity sha512-LnPzcDUZehkNK12PPCHRvn0rE0D8XYXgEhW+9NC8IQEitkwkgY/h4r8S9ZyIpo30y77wjAzV+52dMlMBgtvhsw==
 
 cookie-signature@1.0.6:
   version "1.0.6"
