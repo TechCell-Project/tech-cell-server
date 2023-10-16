@@ -7,6 +7,7 @@ import {
     ApiCreatedResponse,
     ApiNotFoundResponse,
     ApiOkResponse,
+    ApiOperation,
     ApiTags,
 } from '@nestjs/swagger';
 import {
@@ -29,6 +30,10 @@ export class CategoriesController {
         @Inject(MANAGEMENTS_SERVICE) private readonly managementsService: ClientRMQ,
     ) {}
 
+    @ApiOperation({
+        summary: 'Get list of categories',
+        description: 'Get list of categories',
+    })
     @ApiOkResponse({ description: 'Get categories successfully!' })
     @ApiNotFoundResponse({ description: 'Categories not found!' })
     @Get('/')
@@ -38,6 +43,10 @@ export class CategoriesController {
             .pipe(catchException());
     }
 
+    @ApiOperation({
+        summary: 'Get category by id',
+        description: 'Get category by id',
+    })
     @ApiOkResponse({ description: 'Get category successfully!' })
     @ApiNotFoundResponse({ description: 'Category not found!' })
     @Get(':categoryId')
@@ -47,6 +56,10 @@ export class CategoriesController {
             .pipe(catchException());
     }
 
+    @ApiOperation({
+        summary: 'Get category by label',
+        description: 'Get category by label',
+    })
     @ApiOkResponse({ description: 'Get category successfully!' })
     @ApiNotFoundResponse({ description: 'Category not found!' })
     @Get('/label/:label')
@@ -56,6 +69,10 @@ export class CategoriesController {
             .pipe(catchException());
     }
 
+    @ApiOperation({
+        summary: 'Create category',
+        description: 'Create category',
+    })
     @ApiCreatedResponse({ description: 'The category has been successfully created.' })
     @ApiBadRequestResponse({ description: 'Something wrong, re-check your input.' })
     @Post('/')
@@ -65,6 +82,10 @@ export class CategoriesController {
             .pipe(catchException());
     }
 
+    @ApiOperation({
+        summary: 'Update category',
+        description: 'Update category',
+    })
     @Patch('/:categoryId')
     async updateCategory(
         @Param() { categoryId }: CategoryIdParam,

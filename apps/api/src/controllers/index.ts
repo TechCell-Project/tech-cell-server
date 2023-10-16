@@ -13,9 +13,9 @@ import { ProfileController } from './profile.controller';
 export default [
     AdminController,
     AuthController,
-    UsersController,
     ProfileController,
     ImagesController,
+    UsersController,
     ProductsController,
     CategoriesController,
     AttributesController,

@@ -48,7 +48,9 @@ async function bootstrap() {
         .setTitle('TechCell RESTful API Documentations')
         .setContact('TechCell Teams', 'https://techcell.cloud', 'admin@techcell.cloud')
         .setDescription('The documentations of the TechCell RESTful API')
-        .setVersion('1.0')
+        .setVersion('0.0.1')
+        .addServer('https://api.techcell.cloud')
+        .addServer('http://localhost:8000')
         .addBearerAuth(
             {
                 description: `[just text field] Please enter your access token`,
