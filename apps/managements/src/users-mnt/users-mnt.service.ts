@@ -4,6 +4,7 @@ import {
     BlockUnblockRequestDTO,
     ChangeRoleRequestDTO,
     CreateUserRequestDto,
+    UpdateUserAddressRequestDTO,
     UpdateUserRequestDTO,
 } from './dtos';
 import { RpcException } from '@nestjs/microservices';
@@ -232,6 +233,34 @@ export class UsersMntService extends UsersMntUtilService {
             { _id: user._id },
             newUser,
         );
+        return userUpdated;
+    }
+
+    async updateUserAddress({
+        user,
+        addressData,
+    }: {
+        user: TCurrentUser;
+        addressData: UpdateUserAddressRequestDTO;
+    }) {
+        const newAddr = addressData.address;
+        if (newAddr.length > 0 && !newAddr.find((a) => a?.isDefault)) {
+            Object.assign(newAddr[0], {
+                isDefault: true,
+            });
+        }
+
+        if (newAddr.length > 0 && newAddr.filter((a) => a?.isDefault).length > 1) {
+            throw new RpcException(new BadRequestException('Only one address can be default'));
+        }
+
+        const userFound = await this.usersService.getUser({ _id: new Types.ObjectId(user._id) });
+        userFound.address = newAddr;
+        const userUpdated = await this.usersService.findOneAndUpdateUser(
+            { _id: user._id },
+            userFound,
+        );
+        this.logger.verbose(userUpdated);
         return userUpdated;
     }
 }

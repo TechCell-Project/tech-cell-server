@@ -8,7 +8,11 @@ import { TCurrentUser } from '@app/common/types';
 import { UserMntResponseDto } from '@app/resource/users/dtos';
 import { UsersSearchMessagePattern } from '~/apps/search/users-search';
 import { ACCESS_TOKEN_NAME } from '~/constants/api.constant';
-import { UpdateUserRequestDTO, UsersMntMessagePattern } from '~/apps/managements/users-mnt';
+import {
+    UpdateUserAddressRequestDTO,
+    UpdateUserRequestDTO,
+    UsersMntMessagePattern,
+} from '~/apps/managements/users-mnt';
 
 @ApiBearerAuth(ACCESS_TOKEN_NAME)
 @ApiForbiddenResponse({ description: 'Forbidden permission, you need login to access this' })
@@ -37,6 +41,17 @@ export class ProfileController {
     ) {
         return this.managementsService
             .send(UsersMntMessagePattern.updateUserInfo, { user, dataUpdate })
+            .pipe(catchException());
+    }
+
+    @ApiOkResponse({ description: 'Update current user address success', type: UserMntResponseDto })
+    @Patch('/address')
+    async updateUserAddress(
+        @CurrentUser() user: TCurrentUser,
+        @Body() addressData: UpdateUserAddressRequestDTO,
+    ) {
+        return this.managementsService
+            .send(UsersMntMessagePattern.updateUserAddress, { user, addressData })
             .pipe(catchException());
     }
 }

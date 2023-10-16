@@ -6,6 +6,7 @@ import {
     BlockUnblockRequestDTO,
     ChangeRoleRequestDTO,
     CreateUserRequestDto,
+    UpdateUserAddressRequestDTO,
     UpdateUserRequestDTO,
 } from './dtos';
 import { UsersMntMessagePattern } from './users-mnt.pattern';
@@ -93,5 +94,15 @@ export class UsersMntController {
     ) {
         this.rabbitMqService.acknowledgeMessage(context);
         return await this.usersMntService.updateUserInfo({ user, dataUpdate });
+    }
+
+    @MessagePattern(UsersMntMessagePattern.updateUserAddress)
+    async updateUserAddress(
+        @Ctx() context: RmqContext,
+        @Payload()
+        { user, addressData }: { user: TCurrentUser; addressData: UpdateUserAddressRequestDTO },
+    ) {
+        this.rabbitMqService.acknowledgeMessage(context);
+        return await this.usersMntService.updateUserAddress({ user, addressData });
     }
 }
