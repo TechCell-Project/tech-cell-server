@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 
 export class UpdateUserRequestDTO {
     constructor(data: Partial<UpdateUserRequestDTO>) {
@@ -24,27 +24,35 @@ export class UpdateUserRequestDTO {
         description: 'Username of user',
         example: 'example',
         required: true,
+        minLength: 6,
+        maxLength: 24,
     })
     @IsOptional()
     @IsNotEmpty()
+    @MinLength(6)
+    @MaxLength(24)
     userName?: string;
 
     @ApiProperty({
         description: 'First name of user',
         example: 'John',
         required: false,
+        minLength: 1,
     })
     @IsString()
     @IsOptional()
+    @MinLength(1)
     firstName?: string;
 
     @ApiProperty({
         description: 'Last name of user',
         example: 'Doe',
         required: false,
+        minLength: 1,
     })
     @IsString()
     @IsOptional()
+    @MinLength(1)
     lastName?: string;
 
     @ApiProperty({
