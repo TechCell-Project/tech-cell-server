@@ -1,17 +1,18 @@
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { Types } from 'mongoose';
-import { IsArray, IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, IsUrl } from 'class-validator';
 import { UserRole } from '@app/resource/users/enums';
 import { AddressSchemaDTO } from '@app/resource/users/dtos';
+import { User } from '@app/resource';
 
-export class UserDataResponseDTO {
+export class UserDataResponseDTO implements Omit<User, 'password'> {
     @ApiProperty({
         example: '6487d9e0949d97a9ba8bffff',
     })
     @Type(() => String)
     @IsNotEmpty()
-    _id: string | Types.ObjectId;
+    _id: Types.ObjectId;
 
     @ApiProperty({ type: String, format: 'email' })
     @IsEmail()
@@ -42,6 +43,18 @@ export class UserDataResponseDTO {
     @IsEnum(UserRole)
     @IsNotEmpty()
     role?: UserRole | string;
+
+    @ApiProperty({
+        description: 'The user avatar',
+        type: String,
+        format: 'url',
+        required: false,
+        example: 'https://cdn.example.com/image.png',
+    })
+    @IsString()
+    @IsOptional()
+    @IsUrl()
+    avatar?: string;
 
     @ApiProperty({ type: String, example: 'the-access-token' })
     @IsString()
