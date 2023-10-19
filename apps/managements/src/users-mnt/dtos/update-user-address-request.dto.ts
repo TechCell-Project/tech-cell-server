@@ -1,5 +1,6 @@
 import { AddressSchemaDTO } from '@app/resource/users/dtos';
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform, Type } from 'class-transformer';
 import { ArrayMaxSize, ArrayMinSize, ValidateNested } from 'class-validator';
 
 export class UpdateUserAddressRequestDTO {
@@ -11,5 +12,6 @@ export class UpdateUserAddressRequestDTO {
     @ArrayMinSize(0)
     @ArrayMaxSize(10)
     @ValidateNested({ each: true })
-    address: [AddressSchemaDTO];
+    @Transform(({ value }) => value.map((addr) => new AddressSchemaDTO(addr)))
+    address: Array<AddressSchemaDTO>;
 }

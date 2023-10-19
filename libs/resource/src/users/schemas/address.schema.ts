@@ -34,13 +34,13 @@ export class AddressSchema {
     @Prop({ type: String })
     phoneNumbers: string;
 
-    @Prop()
+    @Prop({ type: ProvinceSchema })
     provinceLevel: ProvinceSchema;
 
-    @Prop()
+    @Prop({ type: DistrictSchema })
     districtLevel: DistrictSchema;
 
-    @Prop()
+    @Prop({ type: WardSchema })
     wardLevel: WardSchema;
 
     @Prop({ type: String })

@@ -9,6 +9,7 @@ import {
     IsBoolean,
     IsNotEmpty,
     IsNumber,
+    IsObject,
     IsPhoneNumber,
     IsString,
     ValidateNested,
@@ -16,6 +17,11 @@ import {
 import { Transform, Type } from 'class-transformer';
 
 class ProvinceSchemaDTO implements ProvinceSchema {
+    constructor(province: ProvinceSchema) {
+        this.province_id = province.province_id;
+        this.province_name = province.province_name;
+    }
+
     @ApiProperty({ description: 'The id of province', example: 201 })
     @IsNotEmpty()
     @IsNumber()
@@ -29,6 +35,11 @@ class ProvinceSchemaDTO implements ProvinceSchema {
 }
 
 class DistrictSchemaDTO implements DistrictSchema {
+    constructor(district: DistrictSchema) {
+        this.district_id = district.district_id;
+        this.district_name = district.district_name;
+    }
+
     @ApiProperty({ description: 'The id of district', example: 1490 })
     @IsNotEmpty()
     @IsNumber()
@@ -42,8 +53,14 @@ class DistrictSchemaDTO implements DistrictSchema {
 }
 
 class WardSchemaDTO implements WardSchema {
+    constructor(ward: WardSchema) {
+        this.ward_id = ward.ward_id;
+        this.ward_name = ward.ward_name;
+    }
+
     @ApiProperty({ description: 'The id of ward', example: '1A0807' })
     @IsNotEmpty()
+    @IsString()
     ward_id: string;
 
     @ApiProperty({ description: 'The name of ward', example: 'Phường Mai Động' })
@@ -53,6 +70,17 @@ class WardSchemaDTO implements WardSchema {
 }
 
 export class AddressSchemaDTO implements AddressSchema {
+    constructor(address: AddressSchemaDTO) {
+        this.addressName = address.addressName;
+        this.customerName = address.customerName;
+        this.phoneNumbers = address.phoneNumbers;
+        this.provinceLevel = new ProvinceSchemaDTO(address.provinceLevel);
+        this.districtLevel = new DistrictSchemaDTO(address.districtLevel);
+        this.wardLevel = new WardSchemaDTO(address.wardLevel);
+        this.detail = address.detail;
+        this.isDefault = address.isDefault;
+    }
+
     @ApiProperty({ description: 'The name of address', example: 'Home' })
     @IsString()
     @IsNotEmpty()
@@ -69,15 +97,21 @@ export class AddressSchemaDTO implements AddressSchema {
     phoneNumbers: string;
 
     @ApiProperty({ description: 'The province level address', type: ProvinceSchemaDTO })
+    @IsObject()
     @ValidateNested()
+    @Type(() => ProvinceSchemaDTO)
     provinceLevel: ProvinceSchemaDTO;
 
     @ApiProperty({ description: 'The district level address', type: DistrictSchemaDTO })
+    @IsObject()
     @ValidateNested()
+    @Type(() => DistrictSchemaDTO)
     districtLevel: DistrictSchemaDTO;
 
     @ApiProperty({ description: 'The ward level address', type: WardSchemaDTO })
+    @IsObject()
     @ValidateNested()
+    @Type(() => WardSchemaDTO)
     wardLevel: WardSchemaDTO;
 
     @ApiProperty({ description: 'The detailed address', example: '18 Tam Trinh' })
