@@ -10,7 +10,7 @@ import {
     Request,
 } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
-import { AUTH_SERVICE } from '~/constants';
+import { AUTH_SERVICE } from '@app/common/constants';
 import {
     ApiTags,
     ApiBody,
@@ -53,7 +53,7 @@ import { catchException } from '@app/common';
 import { CurrentUser } from '@app/common/decorators';
 import { TCurrentUser } from '@app/common/types';
 import { AuthGuard } from '@app/common/guards';
-import { ACCESS_TOKEN_NAME } from '~/constants/api.constant';
+import { ACCESS_TOKEN_NAME } from '@app/common/constants/api.constant';
 
 @ApiTags('authentication')
 @ApiTooManyRequestsResponse({ description: 'Too many requests, please try again later' })

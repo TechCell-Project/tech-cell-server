@@ -1,6 +1,6 @@
 import { Controller, Inject, Get, UseGuards } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
-import { ORDER_SERVICE } from '~/constants';
+import { ORDER_SERVICE } from '@app/common/constants';
 import { ApiExcludeController, ApiTags } from '@nestjs/swagger';
 import { CheckoutMessagePattern } from '~/apps/order/checkout-ord/checkout.pattern';
 import { AuthGuard, catchException } from '@app/common';

@@ -3,7 +3,7 @@ import { RpcException } from '@nestjs/microservices';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { catchError, throwError } from 'rxjs';
-import { emailRegex } from '~/constants/regex.constant';
+import { emailRegex } from '@app/common/constants/regex.constant';
 import * as sanitizeHtml from 'sanitize-html';
 
 export function isEmail(email: string): boolean {

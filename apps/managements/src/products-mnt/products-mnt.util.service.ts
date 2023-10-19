@@ -15,7 +15,7 @@ import {
     findDuplicates,
     replaceWhitespaceTo,
 } from '@app/common/utils';
-import { REDIS_CACHE, PRODUCTS_CACHE_PREFIX } from '~/constants';
+import { REDIS_CACHE, PRODUCTS_CACHE_PREFIX } from '@app/common/constants';
 import { Store } from 'cache-manager';
 import { AttributeDTO, CreateProductRequestDTO } from './dtos';
 import { RpcException } from '@nestjs/microservices';

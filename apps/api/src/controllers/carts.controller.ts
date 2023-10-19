@@ -6,8 +6,8 @@ import { Body, Controller, Get, HttpCode, Inject, Post, Query, UseGuards } from 
 import { ClientRMQ } from '@nestjs/microservices';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CartsOrdMessagePattern, AddCartRequestDTO } from '~/apps/order/carts-ord';
-import { ACCESS_TOKEN_NAME } from '~/constants/api.constant';
-import { ORDER_SERVICE } from '~/constants/services.constant';
+import { ACCESS_TOKEN_NAME } from '@app/common/constants/api.constant';
+import { ORDER_SERVICE } from '@app/common/constants/services.constant';
 
 @ApiTags('carts')
 @Controller('carts')

@@ -149,7 +149,8 @@
         ],
         "moduleNameMapper": {
             "^@app/common(|/.*)$": "<rootDir>/libs/common/src/$1",
-            "^~/constants(|/.*)$": "<rootDir>/constants/$1",
+            "^@app/resource(|/.*)$": "<rootDir>/libs/resource/src/$1",
+            "^@app/third-party(|/.*)$": "<rootDir>/libs/third-party/src/$1",
             "^~/apps/api(|/.*)$": "<rootDir>/apps/api/src/$1",
             "^~/apps/auth(|/.*)$": "<rootDir>/apps/auth/src/$1",
             "^~/apps/mail(|/.*)$": "<rootDir>/apps/mail/src/$1",
@@ -157,8 +158,7 @@
             "^~/apps/utility(|/.*)$": "<rootDir>/apps/utility/src/$1",
             "^~/apps/managements(|/.*)$": "<rootDir>/apps/managements/src/$1",
             "^~/apps/task(|/.*)$": "<rootDir>/apps/task/src/$1",
-            "^@app/resource(|/.*)$": "<rootDir>/libs/resource/src/$1",
-            "^@app/third-party(|/.*)$": "<rootDir>/libs/third-party/src/$1"
+            "^~/apps/order(|/.*)$": "<rootDir>/apps/order/src/$1"
         }
     }
 }

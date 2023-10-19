@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Inject, Patch, UseGuards } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
-import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~/constants';
+import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '@app/common/constants';
 import {
     ApiBearerAuth,
     ApiConsumes,
@@ -14,7 +14,7 @@ import { CurrentUser } from '@app/common/decorators';
 import { TCurrentUser } from '@app/common/types';
 import { UserMntResponseDto } from '@app/resource/users/dtos';
 import { UsersSearchMessagePattern } from '~/apps/search/users-search';
-import { ACCESS_TOKEN_NAME } from '~/constants/api.constant';
+import { ACCESS_TOKEN_NAME } from '@app/common/constants/api.constant';
 import {
     UpdateUserAddressRequestDTO,
     UpdateUserRequestDTO,

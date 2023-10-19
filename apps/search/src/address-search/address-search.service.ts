@@ -9,7 +9,7 @@ import {
 import { RpcException } from '@nestjs/microservices';
 import { Store } from 'cache-manager';
 import { convertTimeString } from 'convert-time-string';
-import { REDIS_CACHE } from '~/constants/cache.constant';
+import { REDIS_CACHE } from '@app/common/constants/cache.constant';
 
 @Injectable()
 export class AddressSearchService {

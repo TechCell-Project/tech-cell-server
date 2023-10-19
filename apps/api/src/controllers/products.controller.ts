@@ -11,7 +11,7 @@ import {
     Delete,
 } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
-import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~/constants';
+import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '@app/common/constants';
 import { ModGuard, SuperAdminGuard, catchException } from '@app/common';
 import {
     ApiBody,

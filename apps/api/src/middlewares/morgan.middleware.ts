@@ -2,7 +2,7 @@ import { Inject, Injectable, NestMiddleware, Logger } from '@nestjs/common';
 import { NextFunction, Request, Response } from 'express';
 import * as morgan from 'morgan';
 import { TokenIndexer } from 'morgan';
-import { UTILITY_SERVICE } from '~/constants';
+import { UTILITY_SERVICE } from '@app/common/constants';
 import { ClientRMQ } from '@nestjs/microservices';
 import { isEnable } from '@app/common';
 import { UtilityEventPattern, LogType } from '~/apps/utility';

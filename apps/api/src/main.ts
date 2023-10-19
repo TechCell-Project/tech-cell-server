@@ -10,9 +10,9 @@ import {
 } from '@nestjs/swagger';
 import helmet from 'helmet';
 import * as compression from 'compression';
-import { ACCESS_TOKEN_NAME } from '~/constants/api.constant';
+import { ACCESS_TOKEN_NAME } from '@app/common/constants/api.constant';
 import * as swaggerStats from 'swagger-stats';
-import { AUTH_SERVICE } from '~/constants';
+import { AUTH_SERVICE } from '@app/common/constants';
 import { ClientRMQ } from '@nestjs/microservices';
 import { AuthMessagePattern } from '~/apps/auth/auth.pattern';
 import { catchException } from '@app/common';

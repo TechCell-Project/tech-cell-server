@@ -20,8 +20,10 @@
         "paths": {
             "@app/common": ["libs/common/src"],
             "@app/common/*": ["libs/common/src/*"],
-            "~/constants": ["constants"],
-            "~/constants/*": ["constants/*"],
+            "@app/resource": ["libs/resource/src"],
+            "@app/resource/*": ["libs/resource/src/*"],
+            "@app/third-party": ["libs/third-party/src"],
+            "@app/third-party/*": ["libs/third-party/src/*"],
             "~/apps/api/*": ["apps/api/src/*"],
             "~/apps/auth/*": ["apps/auth/src/*"],
             "~/apps/auth": ["apps/auth/src"],
@@ -34,12 +36,8 @@
             "~/apps/task": ["apps/task/src"],
             "~/apps/task/*": ["apps/task/src/*"],
             "~/apps/managements/*": ["apps/managements/src/*"],
-            "@app/resource": ["libs/resource/src"],
-            "@app/resource/*": ["libs/resource/src/*"],
             "~/apps/order": ["apps/order/src"],
-            "~/apps/order/*": ["apps/order/src/*"],
-            "@app/third-party": ["libs/third-party/src"],
-            "@app/third-party/*": ["libs/third-party/src/*"]
+            "~/apps/order/*": ["apps/order/src/*"]
         }
     }
 }

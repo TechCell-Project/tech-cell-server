@@ -39,8 +39,8 @@ import {
     IMAGE_FILE_MAX_SIZE_IN_BYTES,
     IMAGE_FILE_MAX_SIZE_IN_MB,
     SINGLE_IMAGE_FILE_MAX_COUNT,
-} from '~/constants/api.constant';
-import { MANAGEMENTS_SERVICE } from '~/constants/services.constant';
+} from '@app/common/constants/api.constant';
+import { MANAGEMENTS_SERVICE } from '@app/common/constants/services.constant';
 
 @ApiBadRequestResponse({
     description: 'Invalid request',

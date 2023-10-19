@@ -7,7 +7,7 @@ import {
     UserSearchSortOrder,
     UserSearchRole,
 } from '../enums';
-import { MAX_USERS_PER_PAGE } from '~/constants/user.constant';
+import { MAX_USERS_PER_PAGE } from '@app/common/constants/user.constant';
 import { Type } from 'class-transformer';
 
 export class GetUsersQueryDTO {

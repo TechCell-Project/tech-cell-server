@@ -17,7 +17,7 @@ import {
     SKIP_AUTH_ADMIN_GUARD,
     SKIP_AUTH_MOD_GUARD,
     SKIP_AUTH_GUARD,
-} from '~/constants';
+} from '@app/common/constants';
 import { TCurrentUser } from '../types';
 import { UserRole } from '@app/resource/users/enums';
 

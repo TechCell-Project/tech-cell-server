@@ -1,6 +1,6 @@
 import { Controller, Inject, Get, Query, Post, Body, Patch, Param } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
-import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~/constants';
+import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '@app/common/constants';
 import { catchException } from '@app/common';
 import {
     ApiBadRequestResponse,
