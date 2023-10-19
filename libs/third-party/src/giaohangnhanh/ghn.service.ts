@@ -12,9 +12,7 @@ export class GhnService extends GhnCoreService {
     }
 
     public async calculateShippingFee({ address }: { address: AddressSchema }) {
-        const { selectedProvince, selectedDistrict, selectedWard } = await this.getSelectedAddress(
-            address,
-        );
+        const { selectedDistrict, selectedWard } = await this.getSelectedAddress(address);
 
         const itemFee = new ItemShipping({
             name: 'TEST1',
@@ -26,8 +24,8 @@ export class GhnService extends GhnCoreService {
         });
         const dataFee = new GetShippingFeeDTO({
             service_type_id: 2,
-            to_district_id: selectedDistrict.DistrictID,
-            to_ward_code: selectedWard.WardCode,
+            to_district_id: selectedDistrict.district_id,
+            to_ward_code: selectedWard.ward_code,
             weight: 1000,
             items: [itemFee],
         });
@@ -44,25 +42,27 @@ export class GhnService extends GhnCoreService {
             throw error;
         });
         const selectedProvince = provinceData.find((province) =>
-            province.NameExtension.some((name) =>
+            province.name_extension.some((name) =>
                 generateRegexQuery(address.provinceLevel).test(name),
             ),
         );
 
-        const districtData = await this.getDistricts(selectedProvince.ProvinceID).catch((error) => {
-            throw error;
-        });
+        const districtData = await this.getDistricts(selectedProvince.province_id).catch(
+            (error) => {
+                throw error;
+            },
+        );
         const selectedDistrict = districtData.find((district) =>
-            district.NameExtension.some((name) =>
+            district.name_extension.some((name) =>
                 generateRegexQuery(address.districtLevel).test(name),
             ),
         );
 
-        const wardData = await this.getWards(selectedDistrict.DistrictID).catch((error) => {
+        const wardData = await this.getWards(selectedDistrict.district_id).catch((error) => {
             throw error;
         });
         const selectedWard = wardData.find((ward) =>
-            ward.NameExtension.some((name) => generateRegexQuery(address.wardLevel).test(name)),
+            ward.name_extension.some((name) => generateRegexQuery(address.wardLevel).test(name)),
         );
 
         return { selectedProvince, selectedDistrict, selectedWard };

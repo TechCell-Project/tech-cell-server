@@ -4,6 +4,7 @@ import { ProductsSearchModule } from './products-search/products-search.module';
 import { AttributesSearchModule } from './attributes-search/attributes-search.module';
 import { CategoriesSearchModule } from './categories-search/categories-search.module';
 import { UsersSearchModule } from './users-search/users-search.module';
+import { AddressSearchModule } from './address-search';
 
 @Module({
     imports: [
@@ -12,6 +13,7 @@ import { UsersSearchModule } from './users-search/users-search.module';
         ProductsSearchModule,
         AttributesSearchModule,
         CategoriesSearchModule,
+        AddressSearchModule,
     ],
 })
 export class SearchModule {}

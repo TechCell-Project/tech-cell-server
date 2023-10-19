@@ -1,39 +1,67 @@
-import { IsArray, IsEnum, IsNotEmpty, IsNumber, IsString, validate } from 'class-validator';
+import { IsArray, IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { StatusEnum } from '../enums';
+import { TGhnProvince } from '../types';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class GhnProvinceDTO {
-    constructor(data: GhnProvinceDTO) {
-        this.ProvinceID = Number(data.ProvinceID);
-        this.ProvinceName = data.ProvinceName;
-        this.CountryID = Number(data.CountryID);
-        this.NameExtension = data.NameExtension;
-        this.Status = Number(data.Status);
-        this.validate();
+    constructor(data: TGhnProvince) {
+        this.province_id = Number(data.ProvinceID);
+        this.province_name = data.ProvinceName;
+        this.country_id = Number(data.CountryID);
+        this.name_extension = data.NameExtension;
+        this.status = Number(data.Status);
     }
 
-    validate() {
-        validate(this).then((errors) => {
-            if (errors.length > 0) {
-                throw errors;
-            }
-        });
-    }
-
+    @ApiProperty({
+        example: 201,
+        description: 'Mã tỉnh thành',
+        type: Number,
+    })
     @IsNumber()
     @IsNotEmpty()
-    ProvinceID: number;
+    province_id: number;
 
+    @ApiProperty({
+        example: 'Hà Nội',
+        description: 'Tên tỉnh thành',
+        type: String,
+    })
     @IsString()
     @IsNotEmpty()
-    ProvinceName: string;
+    province_name: string;
 
+    @ApiProperty({
+        example: 1,
+        description: 'Mã quốc gia',
+        type: Number,
+    })
     @IsNumber()
     @IsNotEmpty()
-    CountryID: number;
+    country_id: number;
 
+    @ApiProperty({
+        example: [
+            'Hà Nội',
+            'TP.Hà Nội',
+            'TP. Hà Nội',
+            'TP Hà Nội',
+            'Thành phố Hà Nội',
+            'hanoi',
+            'HN',
+            'ha noi',
+        ],
+        description: 'Tên tỉnh thành mở rộng',
+        type: [String],
+    })
     @IsArray()
-    NameExtension: string[];
+    name_extension: string[];
 
+    @ApiProperty({
+        example: 1,
+        description: 'Trạng thái',
+        type: Number,
+        enum: StatusEnum,
+    })
     @IsEnum(StatusEnum)
-    Status: number;
+    status: number;
 }
