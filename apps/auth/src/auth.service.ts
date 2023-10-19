@@ -19,10 +19,10 @@ import {
     NewTokenRequestDTO,
     UserDataResponseDTO,
     ChangePasswordRequestDTO,
-} from '~/apps/auth/dtos';
+} from '~apps/auth/dtos';
 import { User } from '@app/resource/users/schemas';
 import { RpcException } from '@nestjs/microservices';
-import { ConfirmEmailRegisterDTO, ForgotPasswordEmailDTO, MailEventPattern } from '~/apps/mail';
+import { ConfirmEmailRegisterDTO, ForgotPasswordEmailDTO, MailEventPattern } from '~apps/mail';
 import { OtpType } from '@app/resource/otp';
 import { IUserFacebookResponse, IUserGoogleResponse, ITokenVerifiedResponse } from './interfaces';
 import { buildUniqueUserNameFromEmail, delStartWith, generateRandomString } from '@app/common';

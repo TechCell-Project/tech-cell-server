@@ -18,13 +18,13 @@ import {
     GetAttributeByIdRequestDTO,
     GetAttributeByLabelRequestDTO,
     GetAttributesRequestDTO,
-} from '~/apps/search/attributes-search';
+} from '~apps/search/attributes-search';
 import {
     DeleteAttributeByIdRequestDTO,
     UpdateAttributeRequestDTO,
     CreateAttributeRequestDTO,
-} from '~/apps/managements/attributes-mnt/dtos';
-import { AttributesMntMessagePattern } from '~/apps/managements/attributes-mnt/attributes-mnt.pattern';
+} from '~apps/managements/attributes-mnt/dtos';
+import { AttributesMntMessagePattern } from '~apps/managements/attributes-mnt/attributes-mnt.pattern';
 import {
     ApiBadRequestResponse,
     ApiCreatedResponse,

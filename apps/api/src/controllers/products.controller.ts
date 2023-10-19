@@ -26,15 +26,15 @@ import {
     ApiExcludeEndpoint,
     ApiCreatedResponse,
 } from '@nestjs/swagger';
-import { ProductsMntMessagePattern } from '~/apps/managements/products-mnt';
-import { ProductsSearchMessagePattern } from '~/apps/search/products-search';
-import { GetProductByIdQueryDTO, GetProductsDTO } from '~/apps/search/products-search/dtos';
-import { CreateProductRequestDTO } from '~/apps/managements/products-mnt/dtos';
+import { ProductsMntMessagePattern } from '~apps/managements/products-mnt';
+import { ProductsSearchMessagePattern } from '~apps/search/products-search';
+import { GetProductByIdQueryDTO, GetProductsDTO } from '~apps/search/products-search/dtos';
+import { CreateProductRequestDTO } from '~apps/managements/products-mnt/dtos';
 import {
     ProductIdParamsDTO,
     ProductSkuParamsDTO,
-} from '~/apps/managements/products-mnt/dtos/params.dto';
-import { UpdateProductRequestDTO } from '~/apps/managements/products-mnt/dtos/update-product-request.dto';
+} from '~apps/managements/products-mnt/dtos/params.dto';
+import { UpdateProductRequestDTO } from '~apps/managements/products-mnt/dtos/update-product-request.dto';
 
 @ApiBadRequestResponse({
     description: 'Invalid request',

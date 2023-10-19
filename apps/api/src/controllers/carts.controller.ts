@@ -5,7 +5,7 @@ import { TCurrentUser } from '@app/common/types';
 import { Body, Controller, Get, HttpCode, Inject, Post, Query, UseGuards } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CartsOrdMessagePattern, AddCartRequestDTO } from '~/apps/order/carts-ord';
+import { CartsOrdMessagePattern, AddCartRequestDTO } from '~apps/order/carts-ord';
 import { ACCESS_TOKEN_NAME } from '@app/common/constants/api.constant';
 import { ORDER_SERVICE } from '@app/common/constants/services.constant';
 

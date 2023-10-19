@@ -28,14 +28,14 @@ import {
     UsersMntMessagePattern,
     BlockUnblockRequestDTO,
     CreateUserRequestDto,
-} from '~/apps/managements/users-mnt';
+} from '~apps/managements/users-mnt';
 import { catchException } from '@app/common';
 import { UserMntResponseDto } from '@app/resource/users/dtos';
 import { CurrentUser } from '@app/common/decorators';
 import { TCurrentUser } from '@app/common/types';
 import { ListDataResponseDTO } from '@app/common/dtos';
-import { UsersSearchMessagePattern } from '~/apps/search/users-search';
-import { GetUsersQueryDTO } from '~/apps/search/users-search/dtos';
+import { UsersSearchMessagePattern } from '~apps/search/users-search';
+import { GetUsersQueryDTO } from '~apps/search/users-search/dtos';
 import { ACCESS_TOKEN_NAME } from '@app/common/constants/api.constant';
 
 @ApiTags('users (admin only)')

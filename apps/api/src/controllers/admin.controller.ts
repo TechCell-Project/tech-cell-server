@@ -3,7 +3,7 @@ import { ClientRMQ } from '@nestjs/microservices';
 import { TASK_SERVICE } from '@app/common/constants';
 import { ApiExcludeController } from '@nestjs/swagger';
 import { SuperAdminGuard, catchException } from '@app/common';
-import { DatabaseTaskEventPattern } from '~/apps/task/database-task';
+import { DatabaseTaskEventPattern } from '~apps/task/database-task';
 
 @ApiExcludeController()
 @UseGuards(SuperAdminGuard)

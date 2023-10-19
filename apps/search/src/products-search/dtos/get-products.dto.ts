@@ -2,7 +2,7 @@ import { IsBoolean, IsEnum, IsNumber, IsOptional, IsString, Max, Min } from 'cla
 import { ApiProperty } from '@nestjs/swagger';
 import { MAX_PRODUCTS_PER_PAGE } from '@app/common/constants/product.constant';
 import { Transform, Type } from 'class-transformer';
-import { SelectType } from '~/apps/search/enums';
+import { SelectType } from '~apps/search/enums';
 import { isTrueSet } from '@app/common';
 
 export class GetProductsDTO {

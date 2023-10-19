@@ -14,12 +14,12 @@ import {
     CategoriesSearchMessagePattern,
     GetCategoriesRequestDTO,
     GetCategoryByLabelRequestDTO,
-} from '~/apps/search/categories-search';
+} from '~apps/search/categories-search';
 import {
     CategoriesMntMessagePattern,
     CreateCategoryRequestDTO,
     UpdateCategoryRequestDTO,
-} from '~/apps/managements/categories-mnt';
+} from '~apps/managements/categories-mnt';
 import { CategoryIdParam } from '@app/resource/categories/dtos';
 
 @ApiTags('categories')

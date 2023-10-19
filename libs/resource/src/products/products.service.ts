@@ -5,8 +5,8 @@ import { IBaseQuery } from '../interfaces';
 import { Product } from './schemas';
 import { FilterQuery, Types, UpdateQuery } from 'mongoose';
 import { ProductStatus } from './enums';
-import { SelectType } from '~/apps/search/enums';
-import { SelectTypeDTO } from '~/apps/search/dtos';
+import { SelectType } from '~apps/search/enums';
+import { SelectTypeDTO } from '~apps/search/dtos';
 
 @Injectable()
 export class ProductsService {

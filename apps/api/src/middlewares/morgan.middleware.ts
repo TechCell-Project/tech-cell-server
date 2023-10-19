@@ -5,7 +5,7 @@ import { TokenIndexer } from 'morgan';
 import { UTILITY_SERVICE } from '@app/common/constants';
 import { ClientRMQ } from '@nestjs/microservices';
 import { isEnable } from '@app/common';
-import { UtilityEventPattern, LogType } from '~/apps/utility';
+import { UtilityEventPattern, LogType } from '~apps/utility';
 
 interface JsonFormatTokens extends TokenIndexer {
     date: (req: Request, res: Response) => string;

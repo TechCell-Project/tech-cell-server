@@ -4,7 +4,7 @@ import { Ctx, MessagePattern, RmqContext, Payload } from '@nestjs/microservices'
 import { ProductsSearchMessagePattern } from './products-search.pattern';
 import { ProductsSearchService } from './products-search.service';
 import { GetProductByIdQueryDTO, GetProductsDTO } from './dtos';
-import { ProductIdParamsDTO } from '~/apps/managements/products-mnt/dtos/params.dto';
+import { ProductIdParamsDTO } from '~apps/managements/products-mnt/dtos/params.dto';
 
 @Controller('products-search')
 export class ProductsSearchController {

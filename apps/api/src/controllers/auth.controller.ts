@@ -41,14 +41,14 @@ import {
     EmailRequestDTO,
     ChangePasswordRequestDTO,
     GoogleLoginRequestDTO,
-} from '~/apps/auth/dtos';
+} from '~apps/auth/dtos';
 import {
     GoogleOAuthGuard,
     FacebookOAuthGuard,
     IUserFacebookResponse,
     IUserGoogleResponse,
     AuthMessagePattern,
-} from '~/apps/auth';
+} from '~apps/auth';
 import { catchException } from '@app/common';
 import { CurrentUser } from '@app/common/decorators';
 import { TCurrentUser } from '@app/common/types';
