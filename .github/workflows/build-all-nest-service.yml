@@ -7,8 +7,26 @@ on:
     branches: [ '*' ]
 
 jobs:
-  build:
+  check-runner:
     runs-on: ubuntu-latest
+    outputs:
+      runner-label: ${{ steps.set-runner.outputs.runner-label }}
+
+    steps:
+      - name: Set runner
+        id: set-runner
+        run: |
+          runners=$(curl -s -H "Accept: application/vnd.github+json" -H "Authorization: token ${{ secrets.REPO_ACCESS_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/actions/runners")
+          available=$(echo "$runners" | jq '.runners[] | select(.status == "online" and .busy == false and .labels[] .name == "self-hosted")')
+          if [ -n "$available" ]; then
+            echo "runner-label=self-hosted" >> $GITHUB_OUTPUT
+          else
+            echo "runner-label=ubuntu-latest" >> $GITHUB_OUTPUT
+          fi
+
+  build:
+    needs: check-runner
+    runs-on: ${{ needs.check-runner.outputs.runner-label }}
 
     steps:
       - name: Checkout code
@@ -18,6 +36,9 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: 18.x
+
+      - name: Log runner label
+        run: echo "Running on runner ${{ needs.check-runner.outputs.runner-label }}"
 
       - name: Install dependencies
         run: yarn install
