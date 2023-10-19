@@ -7,22 +7,26 @@ on:
     branches: ["*"]
 
 jobs:
-  determine-runner:
+  check-runner:
     runs-on: ubuntu-latest
     outputs:
-      runner: ${{ steps.set-runner.outputs.use-runner }}
+      runner-label: ${{ steps.set-runner.outputs.runner-label }}
+
     steps:
-      - name: Determine which runner to use
+      - name: Set runner
         id: set-runner
-        uses: jimmygchen/runner-fallback-action@v1
-        with:
-          primary-runner: "self-hosted"
-          fallback-runner: "ubuntu-latest"
-          github-token: ${{ secrets.REPO_ACCESS_TOKEN }}
+        run: |
+          runners=$(curl -s -H "Accept: application/vnd.github+json" -H "Authorization: token ${{ secrets.REPO_ACCESS_TOKEN }}" "https://api.github.com/orgs/${{ github.repository }}/actions/runners")
+          available=$(echo "$runners" | jq '.runners[] | select(.status == "online" and .busy == false and .labels[] .name == "self-hosted")')
+          if [ -n "$available" ]; then
+            echo "runner-label=self-hosted" >> $GITHUB_OUTPUT
+          else
+            echo "runner-label=ubuntu-latest" >> $GITHUB_OUTPUT
+          fi
 
   build:
-    needs: determine-runner
-    runs-on: ${{ fromJson(needs.determine-runner.outputs.runner) }}
+    needs: check-runner
+    runs-on: ${{ needs.check-runner.outputs.runner-label }}
 
     steps:
       - name: Log runner label
