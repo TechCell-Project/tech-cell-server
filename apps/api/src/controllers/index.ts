@@ -9,6 +9,7 @@ import { CartsController } from './carts.controller';
 import { ImagesController } from './images.controller';
 import { AdminController } from './admin.controller';
 import { ProfileController } from './profile.controller';
+import { AddressController } from './address.controller';
 
 export default [
     AdminController,
@@ -20,6 +21,7 @@ export default [
     CategoriesController,
     AttributesController,
     CartsController,
+    AddressController,
     OrderController,
     AppController,
 ];

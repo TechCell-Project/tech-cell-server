@@ -11,7 +11,7 @@ import { RpcException } from '@nestjs/microservices';
 import { BlockActivity, UserRole } from '@app/resource/users/enums';
 import { UsersMntUtilService } from './users-mnt.util.service';
 import { delStartWith, generateRandomString } from '@app/common';
-import { CreateUserDTO } from '@app/resource/users/dtos';
+import { AddressSchemaDTO, CreateUserDTO } from '@app/resource/users/dtos';
 import { REDIS_CACHE, USERS_CACHE_PREFIX } from '~/constants';
 import { delCacheUsers } from '@app/resource/users/utils';
 import { TCurrentUser } from '@app/common/types';
@@ -243,7 +243,10 @@ export class UsersMntService extends UsersMntUtilService {
         user: TCurrentUser;
         addressData: UpdateUserAddressRequestDTO;
     }) {
-        const newAddr = addressData.address;
+        const newAddr = Array.isArray(addressData.address)
+            ? addressData.address.map((addr) => new AddressSchemaDTO(addr))
+            : [];
+
         if (newAddr.length > 0 && !newAddr.find((a) => a?.isDefault)) {
             Object.assign(newAddr[0], {
                 isDefault: true,
@@ -256,11 +259,11 @@ export class UsersMntService extends UsersMntUtilService {
 
         const userFound = await this.usersService.getUser({ _id: new Types.ObjectId(user._id) });
         userFound.address = newAddr;
+
         const userUpdated = await this.usersService.findOneAndUpdateUser(
-            { _id: user._id },
+            { _id: userFound._id },
             userFound,
         );
-        this.logger.verbose(userUpdated);
         return userUpdated;
     }
 }

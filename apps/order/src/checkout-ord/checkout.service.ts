@@ -1,12 +1,13 @@
 import { TCurrentUser } from '@app/common/types';
 import { UsersService } from '@app/resource/users';
 import { GhnService } from '@app/third-party/giaohangnhanh';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { Types } from 'mongoose';
 
 @Injectable()
 export class CheckoutService {
+    private readonly logger = new Logger(CheckoutService.name);
     constructor(
         private readonly ghnService: GhnService,
         private readonly userService: UsersService,
@@ -22,6 +23,7 @@ export class CheckoutService {
             throw new RpcException(new BadRequestException('User has no address'));
         }
         const provincesData = await this.ghnService.calculateShippingFee({ address: userAddress });
+
         return provincesData;
     }
 }

@@ -3,6 +3,7 @@ import { ClientRMQ } from '@nestjs/microservices';
 import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~/constants';
 import {
     ApiBearerAuth,
+    ApiConsumes,
     ApiForbiddenResponse,
     ApiOkResponse,
     ApiOperation,
@@ -62,6 +63,7 @@ export class ProfileController {
         summary: 'Update current user address',
         description: 'Update current user address',
     })
+    @ApiConsumes('application/json')
     @ApiOkResponse({ description: 'Update current user address success', type: UserMntResponseDto })
     @Patch('/address')
     async updateUserAddress(

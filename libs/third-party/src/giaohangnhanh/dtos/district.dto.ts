@@ -1,26 +1,82 @@
 import { IsEnum } from 'class-validator';
 import { SupportTypeEnum, StatusEnum } from '../enums';
+import { TGhnDistrict } from '../types';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class GhnDistrictDTO {
-    constructor(data: GhnDistrictDTO) {
-        this.DistrictID = Number(data.DistrictID);
-        this.DistrictName = data.DistrictName;
-        this.SupportType = Number(data.SupportType);
-        this.NameExtension = data.NameExtension;
-        this.CanUpdateCOD = Boolean(data.CanUpdateCOD);
-        this.Status = Number(data.Status);
+    constructor(data: TGhnDistrict) {
+        this.district_id = Number(data.DistrictID);
+        this.district_name = data.DistrictName;
+        this.support_type = Number(data.SupportType);
+        this.name_extension = data.NameExtension;
+        this.can_update_cod = Boolean(data.CanUpdateCOD);
+        this.status = Number(data.Status);
     }
 
-    ProvinceID: number;
-    DistrictID: number;
-    DistrictName: string;
+    @ApiProperty({
+        example: 201,
+        description: 'Mã tỉnh thành',
+        type: Number,
+    })
+    province_id: number;
 
+    @ApiProperty({
+        example: 1490,
+        description: 'Mã quận huyện',
+        type: Number,
+    })
+    district_id: number;
+
+    @ApiProperty({
+        example: 'Quận Hoàng Mai',
+        description: 'Tên quận huyện',
+        type: String,
+    })
+    district_name: string;
+
+    @ApiProperty({
+        example: 1,
+        description: 'Loại hỗ trợ',
+        type: Number,
+        enum: SupportTypeEnum,
+    })
     @IsEnum(SupportTypeEnum)
-    SupportType: number;
+    support_type: number;
 
-    NameExtension: string[];
-    CanUpdateCOD: boolean;
+    @ApiProperty({
+        example: [
+            'Quận Hoàng Mai',
+            'Q.Hoàng Mai',
+            'Q Hoàng Mai',
+            'Hoàng Mai',
+            'Hoang Mai',
+            'Quan Hoang Mai',
+            'hoangmai',
+        ],
+        description: 'Tên quận huyện mở rộng',
+        type: [String],
+    })
+    name_extension: string[];
 
+    @ApiProperty({
+        example: true,
+        description: 'Có thể cập nhật COD',
+        type: Boolean,
+    })
+    can_update_cod: boolean;
+
+    @ApiProperty({
+        example: 1,
+        description: 'Trạng thái',
+        type: Number,
+        enum: StatusEnum,
+    })
     @IsEnum(StatusEnum)
-    Status: number;
+    @ApiProperty({
+        example: 1,
+        description: 'Trạng thái',
+        type: Number,
+        enum: StatusEnum,
+    })
+    status: number;
 }
