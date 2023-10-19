@@ -61,8 +61,8 @@ jobs:
 
       - name: Build and push images
         run: |
-          docker-compose -f docker-compose.prod.yml build --no-cache
-          docker-compose -f docker-compose.prod.yml push
+          docker compose -f docker-compose.prod.yml build --no-cache
+          docker compose -f docker-compose.prod.yml push
 
       - name: Remove .env file
         run: |
