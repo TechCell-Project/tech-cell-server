@@ -2,7 +2,7 @@ import { catchException } from '@app/common';
 import { GhnDistrictDTO } from '@app/third-party/giaohangnhanh/dtos/district.dto';
 import { GhnProvinceDTO } from '@app/third-party/giaohangnhanh/dtos/province.dto';
 import { GhnWardDTO } from '@app/third-party/giaohangnhanh/dtos/ward.dto';
-import { Controller, Get, HttpCode, Inject, Param } from '@nestjs/common';
+import { Controller, Get, Inject, Param } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AddressSearchMessagePattern } from '~/apps/search/address-search';
@@ -16,8 +16,7 @@ export class AddressController {
 
     @Get('/provinces')
     @ApiOperation({ summary: 'Get provinces' })
-    @ApiOkResponse({ description: 'Success.', type: [GhnProvinceDTO] })
-    @HttpCode(200)
+    @ApiOkResponse({ description: 'Lấy danh sách tỉnh thành công.', type: [GhnProvinceDTO] })
     async getProvinces() {
         return this.searchService
             .send(AddressSearchMessagePattern.getProvinces, {})
@@ -26,8 +25,7 @@ export class AddressController {
 
     @Get('/districts/:province_id')
     @ApiOperation({ summary: 'Get districts' })
-    @ApiOkResponse({ description: 'Success.', type: [GhnDistrictDTO] })
-    @HttpCode(200)
+    @ApiOkResponse({ description: 'Lấy danh sách quận/huyện thành công.', type: [GhnDistrictDTO] })
     async getDistricts(@Param() { province_id }: QueryDistrictsDTO) {
         return this.searchService
             .send(AddressSearchMessagePattern.getDistricts, { province_id })
@@ -36,8 +34,7 @@ export class AddressController {
 
     @Get('/wards/:district_id')
     @ApiOperation({ summary: 'Get wards' })
-    @ApiOkResponse({ description: 'Success.', type: [GhnWardDTO] })
-    @HttpCode(200)
+    @ApiOkResponse({ description: 'Lấy danh sách phường/xã thành công.', type: [GhnWardDTO] })
     async getWards(@Param() { district_id }: QueryWardsDTO) {
         return this.searchService
             .send(AddressSearchMessagePattern.getWards, { district_id })
