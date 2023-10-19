@@ -12,7 +12,6 @@ import { ProfileController } from './profile.controller';
 import { AddressController } from './address.controller';
 
 export default [
-    AddressController,
     AdminController,
     AuthController,
     ProfileController,
@@ -22,6 +21,7 @@ export default [
     CategoriesController,
     AttributesController,
     CartsController,
+    AddressController,
     OrderController,
     AppController,
 ];

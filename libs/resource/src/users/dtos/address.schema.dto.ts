@@ -1,7 +1,56 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { AddressSchema } from '../schemas/address.schema';
-import { IsBoolean, IsNotEmpty, IsPhoneNumber, IsString } from 'class-validator';
-import { Transform } from 'class-transformer';
+import {
+    AddressSchema,
+    DistrictSchema,
+    ProvinceSchema,
+    WardSchema,
+} from '../schemas/address.schema';
+import {
+    IsBoolean,
+    IsNotEmpty,
+    IsNumber,
+    IsPhoneNumber,
+    IsString,
+    ValidateNested,
+} from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+
+class ProvinceSchemaDTO implements ProvinceSchema {
+    @ApiProperty({ description: 'The id of province', example: 201 })
+    @IsNotEmpty()
+    @IsNumber()
+    @Type(() => Number)
+    province_id: number;
+
+    @ApiProperty({ description: 'The name of province', example: 'Hà Nội' })
+    @IsString()
+    @IsNotEmpty()
+    province_name: string;
+}
+
+class DistrictSchemaDTO implements DistrictSchema {
+    @ApiProperty({ description: 'The id of district', example: 1490 })
+    @IsNotEmpty()
+    @IsNumber()
+    @Type(() => Number)
+    district_id: number;
+
+    @ApiProperty({ description: 'The name of district', example: 'Quận Hoàng Mai' })
+    @IsString()
+    @IsNotEmpty()
+    district_name: string;
+}
+
+class WardSchemaDTO implements WardSchema {
+    @ApiProperty({ description: 'The id of ward', example: '1A0807' })
+    @IsNotEmpty()
+    ward_id: string;
+
+    @ApiProperty({ description: 'The name of ward', example: 'Phường Mai Động' })
+    @IsString()
+    @IsNotEmpty()
+    ward_name: string;
+}
 
 export class AddressSchemaDTO implements AddressSchema {
     @ApiProperty({ description: 'The name of address', example: 'Home' })
@@ -19,20 +68,17 @@ export class AddressSchemaDTO implements AddressSchema {
     @IsNotEmpty()
     phoneNumbers: string;
 
-    @ApiProperty({ description: 'The province level address', example: 'Ha Noi' })
-    @IsString()
-    @IsNotEmpty()
-    provinceLevel: string;
+    @ApiProperty({ description: 'The province level address', type: ProvinceSchemaDTO })
+    @ValidateNested()
+    provinceLevel: ProvinceSchemaDTO;
 
-    @ApiProperty({ description: 'The district level address', example: 'Hoang Mai' })
-    @IsString()
-    @IsNotEmpty()
-    districtLevel: string;
+    @ApiProperty({ description: 'The district level address', type: DistrictSchemaDTO })
+    @ValidateNested()
+    districtLevel: DistrictSchemaDTO;
 
-    @ApiProperty({ description: 'The ward level address', example: 'Mai Dong' })
-    @IsString()
-    @IsNotEmpty()
-    wardLevel: string;
+    @ApiProperty({ description: 'The ward level address', type: WardSchemaDTO })
+    @ValidateNested()
+    wardLevel: WardSchemaDTO;
 
     @ApiProperty({ description: 'The detailed address', example: '18 Tam Trinh' })
     @IsString()

@@ -43,7 +43,7 @@ export class GhnService extends GhnCoreService {
         });
         const selectedProvince = provinceData.find((province) =>
             province.name_extension.some((name) =>
-                generateRegexQuery(address.provinceLevel).test(name),
+                generateRegexQuery(address.provinceLevel.province_name).test(name),
             ),
         );
 
@@ -54,7 +54,7 @@ export class GhnService extends GhnCoreService {
         );
         const selectedDistrict = districtData.find((district) =>
             district.name_extension.some((name) =>
-                generateRegexQuery(address.districtLevel).test(name),
+                generateRegexQuery(address.districtLevel.district_name).test(name),
             ),
         );
 
@@ -62,7 +62,9 @@ export class GhnService extends GhnCoreService {
             throw error;
         });
         const selectedWard = wardData.find((ward) =>
-            ward.name_extension.some((name) => generateRegexQuery(address.wardLevel).test(name)),
+            ward.name_extension.some((name) =>
+                generateRegexQuery(address.wardLevel.ward_name).test(name),
+            ),
         );
 
         return { selectedProvince, selectedDistrict, selectedWard };
