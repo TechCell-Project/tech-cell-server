@@ -1,5 +1,5 @@
 import { IsBoolean, IsEmail, IsNotEmpty, IsOptional, IsString, Length } from 'class-validator';
-import { CreateUserRequestDto } from '~/apps/managements/users-mnt/dtos';
+import { CreateUserRequestDto } from '~apps/managements/users-mnt/dtos';
 import { UserRole } from '../enums';
 
 export class CreateUserDTO {

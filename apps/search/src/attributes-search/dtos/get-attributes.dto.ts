@@ -2,7 +2,7 @@ import { IsEnum, IsNumber, IsOptional, IsString, Max, Min } from 'class-validato
 import { ApiProperty } from '@nestjs/swagger';
 import { SelectType } from '../enums';
 import { Type } from 'class-transformer';
-import { MAX_ATTRIBUTES_PER_PAGE } from '~/constants/attribute.constant';
+import { MAX_ATTRIBUTES_PER_PAGE } from '@app/common/constants/attribute.constant';
 
 export class GetAttributesRequestDTO {
     @ApiProperty({

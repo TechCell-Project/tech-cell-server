@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { REDIS_CACHE } from '~/constants';
+import { REDIS_CACHE } from '@app/common/constants';
 import { Store } from 'cache-manager';
 import * as path from 'path';
 import * as fs from 'fs/promises';

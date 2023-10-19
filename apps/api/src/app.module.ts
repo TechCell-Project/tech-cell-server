@@ -9,12 +9,12 @@ import {
     MANAGEMENTS_SERVICE,
     ORDER_SERVICE,
     TASK_SERVICE,
-} from '~/constants';
+} from '@app/common/constants';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerStorageRedisService } from 'nestjs-throttler-storage-redis';
 import { MorganMiddleware } from './middlewares';
-import { GoogleStrategy, AccessTokenStrategy, FacebookStrategy } from '~/apps/auth/strategies';
+import { GoogleStrategy, AccessTokenStrategy, FacebookStrategy } from '~apps/auth/strategies';
 import { CloudinaryModule } from '@app/third-party/cloudinary.com';
 
 @Module({

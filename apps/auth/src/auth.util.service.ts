@@ -11,10 +11,10 @@ import { TokenExpiredError } from 'jsonwebtoken';
 import { UsersService } from '@app/resource/users';
 import { User } from '@app/resource/users/schemas';
 import { ConfigService } from '@nestjs/config';
-import { JwtPayloadDto, UserDataResponseDTO } from '~/apps/auth/dtos';
+import { JwtPayloadDto, UserDataResponseDTO } from '~apps/auth/dtos';
 import * as bcrypt from 'bcrypt';
 import { RpcException, ClientRMQ } from '@nestjs/microservices';
-import { MAIL_SERVICE, REDIS_CACHE, REQUIRE_USER_REFRESH } from '~/constants';
+import { MAIL_SERVICE, REDIS_CACHE, REQUIRE_USER_REFRESH } from '@app/common/constants';
 import { OtpService } from '@app/resource/otp';
 import { Store } from 'cache-manager';
 import {

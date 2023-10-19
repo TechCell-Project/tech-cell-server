@@ -10,7 +10,7 @@ import {
     Post,
 } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
-import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~/constants';
+import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '@app/common/constants';
 import { ModGuard, SuperAdminGuard } from '@app/common/guards';
 import {
     ApiBadRequestResponse,
@@ -28,15 +28,15 @@ import {
     UsersMntMessagePattern,
     BlockUnblockRequestDTO,
     CreateUserRequestDto,
-} from '~/apps/managements/users-mnt';
+} from '~apps/managements/users-mnt';
 import { catchException } from '@app/common';
 import { UserMntResponseDto } from '@app/resource/users/dtos';
 import { CurrentUser } from '@app/common/decorators';
 import { TCurrentUser } from '@app/common/types';
 import { ListDataResponseDTO } from '@app/common/dtos';
-import { UsersSearchMessagePattern } from '~/apps/search/users-search';
-import { GetUsersQueryDTO } from '~/apps/search/users-search/dtos';
-import { ACCESS_TOKEN_NAME } from '~/constants/api.constant';
+import { UsersSearchMessagePattern } from '~apps/search/users-search';
+import { GetUsersQueryDTO } from '~apps/search/users-search/dtos';
+import { ACCESS_TOKEN_NAME } from '@app/common/constants/api.constant';
 
 @ApiTags('users (admin only)')
 @ApiBearerAuth(ACCESS_TOKEN_NAME)

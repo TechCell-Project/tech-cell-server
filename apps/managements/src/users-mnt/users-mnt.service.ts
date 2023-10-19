@@ -12,7 +12,7 @@ import { BlockActivity, UserRole } from '@app/resource/users/enums';
 import { UsersMntUtilService } from './users-mnt.util.service';
 import { delStartWith, generateRandomString } from '@app/common';
 import { AddressSchemaDTO, CreateUserDTO } from '@app/resource/users/dtos';
-import { REDIS_CACHE, USERS_CACHE_PREFIX } from '~/constants';
+import { REDIS_CACHE, USERS_CACHE_PREFIX } from '@app/common/constants';
 import { delCacheUsers } from '@app/resource/users/utils';
 import { TCurrentUser } from '@app/common/types';
 import { UsersService } from '@app/resource/users';

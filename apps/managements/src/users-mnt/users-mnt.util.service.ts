@@ -3,7 +3,7 @@ import { BadRequestException, ForbiddenException, Injectable, Logger } from '@ne
 import { isAdmin, isMod, isSuperAdmin, isUser } from '@app/common/utils';
 import { RpcException } from '@nestjs/microservices';
 import { User } from '@app/resource/users/schemas';
-import { REQUIRE_USER_REFRESH } from '~/constants';
+import { REQUIRE_USER_REFRESH } from '@app/common/constants';
 import { Store } from 'cache-manager';
 import { UserRole } from '@app/resource/users/enums';
 import { convertTimeString } from 'convert-time-string';

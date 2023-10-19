@@ -5,9 +5,9 @@ import { GhnWardDTO } from '@app/third-party/giaohangnhanh/dtos/ward.dto';
 import { Controller, Get, Inject, Param } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { AddressSearchMessagePattern } from '~/apps/search/address-search';
-import { QueryDistrictsDTO, QueryWardsDTO } from '~/apps/search/address-search/dtos';
-import { SEARCH_SERVICE } from '~/constants/services.constant';
+import { AddressSearchMessagePattern } from '~apps/search/address-search';
+import { QueryDistrictsDTO, QueryWardsDTO } from '~apps/search/address-search/dtos';
+import { SEARCH_SERVICE } from '@app/common/constants/services.constant';
 
 @ApiTags('address')
 @Controller('address')

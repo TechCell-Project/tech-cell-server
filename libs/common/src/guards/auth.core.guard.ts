@@ -10,14 +10,14 @@ import {
 import { Reflector } from '@nestjs/core';
 import { ClientRMQ, RpcException } from '@nestjs/microservices';
 import { catchError, firstValueFrom } from 'rxjs';
-import { ITokenVerifiedResponse, AuthMessagePattern } from '~/apps/auth';
+import { ITokenVerifiedResponse, AuthMessagePattern } from '~apps/auth';
 import {
     AUTH_SERVICE,
     SKIP_AUTH_SUPER_ADMIN_GUARD,
     SKIP_AUTH_ADMIN_GUARD,
     SKIP_AUTH_MOD_GUARD,
     SKIP_AUTH_GUARD,
-} from '~/constants';
+} from '@app/common/constants';
 import { TCurrentUser } from '../types';
 import { UserRole } from '@app/resource/users/enums';
 

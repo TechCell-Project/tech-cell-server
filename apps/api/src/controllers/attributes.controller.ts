@@ -11,20 +11,20 @@ import {
     Delete,
 } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
-import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~/constants';
+import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '@app/common/constants';
 import { AdminGuard, catchException } from '@app/common';
 import {
     AttributesSearchMessagePattern,
     GetAttributeByIdRequestDTO,
     GetAttributeByLabelRequestDTO,
     GetAttributesRequestDTO,
-} from '~/apps/search/attributes-search';
+} from '~apps/search/attributes-search';
 import {
     DeleteAttributeByIdRequestDTO,
     UpdateAttributeRequestDTO,
     CreateAttributeRequestDTO,
-} from '~/apps/managements/attributes-mnt/dtos';
-import { AttributesMntMessagePattern } from '~/apps/managements/attributes-mnt/attributes-mnt.pattern';
+} from '~apps/managements/attributes-mnt/dtos';
+import { AttributesMntMessagePattern } from '~apps/managements/attributes-mnt/attributes-mnt.pattern';
 import {
     ApiBadRequestResponse,
     ApiCreatedResponse,

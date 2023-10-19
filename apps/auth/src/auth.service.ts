@@ -19,14 +19,14 @@ import {
     NewTokenRequestDTO,
     UserDataResponseDTO,
     ChangePasswordRequestDTO,
-} from '~/apps/auth/dtos';
+} from '~apps/auth/dtos';
 import { User } from '@app/resource/users/schemas';
 import { RpcException } from '@nestjs/microservices';
-import { ConfirmEmailRegisterDTO, ForgotPasswordEmailDTO, MailEventPattern } from '~/apps/mail';
+import { ConfirmEmailRegisterDTO, ForgotPasswordEmailDTO, MailEventPattern } from '~apps/mail';
 import { OtpType } from '@app/resource/otp';
 import { IUserFacebookResponse, IUserGoogleResponse, ITokenVerifiedResponse } from './interfaces';
 import { buildUniqueUserNameFromEmail, delStartWith, generateRandomString } from '@app/common';
-import { PASSWORD_MAX_LENGTH, USERS_CACHE_PREFIX } from '~/constants';
+import { PASSWORD_MAX_LENGTH, USERS_CACHE_PREFIX } from '@app/common/constants';
 import { TCurrentUser } from '@app/common/types';
 import { Types } from 'mongoose';
 import { LoginTicket, OAuth2Client, OAuth2ClientOptions } from 'google-auth-library';

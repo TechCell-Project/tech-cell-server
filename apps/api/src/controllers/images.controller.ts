@@ -31,16 +31,16 @@ import {
     ApiTags,
     ApiTooManyRequestsResponse,
 } from '@nestjs/swagger';
-import { ImageUploadedResponseDTO } from '~/apps/managements/images-mnt/dtos/image-uploaded-response.dto';
-import { PublicIdDTO } from '~/apps/managements/images-mnt/dtos/publicId.dto';
-import { ImagesMntMessagePattern } from '~/apps/managements/images-mnt/images-mnt.pattern';
+import { ImageUploadedResponseDTO } from '~apps/managements/images-mnt/dtos/image-uploaded-response.dto';
+import { PublicIdDTO } from '~apps/managements/images-mnt/dtos/publicId.dto';
+import { ImagesMntMessagePattern } from '~apps/managements/images-mnt/images-mnt.pattern';
 import {
     ARRAY_IMAGE_FILE_MAX_COUNT,
     IMAGE_FILE_MAX_SIZE_IN_BYTES,
     IMAGE_FILE_MAX_SIZE_IN_MB,
     SINGLE_IMAGE_FILE_MAX_COUNT,
-} from '~/constants/api.constant';
-import { MANAGEMENTS_SERVICE } from '~/constants/services.constant';
+} from '@app/common/constants/api.constant';
+import { MANAGEMENTS_SERVICE } from '@app/common/constants/services.constant';
 
 @ApiBadRequestResponse({
     description: 'Invalid request',

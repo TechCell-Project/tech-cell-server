@@ -1,6 +1,6 @@
 import { Controller, Inject, Get, Query, Post, Body, Patch, Param } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
-import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~/constants';
+import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '@app/common/constants';
 import { catchException } from '@app/common';
 import {
     ApiBadRequestResponse,
@@ -14,12 +14,12 @@ import {
     CategoriesSearchMessagePattern,
     GetCategoriesRequestDTO,
     GetCategoryByLabelRequestDTO,
-} from '~/apps/search/categories-search';
+} from '~apps/search/categories-search';
 import {
     CategoriesMntMessagePattern,
     CreateCategoryRequestDTO,
     UpdateCategoryRequestDTO,
-} from '~/apps/managements/categories-mnt';
+} from '~apps/managements/categories-mnt';
 import { CategoryIdParam } from '@app/resource/categories/dtos';
 
 @ApiTags('categories')
