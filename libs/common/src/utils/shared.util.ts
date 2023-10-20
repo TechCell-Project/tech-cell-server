@@ -5,6 +5,10 @@ import { validate } from 'class-validator';
 import { catchError, throwError } from 'rxjs';
 import { emailRegex } from '@app/common/constants/regex.constant';
 import * as sanitizeHtml from 'sanitize-html';
+import { Types } from 'mongoose';
+import { ObjectIdLike } from 'bson';
+
+const logger = new Logger('SharedUtil');
 
 export function isEmail(email: string): boolean {
     if (typeof email !== 'string') return false;
@@ -81,7 +85,7 @@ export async function validateDTO(data: any, dto: any) {
         }
     } catch (error) {
         if (!isUnexpected) {
-            Logger.error(`[validateDTO] ${error}]`);
+            logger.error(`[validateDTO] ${error}]`);
         }
         throw new RpcException(new BadRequestException(error.message));
     }
@@ -147,4 +151,19 @@ export function sanitizeHtmlString(html = ''): string {
         allowedSchemes: ['data', 'http', 'https'],
     });
     return result;
+}
+
+/**
+ * @param id Can be a 24 character hex string, 12 byte binary Buffer, or a number.
+ * @returns The ObjectId
+ */
+export function convertToObjectId(
+    id: string | number | Types.ObjectId | ObjectIdLike | Uint8Array,
+) {
+    try {
+        return new Types.ObjectId(id);
+    } catch (error) {
+        logger.error(error);
+        throw new Error('Invalid ObjectId');
+    }
 }

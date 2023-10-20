@@ -10,6 +10,7 @@ import { ImagesController } from './images.controller';
 import { AdminController } from './admin.controller';
 import { ProfileController } from './profile.controller';
 import { AddressController } from './address.controller';
+import { DiscountsController } from './discounts.controller';
 
 export default [
     AdminController,
@@ -23,5 +24,6 @@ export default [
     CartsController,
     AddressController,
     OrderController,
+    DiscountsController,
     AppController,
 ];
