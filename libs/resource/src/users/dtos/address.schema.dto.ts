@@ -54,14 +54,14 @@ class DistrictSchemaDTO implements DistrictSchema {
 
 class WardSchemaDTO implements WardSchema {
     constructor(ward: WardSchema) {
-        this.ward_id = ward.ward_id;
+        this.ward_code = ward.ward_code;
         this.ward_name = ward.ward_name;
     }
 
-    @ApiProperty({ description: 'The id of ward', example: '1A0807' })
+    @ApiProperty({ description: 'The code of ward', example: '1A0807' })
     @IsNotEmpty()
     @IsString()
-    ward_id: string;
+    ward_code: string;
 
     @ApiProperty({ description: 'The name of ward', example: 'Phường Mai Động' })
     @IsString()
