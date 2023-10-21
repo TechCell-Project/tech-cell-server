@@ -19,6 +19,24 @@
                 "tsConfigPath": "libs/common/tsconfig.lib.json"
             }
         },
+        "resource": {
+            "type": "library",
+            "root": "libs/resource",
+            "entryFile": "index",
+            "sourceRoot": "libs/resource/src",
+            "compilerOptions": {
+                "tsConfigPath": "libs/resource/tsconfig.lib.json"
+            }
+        },
+        "third-party": {
+            "type": "library",
+            "root": "libs/third-party",
+            "entryFile": "index",
+            "sourceRoot": "libs/third-party/src",
+            "compilerOptions": {
+                "tsConfigPath": "libs/third-party/tsconfig.lib.json"
+            }
+        },
         "api": {
             "type": "application",
             "root": "apps/api",
@@ -46,17 +64,6 @@
                 "tsConfigPath": "apps/auth/tsconfig.app.json"
             }
         },
-        "mail": {
-            "type": "application",
-            "root": "apps/mail",
-            "entryFile": "main",
-            "sourceRoot": "apps/mail/src",
-            "compilerOptions": {
-                "tsConfigPath": "apps/mail/tsconfig.app.json",
-                "assets": ["**/*.hbs", "**/images/*"],
-                "watchAssets": true
-            }
-        },
         "managements": {
             "type": "application",
             "root": "apps/managements",
@@ -64,15 +71,6 @@
             "sourceRoot": "apps/managements/src",
             "compilerOptions": {
                 "tsConfigPath": "apps/managements/tsconfig.app.json"
-            }
-        },
-        "resource": {
-            "type": "library",
-            "root": "libs/resource",
-            "entryFile": "index",
-            "sourceRoot": "libs/resource/src",
-            "compilerOptions": {
-                "tsConfigPath": "libs/resource/tsconfig.lib.json"
             }
         },
         "order": {
@@ -102,13 +100,15 @@
                 "tsConfigPath": "apps/task/tsconfig.app.json"
             }
         },
-        "third-party": {
-            "type": "library",
-            "root": "libs/third-party",
-            "entryFile": "index",
-            "sourceRoot": "libs/third-party/src",
+        "communications": {
+            "type": "application",
+            "root": "apps/communications",
+            "entryFile": "main",
+            "sourceRoot": "apps/communications/src",
             "compilerOptions": {
-                "tsConfigPath": "libs/third-party/tsconfig.lib.json"
+                "tsConfigPath": "apps/communications/tsconfig.app.json",
+                "assets": ["mail/templates/**"],
+                "watchAssets": true
             }
         }
     }

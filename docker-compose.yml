@@ -106,10 +106,10 @@ services:
             - techcell_backend
         restart: always
 
-    mail:
+    communications:
         build:
             context: ./
-            dockerfile: ./apps/mail/Dockerfile
+            dockerfile: ./apps/communications/Dockerfile
         env_file:
             - .env
         volumes:

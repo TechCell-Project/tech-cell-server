@@ -4,6 +4,7 @@ import { RabbitMQService } from '@app/common/RabbitMQ';
 import { Ctx, Payload, RmqContext, EventPattern } from '@nestjs/microservices';
 import { ConfirmEmailRegisterDTO, ForgotPasswordEmailDTO } from './dtos';
 import { MailEventPattern } from './mail.pattern';
+import { RESEND_TRANSPORT, SENDGRID_TRANSPORT } from './constants';
 
 @Controller()
 export class MailController {
@@ -16,22 +17,37 @@ export class MailController {
     async sendConfirmEmail(
         @Ctx() context: RmqContext,
         @Payload()
-        { email, emailContext }: { email: string; emailContext: ConfirmEmailRegisterDTO },
+        {
+            email,
+            emailContext,
+            transporter = SENDGRID_TRANSPORT,
+        }: { email: string; emailContext: ConfirmEmailRegisterDTO; transporter?: string },
     ) {
         this.rabbitMqService.acknowledgeMessage(context);
-        return this.mailService.sendConfirmMail(email, emailContext);
+        return this.mailService.sendConfirmMail(email, emailContext, transporter);
     }
 
     @EventPattern(MailEventPattern.sendMailForgotPassword)
     async sendForgotPasswordEmail(
         @Ctx() context: RmqContext,
-        @Payload() { userEmail, firstName, otpCode }: ForgotPasswordEmailDTO,
-    ) {
-        this.rabbitMqService.acknowledgeMessage(context);
-        return this.mailService.sendForgotPasswordMail({
+        @Payload()
+        {
             userEmail,
             firstName,
             otpCode,
-        });
+            transporter = RESEND_TRANSPORT,
+        }: ForgotPasswordEmailDTO & {
+            transporter?: string;
+        },
+    ) {
+        this.rabbitMqService.acknowledgeMessage(context);
+        return this.mailService.sendForgotPasswordMail(
+            {
+                userEmail,
+                firstName,
+                otpCode,
+            },
+            transporter,
+        );
     }
 }
