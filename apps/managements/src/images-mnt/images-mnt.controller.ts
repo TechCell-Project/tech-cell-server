@@ -27,18 +27,21 @@ export class ImagesMntController {
     @MessagePattern(ImagesMntMessagePattern.uploadSingleImage)
     async uploadSingleImage(
         @Ctx() context: RmqContext,
-        @Payload() { image }: { image: Express.Multer.File },
+        @Payload() { image, imageUrl }: { image: Express.Multer.File; imageUrl: string },
     ) {
         this.rabbitmqService.acknowledgeMessage(context);
-        return this.imagesMntService.uploadSingleImage(image);
+        return this.imagesMntService.uploadSingleImage({
+            image,
+            imageUrl,
+        });
     }
 
     @MessagePattern(ImagesMntMessagePattern.uploadArrayImage)
     async uploadArrayImage(
         @Ctx() context: RmqContext,
-        @Payload() { images }: { images: Express.Multer.File[] },
+        @Payload() { images, imageUrls }: { images: Express.Multer.File[]; imageUrls: string[] },
     ) {
         this.rabbitmqService.acknowledgeMessage(context);
-        return this.imagesMntService.uploadArrayImage(images);
+        return this.imagesMntService.uploadArrayImage({ images, imageUrls });
     }
 }

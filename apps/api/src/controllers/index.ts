@@ -12,7 +12,7 @@ import { ProfileController } from './profile.controller';
 import { AddressController } from './address.controller';
 import { DiscountsController } from './discounts.controller';
 
-export default [
+export const ListControllers = [
     AdminController,
     AuthController,
     ProfileController,
