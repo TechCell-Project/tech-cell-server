@@ -16,11 +16,21 @@ export class MailService {
 
     private readonly logger = new Logger(MailService.name);
     private readonly TEMPLATES_PATH = join(__dirname, 'mail/templates');
+    private readonly TRANSPORTERS = [GMAIL_TRANSPORT, SENDGRID_TRANSPORT, RESEND_TRANSPORT];
+    private readonly MAX_RETRIES = this.TRANSPORTERS.length;
 
-    async sendMail(email: string, name: string, transporter?: string) {
+    async sendMail(email: string, name: string, transporter?: string, retryCount = 0) {
+        if (retryCount > this.MAX_RETRIES) {
+            this.logger.error(`Send mail failed: too many retries`);
+            return {
+                message: 'Failed to send email',
+            };
+        }
+
+        const transporterName = this.resolveTransporter(transporter);
         return await this.mailerService
             .sendMail({
-                transporterName: this.resolveTransporter(transporter),
+                transporterName,
                 to: email,
                 subject: 'Greeting from NestJS NodeMailer',
                 template: 'test',
@@ -37,8 +47,10 @@ export class MailService {
             })
             .catch(async (error) => {
                 this.logger.error(`Send mail failed: ${error.message}`);
-                this.logger.log('Switch to GMAIL_TRANSPORT');
-                return await this.sendMail(email, name, GMAIL_TRANSPORT);
+
+                transporter = this.getNextTransporter(transporterName);
+                this.logger.log(`Retry send mail with transporter: ${transporter}`);
+                return await this.sendMail(email, name, transporter, retryCount + 1);
             });
     }
 
@@ -46,11 +58,20 @@ export class MailService {
         email: string,
         emailContext: ConfirmEmailRegisterDTO,
         transporter?: string,
+        retryCount = 0,
     ) {
+        if (retryCount > this.MAX_RETRIES) {
+            this.logger.error(`Send mail failed: too many retries`);
+            return {
+                message: 'Failed to send email',
+            };
+        }
+
+        const transporterName = this.resolveTransporter(transporter);
         const message = `Mail sent: ${email}`;
         return await this.mailerService
             .sendMail({
-                transporterName: this.resolveTransporter(transporter),
+                transporterName,
                 to: email,
                 subject: 'Confirm your registration',
                 template: 'confirm-register',
@@ -64,8 +85,10 @@ export class MailService {
             })
             .catch(async (error) => {
                 this.logger.error(`Send mail failed: ${error.message}`);
-                this.logger.log('Switch to GMAIL_TRANSPORT');
-                return await this.sendConfirmMail(email, emailContext, GMAIL_TRANSPORT);
+
+                transporter = this.getNextTransporter(transporterName);
+                this.logger.log(`Retry send mail with transporter: ${transporter}`);
+                return await this.sendConfirmMail(email, emailContext, transporter, retryCount + 1);
             })
             .finally(() => {
                 return {
@@ -77,11 +100,20 @@ export class MailService {
     async sendForgotPasswordMail(
         { userEmail, firstName, otpCode }: ForgotPasswordEmailDTO,
         transporter?: string,
+        retryCount = 0,
     ) {
+        if (retryCount > this.MAX_RETRIES) {
+            this.logger.error(`Send mail failed: too many retries`);
+            return {
+                message: 'Failed to send email',
+            };
+        }
+
+        const transporterName = this.resolveTransporter(transporter);
         const message = `Mail sent: ${userEmail}`;
         return await this.mailerService
             .sendMail({
-                transporterName: this.resolveTransporter(transporter),
+                transporterName,
                 to: userEmail,
                 subject: 'Confirm your reset password',
                 template: 'forgot-password',
@@ -106,10 +138,13 @@ export class MailService {
             })
             .catch(async (error) => {
                 this.logger.error(`Send mail failed: ${error.message}`);
-                this.logger.log('Switch to GMAIL_TRANSPORT');
+
+                transporter = this.getNextTransporter(transporterName);
+                this.logger.log(`Retry send mail with transporter: ${transporter}`);
                 return await this.sendForgotPasswordMail(
                     { userEmail, firstName, otpCode },
-                    GMAIL_TRANSPORT,
+                    transporter,
+                    retryCount + 1,
                 );
             })
             .finally(() => {
@@ -120,11 +155,19 @@ export class MailService {
     }
 
     private resolveTransporter(transporter = GMAIL_TRANSPORT) {
-        const transporterName: string[] = [SENDGRID_TRANSPORT, GMAIL_TRANSPORT, RESEND_TRANSPORT];
-        if (!transporterName.includes(transporter)) {
+        if (!this.TRANSPORTERS.includes(transporter)) {
             transporter = GMAIL_TRANSPORT;
         }
 
         return transporter;
+    }
+
+    private getNextTransporter(currentTransporter: string): string | null {
+        const currentIndex = this.TRANSPORTERS.indexOf(currentTransporter);
+        if (currentIndex === -1 || currentIndex === this.TRANSPORTERS.length - 1) {
+            return this.TRANSPORTERS[0];
+        } else {
+            return this.TRANSPORTERS[currentIndex + 1];
+        }
     }
 }
