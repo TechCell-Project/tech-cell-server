@@ -243,8 +243,14 @@ export class UsersMntService extends UsersMntUtilService {
         user: TCurrentUser;
         addressData: UpdateUserAddressRequestDTO;
     }) {
+        const userFound = await this.usersService.getUser({ _id: new Types.ObjectId(user._id) });
         const newAddr = Array.isArray(addressData.address)
-            ? addressData.address.map((addr) => new AddressSchemaDTO(addr))
+            ? addressData.address.map((addr) => {
+                  if (!addr?.customerName) {
+                      addr.customerName = userFound.firstName + ' ' + userFound.lastName;
+                  }
+                  return new AddressSchemaDTO(addr);
+              })
             : [];
 
         if (newAddr.length > 0 && !newAddr.find((a) => a?.isDefault)) {
@@ -257,9 +263,7 @@ export class UsersMntService extends UsersMntUtilService {
             throw new RpcException(new BadRequestException('Only one address can be default'));
         }
 
-        const userFound = await this.usersService.getUser({ _id: new Types.ObjectId(user._id) });
         userFound.address = newAddr;
-
         const userUpdated = await this.usersService.findOneAndUpdateUser(
             { _id: userFound._id },
             userFound,
