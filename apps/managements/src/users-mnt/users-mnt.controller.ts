@@ -1,6 +1,6 @@
 import { Controller } from '@nestjs/common';
 import { MessagePattern, RmqContext, Payload, Ctx } from '@nestjs/microservices';
-import { RabbitMQService } from '@app/common';
+import { RabbitMQService } from '@app/common/RabbitMQ';
 import { UsersMntService } from './users-mnt.service';
 import {
     BlockUnblockRequestDTO,

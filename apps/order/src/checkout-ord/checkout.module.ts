@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { RabbitMQService } from '@app/common';
+import { RabbitMQService } from '@app/common/RabbitMQ';
 import { HttpModule } from '@nestjs/axios';
 import { CheckoutService } from './checkout.service';
 import { CheckoutController } from './checkout.controller';

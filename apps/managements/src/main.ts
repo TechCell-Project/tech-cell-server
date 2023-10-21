@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { ManagementsModule } from './managements.module';
-import { RpcExceptionFilter, useRabbitMQ } from '@app/common';
+import { RpcExceptionFilter } from '@app/common';
+import { useRabbitMQ } from '@app/common/RabbitMQ';
 import { Logger } from '@nestjs/common';
 
 async function bootstrap() {

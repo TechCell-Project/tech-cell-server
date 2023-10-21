@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { MailModule } from './mail.module';
-import { useRabbitMQ } from '@app/common';
+import { useRabbitMQ } from '@app/common/RabbitMQ';
 import { Logger } from '@nestjs/common';
 import { RpcExceptionFilter } from '@app/common/filters/';
 

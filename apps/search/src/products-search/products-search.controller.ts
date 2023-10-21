@@ -1,4 +1,4 @@
-import { RabbitMQService } from '@app/common';
+import { RabbitMQService } from '@app/common/RabbitMQ';
 import { Controller } from '@nestjs/common';
 import { Ctx, MessagePattern, RmqContext, Payload } from '@nestjs/microservices';
 import { ProductsSearchMessagePattern } from './products-search.pattern';

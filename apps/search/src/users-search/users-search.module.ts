@@ -1,4 +1,5 @@
-import { RabbitMQService, RedisCacheModule } from '@app/common';
+import { RedisCacheModule } from '@app/common/RedisCache';
+import { RabbitMQService } from '@app/common/RabbitMQ';
 import { UsersModule } from '@app/resource';
 import { Logger, Module } from '@nestjs/common';
 import { UsersSearchController } from './users-search.controller';

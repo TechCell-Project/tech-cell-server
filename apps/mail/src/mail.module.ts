@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
 import { MailController } from './mail.controller';
 import { MailService } from './mail.service';
-import { AppConfigModule, RabbitMQService } from '@app/common';
+import { AppConfigModule } from '@app/common';
+import { RabbitMQService } from '@app/common/RabbitMQ';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { MailerConfig } from './mail.config';
 
