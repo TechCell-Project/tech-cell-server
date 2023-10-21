@@ -3,8 +3,10 @@ import { ImagesMntController } from './images-mnt.controller';
 import { RabbitMQService } from '@app/common/RabbitMQ';
 import { CloudinaryService } from '@app/third-party/cloudinary.com';
 import { ImagesMntService } from './images-mnt.service';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
+    imports: [HttpModule],
     controllers: [ImagesMntController],
     providers: [RabbitMQService, ImagesMntService, CloudinaryService],
 })

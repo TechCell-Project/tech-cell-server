@@ -3,7 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AppConfigModule } from '@app/common';
 import { RabbitMQModule } from '@app/common/RabbitMQ';
 import { HealthModule } from '@app/common/HealthCheck';
-import Controller from './controllers';
+import { ListControllers } from './controllers';
 import {
     SEARCH_SERVICE,
     UTILITY_SERVICE,
@@ -18,6 +18,13 @@ import { ThrottlerStorageRedisService } from 'nestjs-throttler-storage-redis';
 import { MorganMiddleware } from './middlewares';
 import { GoogleStrategy, AccessTokenStrategy, FacebookStrategy } from '~apps/auth/strategies';
 import { CloudinaryModule } from '@app/third-party/cloudinary.com';
+import { MulterModule } from '@nestjs/platform-express/multer';
+import { diskStorage } from 'multer';
+import { v4 as uuidv4 } from 'uuid';
+import { UploadConstants } from '@app/common/constants/upload.constant';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { ApiTaskService } from './api-task.service';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
     imports: [
@@ -37,6 +44,27 @@ import { CloudinaryModule } from '@app/third-party/cloudinary.com';
         }),
         CloudinaryModule,
         HealthModule,
+        MulterModule.registerAsync({
+            useFactory: () => ({
+                dest: UploadConstants.multerUploadTmpFolderDir,
+                storage: diskStorage({
+                    destination: (req, file, cb) => {
+                        cb(null, UploadConstants.multerUploadTmpFolderDir);
+                    },
+                    filename: (req, file, cb) => {
+                        cb(null, `${uuidv4()}-${Date.now()}-${file.originalname}`);
+                    },
+                }),
+            }),
+        }),
+        ServeStaticModule.forRoot({
+            rootPath: UploadConstants.multerUploadTmpFolderDir,
+            serveRoot: '/public/',
+            serveStaticOptions: {
+                index: false,
+            },
+        }),
+        ScheduleModule.forRoot(),
         RabbitMQModule.registerRmq(UTILITY_SERVICE, process.env.RABBITMQ_UTILITY_QUEUE),
         RabbitMQModule.registerRmq(SEARCH_SERVICE, process.env.RABBITMQ_SEARCH_QUEUE),
         RabbitMQModule.registerRmq(AUTH_SERVICE, process.env.RABBITMQ_AUTH_QUEUE),
@@ -44,7 +72,7 @@ import { CloudinaryModule } from '@app/third-party/cloudinary.com';
         RabbitMQModule.registerRmq(ORDER_SERVICE, process.env.RABBITMQ_ORDER_QUEUE),
         RabbitMQModule.registerRmq(TASK_SERVICE, process.env.RABBITMQ_TASK_QUEUE),
     ],
-    controllers: [...Controller],
+    controllers: ListControllers,
     providers: [
         {
             provide: APP_GUARD,
@@ -53,6 +81,7 @@ import { CloudinaryModule } from '@app/third-party/cloudinary.com';
         GoogleStrategy,
         AccessTokenStrategy,
         FacebookStrategy,
+        ApiTaskService,
     ],
 })
 export class AppModule implements NestModule {
