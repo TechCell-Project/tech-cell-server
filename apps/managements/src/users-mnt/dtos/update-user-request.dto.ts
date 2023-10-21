@@ -23,7 +23,7 @@ export class UpdateUserRequestDTO {
     @ApiProperty({
         description: 'Username of user',
         example: 'example',
-        required: true,
+        required: false,
         minLength: 6,
         maxLength: 24,
     })
@@ -58,7 +58,7 @@ export class UpdateUserRequestDTO {
     @ApiProperty({
         description: "PublicId of user's avatar",
         example: 'example',
-        required: true,
+        required: false,
     })
     @IsString()
     @IsOptional()

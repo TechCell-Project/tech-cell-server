@@ -10,6 +10,7 @@ import {
     IsNotEmpty,
     IsNumber,
     IsObject,
+    IsOptional,
     IsPhoneNumber,
     IsString,
     ValidateNested,
@@ -72,7 +73,7 @@ class WardSchemaDTO implements WardSchema {
 export class AddressSchemaDTO implements AddressSchema {
     constructor(address: AddressSchemaDTO) {
         this.addressName = address.addressName;
-        this.customerName = address.customerName;
+        this.customerName = address?.customerName;
         this.phoneNumbers = address.phoneNumbers;
         this.provinceLevel = new ProvinceSchemaDTO(address.provinceLevel);
         this.districtLevel = new DistrictSchemaDTO(address.districtLevel);
@@ -86,8 +87,8 @@ export class AddressSchemaDTO implements AddressSchema {
     @IsNotEmpty()
     addressName: string;
 
-    @ApiProperty({ description: 'The name of customer', example: 'John Doe' })
-    @IsString()
+    @ApiProperty({ description: 'The name of customer', example: 'John Doe', required: false })
+    @IsOptional()
     @IsNotEmpty()
     customerName: string;
 
@@ -121,7 +122,9 @@ export class AddressSchemaDTO implements AddressSchema {
 
     @ApiProperty({
         description: 'The boolean value to check if this address is default or not',
+        required: false,
     })
+    @IsOptional()
     @IsBoolean()
     @Transform(({ value }) => value === 'true')
     isDefault: boolean;
