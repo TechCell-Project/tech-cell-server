@@ -1,6 +1,5 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
-import { RpcException } from '@nestjs/microservices';
 import { ConfirmEmailRegisterDTO, ForgotPasswordEmailDTO } from './dtos';
 import { GMAIL_TRANSPORT, RESEND_TRANSPORT, SENDGRID_TRANSPORT } from './constants';
 import { MailerConfig } from './mail.config';
@@ -36,8 +35,10 @@ export class MailService {
                         'Your registration was successfully, please check your email to verify your registration',
                 };
             })
-            .catch((error) => {
-                throw new RpcException(new BadRequestException(error.message));
+            .catch(async (error) => {
+                this.logger.error(`Send mail failed: ${error.message}`);
+                this.logger.log('Switch to GMAIL_TRANSPORT');
+                return await this.sendMail(email, name, GMAIL_TRANSPORT);
             });
     }
 
@@ -61,8 +62,10 @@ export class MailService {
                     message: message,
                 };
             })
-            .catch((error) => {
+            .catch(async (error) => {
                 this.logger.error(`Send mail failed: ${error.message}`);
+                this.logger.log('Switch to GMAIL_TRANSPORT');
+                return await this.sendConfirmMail(email, emailContext, GMAIL_TRANSPORT);
             })
             .finally(() => {
                 return {
@@ -101,8 +104,13 @@ export class MailService {
                     message: message,
                 };
             })
-            .catch((error) => {
+            .catch(async (error) => {
                 this.logger.error(`Send mail failed: ${error.message}`);
+                this.logger.log('Switch to GMAIL_TRANSPORT');
+                return await this.sendForgotPasswordMail(
+                    { userEmail, firstName, otpCode },
+                    GMAIL_TRANSPORT,
+                );
             })
             .finally(() => {
                 return {
