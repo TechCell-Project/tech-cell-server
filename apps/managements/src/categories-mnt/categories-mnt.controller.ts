@@ -1,6 +1,6 @@
 import { Controller } from '@nestjs/common';
 import { Ctx, MessagePattern, RmqContext, Payload } from '@nestjs/microservices';
-import { RabbitMQService } from '@app/common';
+import { RabbitMQService } from '@app/common/RabbitMQ';
 import { CategoriesMntMessagePattern } from './categories-mnt.pattern';
 import { CategoriesMntService } from './categories-mnt.service';
 import { CreateCategoryRequestDTO, UpdateCategoryRequestDTO } from './dtos';

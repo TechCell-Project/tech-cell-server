@@ -1,5 +1,5 @@
 import { Controller } from '@nestjs/common';
-import { RabbitMQService } from '@app/common';
+import { RabbitMQService } from '@app/common/RabbitMQ';
 import { Ctx, MessagePattern, Payload, RmqContext } from '@nestjs/microservices';
 import { CategoriesSearchService } from './categories-search.service';
 import { CategoriesSearchMessagePattern } from './categories-search.pattern';

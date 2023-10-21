@@ -18,7 +18,7 @@ export class DistrictSchema {
 
 export class WardSchema {
     @Prop({ type: String })
-    ward_id: string;
+    ward_code: string;
 
     @Prop({ type: String })
     ward_name: string;

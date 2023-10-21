@@ -1,7 +1,8 @@
 import { NestFactory } from '@nestjs/core';
 import { TaskModule } from './task.module';
 import { Logger } from '@nestjs/common';
-import { RpcExceptionFilter, useRabbitMQ } from '@app/common';
+import { RpcExceptionFilter } from '@app/common';
+import { useRabbitMQ } from '@app/common/RabbitMQ';
 
 async function bootstrap(port: number) {
     const logger = new Logger('task');

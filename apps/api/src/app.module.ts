@@ -1,6 +1,8 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { RabbitMQModule, HealthModule, AppConfigModule } from '@app/common';
+import { AppConfigModule } from '@app/common';
+import { RabbitMQModule } from '@app/common/RabbitMQ';
+import { HealthModule } from '@app/common/HealthCheck';
 import Controller from './controllers';
 import {
     SEARCH_SERVICE,

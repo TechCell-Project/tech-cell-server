@@ -2,7 +2,8 @@ import { Module } from '@nestjs/common';
 import { ProductsModule } from '@app/resource/products';
 import { ProductsMntController } from './products-mnt.controller';
 import { ProductsMntService } from './products-mnt.service';
-import { RabbitMQService, RedisCacheModule } from '@app/common';
+import { RedisCacheModule } from '@app/common/RedisCache';
+import { RabbitMQService } from '@app/common/RabbitMQ';
 import { CloudinaryService } from '@app/third-party/cloudinary.com';
 import { AttributesModule, CategoriesModule } from '@app/resource';
 

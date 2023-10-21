@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
-import { AppConfigModule, RabbitMQModule, RabbitMQService, RedisCacheModule } from '@app/common';
+import { AppConfigModule } from '@app/common';
+import { RedisCacheModule } from '@app/common/RedisCache';
+import { RabbitMQModule, RabbitMQService } from '@app/common/RabbitMQ';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { UsersModule } from '@app/resource/users';
