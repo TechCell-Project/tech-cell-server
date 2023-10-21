@@ -88,9 +88,6 @@ services:
             - MONGODB_URI=mongodb://root:password123@mongodb-primary:27017/techcell-dev?directConnection=true&authMechanism=SCRAM-SHA-1&replicaSet=replicaset&authSource=admin
         env_file:
             - .env
-        volumes:
-            - .:/usr/src/techcell_app
-            - /usr/src/techcell_app/node_modules
         ports:
             - 8000:8000
         networks:
@@ -107,9 +104,6 @@ services:
             - MONGODB_URI=mongodb://root:password123@mongodb-primary:27017/techcell-dev?directConnection=true&authMechanism=SCRAM-SHA-1&replicaSet=replicaset&authSource=admin
         env_file:
             - .env
-        volumes:
-            - .:/usr/src/techcell_app
-            - /usr/src/techcell_app/node_modules
         networks:
             - techcell_backend
         restart: always
@@ -122,9 +116,6 @@ services:
             - RABBITMQ_URLS=amqp://techcell_server:techcell_server_9901@haproxy:5672
         env_file:
             - .env
-        volumes:
-            - .:/usr/src/techcell_app
-            - /usr/src/techcell_app/node_modules
         networks:
             - techcell_backend
         restart: always
@@ -138,9 +129,6 @@ services:
             - MONGODB_URI=mongodb://root:password123@mongodb-primary:27017/techcell-dev?directConnection=true&authMechanism=SCRAM-SHA-1&replicaSet=replicaset&authSource=admin
         env_file:
             - .env
-        volumes:
-            - .:/usr/src/techcell_app
-            - /usr/src/techcell_app/node_modules
         networks:
             - techcell_backend
         restart: always
@@ -154,9 +142,6 @@ services:
             - REDIS_HOST=redis
         env_file:
             - .env
-        volumes:
-            - .:/usr/src/techcell_app
-            - /usr/src/techcell_app/node_modules
         networks:
             - techcell_backend
         restart: always
@@ -171,9 +156,6 @@ services:
             - MONGODB_URI=mongodb://root:password123@mongodb-primary:27017/techcell-dev?directConnection=true&authMechanism=SCRAM-SHA-1&replicaSet=replicaset&authSource=admin
         env_file:
             - .env
-        volumes:
-            - .:/usr/src/techcell_app
-            - /usr/src/techcell_app/node_modules
         networks:
             - techcell_backend
         restart: always
@@ -187,9 +169,6 @@ services:
             - MONGODB_URI=mongodb://root:password123@mongodb-primary:27017/techcell-dev?directConnection=true&authMechanism=SCRAM-SHA-1&replicaSet=replicaset&authSource=admin
         env_file:
             - .env
-        volumes:
-            - .:/usr/src/techcell_app
-            - /usr/src/techcell_app/node_modules
         networks:
             - techcell_backend
         restart: always

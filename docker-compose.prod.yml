@@ -89,9 +89,6 @@ services:
         image: lehuygiang28/techcell_api
         env_file:
             - .env
-        volumes:
-            - .:/usr/src/techcell_app
-            - /usr/src/techcell_app/node_modules
         ports:
             - 8000:8000
         networks:
@@ -105,9 +102,6 @@ services:
         image: lehuygiang28/techcell_auth
         env_file:
             - .env
-        volumes:
-            - .:/usr/src/techcell_app
-            - /usr/src/techcell_app/node_modules
         networks:
             - techcell_backend
         restart: always
@@ -119,9 +113,6 @@ services:
         image: lehuygiang28/techcell_communications
         env_file:
             - .env
-        volumes:
-            - .:/usr/src/techcell_app
-            - /usr/src/techcell_app/node_modules
         networks:
             - techcell_backend
         restart: always
@@ -133,9 +124,6 @@ services:
         image: lehuygiang28/techcell_search
         env_file:
             - .env
-        volumes:
-            - .:/usr/src/techcell_app
-            - /usr/src/techcell_app/node_modules
         networks:
             - techcell_backend
         restart: always
@@ -147,9 +135,6 @@ services:
         image: lehuygiang28/techcell_utility
         env_file:
             - .env
-        volumes:
-            - .:/usr/src/techcell_app
-            - /usr/src/techcell_app/node_modules
         networks:
             - techcell_backend
         restart: always
@@ -161,9 +146,6 @@ services:
         image: lehuygiang28/techcell_managements
         env_file:
             - .env
-        volumes:
-            - .:/usr/src/techcell_app
-            - /usr/src/techcell_app/node_modules
         networks:
             - techcell_backend
         restart: always
@@ -175,9 +157,6 @@ services:
         image: lehuygiang28/techcell_order
         env_file:
             - .env
-        volumes:
-            - .:/usr/src/techcell_app
-            - /usr/src/techcell_app/node_modules
         networks:
             - techcell_backend
         restart: always
@@ -189,9 +168,6 @@ services:
         image: lehuygiang28/techcell_task
         env_file:
             - .env
-        volumes:
-            - .:/usr/src/techcell_app
-            - /usr/src/techcell_app/node_modules
         networks:
             - techcell_backend
         restart: always

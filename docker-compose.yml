@@ -84,9 +84,6 @@ services:
             dockerfile: ./apps/api/Dockerfile
         env_file:
             - .env
-        volumes:
-            - .:/usr/src/techcell_app
-            - /usr/src/techcell_app/node_modules
         ports:
             - 8000:8000
         networks:
@@ -99,9 +96,6 @@ services:
             dockerfile: ./apps/auth/Dockerfile
         env_file:
             - .env
-        volumes:
-            - .:/usr/src/techcell_app
-            - /usr/src/techcell_app/node_modules
         networks:
             - techcell_backend
         restart: always
@@ -112,9 +106,6 @@ services:
             dockerfile: ./apps/communications/Dockerfile
         env_file:
             - .env
-        volumes:
-            - .:/usr/src/techcell_app
-            - /usr/src/techcell_app/node_modules
         networks:
             - techcell_backend
         restart: always
@@ -125,9 +116,6 @@ services:
             dockerfile: ./apps/search/Dockerfile
         env_file:
             - .env
-        volumes:
-            - .:/usr/src/techcell_app
-            - /usr/src/techcell_app/node_modules
         networks:
             - techcell_backend
         restart: always
@@ -138,9 +126,6 @@ services:
             dockerfile: ./apps/utility/Dockerfile
         env_file:
             - .env
-        volumes:
-            - .:/usr/src/techcell_app
-            - /usr/src/techcell_app/node_modules
         networks:
             - techcell_backend
         restart: always
@@ -151,9 +136,6 @@ services:
             dockerfile: ./apps/managements/Dockerfile
         env_file:
             - .env
-        volumes:
-            - .:/usr/src/techcell_app
-            - /usr/src/techcell_app/node_modules
         networks:
             - techcell_backend
         restart: always
@@ -164,9 +146,6 @@ services:
             dockerfile: ./apps/order/Dockerfile
         env_file:
             - .env
-        volumes:
-            - .:/usr/src/techcell_app
-            - /usr/src/techcell_app/node_modules
         networks:
             - techcell_backend
         restart: always
