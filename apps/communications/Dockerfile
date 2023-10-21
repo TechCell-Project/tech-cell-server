@@ -19,6 +19,5 @@ COPY package.json yarn.lock ./
 RUN yarn install --prod
 
 COPY --from=build-stage /usr/src/app/dist ./dist
-COPY --from=build-stage /usr/src/app/mail-templates ./mail-templates
 
 CMD ["node", "dist/apps/communications/main"]
