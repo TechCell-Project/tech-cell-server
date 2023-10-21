@@ -60,7 +60,7 @@ export class ImagesController {
     constructor(@Inject(MANAGEMENTS_SERVICE) private readonly managementsService: ClientRMQ) {}
 
     static buildUploadImageUrl(req: Request, filename: string) {
-        return `${req.protocol}://${req.headers.host}/uploads/${filename}`;
+        return `${req.protocol}://${req.headers.host}/public/${filename}`;
     }
 
     @ApiOperation({
@@ -208,6 +208,7 @@ export class ImagesController {
         const imageUrls = images.map((image) =>
             ImagesController.buildUploadImageUrl(req, image.filename),
         );
+        console.log(imageUrls);
         return this.managementsService
             .send(ImagesMntMessagePattern.uploadArrayImage, { images, imageUrls })
             .pipe(catchException());

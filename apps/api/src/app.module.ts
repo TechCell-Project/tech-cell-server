@@ -46,10 +46,10 @@ import { ScheduleModule } from '@nestjs/schedule';
         HealthModule,
         MulterModule.registerAsync({
             useFactory: () => ({
-                dest: UploadConstants.uploadPath,
+                dest: UploadConstants.multerUploadTmpFolderDir,
                 storage: diskStorage({
                     destination: (req, file, cb) => {
-                        cb(null, UploadConstants.uploadPath);
+                        cb(null, UploadConstants.multerUploadTmpFolderDir);
                     },
                     filename: (req, file, cb) => {
                         cb(null, `${uuidv4()}-${Date.now()}-${file.originalname}`);
@@ -58,8 +58,8 @@ import { ScheduleModule } from '@nestjs/schedule';
             }),
         }),
         ServeStaticModule.forRoot({
-            rootPath: UploadConstants.uploadPath,
-            serveRoot: '/uploads/',
+            rootPath: UploadConstants.multerUploadTmpFolderDir,
+            serveRoot: '/public/',
             serveStaticOptions: {
                 index: false,
             },

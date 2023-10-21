@@ -8,14 +8,14 @@ import { join } from 'path';
 @Injectable()
 export class ApiTaskService {
     private readonly logger = new Logger(ApiTaskService.name);
-    private readonly uploadFolder = UploadConstants.uploadPath;
+    private readonly multerTmpDir = UploadConstants.multerUploadTmpFolderDir;
 
     /**
      * Clean the upload folder every 30 minutes to remove files older than 30 minutes
      */
     @Cron('*/30 * * * *')
     async cleanUploadsFolder() {
-        const cleanFolder = this.uploadFolder;
+        const cleanFolder = this.multerTmpDir;
         this.logger.log(`Start clean folder ${cleanFolder}`);
 
         const now = Date.now();
