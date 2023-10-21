@@ -112,11 +112,11 @@ services:
             - techcell_backend
         restart: always
 
-    mail:
+    communications:
         build:
             context: ./
-            dockerfile: ./apps/mail/Dockerfile
-        image: lehuygiang28/techcell_mail
+            dockerfile: ./apps/communications/Dockerfile
+        image: lehuygiang28/techcell_communications
         env_file:
             - .env
         volumes:

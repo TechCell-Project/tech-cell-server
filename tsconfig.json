@@ -31,14 +31,14 @@
             "~apps/search/*": ["apps/search/src/*"],
             "~apps/utility": ["apps/utility/src"],
             "~apps/utility/*": ["apps/utility/src/*"],
-            "~apps/mail": ["apps/mail/src"],
-            "~apps/mail/*": ["apps/mail/src/*"],
             "~apps/task": ["apps/task/src"],
             "~apps/task/*": ["apps/task/src/*"],
             "~apps/managements": ["apps/managements/src"],
             "~apps/managements/*": ["apps/managements/src/*"],
             "~apps/order": ["apps/order/src"],
-            "~apps/order/*": ["apps/order/src/*"]
+            "~apps/order/*": ["apps/order/src/*"],
+            "~apps/communications": ["apps/communications/src"],
+            "~apps/communications/*": ["apps/communications/src/*"]
         }
     }
 }

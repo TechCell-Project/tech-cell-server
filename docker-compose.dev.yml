@@ -114,10 +114,10 @@ services:
             - techcell_backend
         restart: always
 
-    mail:
+    communications:
         build:
             context: ./
-            dockerfile: ./apps/mail/Dockerfile
+            dockerfile: ./apps/communications/Dockerfile
         environment:
             - RABBITMQ_URLS=amqp://techcell_server:techcell_server_9901@haproxy:5672
         env_file:

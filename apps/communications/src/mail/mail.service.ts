@@ -2,23 +2,37 @@ import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
 import { RpcException } from '@nestjs/microservices';
 import { ConfirmEmailRegisterDTO, ForgotPasswordEmailDTO } from './dtos';
+import { GMAIL_TRANS, RESEND_TRANS, SENDGRID_TRANS } from './constants';
+import { MailerConfig } from './mail.config';
+import { join } from 'path';
 
 @Injectable()
 export class MailService {
     constructor(private mailerService: MailerService) {}
 
+    private readonly logger = new Logger(MailService.name);
+    private readonly TEMPLATES_PATH = join(__dirname, 'mail/templates');
+
+    setTransport() {
+        const config = new MailerConfig();
+        this.mailerService.addTransporter(SENDGRID_TRANS, config.SendGridTransport);
+        this.mailerService.addTransporter(RESEND_TRANS, config.ResendTransport);
+        this.mailerService.addTransporter(GMAIL_TRANS, config.GmailTransport);
+    }
+
     async sendMail(email: string, name: string) {
+        this.setTransport();
         return await this.mailerService
             .sendMail({
                 to: email,
                 subject: 'Greeting from NestJS NodeMailer',
-                template: './test',
+                template: 'test',
                 context: {
                     name: name,
                 },
             })
             .then(() => {
-                Logger.log(`Mail sent:: ${email}`);
+                this.logger.log(`Mail sent:: ${email}`);
                 return {
                     message:
                         'Your registration was successfully, please check your email to verify your registration',
@@ -35,17 +49,17 @@ export class MailService {
             .sendMail({
                 to: email,
                 subject: 'Confirm your registration',
-                template: './confirm-register',
+                template: 'confirm-register',
                 context: emailContext,
             })
             .then(() => {
-                Logger.log(`Mail sent: ${email}`);
+                this.logger.log(`Mail sent: ${email}`);
                 return {
                     message: message,
                 };
             })
             .catch((error) => {
-                Logger.error(`Send mail failed: ${error.message}`);
+                this.logger.error(`Send mail failed: ${error.message}`);
             })
             .finally(() => {
                 return {
@@ -60,7 +74,7 @@ export class MailService {
             .sendMail({
                 to: userEmail,
                 subject: 'Confirm your reset password',
-                template: './forgot-password',
+                template: 'forgot-password',
                 context: {
                     userEmail,
                     firstName,
@@ -69,19 +83,19 @@ export class MailService {
                 attachments: [
                     {
                         filename: 'image-1.png',
-                        path: __dirname + '/templates/images/image-1.png',
+                        path: join(this.TEMPLATES_PATH, 'images/image-1.png'),
                         cid: 'image1',
                     },
                 ],
             })
             .then(() => {
-                Logger.log(`Mail sent: ${userEmail}`);
+                this.logger.log(`Mail sent: ${userEmail}`);
                 return {
                     message: message,
                 };
             })
             .catch((error) => {
-                Logger.error(`Send mail failed: ${error.message}`);
+                this.logger.error(`Send mail failed: ${error.message}`);
             })
             .finally(() => {
                 return {

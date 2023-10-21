@@ -8,7 +8,7 @@ RUN yarn install
 
 COPY . . 
 
-RUN yarn run build mail
+RUN yarn run build communications
 
 FROM node:18-alpine AS production
 
@@ -19,5 +19,6 @@ COPY package.json yarn.lock ./
 RUN yarn install --prod
 
 COPY --from=build-stage /usr/src/app/dist ./dist
+COPY --from=build-stage /usr/src/app/mail-templates ./mail-templates
 
-CMD ["node", "dist/apps/mail/main"]
+CMD ["node", "dist/apps/communications/main"]

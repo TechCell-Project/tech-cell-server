@@ -9,7 +9,7 @@ import { AccessTokenStrategy, GoogleStrategy, FacebookStrategy } from './strateg
 import { JwtModule } from '@nestjs/jwt';
 import { JwtGuard } from './guards';
 import { OtpModule } from '@app/resource/otp';
-import { MAIL_SERVICE } from '@app/common/constants';
+import { COMMUNICATIONS_SERVICE } from '@app/common/constants';
 
 @Module({
     imports: [
@@ -19,7 +19,10 @@ import { MAIL_SERVICE } from '@app/common/constants';
         JwtModule.register({}),
         RedisCacheModule,
         RabbitMQModule,
-        RabbitMQModule.registerRmq(MAIL_SERVICE, process.env.RABBITMQ_MAIL_QUEUE),
+        RabbitMQModule.registerRmq(
+            COMMUNICATIONS_SERVICE,
+            process.env.RABBITMQ_COMMUNICATIONS_QUEUE,
+        ),
     ],
     controllers: [AuthController],
     providers: [

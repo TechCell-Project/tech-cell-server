@@ -22,7 +22,11 @@ import {
 } from '~apps/auth/dtos';
 import { User } from '@app/resource/users/schemas';
 import { RpcException } from '@nestjs/microservices';
-import { ConfirmEmailRegisterDTO, ForgotPasswordEmailDTO, MailEventPattern } from '~apps/mail';
+import {
+    ConfirmEmailRegisterDTO,
+    ForgotPasswordEmailDTO,
+    MailEventPattern,
+} from '~apps/communications/mail';
 import { OtpType } from '@app/resource/otp';
 import { IUserFacebookResponse, IUserGoogleResponse, ITokenVerifiedResponse } from './interfaces';
 import { buildUniqueUserNameFromEmail, delStartWith, generateRandomString } from '@app/common';
@@ -132,7 +136,7 @@ export class AuthService extends AuthUtilService {
         const emailContext: ConfirmEmailRegisterDTO = {
             otpCode: otp.otpCode,
         };
-        this.mailService.emit(MailEventPattern.sendMailConfirm, {
+        this.communicationsService.emit(MailEventPattern.sendMailConfirm, {
             email: userCreated.email,
             emailContext,
         });
@@ -181,7 +185,7 @@ export class AuthService extends AuthUtilService {
         });
 
         await this.limitEmailSent(user.email);
-        this.mailService.emit(MailEventPattern.sendMailConfirm, {
+        this.communicationsService.emit(MailEventPattern.sendMailConfirm, {
             email: user.email,
             emailContext,
         });
@@ -232,7 +236,9 @@ export class AuthService extends AuthUtilService {
             firstName: userFound.firstName,
         };
 
-        this.mailService.emit(MailEventPattern.sendMailForgotPassword, { ...emailContext });
+        this.communicationsService.emit(MailEventPattern.sendMailForgotPassword, {
+            ...emailContext,
+        });
 
         return {
             message: 'An email has already been sent to you email address, please check your email',
