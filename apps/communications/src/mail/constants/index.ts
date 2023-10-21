@@ -1,3 +1,3 @@
-export const SENDGRID_TRANS = 'sendgrid';
-export const RESEND_TRANS = 'resend';
-export const GMAIL_TRANS = 'gmail';
+export const SENDGRID_TRANSPORT = 'sendgrid';
+export const RESEND_TRANSPORT = 'resend';
+export const GMAIL_TRANSPORT = 'gmail';
