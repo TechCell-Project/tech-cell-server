@@ -23,7 +23,7 @@ import { diskStorage } from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import { UploadConstants } from '@app/common/constants/upload.constant';
 import { ServeStaticModule } from '@nestjs/serve-static';
-import { ApiTaskService } from './api-task.service';
+import { ApiTaskService } from './services';
 import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
