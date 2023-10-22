@@ -210,8 +210,8 @@ export class UsersMntService extends UsersMntUtilService {
         delete oldUser.updatedAt;
 
         if (dataUpdate?.userName) {
-            const user = await this.usersService.getUser({ userName: dataUpdate.userName });
-            if (user) {
+            const isUsernameExist = await this.usersService.isUserNameExist(dataUpdate.userName);
+            if (isUsernameExist) {
                 throw new RpcException(new BadRequestException('Username already exists'));
             }
         }
