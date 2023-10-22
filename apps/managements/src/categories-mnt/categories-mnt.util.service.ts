@@ -2,7 +2,7 @@ import { CategoriesService } from '@app/resource/categories';
 import { AttributesService } from '@app/resource/attributes';
 import { Inject, Injectable } from '@nestjs/common';
 import { Store } from 'cache-manager';
-import { REDIS_CACHE } from '~/constants';
+import { REDIS_CACHE } from '@app/common/constants';
 
 @Injectable()
 export class CategoriesMntUtilService {

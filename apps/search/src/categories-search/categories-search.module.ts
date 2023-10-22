@@ -1,6 +1,7 @@
 import { CategoriesModule } from '@app/resource';
 import { Module } from '@nestjs/common';
-import { RabbitMQService, RedisCacheModule } from '@app/common';
+import { RedisCacheModule } from '@app/common/RedisCache';
+import { RabbitMQService } from '@app/common/RabbitMQ';
 import { CategoriesSearchService } from './categories-search.service';
 import { CategoriesSearchController } from './categories-search.controller';
 

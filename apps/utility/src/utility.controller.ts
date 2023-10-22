@@ -1,7 +1,7 @@
 import { Controller } from '@nestjs/common';
 import { UtilityService } from './utility.service';
 import { UtilityEventPattern } from './utility.pattern';
-import { RabbitMQService } from '@app/common';
+import { RabbitMQService } from '@app/common/RabbitMQ';
 import { Ctx, RmqContext, Payload, EventPattern } from '@nestjs/microservices';
 import { BotGateway } from '@app/common/Discordjs/bot/bot.gateway';
 import { LogType } from './enums';

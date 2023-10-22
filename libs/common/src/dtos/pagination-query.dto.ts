@@ -10,8 +10,8 @@ export class PaginationQuery {
      * @param query
      */
     constructor(query: Partial<PaginationQuery>) {
-        this.page = query.page ? Number(query.page) : 1;
-        this.pageSize = query.pageSize ? Number(query.pageSize) : 10;
+        this.page = query?.page ? Number(query.page) : 1;
+        this.pageSize = query?.pageSize ? Number(query.pageSize) : 10;
     }
 
     @ApiProperty({

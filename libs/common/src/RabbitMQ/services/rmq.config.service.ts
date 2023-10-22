@@ -1,6 +1,6 @@
 import { INestApplication, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { RabbitMQService } from '@app/common';
+import { RabbitMQService } from './rmq.service';
 import { RmqOptions } from '@nestjs/microservices';
 
 const logger = new Logger('RabbitMQ');

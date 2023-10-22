@@ -1,8 +1,8 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { REDIS_CACHE } from '~/constants';
+import { REDIS_CACHE } from '@app/common/constants';
 import { User, UsersService } from '@app/resource/users';
 import { Store } from 'cache-manager';
-import { GetUsersDTO } from './dtos';
+import { GetUsersQueryDTO } from './dtos';
 import { FilterQuery, QueryOptions } from 'mongoose';
 import {
     UserSearchBlock,
@@ -23,7 +23,7 @@ export class UsersSearchUtilService {
         this.logger = new Logger(UsersSearchUtilService.name);
     }
 
-    protected buildFilterQuery(payload: GetUsersDTO) {
+    protected buildFilterQuery(payload: GetUsersQueryDTO) {
         const filterQuery: FilterQuery<User> = {};
 
         if (payload?.keyword) {
@@ -88,7 +88,7 @@ export class UsersSearchUtilService {
         return filterQuery;
     }
 
-    protected buildQueryOptions(payload: GetUsersDTO) {
+    protected buildQueryOptions(payload: GetUsersQueryDTO) {
         const {
             page,
             pageSize,

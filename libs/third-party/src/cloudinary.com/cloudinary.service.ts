@@ -46,8 +46,8 @@ export class CloudinaryService {
         });
     }
 
-    getImageByPublicId(publicId: string): Promise<any> {
-        return new Promise<any>((resolve, reject) => {
+    getImageByPublicId(publicId: string): Promise<CloudinaryResponse> {
+        return new Promise<CloudinaryResponse>((resolve, reject) => {
             cloudinary.api.resource(publicId, (error, result) => {
                 if (error) {
                     reject(error);

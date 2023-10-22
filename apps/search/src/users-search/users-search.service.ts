@@ -2,13 +2,13 @@ import { RpcException } from '@nestjs/microservices';
 import { FilterQuery, ProjectionFields, QueryOptions, Types } from 'mongoose';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ListDataResponseDTO } from '@app/common/dtos';
-import { GetUsersDTO } from './dtos';
+import { GetUsersQueryDTO } from './dtos';
 import { User } from '@app/resource/users';
 import { UsersSearchUtilService } from './users-search.util.service';
 
 @Injectable()
 export class UsersSearchService extends UsersSearchUtilService {
-    async getUsers(payload: GetUsersDTO) {
+    async getUsers(payload: GetUsersQueryDTO) {
         const { page = 1, pageSize = 10 } = payload;
 
         const filterQuery: FilterQuery<User> = this.buildFilterQuery(payload);

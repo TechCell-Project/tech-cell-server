@@ -11,25 +11,26 @@ import {
     Delete,
 } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
-import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~/constants';
+import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '@app/common/constants';
 import { AdminGuard, catchException } from '@app/common';
 import {
     AttributesSearchMessagePattern,
     GetAttributeByIdRequestDTO,
     GetAttributeByLabelRequestDTO,
     GetAttributesRequestDTO,
-} from '~/apps/search/attributes-search';
+} from '~apps/search/attributes-search';
 import {
     DeleteAttributeByIdRequestDTO,
     UpdateAttributeRequestDTO,
     CreateAttributeRequestDTO,
-} from '~/apps/managements/attributes-mnt/dtos';
-import { AttributesMntMessagePattern } from '~/apps/managements/attributes-mnt/attributes-mnt.pattern';
+} from '~apps/managements/attributes-mnt/dtos';
+import { AttributesMntMessagePattern } from '~apps/managements/attributes-mnt/attributes-mnt.pattern';
 import {
     ApiBadRequestResponse,
     ApiCreatedResponse,
     ApiNotFoundResponse,
     ApiOkResponse,
+    ApiOperation,
     ApiTags,
 } from '@nestjs/swagger';
 import { ListDataResponseDTO } from '@app/common/dtos';
@@ -42,6 +43,10 @@ export class AttributesController {
         @Inject(SEARCH_SERVICE) private readonly searchService: ClientRMQ,
     ) {}
 
+    @ApiOperation({
+        summary: 'Get list of attribute',
+        description: 'Get list of attribute',
+    })
     @ApiOkResponse({ type: ListDataResponseDTO, description: 'Get attributes successfully!' })
     @ApiNotFoundResponse({ description: 'Attributes not found!' })
     @Get('/')
@@ -51,6 +56,10 @@ export class AttributesController {
             .pipe(catchException());
     }
 
+    @ApiOperation({
+        summary: 'Get attribute by id',
+        description: 'Get attribute by id',
+    })
     @ApiOkResponse({ description: 'Get attribute by id successfully!' })
     @ApiNotFoundResponse({ description: 'Attribute not found!' })
     @Get('/:attributeId')
@@ -60,6 +69,10 @@ export class AttributesController {
             .pipe(catchException());
     }
 
+    @ApiOperation({
+        summary: 'Get attribute by label',
+        description: 'Get attribute by label',
+    })
     @ApiOkResponse({ description: 'Get attribute by label successfully!' })
     @ApiNotFoundResponse({ description: 'Attribute not found!' })
     @Get('/label/:label')
@@ -69,6 +82,10 @@ export class AttributesController {
             .pipe(catchException());
     }
 
+    @ApiOperation({
+        summary: 'Create attribute',
+        description: 'Create attribute',
+    })
     @ApiCreatedResponse({ description: 'The attribute has been successfully created.' })
     @ApiBadRequestResponse({ description: 'Something wrong, re-check your input.' })
     @UseGuards(AdminGuard)
@@ -79,11 +96,15 @@ export class AttributesController {
             .pipe(catchException());
     }
 
+    @ApiOperation({
+        summary: 'Update attribute',
+        description: 'Update attribute',
+    })
     @ApiOkResponse({ description: 'Update attribute description successfully!' })
     @ApiBadRequestResponse({ description: 'Something wrong, re-check your input.' })
     @UseGuards(AdminGuard)
     @Patch('/:attributeId')
-    async updateAttributeDescription(
+    async updateAttributeInfo(
         @Param('attributeId') attributeId: string,
         @Body() { label, name, description }: UpdateAttributeRequestDTO,
     ) {
@@ -97,6 +118,10 @@ export class AttributesController {
             .pipe(catchException());
     }
 
+    @ApiOperation({
+        summary: 'Delete attribute',
+        description: 'Delete attribute',
+    })
     @ApiOkResponse({ description: 'Delete attribute successfully!' })
     @ApiBadRequestResponse({ description: 'Something wrong, re-check your input.' })
     @UseGuards(AdminGuard)

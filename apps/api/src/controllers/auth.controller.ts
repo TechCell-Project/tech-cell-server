@@ -10,7 +10,7 @@ import {
     Request,
 } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
-import { AUTH_SERVICE } from '~/constants';
+import { AUTH_SERVICE } from '@app/common/constants';
 import {
     ApiTags,
     ApiBody,
@@ -27,6 +27,7 @@ import {
     ApiOAuth2,
     ApiBearerAuth,
     ApiExcludeEndpoint,
+    ApiOperation,
 } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import {
@@ -40,19 +41,19 @@ import {
     EmailRequestDTO,
     ChangePasswordRequestDTO,
     GoogleLoginRequestDTO,
-} from '~/apps/auth/dtos';
+} from '~apps/auth/dtos';
 import {
     GoogleOAuthGuard,
     FacebookOAuthGuard,
     IUserFacebookResponse,
     IUserGoogleResponse,
     AuthMessagePattern,
-} from '~/apps/auth';
+} from '~apps/auth';
 import { catchException } from '@app/common';
 import { CurrentUser } from '@app/common/decorators';
 import { TCurrentUser } from '@app/common/types';
 import { AuthGuard } from '@app/common/guards';
-import { ACCESS_TOKEN_NAME } from '~/constants/api.constant';
+import { ACCESS_TOKEN_NAME } from '@app/common/constants/api.constant';
 
 @ApiTags('authentication')
 @ApiTooManyRequestsResponse({ description: 'Too many requests, please try again later' })
@@ -60,6 +61,10 @@ import { ACCESS_TOKEN_NAME } from '~/constants/api.constant';
 export class AuthController {
     constructor(@Inject(AUTH_SERVICE) private readonly authService: ClientRMQ) {}
 
+    @ApiOperation({
+        summary: 'Login',
+        description: 'Login',
+    })
     @ApiBody({ type: LoginRequestDTO })
     @ApiOkResponse({
         description: 'Login successfully',
@@ -86,6 +91,10 @@ export class AuthController {
             .pipe(catchException());
     }
 
+    @ApiOperation({
+        summary: 'Check email is exist or not',
+        description: 'Check email is exist or not',
+    })
     @ApiBody({ type: EmailRequestDTO })
     @ApiOkResponse({ description: 'Email is not in use. Can register' })
     @ApiConflictResponse({
@@ -100,6 +109,10 @@ export class AuthController {
             .pipe(catchException());
     }
 
+    @ApiOperation({
+        summary: 'Register new user',
+        description: 'Register new user',
+    })
     @ApiBody({ type: RegisterRequestDTO })
     @ApiCreatedResponse({
         description: 'User created successfully',
@@ -127,6 +140,10 @@ export class AuthController {
             .pipe(catchException());
     }
 
+    @ApiOperation({
+        summary: 'Verify email registration',
+        description: 'Verify email registration',
+    })
     @ApiBody({ type: VerifyEmailRequestDTO })
     @ApiOkResponse({ description: 'Email verified' })
     @ApiUnauthorizedResponse({ description: 'Email verify failed' })
@@ -141,6 +158,10 @@ export class AuthController {
             .pipe(catchException());
     }
 
+    @ApiOperation({
+        summary: 'Resend verify email otp',
+        description: 'Resend verify email otp',
+    })
     @ApiBody({ type: EmailRequestDTO })
     @ApiOkResponse({
         description: 'An email has already been sent to you email address, please check your email',
@@ -156,6 +177,10 @@ export class AuthController {
             .pipe(catchException());
     }
 
+    @ApiOperation({
+        summary: 'Get new token',
+        description: 'Get new token',
+    })
     @ApiBody({ type: NewTokenRequestDTO })
     @ApiCreatedResponse({
         description: 'New token created successfully',
@@ -175,6 +200,10 @@ export class AuthController {
             .pipe(catchException());
     }
 
+    @ApiOperation({
+        summary: 'Forgot password',
+        description: 'Forgot password',
+    })
     @ApiBody({ type: ForgotPasswordDTO })
     @ApiOkResponse({ description: 'Check your email to verify your password' })
     @ApiBadRequestResponse({ description: 'Your info is invalid' })
@@ -187,6 +216,10 @@ export class AuthController {
             .pipe(catchException());
     }
 
+    @ApiOperation({
+        summary: 'Verify forgot password',
+        description: 'Verify forgot password',
+    })
     @ApiBody({ type: VerifyForgotPasswordDTO })
     @ApiOkResponse({ description: 'Password change successful' })
     @ApiNotFoundResponse({ description: 'Your information is not found' })
@@ -206,6 +239,10 @@ export class AuthController {
             .pipe(catchException());
     }
 
+    @ApiOperation({
+        summary: 'Change password',
+        description: 'Change password',
+    })
     @ApiBody({ type: ChangePasswordRequestDTO })
     @ApiOkResponse({ description: 'Password change successful' })
     @ApiNotFoundResponse({ description: 'Your information is not found' })
@@ -223,6 +260,10 @@ export class AuthController {
             .pipe(catchException());
     }
 
+    @ApiOperation({
+        summary: 'Login with google',
+        description: 'Login with google',
+    })
     @ApiOkResponse({
         type: UserDataResponseDTO,
     })

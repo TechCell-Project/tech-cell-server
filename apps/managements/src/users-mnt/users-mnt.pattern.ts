@@ -4,6 +4,8 @@ export const UsersMntMessagePattern = {
     unblockUser: { cmd: 'mnt_unblock_user' },
     changeRoleUser: { cmd: 'mnt_change_role_user' },
     generateUsers: { cmd: 'mnt_gen_user_gen_clone' },
+    updateUserInfo: { cmd: 'mnt_profile_update_user_info' },
+    updateUserAddress: { cmd: 'mnt_profile_update_user_address' },
 };
 
 export const UsersMntEventPattern = {};

@@ -1,6 +1,6 @@
 import { Controller } from '@nestjs/common';
 import { Ctx, MessagePattern, RmqContext, Payload } from '@nestjs/microservices';
-import { RabbitMQService } from '@app/common';
+import { RabbitMQService } from '@app/common/RabbitMQ';
 import { AttributesSearchMessagePattern } from './attributes-search.pattern';
 import { GetAttributesRequestDTO } from './dtos';
 import { AttributesSearchService } from './attributes-search.service';

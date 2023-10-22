@@ -16,7 +16,7 @@ import { Type } from 'class-transformer';
 import { ProductStatus } from '../enums';
 import { AttributeSchema, VariationSchema } from '../schemas';
 import { ImageSchema } from '../schemas/image.schema';
-import { CreateProductRequestDTO } from '~/apps/managements/products-mnt/dtos';
+import { CreateProductRequestDTO } from '~apps/managements/products-mnt/dtos';
 import { ApiProperty } from '@nestjs/swagger';
 import { Types } from 'mongoose';
 

@@ -2,20 +2,41 @@ name: Build all Nest services
 
 on:
   push:
-    branches: [ stable, development ]
+    branches: [stable, development]
   pull_request:
-    branches: [ '*' ]
+    branches: ["*"]
 
 jobs:
-  build:
+  check-runner:
     runs-on: ubuntu-latest
+    outputs:
+      runner-label: ${{ steps.set-runner.outputs.runner-label }}
 
     steps:
+      - name: Set runner
+        id: set-runner
+        run: |
+          runners=$(curl -s -H "Accept: application/vnd.github+json" -H "Authorization: token ${{ secrets.REPO_ACCESS_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/actions/runners")
+          available=$(echo "$runners" | jq '.runners[] | select(.status == "online" and .busy == false and .labels[] .name == "self-hosted")')
+          if [ -n "$available" ]; then
+            echo "runner-label=self-hosted" >> $GITHUB_OUTPUT
+          else
+            echo "runner-label=ubuntu-latest" >> $GITHUB_OUTPUT
+          fi
+
+  build:
+    needs: check-runner
+    runs-on: ${{ needs.check-runner.outputs.runner-label }}
+
+    steps:
+      - name: Log runner label
+        run: echo "Running on runner ${{ needs.check-runner.outputs.runner-label }}"
+
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Use Node.js 18.x
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: 18.x
 

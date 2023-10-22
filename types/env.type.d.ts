@@ -163,7 +163,7 @@ declare namespace NodeJS {
         RABBITMQ_UTILITY_QUEUE: string;
         RABBITMQ_SEARCH_QUEUE: string;
         RABBITMQ_AUTH_QUEUE: string;
-        RABBITMQ_MAIL_QUEUE: string;
+        RABBITMQ_COMMUNICATIONS_QUEUE: string;
         RABBITMQ_MANAGEMENTS_QUEUE: string;
         RABBITMQ_ORDER_QUEUE: string;
         RABBITMQ_TASK_QUEUE: string;

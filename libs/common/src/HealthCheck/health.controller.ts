@@ -8,6 +8,7 @@ import {
     MicroserviceHealthIndicator,
 } from '@nestjs/terminus';
 import { Transport, RmqOptions, RedisOptions } from '@nestjs/microservices';
+import { ApiOperation } from '@nestjs/swagger';
 
 @Controller('health')
 export class HealthController {
@@ -19,6 +20,10 @@ export class HealthController {
         private microservice: MicroserviceHealthIndicator,
     ) {}
 
+    @ApiOperation({
+        summary: 'Health check',
+        description: 'Get health check',
+    })
     @Get()
     @HealthCheck()
     readiness() {

@@ -1,6 +1,6 @@
 import { delStartWith } from '@app/common/utils';
 import { Store } from 'cache-manager';
-import { USERS_ALL, USERS_CACHE_PREFIX, USERS_PAGE, USERS_PAGESIZE } from '~/constants';
+import { USERS_ALL, USERS_CACHE_PREFIX, USERS_PAGE, USERS_PAGESIZE } from '@app/common/constants';
 
 export function buildCacheKeyUsers({
     page,

@@ -6,6 +6,7 @@ import { GhnProvinceDTO } from './dtos/province.dto';
 import { GhnDistrictDTO } from './dtos/district.dto';
 import { GhnWardDTO } from './dtos/ward.dto';
 import { GetShippingFeeDTO } from './dtos/get-shipping-fee.dto';
+import { TGhnDistrict, TGhnProvince, TGhnWard } from './types';
 
 export class GhnCoreService {
     private GHN_URL: string = process.env.GHN_URL;
@@ -26,7 +27,7 @@ export class GhnCoreService {
         this.httpService.axiosRef.defaults.baseURL = this.GHN_URL;
     }
 
-    protected async getProvinces(): Promise<GhnProvinceDTO[]> {
+    public async getProvinces(): Promise<GhnProvinceDTO[]> {
         const url = `/shiip/public-api/master-data/province`;
         const data = await firstValueFrom(
             this.httpService.get(url).pipe(
@@ -35,7 +36,7 @@ export class GhnCoreService {
                     throw new Error(error.message);
                 }),
                 map((response) =>
-                    (response.data.data as GhnProvinceDTO[]).map(
+                    (response.data.data as TGhnProvince[]).map(
                         (province) => new GhnProvinceDTO(province),
                     ),
                 ),
@@ -44,7 +45,7 @@ export class GhnCoreService {
         return data;
     }
 
-    protected async getDistricts(provinceId: number): Promise<GhnDistrictDTO[]> {
+    public async getDistricts(provinceId: number): Promise<GhnDistrictDTO[]> {
         const url = `/shiip/public-api/master-data/district`;
         const data = await firstValueFrom(
             this.httpService
@@ -59,7 +60,7 @@ export class GhnCoreService {
                         throw new Error(error.message);
                     }),
                     map((response) =>
-                        (response.data.data as GhnDistrictDTO[]).map(
+                        (response.data.data as TGhnDistrict[]).map(
                             (district) => new GhnDistrictDTO(district),
                         ),
                     ),
@@ -69,7 +70,7 @@ export class GhnCoreService {
         return data;
     }
 
-    protected async getWards(districtId: number): Promise<GhnWardDTO[]> {
+    public async getWards(districtId: number): Promise<GhnWardDTO[]> {
         const url = `/shiip/public-api/master-data/ward`;
         const data = await firstValueFrom(
             this.httpService
@@ -84,7 +85,7 @@ export class GhnCoreService {
                         throw new Error(error.message);
                     }),
                     map((response) =>
-                        (response.data.data as GhnWardDTO[]).map((ward) => new GhnWardDTO(ward)),
+                        (response.data.data as TGhnWard[]).map((ward) => new GhnWardDTO(ward)),
                     ),
                 ),
         );

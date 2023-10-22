@@ -2,7 +2,8 @@ import { Module } from '@nestjs/common';
 import { TerminusModule } from '@nestjs/terminus';
 import { HttpModule } from '@nestjs/axios';
 import { HealthController } from './health.controller';
-import { MongodbModule, RabbitMQModule } from '@app/common';
+import { MongodbModule } from '@app/common';
+import { RabbitMQModule } from '@app/common/RabbitMQ';
 
 @Module({
     imports: [

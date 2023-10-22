@@ -8,16 +8,22 @@ import { CategoriesController } from './categories.controller';
 import { CartsController } from './carts.controller';
 import { ImagesController } from './images.controller';
 import { AdminController } from './admin.controller';
+import { ProfileController } from './profile.controller';
+import { AddressController } from './address.controller';
+import { DiscountsController } from './discounts.controller';
 
-export default [
+export const ListControllers = [
     AdminController,
     AuthController,
+    ProfileController,
     ImagesController,
     UsersController,
     ProductsController,
     CategoriesController,
     AttributesController,
     CartsController,
+    AddressController,
     OrderController,
+    DiscountsController,
     AppController,
 ];

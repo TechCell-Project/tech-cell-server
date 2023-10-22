@@ -7,7 +7,7 @@ import {
     PRODUCTS_ALL,
     PRODUCTS_PAGESIZE,
     PRODUCTS_PAGE,
-} from '~/constants';
+} from '@app/common/constants';
 import { Store } from 'cache-manager';
 
 @Injectable()

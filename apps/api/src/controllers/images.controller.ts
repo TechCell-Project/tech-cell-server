@@ -14,6 +14,7 @@ import {
     UseGuards,
     UseInterceptors,
     UploadedFiles,
+    Req,
 } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
@@ -31,16 +32,17 @@ import {
     ApiTags,
     ApiTooManyRequestsResponse,
 } from '@nestjs/swagger';
-import { ImageUploadedResponseDTO } from '~/apps/managements/images-mnt/dtos/image-uploaded-response.dto';
-import { PublicIdDTO } from '~/apps/managements/images-mnt/dtos/publicId.dto';
-import { ImagesMntMessagePattern } from '~/apps/managements/images-mnt/images-mnt.pattern';
+import { ImageUploadedResponseDTO } from '~apps/managements/images-mnt/dtos/image-uploaded-response.dto';
+import { PublicIdDTO } from '~apps/managements/images-mnt/dtos/publicId.dto';
+import { ImagesMntMessagePattern } from '~apps/managements/images-mnt/images-mnt.pattern';
 import {
     ARRAY_IMAGE_FILE_MAX_COUNT,
     IMAGE_FILE_MAX_SIZE_IN_BYTES,
     IMAGE_FILE_MAX_SIZE_IN_MB,
     SINGLE_IMAGE_FILE_MAX_COUNT,
-} from '~/constants/api.constant';
-import { MANAGEMENTS_SERVICE } from '~/constants/services.constant';
+} from '@app/common/constants/api.constant';
+import { MANAGEMENTS_SERVICE } from '@app/common/constants/services.constant';
+import { Request } from 'express';
 
 @ApiBadRequestResponse({
     description: 'Invalid request',
@@ -56,6 +58,10 @@ import { MANAGEMENTS_SERVICE } from '~/constants/services.constant';
 @Controller('images')
 export class ImagesController {
     constructor(@Inject(MANAGEMENTS_SERVICE) private readonly managementsService: ClientRMQ) {}
+
+    static buildUploadImageUrl(req: Request, filename: string) {
+        return `${req.protocol}://${req.headers.host}/public/${filename}`;
+    }
 
     @ApiOperation({
         summary: 'Get image by public id',
@@ -130,9 +136,11 @@ export class ImagesController {
             }),
         )
         image: Express.Multer.File,
+        @Req() req: Request,
     ) {
+        const imageUrl = ImagesController.buildUploadImageUrl(req, image.filename);
         return this.managementsService
-            .send(ImagesMntMessagePattern.uploadSingleImage, { image })
+            .send(ImagesMntMessagePattern.uploadSingleImage, { image, imageUrl })
             .pipe(catchException());
     }
 
@@ -195,9 +203,14 @@ export class ImagesController {
             }),
         )
         images: Express.Multer.File[],
+        @Req() req: Request,
     ) {
+        const imageUrls = images.map((image) =>
+            ImagesController.buildUploadImageUrl(req, image.filename),
+        );
+        console.log(imageUrls);
         return this.managementsService
-            .send(ImagesMntMessagePattern.uploadArrayImage, { images })
+            .send(ImagesMntMessagePattern.uploadArrayImage, { images, imageUrls })
             .pipe(catchException());
     }
 }

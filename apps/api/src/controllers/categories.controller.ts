@@ -1,24 +1,25 @@
 import { Controller, Inject, Get, Query, Post, Body, Patch, Param } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
-import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~/constants';
+import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '@app/common/constants';
 import { catchException } from '@app/common';
 import {
     ApiBadRequestResponse,
     ApiCreatedResponse,
     ApiNotFoundResponse,
     ApiOkResponse,
+    ApiOperation,
     ApiTags,
 } from '@nestjs/swagger';
 import {
     CategoriesSearchMessagePattern,
     GetCategoriesRequestDTO,
     GetCategoryByLabelRequestDTO,
-} from '~/apps/search/categories-search';
+} from '~apps/search/categories-search';
 import {
     CategoriesMntMessagePattern,
     CreateCategoryRequestDTO,
     UpdateCategoryRequestDTO,
-} from '~/apps/managements/categories-mnt';
+} from '~apps/managements/categories-mnt';
 import { CategoryIdParam } from '@app/resource/categories/dtos';
 
 @ApiTags('categories')
@@ -29,6 +30,10 @@ export class CategoriesController {
         @Inject(MANAGEMENTS_SERVICE) private readonly managementsService: ClientRMQ,
     ) {}
 
+    @ApiOperation({
+        summary: 'Get list of categories',
+        description: 'Get list of categories',
+    })
     @ApiOkResponse({ description: 'Get categories successfully!' })
     @ApiNotFoundResponse({ description: 'Categories not found!' })
     @Get('/')
@@ -38,6 +43,10 @@ export class CategoriesController {
             .pipe(catchException());
     }
 
+    @ApiOperation({
+        summary: 'Get category by id',
+        description: 'Get category by id',
+    })
     @ApiOkResponse({ description: 'Get category successfully!' })
     @ApiNotFoundResponse({ description: 'Category not found!' })
     @Get(':categoryId')
@@ -47,6 +56,10 @@ export class CategoriesController {
             .pipe(catchException());
     }
 
+    @ApiOperation({
+        summary: 'Get category by label',
+        description: 'Get category by label',
+    })
     @ApiOkResponse({ description: 'Get category successfully!' })
     @ApiNotFoundResponse({ description: 'Category not found!' })
     @Get('/label/:label')
@@ -56,6 +69,10 @@ export class CategoriesController {
             .pipe(catchException());
     }
 
+    @ApiOperation({
+        summary: 'Create category',
+        description: 'Create category',
+    })
     @ApiCreatedResponse({ description: 'The category has been successfully created.' })
     @ApiBadRequestResponse({ description: 'Something wrong, re-check your input.' })
     @Post('/')
@@ -65,6 +82,10 @@ export class CategoriesController {
             .pipe(catchException());
     }
 
+    @ApiOperation({
+        summary: 'Update category',
+        description: 'Update category',
+    })
     @Patch('/:categoryId')
     async updateCategory(
         @Param() { categoryId }: CategoryIdParam,

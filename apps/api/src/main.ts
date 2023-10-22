@@ -10,14 +10,14 @@ import {
 } from '@nestjs/swagger';
 import helmet from 'helmet';
 import * as compression from 'compression';
-import { ACCESS_TOKEN_NAME } from '~/constants/api.constant';
+import { ACCESS_TOKEN_NAME } from '@app/common/constants/api.constant';
 import * as swaggerStats from 'swagger-stats';
-import { AUTH_SERVICE } from '~/constants';
+import { AUTH_SERVICE } from '@app/common/constants';
 import { ClientRMQ } from '@nestjs/microservices';
-import { AuthMessagePattern } from '~/apps/auth/auth.pattern';
+import { AuthMessagePattern } from '~apps/auth/auth.pattern';
 import { catchException } from '@app/common';
 import { firstValueFrom } from 'rxjs';
-import { UserDataResponseDTO } from '~/apps/auth/dtos';
+import { UserDataResponseDTO } from '~apps/auth/dtos';
 
 async function bootstrap() {
     const port = process.env.API_PORT || 8000;
@@ -48,7 +48,9 @@ async function bootstrap() {
         .setTitle('TechCell RESTful API Documentations')
         .setContact('TechCell Teams', 'https://techcell.cloud', 'admin@techcell.cloud')
         .setDescription('The documentations of the TechCell RESTful API')
-        .setVersion('1.0')
+        .setVersion('0.0.1')
+        .addServer('https://api.techcell.cloud')
+        .addServer('http://localhost:8000')
         .addBearerAuth(
             {
                 description: `[just text field] Please enter your access token`,
