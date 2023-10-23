@@ -3,7 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Types } from 'mongoose';
 import { IsArray, IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, IsUrl } from 'class-validator';
 import { UserRole } from '@app/resource/users/enums';
-import { AddressSchemaDTO } from '@app/resource/users/dtos';
+import { AddressSchemaDTO, ImageSchemaDTO } from '@app/resource/users/dtos';
 import { User } from '@app/resource';
 
 export class UserDataResponseDTO implements Omit<User, 'password'> {
@@ -46,15 +46,11 @@ export class UserDataResponseDTO implements Omit<User, 'password'> {
 
     @ApiProperty({
         description: 'The user avatar',
-        type: String,
-        format: 'url',
+        type: ImageSchemaDTO,
         required: false,
-        example: 'https://cdn.example.com/image.png',
     })
-    @IsString()
     @IsOptional()
-    @IsUrl()
-    avatar?: string;
+    avatar?: ImageSchemaDTO;
 
     @ApiProperty({ type: String, example: 'the-access-token' })
     @IsString()

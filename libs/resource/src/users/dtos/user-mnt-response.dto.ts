@@ -1,9 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { UserRole } from '../enums';
 import { Types } from 'mongoose';
-import { AddressSchemaDTO } from './address.schema.dto';
-import { BlockSchemaDTO } from './block.schema.dto';
 import { User } from '../schemas';
+import { AddressSchemaDTO, BlockSchemaDTO, ImageSchemaDTO } from './user-schema.dto';
 
 export class UserMntResponseDto implements Omit<User, 'password'> {
     @ApiProperty({
@@ -27,12 +26,10 @@ export class UserMntResponseDto implements Omit<User, 'password'> {
 
     @ApiProperty({
         description: 'The user avatar',
-        type: String,
-        format: 'url',
+        type: ImageSchemaDTO,
         required: false,
-        example: 'https://cdn.example.com/image.png',
     })
-    avatar?: string;
+    avatar?: ImageSchemaDTO;
 
     @ApiProperty({
         description: 'The user address',

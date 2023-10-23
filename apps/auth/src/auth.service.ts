@@ -34,6 +34,7 @@ import { PASSWORD_MAX_LENGTH, USERS_CACHE_PREFIX } from '@app/common/constants';
 import { TCurrentUser } from '@app/common/types';
 import { Types } from 'mongoose';
 import { LoginTicket, OAuth2Client, OAuth2ClientOptions } from 'google-auth-library';
+import { cleanUserBeforeResponse } from '@app/resource/users/utils/user.util';
 
 @Injectable()
 export class AuthService extends AuthUtilService {
@@ -215,7 +216,7 @@ export class AuthService extends AuthUtilService {
 
             await this.revokeRefreshToken(oldRefreshToken);
 
-            return { ...this.cleanUserBeforeResponse(userFound), accessToken, refreshToken };
+            return { ...cleanUserBeforeResponse(userFound), accessToken, refreshToken };
         } catch (error) {
             throw new RpcException(new ForbiddenException(error.message));
         }
