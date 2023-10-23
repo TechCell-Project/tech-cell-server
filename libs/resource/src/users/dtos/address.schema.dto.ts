@@ -16,6 +16,7 @@ import {
     ValidateNested,
 } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
+import { isTrueSet } from '@app/common/utils/shared.util';
 
 class ProvinceSchemaDTO implements ProvinceSchema {
     constructor(province: ProvinceSchema) {
@@ -126,6 +127,6 @@ export class AddressSchemaDTO implements AddressSchema {
     })
     @IsOptional()
     @IsBoolean()
-    @Transform(({ value }) => value === 'true')
+    @Transform(({ value }) => isTrueSet(value))
     isDefault: boolean;
 }
