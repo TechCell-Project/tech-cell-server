@@ -1,7 +1,7 @@
 import { Prop } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
 
-export class ProductCart {
+export class ProductCartSchema {
     @Prop({ type: Types.ObjectId, ref: 'Product' })
     productId: Types.ObjectId;
 

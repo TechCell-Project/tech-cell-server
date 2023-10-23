@@ -4,15 +4,19 @@ import { FilterQuery, QueryOptions, Types } from 'mongoose';
 import { CreateCartDTO } from './dtos';
 import { IGetCartByProduct } from './interfaces';
 import { Cart } from './schemas';
+import { CartState } from './enums';
 
 @Injectable()
 export class CartsService {
     constructor(private readonly cartRepository: CartsRepository) {}
 
     async createCart({ userId, products }: CreateCartDTO) {
+        const count = products?.length ?? 0;
         return this.cartRepository.create({
             userId,
             products,
+            cartCountProducts: count,
+            cartState: CartState.ACTIVE,
         });
     }
 
@@ -21,8 +25,8 @@ export class CartsService {
      * @param param0 userId and array of all product in cart
      * @returns updated cart
      */
-    async updateCart({ userId, products }: CreateCartDTO) {
-        return this.cartRepository.upsert({ userId }, { products });
+    async updateCart({ userId, products, cartCountProducts }: Cart) {
+        return this.cartRepository.upsert({ userId }, { products, cartCountProducts });
     }
 
     async getCarts(userId: Types.ObjectId) {
