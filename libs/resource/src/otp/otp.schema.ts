@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { AbstractDocument } from '@app/common';
+import { AbstractDocument } from '@app/resource/abstract';
 import { OtpType } from './otp.enum';
 
 @Schema({ timestamps: true })

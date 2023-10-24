@@ -15,7 +15,7 @@ import { REDIS_CACHE } from '@app/common/constants/cache.constant';
 export class AddressSearchService {
     constructor(
         private readonly ghnService: GhnService,
-        @Inject(REDIS_CACHE) private cacheManager: Store,
+        @Inject(REDIS_CACHE) private readonly cacheManager: Store,
     ) {}
 
     private readonly GET_PROVINCES_CACHE_KEY = 'address_search_get_provinces';

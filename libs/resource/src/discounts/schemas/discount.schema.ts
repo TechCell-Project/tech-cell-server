@@ -1,4 +1,4 @@
-import { AbstractDocument } from '@app/common';
+import { AbstractDocument } from '@app/resource/abstract';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { SelectProduct } from '@app/resource/products/dtos/select-product.dto';
 import { ApplyDiscountTo, DiscountType } from '../enums';
