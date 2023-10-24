@@ -1,4 +1,4 @@
-import { AbstractDocument } from '@app/common/database';
+import { AbstractDocument } from '@app/resource/abstract';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
 import { OrderStatus } from '../enums';

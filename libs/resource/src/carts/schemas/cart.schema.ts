@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
 import { ProductCartSchema } from './product-cart.schema';
-import { AbstractDocument } from '@app/common';
+import { AbstractDocument } from '@app/resource/abstract';
 import { CartState } from '../enums';
 
 @Schema({ timestamps: true })
