@@ -5,15 +5,16 @@ import {
     ChangeRoleRequestDTO,
     CreateUserRequestDto,
     UpdateUserAddressRequestDTO,
+    UpdateUserExecDTO,
     UpdateUserRequestDTO,
 } from './dtos';
 import { RpcException } from '@nestjs/microservices';
 import { BlockActivity, UserRole } from '@app/resource/users/enums';
 import { UsersMntUtilService } from './users-mnt.util.service';
 import { delStartWith, generateRandomString } from '@app/common';
-import { AddressSchemaDTO, CreateUserDTO } from '@app/resource/users/dtos';
+import { AddressSchemaDTO, CreateUserDTO, ImageSchemaDTO } from '@app/resource/users/dtos';
 import { REDIS_CACHE, USERS_CACHE_PREFIX } from '@app/common/constants';
-import { delCacheUsers } from '@app/resource/users/utils';
+import { cleanUserBeforeResponse, delCacheUsers } from '@app/resource/users/utils';
 import { TCurrentUser } from '@app/common/types';
 import { UsersService } from '@app/resource/users';
 import { Store } from 'cache-manager';
@@ -209,31 +210,47 @@ export class UsersMntService extends UsersMntUtilService {
         delete oldUser.createdAt;
         delete oldUser.updatedAt;
 
+        let imageCloud = null;
+
         if (dataUpdate?.userName) {
-            const user = await this.usersService.getUser({ userName: dataUpdate.userName });
-            if (user) {
+            const isUsernameExist = await this.usersService.isUserNameExist(dataUpdate.userName);
+            if (isUsernameExist) {
                 throw new RpcException(new BadRequestException('Username already exists'));
             }
         }
 
-        if (dataUpdate?.avatar) {
+        if (dataUpdate?.avatarPublicId) {
             try {
-                const avatarUrl = (
-                    await this.cloudinaryService.getImageByPublicId(dataUpdate.avatar)
-                ).secure_url;
-                dataUpdate.avatar = avatarUrl;
+                const res = await this.cloudinaryService.getImageByPublicId(
+                    dataUpdate.avatarPublicId,
+                );
+                imageCloud = new ImageSchemaDTO({
+                    publicId: res.public_id,
+                    url: res.secure_url,
+                });
             } catch (error) {
-                delete dataUpdate.avatar;
+                delete dataUpdate.avatarPublicId;
+                imageCloud = null;
                 throw new RpcException(new BadRequestException('Avatar not found'));
             }
         }
 
-        const newUser = { ...oldUser, ...new UpdateUserRequestDTO(dataUpdate) };
+        const newUser = {
+            ...oldUser,
+            ...new UpdateUserExecDTO({
+                ...dataUpdate,
+                ...(imageCloud ? { avatar: imageCloud } : {}),
+            }),
+        };
         const userUpdated = await this.usersService.findOneAndUpdateUser(
             { _id: user._id },
             newUser,
         );
-        return userUpdated;
+
+        return {
+            message: 'Update user info success',
+            data: cleanUserBeforeResponse(userUpdated),
+        };
     }
 
     async updateUserAddress({
@@ -268,6 +285,9 @@ export class UsersMntService extends UsersMntUtilService {
             { _id: userFound._id },
             userFound,
         );
-        return userUpdated;
+        return {
+            message: 'Update address success',
+            data: cleanUserBeforeResponse(userUpdated),
+        };
     }
 }

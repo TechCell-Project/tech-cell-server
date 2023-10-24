@@ -12,13 +12,14 @@ import {
     IsBoolean,
     IsMongoId,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import { ProductStatus } from '../enums';
 import { AttributeSchema, VariationSchema } from '../schemas';
 import { ImageSchema } from '../schemas/image.schema';
 import { CreateProductRequestDTO } from '~apps/managements/products-mnt/dtos';
 import { ApiProperty } from '@nestjs/swagger';
 import { Types } from 'mongoose';
+import { isTrueSet } from '@app/common/utils/shared.util';
 
 class AttributeDTO implements AttributeSchema {
     @ApiProperty({
@@ -104,6 +105,7 @@ export class ImageDTO implements ImageSchema {
     })
     @IsOptional()
     @IsBoolean()
+    @Transform(({ value }) => isTrueSet(value))
     isThumbnail?: boolean;
 }
 

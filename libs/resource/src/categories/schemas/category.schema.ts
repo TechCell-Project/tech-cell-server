@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { AbstractDocument } from '@app/common';
 import { Attribute } from '@app/resource/attributes';
 
-@Schema({ timestamps: true, versionKey: false })
+@Schema({ timestamps: true })
 export class Category extends AbstractDocument {
     @Prop({ unique: true, required: true })
     label: string;

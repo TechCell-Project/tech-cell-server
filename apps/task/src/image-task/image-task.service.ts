@@ -1,7 +1,8 @@
+import { Cron } from '@nestjs/schedule';
+import { Injectable, Logger } from '@nestjs/common';
 import { CloudinaryService } from '@app/third-party/cloudinary.com';
 import { ProductsService } from '@app/resource/products';
-import { Injectable, Logger } from '@nestjs/common';
-import { Cron } from '@nestjs/schedule';
+import { UsersService } from '@app/resource/users';
 
 @Injectable()
 export class ImageTaskService {
@@ -10,6 +11,7 @@ export class ImageTaskService {
     constructor(
         private readonly cloudinaryService: CloudinaryService,
         private readonly productsService: ProductsService,
+        private readonly usersService: UsersService,
     ) {}
 
     /**
@@ -30,8 +32,11 @@ export class ImageTaskService {
         // Remove unused image
         for (const image of images.resources) {
             this.logger.log(`Check image ${image.public_id}`);
-            const isImageInUse = await this.productsService.isImageInUse(image.public_id);
-            if (!isImageInUse) {
+            const inUseArray = await Promise.all([
+                this.productsService.isImageInUse(image.public_id),
+                this.usersService.isImageInUse(image.public_id),
+            ]);
+            if (inUseArray.some((inUse) => inUse === false)) {
                 await this.cloudinaryService.deleteFile(image.public_id).then(() => {
                     this.logger.verbose(`Deleted:: '${image.public_id}'`);
                 });

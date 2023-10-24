@@ -1,5 +1,49 @@
 [
     {
+        "label": "height",
+        "name": "chiều cao",
+        "description": "Chiều cao của sản phẩm (cm)",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
+        "label": "weight",
+        "name": "trọng lượng",
+        "description": "Trọng lượng của sản phẩm (gram)",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
+        "label": "length",
+        "name": "chiều dài",
+        "description": "Chiều dài của sản phẩm (cm)",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
+        "label": "width",
+        "name": "chiều rộng",
+        "description": "Chiều rộng của sản phẩm (cm)",
+        "updatedAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        },
+        "createdAt": {
+            "$date": "2023-07-26T19:32:08.770Z"
+        }
+    },
+    {
         "label": "brand",
         "name": "thương hiệu",
         "description": "The brand of the smartphone",
@@ -454,50 +498,6 @@
         "label": "dimensions",
         "name": "kích thước",
         "description": "Kích thước của sản phẩm",
-        "updatedAt": {
-            "$date": "2023-07-26T19:32:08.770Z"
-        },
-        "createdAt": {
-            "$date": "2023-07-26T19:32:08.770Z"
-        }
-    },
-    {
-        "label": "weight",
-        "name": "trọng lượng",
-        "description": "Trọng lượng của sản phẩm (gram)",
-        "updatedAt": {
-            "$date": "2023-07-26T19:32:08.770Z"
-        },
-        "createdAt": {
-            "$date": "2023-07-26T19:32:08.770Z"
-        }
-    },
-    {
-        "label": "length",
-        "name": "chiều dài",
-        "description": "Chiều dài của sản phẩm",
-        "updatedAt": {
-            "$date": "2023-07-26T19:32:08.770Z"
-        },
-        "createdAt": {
-            "$date": "2023-07-26T19:32:08.770Z"
-        }
-    },
-    {
-        "label": "width",
-        "name": "chiều rộng",
-        "description": "Chiều rộng của sản phẩm",
-        "updatedAt": {
-            "$date": "2023-07-26T19:32:08.770Z"
-        },
-        "createdAt": {
-            "$date": "2023-07-26T19:32:08.770Z"
-        }
-    },
-    {
-        "label": "height",
-        "name": "chiều cao",
-        "description": "Chiều cao của sản phẩm",
         "updatedAt": {
             "$date": "2023-07-26T19:32:08.770Z"
         },

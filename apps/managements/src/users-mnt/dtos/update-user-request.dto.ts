@@ -1,4 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ImageSchemaDTO } from '@app/resource/users/dtos';
+import { ApiProperty, OmitType } from '@nestjs/swagger';
 import { IsNotEmpty, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 
 export class UpdateUserRequestDTO {
@@ -15,8 +16,8 @@ export class UpdateUserRequestDTO {
             this.lastName = data.lastName;
         }
 
-        if (data?.avatar) {
-            this.avatar = data.avatar;
+        if (data?.avatarPublicId) {
+            this.avatarPublicId = data.avatarPublicId;
         }
     }
 
@@ -62,5 +63,17 @@ export class UpdateUserRequestDTO {
     })
     @IsString()
     @IsOptional()
-    avatar?: string;
+    avatarPublicId?: string;
+}
+
+export class UpdateUserExecDTO extends OmitType(UpdateUserRequestDTO, ['avatarPublicId']) {
+    constructor(data: Partial<UpdateUserExecDTO>) {
+        super(data);
+        this.firstName = super.firstName;
+        this.lastName = super.lastName;
+        this.userName = super.userName;
+        this.avatar = new ImageSchemaDTO(data?.avatar);
+    }
+
+    avatar?: ImageSchemaDTO;
 }

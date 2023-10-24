@@ -7,6 +7,7 @@ import { GhnDistrictDTO } from './dtos/district.dto';
 import { GhnWardDTO } from './dtos/ward.dto';
 import { GetShippingFeeDTO } from './dtos/get-shipping-fee.dto';
 import { TGhnDistrict, TGhnProvince, TGhnWard } from './types';
+import { TShippingFeeResponse } from './types/shipping-fee-response.ghn';
 
 export class GhnCoreService {
     private GHN_URL: string = process.env.GHN_URL;
@@ -93,7 +94,7 @@ export class GhnCoreService {
         return data;
     }
 
-    protected async getShippingFee(data: GetShippingFeeDTO) {
+    protected async getShippingFee(data: GetShippingFeeDTO): Promise<TShippingFeeResponse> {
         const url = '/shiip/public-api/v2/shipping-order/fee';
         const bodyPayload = new GetShippingFeeDTO(data);
         const response = await firstValueFrom(
@@ -103,7 +104,7 @@ export class GhnCoreService {
                     console.error(error);
                     throw new Error(error.message);
                 }),
-                map((response) => response.data.data),
+                map((response) => response.data.data as TShippingFeeResponse),
             ),
         );
 

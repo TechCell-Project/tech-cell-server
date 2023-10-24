@@ -4,9 +4,10 @@ import { CloudinaryService } from '@app/third-party/cloudinary.com';
 import { ProductsModule } from '@app/resource/products';
 import { Module } from '@nestjs/common';
 import { ImageTaskService } from './image-task.service';
+import { UsersModule } from '@app/resource';
 
 @Module({
-    imports: [RedisCacheModule, ProductsModule],
+    imports: [RedisCacheModule, ProductsModule, UsersModule],
     providers: [RabbitMQService, CloudinaryService, ImageTaskService],
     exports: [ImageTaskService],
 })

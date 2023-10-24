@@ -10,7 +10,7 @@ import { ImagesController } from './images.controller';
 import { AdminController } from './admin.controller';
 import { ProfileController } from './profile.controller';
 import { AddressController } from './address.controller';
-import { DiscountsController } from './discounts.controller';
+// import { DiscountsController } from './discounts.controller';
 
 export const ListControllers = [
     AdminController,
@@ -24,6 +24,6 @@ export const ListControllers = [
     CartsController,
     AddressController,
     OrderController,
-    DiscountsController,
+    // DiscountsController,
     AppController,
 ];

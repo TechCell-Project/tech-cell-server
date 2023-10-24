@@ -1,6 +1,8 @@
 import { IsBoolean, IsEmail, IsNotEmpty, IsOptional, IsString, Length } from 'class-validator';
 import { CreateUserRequestDto } from '~apps/managements/users-mnt/dtos';
 import { UserRole } from '../enums';
+import { Transform } from 'class-transformer';
+import { isTrueSet } from '@app/common/utils/shared.util';
 
 export class CreateUserDTO {
     constructor(data: CreateUserRequestDto) {
@@ -39,6 +41,7 @@ export class CreateUserDTO {
 
     @IsBoolean()
     @IsNotEmpty()
+    @Transform(({ value }) => isTrueSet(value))
     emailVerified?: boolean;
 
     @IsString()

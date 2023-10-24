@@ -8,6 +8,7 @@ import {
     Connection,
     QueryOptions,
     ProjectionType,
+    ClientSession,
 } from 'mongoose';
 import { AbstractDocument } from './abstract.schema';
 import { RpcException } from '@nestjs/microservices';
@@ -20,12 +21,18 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
         private readonly connection: Connection,
     ) {}
 
-    async create(document: Omit<TDocument, '_id'>, options?: SaveOptions): Promise<TDocument> {
+    async create(
+        document: Omit<TDocument, '_id'>,
+        options?: SaveOptions,
+        session?: ClientSession,
+    ): Promise<TDocument> {
         const createdDocument = new this.model({
             ...document,
             _id: new Types.ObjectId(),
         });
-        return (await createdDocument.save(options)).toJSON() as unknown as TDocument;
+        return (
+            await createdDocument.save({ ...options, session })
+        ).toJSON() as unknown as TDocument;
     }
 
     async findOne(
@@ -50,18 +57,19 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
         filterQuery: FilterQuery<TDocument>,
         update: UpdateQuery<TDocument>,
         options?: Partial<QueryOptions<TDocument>>,
+        session?: ClientSession,
     ) {
-        const document = await this.model.findOneAndUpdate(filterQuery, update, {
-            lean: true,
-            new: true,
-            ...options,
-        });
-
+        const document = await this.model
+            .findOneAndUpdate(filterQuery, update, {
+                lean: true,
+                new: true,
+                ...options,
+            })
+            .session(session);
         if (!document) {
             this.logger.warn(`${this.model.modelName} not found with filterQuery:`, filterQuery);
             throw new RpcException(new NotFoundException(`${this.model.modelName} not found.`));
         }
-
         return document;
     }
 
@@ -111,5 +119,14 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
     async count(filterQuery: FilterQuery<TDocument>) {
         const countNum = await this.model.countDocuments(filterQuery);
         return countNum;
+    }
+
+    async updateOne(
+        filterQuery: FilterQuery<TDocument>,
+        update: UpdateQuery<TDocument>,
+        options?: QueryOptions<Partial<TDocument>>,
+        session?: ClientSession,
+    ) {
+        return this.model.updateOne(filterQuery, update, options).session(session);
     }
 }

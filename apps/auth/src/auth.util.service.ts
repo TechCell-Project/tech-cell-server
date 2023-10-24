@@ -24,6 +24,7 @@ import {
     isEmail,
 } from '@app/common';
 import { convertTimeString, TimeUnitOutPut } from 'convert-time-string';
+import { cleanUserBeforeResponse } from '@app/resource/users/utils';
 
 @Injectable()
 export class AuthUtilService {
@@ -63,12 +64,6 @@ export class AuthUtilService {
         await this.cacheManager.del(cacheUserKey);
     }
 
-    protected cleanUserBeforeResponse(user: User): Omit<User, 'password' | 'block'> {
-        delete user.password;
-        if (user.block) delete user.block;
-        return user;
-    }
-
     async buildUserTokenResponse(user: User): Promise<UserDataResponseDTO> {
         const { _id, email, role } = user;
         const { accessToken, refreshToken } = await this.signTokens({
@@ -77,7 +72,7 @@ export class AuthUtilService {
             role,
         });
 
-        return { accessToken, refreshToken, ...this.cleanUserBeforeResponse(user) };
+        return { accessToken, refreshToken, ...cleanUserBeforeResponse(user) };
     }
 
     async validateUserLogin(emailOrUsername: string, password: string) {

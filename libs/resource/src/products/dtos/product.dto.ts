@@ -2,6 +2,9 @@ import { Types } from 'mongoose';
 import { AttributeSchema, ImageSchema, PriceSchema, Product, VariationSchema } from '../schemas';
 import { ProductStatus } from '../enums/ProductStatus.enum';
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
+import { isTrueSet } from '@app/common';
+import { IsOptional } from 'class-validator';
 
 export class AttributeDTO implements AttributeSchema {
     @ApiProperty({
@@ -47,6 +50,8 @@ export class ImageDTO implements ImageSchema {
         example: false,
         required: false,
     })
+    @IsOptional()
+    @Transform(({ value }) => isTrueSet(value))
     isThumbnail?: boolean;
 }
 

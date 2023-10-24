@@ -45,7 +45,7 @@ export class GetProductsDTO {
     })
     @IsBoolean()
     @IsOptional()
-    @Transform(({ value }) => value === 'true')
+    @Transform(({ value }) => isTrueSet(value))
     detail?: boolean;
 
     @ApiProperty({

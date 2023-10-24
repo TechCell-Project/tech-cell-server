@@ -26,7 +26,13 @@ async function bootstrap() {
     const app = await NestFactory.create(AppModule);
 
     app.enableCors({
-        origin: [`http://localhost:3000`, `https://techcell.cloud`, `https://admin.techcell.cloud`],
+        origin: [
+            'http://localhost:3000',
+            'http://localhost:8000',
+            'https://techcell.cloud',
+            'https://admin.techcell.cloud',
+            'https://api.techcell.cloud',
+        ],
         methods: ['*'],
     });
     app.use(helmet());

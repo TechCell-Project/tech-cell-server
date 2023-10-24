@@ -3,8 +3,9 @@ import { AbstractDocument } from '@app/common';
 import { UserRole } from '@app/resource/users/enums';
 import { BlockSchema } from './block.schema';
 import { AddressSchema } from './address.schema';
+import { ImageSchema } from './image.schema';
 
-@Schema({ versionKey: false, timestamps: true })
+@Schema({ timestamps: true })
 export class User extends AbstractDocument {
     @Prop({ required: true, unique: true })
     email: string;
@@ -33,8 +34,8 @@ export class User extends AbstractDocument {
     @Prop({ type: BlockSchema })
     block?: BlockSchema;
 
-    @Prop({ default: '' })
-    avatar?: string;
+    @Prop({ required: false, default: {} })
+    avatar?: ImageSchema;
 
     @Prop({ default: Date.now })
     createdAt?: Date;

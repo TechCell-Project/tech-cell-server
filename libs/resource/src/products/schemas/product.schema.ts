@@ -8,7 +8,7 @@ import { Types } from 'mongoose';
 
 export type ProductDocument = mongoose.HydratedDocument<Product>;
 
-@Schema({ timestamps: true, versionKey: false })
+@Schema({ timestamps: true })
 export class Product extends AbstractDocument {
     @Prop({ required: true })
     name: string;

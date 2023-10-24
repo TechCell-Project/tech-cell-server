@@ -3,14 +3,18 @@ import { CreateProductDTO } from './dtos';
 import { ProductsRepository } from './products.repository';
 import { IBaseQuery } from '../interfaces';
 import { Product } from './schemas';
-import { FilterQuery, Types, UpdateQuery } from 'mongoose';
+import { ClientSession, FilterQuery, Types, UpdateQuery } from 'mongoose';
 import { ProductStatus } from './enums';
 import { SelectType } from '~apps/search/enums';
 import { SelectTypeDTO } from '~apps/search/dtos';
+import { RedlockService } from '@app/common/Redis/services';
 
 @Injectable()
 export class ProductsService {
-    constructor(private readonly productsRepository: ProductsRepository) {}
+    constructor(
+        private readonly productsRepository: ProductsRepository,
+        private readonly redLock: RedlockService,
+    ) {}
 
     async createProduct(createProductDto: CreateProductDTO) {
         return await this.productsRepository.create(createProductDto);
@@ -113,8 +117,9 @@ export class ProductsService {
     async updateProductById(
         productId: Types.ObjectId,
         updateQueries: UpdateQuery<Partial<Product>>,
+        session: ClientSession = null,
     ) {
-        return await this.productsRepository.findOneAndUpdate(productId, updateQueries);
+        return await this.productsRepository.findOneAndUpdate(productId, updateQueries, session);
     }
 
     async isImageInUse(publicId: string) {
@@ -154,6 +159,46 @@ export class ProductsService {
                     updatedAt: new Date(),
                 },
             },
+        );
+        return product;
+    }
+
+    async startTransaction() {
+        return this.productsRepository.startTransaction();
+    }
+
+    async updateProductByIdLockSession(
+        productId: Types.ObjectId,
+        updateQueries: UpdateQuery<Partial<Product>>,
+        session: ClientSession,
+    ) {
+        const lock = await this.redLock.lock([`update_product:${productId}`], 1000);
+        let result: Product;
+
+        try {
+            result = await this.productsRepository.findOneAndUpdate(
+                { _id: productId },
+                updateQueries,
+                {},
+                session,
+            );
+        } finally {
+            await this.redLock.unlock(lock);
+        }
+
+        return result;
+    }
+
+    async deleteProductByIdLockSession(productId: Types.ObjectId, session: ClientSession) {
+        const product = await this.updateProductByIdLockSession(
+            productId,
+            {
+                $set: {
+                    status: ProductStatus.Deleted,
+                    updatedAt: new Date(),
+                },
+            },
+            session,
         );
         return product;
     }

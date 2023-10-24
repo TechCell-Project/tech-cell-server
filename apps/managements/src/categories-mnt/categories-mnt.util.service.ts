@@ -12,9 +12,14 @@ export class CategoriesMntUtilService {
         @Inject(REDIS_CACHE) protected cacheManager: Store,
     ) {}
 
+    public readonly MUST_HAVE_ATTRIBUTES = ['height', 'weight', 'length', 'width'];
+
     protected async validateCategoryRequireAttributes(requireAttributes: string[]) {
+        const requireAttributesArray = Array.from(
+            new Set([...requireAttributes, ...this.MUST_HAVE_ATTRIBUTES]),
+        );
         return await Promise.all(
-            requireAttributes.map(async (attributeLabel) => {
+            requireAttributesArray.map(async (attributeLabel) => {
                 const attribute = await this.attributesService.getAttributeByLabel(attributeLabel);
                 delete attribute['_id'];
                 delete attribute['createdAt'];

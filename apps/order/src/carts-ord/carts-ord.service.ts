@@ -6,6 +6,8 @@ import { QueryOptions, Types } from 'mongoose';
 import { ProductsService } from '@app/resource';
 import { PaginationQuery } from '@app/common/dtos';
 import { TCurrentUser } from '@app/common/types';
+import { DeleteProductsCartRequestDTO } from './dtos';
+import { CartState } from '@app/resource/carts/enums';
 
 @Injectable()
 export class CartsOrdService {
@@ -42,17 +44,67 @@ export class CartsOrdService {
 
         // Check if user already has cart
         const isUserHasCart = await this.cartsService.countCartUser(userId);
-
         if (isUserHasCart) {
             // Update cart if user already has cart
             const cart = await this.cartsService.getCartByUserId({ userId });
-            const cartToAdd = this.updateCart({ oldCart: cart, productId, sku, quantity });
+            const cartToAdd = this.updateCartUtil({ oldCart: cart, productId, sku, quantity });
             return await this.cartsService.updateCart(cartToAdd);
         }
 
         // Create new cart if user does not have cart
-        const newCart = this.createNewCart(userId, productId, sku, quantity);
+        const newCart = this.buildNewCart(userId, productId, sku, quantity);
         return await this.cartsService.createCart(newCart);
+    }
+
+    public async deleteProductsCart({
+        cartsData,
+        user,
+    }: {
+        cartsData: DeleteProductsCartRequestDTO;
+        user: TCurrentUser;
+    }) {
+        const userId = new Types.ObjectId(user._id);
+        const { selectProducts, isAll } = new DeleteProductsCartRequestDTO(cartsData);
+        console.log({ selectProducts, isAll });
+
+        if (!selectProducts && !isAll) {
+            throw new RpcException(new BadRequestException('Nothing to delete'));
+        }
+
+        if (isAll) {
+            const cart = await this.cartsService.getCartByUserId({ userId });
+            cart.products = [];
+            cart.cartCountProducts = 0;
+            await this.cartsService.updateCart(cart);
+            return await this.cartsService.updateCart(cart);
+        }
+
+        if (selectProducts) {
+            // Catch error if product already deleted
+            // Will throw error if product does not exist or user delete many times
+            try {
+                await Promise.all(
+                    selectProducts.map((product) =>
+                        this.addProductToCart({
+                            cartData: {
+                                productId: product.productId,
+                                sku: product.sku,
+                                quantity: -1,
+                            },
+                            user,
+                        }),
+                    ),
+                );
+            } catch (error) {
+                return {
+                    message: 'Delete product in cart successfully',
+                };
+            }
+        }
+
+        return {
+            message: 'Delete product in cart successfully',
+        };
     }
 
     // Utils below
@@ -66,7 +118,7 @@ export class CartsOrdService {
      * @property userId user id to update with cart
      * @returns updated cart
      */
-    private updateCart({
+    private updateCartUtil({
         oldCart,
         productId,
         sku,
@@ -115,10 +167,11 @@ export class CartsOrdService {
 
         // Sort cart products by updatedAt
         oldCart.products.sort((a, b) => b?.updatedAt?.getTime() - a?.updatedAt?.getTime());
+        oldCart.cartCountProducts = oldCart?.products?.length ?? 0;
         return oldCart;
     }
 
-    private createNewCart(
+    private buildNewCart(
         userId: Types.ObjectId,
         productId: Types.ObjectId,
         sku: string,
@@ -142,6 +195,8 @@ export class CartsOrdService {
                     updatedAt: new Date(Date.now()),
                 },
             ],
+            cartCountProducts: 1,
+            cartState: CartState.ACTIVE,
         };
     }
 
