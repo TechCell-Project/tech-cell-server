@@ -206,6 +206,7 @@ export class UsersMntService extends UsersMntUtilService {
         user: TCurrentUser;
         dataUpdate: UpdateUserRequestDTO;
     }) {
+        this.logger.debug(dataUpdate);
         const oldUser = await this.usersService.getUser({ _id: new Types.ObjectId(user._id) });
         delete oldUser.createdAt;
         delete oldUser.updatedAt;

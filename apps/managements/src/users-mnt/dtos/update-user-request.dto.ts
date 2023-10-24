@@ -69,10 +69,11 @@ export class UpdateUserRequestDTO {
 export class UpdateUserExecDTO extends OmitType(UpdateUserRequestDTO, ['avatarPublicId']) {
     constructor(data: Partial<UpdateUserExecDTO>) {
         super(data);
-        this.firstName = super.firstName;
-        this.lastName = super.lastName;
-        this.userName = super.userName;
-        this.avatar = new ImageSchemaDTO(data?.avatar);
+        this.firstName = data?.firstName;
+        this.lastName = data?.lastName;
+        this.userName = data?.userName;
+        this.avatar =
+            data?.avatar instanceof ImageSchemaDTO ? new ImageSchemaDTO(data.avatar) : undefined;
     }
 
     avatar?: ImageSchemaDTO;
