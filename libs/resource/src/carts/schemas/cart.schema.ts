@@ -4,10 +4,7 @@ import { ProductCartSchema } from './product-cart.schema';
 import { AbstractDocument } from '@app/common';
 import { CartState } from '../enums';
 
-@Schema({
-    versionKey: false,
-    timestamps: true,
-})
+@Schema({ timestamps: true })
 export class Cart extends AbstractDocument {
     @Prop({ required: true, type: Types.ObjectId, ref: 'User' })
     userId: Types.ObjectId;

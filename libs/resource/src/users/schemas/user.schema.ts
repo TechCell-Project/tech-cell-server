@@ -5,7 +5,7 @@ import { BlockSchema } from './block.schema';
 import { AddressSchema } from './address.schema';
 import { ImageSchema } from './image.schema';
 
-@Schema({ versionKey: false, timestamps: true })
+@Schema({ timestamps: true })
 export class User extends AbstractDocument {
     @Prop({ required: true, unique: true })
     email: string;

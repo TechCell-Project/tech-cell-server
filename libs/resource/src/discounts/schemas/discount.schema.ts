@@ -5,7 +5,7 @@ import { ApplyDiscountTo, DiscountType } from '../enums';
 import { User } from '@app/resource/users';
 import { Types } from 'mongoose';
 
-@Schema({ versionKey: false, timestamps: true })
+@Schema({ timestamps: true })
 export class Discount extends AbstractDocument {
     @Prop({
         required: true,

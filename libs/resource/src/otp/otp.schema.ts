@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { AbstractDocument } from '@app/common';
 import { OtpType } from './otp.enum';
 
-@Schema({ versionKey: false, timestamps: true })
+@Schema({ timestamps: true })
 export class Otp extends AbstractDocument {
     @Prop({ required: true })
     email: string;

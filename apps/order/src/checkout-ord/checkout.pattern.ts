@@ -1,4 +1,5 @@
 export const CheckoutMessagePattern = {
-    calculateShippingFee: { cmd: 'checkout_calculate_shipping_fee' },
+    createOrder: { cmd: 'checkout_create_order' },
     checkoutVnpay: { cmd: 'checkout_vnpay' },
+    reviewOrder: { cmd: 'checkout_review_order' },
 };

@@ -1,14 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { CartsRepository } from './carts.repository';
-import { FilterQuery, QueryOptions, Types } from 'mongoose';
+import { ClientSession, FilterQuery, QueryOptions, Types } from 'mongoose';
 import { CreateCartDTO } from './dtos';
 import { IGetCartByProduct } from './interfaces';
 import { Cart } from './schemas';
 import { CartState } from './enums';
+import { RedlockService } from '@app/common/Redis/services';
 
 @Injectable()
 export class CartsService {
-    constructor(private readonly cartRepository: CartsRepository) {}
+    constructor(
+        private readonly cartRepository: CartsRepository,
+        private readonly redLock: RedlockService,
+    ) {}
 
     async createCart({ userId, products }: CreateCartDTO) {
         const count = products?.length ?? 0;
@@ -54,5 +58,46 @@ export class CartsService {
         options?: QueryOptions<Cart>;
     }) {
         return this.cartRepository.findOne({ userId, ...filterQueries }, options);
+    }
+
+    async getCartByUserIdOrFail({
+        userId,
+        filterQueries,
+        options,
+    }: {
+        userId: Types.ObjectId;
+        filterQueries?: FilterQuery<Cart>;
+        options?: QueryOptions<Cart>;
+    }): Promise<Cart | null> | null {
+        try {
+            return await this.cartRepository.findOne({ userId, ...filterQueries }, options);
+        } catch (error) {
+            return Promise.resolve(null);
+        }
+    }
+
+    async startTransaction() {
+        return this.cartRepository.startTransaction();
+    }
+
+    async updateCartLockSession(
+        { userId, products, cartCountProducts }: Cart,
+        session: ClientSession,
+    ) {
+        let result: Cart;
+        const lock = await this.redLock.lock([`update_cart:${userId}`], 1000);
+
+        try {
+            result = await this.cartRepository.findOneAndUpdate(
+                { userId },
+                { products, cartCountProducts },
+                {},
+                session,
+            );
+        } finally {
+            await this.redLock.unlock(lock);
+        }
+
+        return result;
     }
 }

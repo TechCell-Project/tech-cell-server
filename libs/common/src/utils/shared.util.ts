@@ -167,3 +167,13 @@ export function convertToObjectId(
         throw new Error('Invalid ObjectId');
     }
 }
+
+/**
+ *
+ * @param ms The time to sleep in milliseconds
+ * @description This function is used to sleep in async function
+ * @returns A promise that resolves after the specified time
+ */
+export async function sleep(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}

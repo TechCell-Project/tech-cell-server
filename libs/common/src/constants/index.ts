@@ -8,3 +8,4 @@ export * from './product.constant';
 export * from './regex.constant';
 export * from './services.constant';
 export * from './user.constant';
+export * from './provider.constant';
