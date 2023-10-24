@@ -88,6 +88,14 @@ export class CheckoutService {
                 );
             }
 
+            if (productWithSku.status < 0) {
+                throw new RpcException(
+                    new BadRequestException(
+                        `Product with sku '${productUserSelected.sku}' is not available`,
+                    ),
+                );
+            }
+
             if (productWithSku.stock < productUserSelected.quantity) {
                 throw new RpcException(
                     new BadRequestException(
