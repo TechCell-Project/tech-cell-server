@@ -9,7 +9,6 @@ import {
     SwaggerDocumentOptions,
 } from '@nestjs/swagger';
 import helmet from 'helmet';
-import * as compression from 'compression';
 import { ACCESS_TOKEN_NAME } from '@app/common/constants/api.constant';
 import * as swaggerStats from 'swagger-stats';
 import { AUTH_SERVICE } from '@app/common/constants';
@@ -36,8 +35,6 @@ async function bootstrap() {
         methods: ['*'],
     });
     app.use(helmet());
-    // Use to compress responses to improve performance
-    app.use(compression());
 
     // Use to catch exceptions and send them to responses
     app.useGlobalFilters(new RpcExceptionFilter());
