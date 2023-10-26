@@ -8,7 +8,6 @@ import { CurrentUser } from '@app/common/decorators';
 import { TCurrentUser } from '@app/common/types';
 import {
     ReviewOrderRequestDTO,
-    ReviewOrderResponseDTO,
     ReviewedOrderResponseDTO,
     VnpayIpnUrlDTO,
 } from '~apps/order/checkout-ord/dtos';
