@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { OrderRepository } from './orders.repository';
 import { CreateOrderDTO } from './dtos/create-order.dto';
-import { ClientSession, Types } from 'mongoose';
+import { ClientSession, QueryOptions, Types } from 'mongoose';
 import { Order } from './schemas';
 
 @Injectable()
@@ -42,5 +42,19 @@ export class OrdersService {
                 $set: data,
             },
         );
+    }
+
+    async getAllUserOrders(userId: Types.ObjectId, options?: QueryOptions<Order>) {
+        return this.orderRepository.find({
+            filterQuery: {
+                userId: userId,
+            },
+            queryOptions: {
+                sort: {
+                    updatedAt: -1,
+                },
+                ...options,
+            },
+        });
     }
 }

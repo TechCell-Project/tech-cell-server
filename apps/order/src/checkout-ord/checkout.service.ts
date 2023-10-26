@@ -247,6 +247,14 @@ export class CheckoutService {
     }
 
     /**
+     * @description Get all user's orders
+     */
+    public async getAllUserOrders({ user }: { user: TCurrentUser }) {
+        const orders = await this.orderService.getAllUserOrders(new Types.ObjectId(user._id));
+        return orders;
+    }
+
+    /**
      * @description Vnpay ipn url, Vnpay will call this url to verify payment
      */
     public async vnpayIpnUrl({ ...query }: VnpayIpnUrlDTO): Promise<ResponseForVnpayDTO> {

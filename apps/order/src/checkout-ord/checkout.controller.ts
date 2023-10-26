@@ -52,6 +52,11 @@ export class CheckoutController {
         });
     }
 
+    @MessagePattern(CheckoutMessagePattern.getAllUserOrders)
+    async getAllUserOrders({ user }: { user: TCurrentUser }) {
+        return this.checkoutService.getAllUserOrders({ user });
+    }
+
     @MessagePattern(CheckoutMessagePattern.vnpayIpnUrl)
     async vnpayIpnUrl(@Ctx() context: RmqContext, @Payload() { ...query }: VnpayIpnUrlDTO) {
         this.rabbitmqService.acknowledgeMessage(context);

@@ -12,11 +12,21 @@ import {
     VnpayIpnUrlDTO,
 } from '~apps/order/checkout-ord/dtos';
 import { CreateOrderRequestDTO } from '~apps/order/checkout-ord/dtos/create-order-request.dto';
+import { OrderSchemaDTO } from '@app/resource/orders/dtos/order-schema.dto';
 
 @ApiTags('order')
 @Controller('order')
 export class OrderController {
     constructor(@Inject(ORDER_SERVICE) private readonly orderService: ClientRMQ) {}
+
+    @UseGuards(AuthGuard)
+    @ApiResponse({ description: 'Get all user orders', type: [OrderSchemaDTO] })
+    @Get('/')
+    async getAllUserOrders(@CurrentUser() user: TCurrentUser) {
+        return this.orderService
+            .send(CheckoutMessagePattern.getAllUserOrders, { user })
+            .pipe(catchException());
+    }
 
     @UseGuards(AuthGuard)
     @ApiResponse({
@@ -36,7 +46,7 @@ export class OrderController {
     }
 
     @UseGuards(AuthGuard)
-    @ApiResponse({ status: 200, description: 'Review order' })
+    @ApiResponse({ status: 200, description: 'Review order', type: OrderSchemaDTO })
     @HttpCode(200)
     @Post('/')
     async createOrder(
