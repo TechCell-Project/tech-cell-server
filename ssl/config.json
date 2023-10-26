@@ -4,7 +4,7 @@
             "domain": "api.techcell.cloud",
             "email": "techcell.cloud@gmail.com",
             "wwwSubdomain": false,
-            "testCert": true,
+            "testCert": false,
             "rsaKeySize": 4096,
             "requestHandler": "reverseProxy",
             "upstream": "tech-cell-web-server-api:8000",
@@ -15,10 +15,9 @@
             "domain": "server.techcell.cloud",
             "email": "techcell.cloud@gmail.com",
             "wwwSubdomain": false,
-            "testCert": true,
+            "testCert": false,
             "rsaKeySize": 4096,
-            "requestHandler": "reverseProxy",
-            "upstream": "tech-cell-web-server-api:8000",
+            "requestHandler": "staticContent",
             "websockets": true,
             "dnsResolver": "127.0.0.11"
         }
