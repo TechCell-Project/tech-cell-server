@@ -9,6 +9,7 @@ import { TCurrentUser } from '@app/common/types';
 import {
     ReviewOrderRequestDTO,
     ReviewOrderResponseDTO,
+    ReviewedOrderResponseDTO,
     VnpayIpnUrlDTO,
 } from '~apps/order/checkout-ord/dtos';
 import { CreateOrderRequestDTO } from '~apps/order/checkout-ord/dtos/create-order-request.dto';
@@ -32,7 +33,7 @@ export class OrderController {
     @ApiResponse({
         status: 200,
         description: 'Review order before create (for getting the shipping fee, etc...)',
-        type: ReviewOrderResponseDTO,
+        type: ReviewedOrderResponseDTO,
     })
     @HttpCode(200)
     @Post('/review')
