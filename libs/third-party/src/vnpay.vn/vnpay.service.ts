@@ -1,6 +1,6 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { CreateVnpayUrlDto } from './dtos';
-import { ConfigVnpayDTO, VNPay } from 'vnpay';
+import { CreateVnpayUrlDTO } from './dtos';
+import { ConfigVnpayDTO, VNPay, ReturnQueryFromVNPayDTO } from 'vnpay';
 
 @Injectable()
 export class VnpayService {
@@ -11,16 +11,22 @@ export class VnpayService {
         this.vnpayInstance = new VNPay(this.config);
     }
 
-    async createPaymentUrl(data: CreateVnpayUrlDto) {
+    async createPaymentUrl(data?: CreateVnpayUrlDTO) {
         try {
             const url = await this.vnpayInstance.buildPaymentUrl({
-                vnp_Amount: 100000,
-                vnp_IpAddr: '10.10.1.1',
-                vnp_OrderInfo: 'Thanh toan don hang',
-                vnp_ReturnUrl: 'http://localhost:3000/vnpay-return',
-                vnp_TxnRef: '123456789',
+                ...data,
             });
             return url;
+        } catch (error) {
+            this.logger.error(error);
+            return null;
+        }
+    }
+
+    async verifyReturnUrl(query: ReturnQueryFromVNPayDTO) {
+        try {
+            const isValid = await this.vnpayInstance.verifyReturnUrl(query);
+            return isValid;
         } catch (error) {
             this.logger.error(error);
             return null;

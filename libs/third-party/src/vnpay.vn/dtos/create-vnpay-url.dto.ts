@@ -9,8 +9,9 @@ import {
     IsOptional,
 } from 'class-validator';
 import { ProductCode } from '../enums';
+import { BankCode } from '../enums/bank-code.enum';
 
-export class CreateVnpayUrlDto {
+export class CreateVnpayUrlDTO {
     @IsOptional()
     @IsString()
     vnp_Command?: string;
@@ -24,17 +25,34 @@ export class CreateVnpayUrlDto {
     @IsNotEmpty()
     @IsString()
     @IsIP()
-    ipAddress: string;
+    vnp_IpAddr: string;
 
+    /**
+     * @description Thông tin đơn hàng
+     */
     @IsNotEmpty()
     @IsString()
     vnp_OrderInfo: string;
 
+    /**
+     * @description Loại hàng hóa
+     */
     @IsNotEmpty()
     @IsEnum(ProductCode)
     vnp_OrderType: string;
 
+    /**
+     * @description Mã ngân hàng
+     */
+    @IsOptional()
+    @IsString()
+    @IsEnum(BankCode)
+    bankCode?: string;
+
+    /**
+     * @description Mã đơn hàng
+     */
     @IsNotEmpty()
     @IsString()
-    bankCode?: string;
+    vnp_TxnRef: string;
 }

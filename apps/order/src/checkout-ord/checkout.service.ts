@@ -4,28 +4,35 @@ import { GhnService } from '@app/third-party/giaohangnhanh';
 import {
     BadRequestException,
     Injectable,
+    InternalServerErrorException,
     Logger,
     UnprocessableEntityException,
 } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { ClientSession, Types } from 'mongoose';
-import { ReviewOrderRequestDTO, ReviewedOrderResponseDTO } from './dtos';
+import { ReviewOrderRequestDTO, ReviewedOrderResponseDTO, VnpayIpnUrlDTO } from './dtos';
 import { Product, ProductsService } from '@app/resource';
 import { TProductDimensions } from './types';
 import { ItemShipping } from '@app/third-party/giaohangnhanh/dtos';
 import { CreateOrderDTO } from '@app/resource/orders/dtos/create-order.dto';
-import { OrderStatus } from '@app/resource/orders/enums';
+import { OrderStatus, PaymentStatus } from '@app/resource/orders/enums';
 import { AddressSchema } from '@app/resource/users/schemas/address.schema';
 import { Order, OrdersService } from '@app/resource/orders';
 import { ProductCartDTO } from '@app/resource/carts/dtos/product-cart.dto';
 import { CartsService } from '@app/resource/carts/carts.service';
 import { RedlockService } from '@app/common/Redis/services/redlock.service';
+import { CreateOrderRequestDTO } from './dtos/create-order-request.dto';
+import { VnpayService } from '@app/third-party/vnpay.vn';
+import { ProductCode } from '@app/third-party/vnpay.vn/enums';
+import { PaymentMethodEnum } from './enums';
+import { ResponseForVnpayDTO } from './dtos/response-for-vnpay.dto';
 
 @Injectable()
 export class CheckoutService {
     private readonly logger = new Logger(CheckoutService.name);
     constructor(
         private readonly ghnService: GhnService,
+        private readonly vnpayService: VnpayService,
         private readonly userService: UsersService,
         private readonly productService: ProductsService,
         private readonly orderService: OrdersService,
@@ -33,7 +40,10 @@ export class CheckoutService {
         private readonly redlockService: RedlockService,
     ) {}
 
-    async reviewOrder({
+    /**
+     * Review order before create (for getting the shipping fee, etc...)
+     */
+    public async reviewOrder({
         user,
         dataReview,
     }: {
@@ -150,14 +160,17 @@ export class CheckoutService {
         });
     }
 
-    async createOrder({
+    /**
+     * @description Create order
+     */
+    public async createOrder({
         user,
-        dataReview,
+        data2CreateOrder,
     }: {
         user: TCurrentUser;
-        dataReview: ReviewOrderRequestDTO;
+        data2CreateOrder: CreateOrderRequestDTO;
     }) {
-        const reviewedOrder = await this.reviewOrder({ user, dataReview });
+        const reviewedOrder = await this.reviewOrder({ user, dataReview: data2CreateOrder });
 
         const resources = [];
         resources.push(`order_create:user:${user._id}`);
@@ -181,13 +194,18 @@ export class CheckoutService {
                 toAddress: userFound.address[reviewedOrder.addressSelected],
             },
             checkoutOrder: {
-                totalPrice: reviewedOrder.totalProductPrice,
-                totalApplyDiscount: 0,
                 shippingFee: reviewedOrder.shipping.giaohangnhanh.total,
+                totalApplyDiscount: 0,
+                totalPrice:
+                    reviewedOrder.totalProductPrice + reviewedOrder.shipping.giaohangnhanh.total,
             },
             orderStatus: OrderStatus.PENDING,
             products: reviewedOrder.productSelected,
             trackingCode: this.createTrackingCode(userFound.address[reviewedOrder.addressSelected]),
+            paymentOrder: {
+                method: data2CreateOrder.paymentMethod,
+                status: PaymentStatus.PROCESSING,
+            },
         });
 
         // Create a session to start transaction
@@ -195,6 +213,7 @@ export class CheckoutService {
 
         // Create order to return
         let resultOrder: Order;
+        let paymentUrl: string | null = null;
         try {
             // Lock the `createOrder` for each user and product
             const lock = await this.redlockService.lock(resources, 5000);
@@ -208,6 +227,7 @@ export class CheckoutService {
                         session,
                     ),
                 ]);
+                paymentUrl = await this.getPaymentUrl(data2CreateOrder.paymentMethod, resultOrder);
                 await session.commitTransaction();
             } finally {
                 await this.redlockService.unlock(lock);
@@ -223,12 +243,103 @@ export class CheckoutService {
             await session.endSession();
         }
 
-        return resultOrder;
+        return { ...resultOrder, paymentUrl: paymentUrl ?? undefined };
     }
 
     /**
+     * @description Get all user's orders
+     */
+    public async getAllUserOrders({ user }: { user: TCurrentUser }) {
+        const orders = await this.orderService.getAllUserOrders(new Types.ObjectId(user._id));
+        return orders;
+    }
+
+    /**
+     * @description Vnpay ipn url, Vnpay will call this url to verify payment
+     */
+    public async vnpayIpnUrl({ ...query }: VnpayIpnUrlDTO): Promise<ResponseForVnpayDTO> {
+        try {
+            const isVerified = await this.vnpayService.verifyReturnUrl({ ...query });
+            if (!isVerified.isSuccess) {
+                return {
+                    RspCode: '97',
+                    Message: 'Invalid signature',
+                };
+            }
+
+            const order = await this.orderService.getOrderByIdOrNull(
+                new Types.ObjectId(query.vnp_TxnRef),
+            );
+            if (!order) {
+                return {
+                    RspCode: '01',
+                    Message: 'Order not found',
+                };
+            }
+
+            if (order.checkoutOrder.totalPrice !== Number(query.vnp_Amount) / 100) {
+                return {
+                    RspCode: '04',
+                    Message: 'Invalid amount',
+                };
+            }
+
+            // If payment, or order is completed, or canceled, return error
+            if (
+                order.orderStatus === OrderStatus.COMPLETED ||
+                order.paymentOrder.status === PaymentStatus.COMPLETED ||
+                order.orderStatus === OrderStatus.CANCELLED
+            ) {
+                return {
+                    RspCode: '02',
+                    Message: 'Order already confirmed',
+                };
+            }
+
+            order.paymentOrder.method = PaymentMethodEnum.VNPAY;
+            if (query.vnp_ResponseCode === '00' || query.vnp_TransactionStatus === '00') {
+                order.paymentOrder.status = PaymentStatus.COMPLETED;
+                order.orderStatus = OrderStatus.PROCESSING;
+            } else {
+                order.paymentOrder.status = PaymentStatus.CANCELLED;
+                order.orderStatus = OrderStatus.CANCELLED;
+            }
+
+            await this.orderService.updateOrderById(order._id, order);
+            return {
+                RspCode: '00',
+                Message: 'Confirm success',
+            };
+        } catch (error) {
+            this.logger.error(error);
+            return {
+                RspCode: '99',
+                Message: 'Unknown error',
+            };
+        }
+    }
+
+    public async vnpayReturnUrl({ ...query }: VnpayIpnUrlDTO) {
+        const { isSuccess, message } = await this.vnpayService.verifyReturnUrl({ ...query });
+
+        if (!isSuccess) {
+            throw new RpcException(
+                new UnprocessableEntityException({
+                    statusCode: 422, // important for throw a correct error
+                    isSuccess,
+                    message,
+                }),
+            );
+        }
+
+        return { isSuccess, message };
+    }
+
+    /// PRIVATE METHOD
+
+    /**
      *
-     * @param product Product to get dimensions
+     * @param product Product to get dimensions (height, width, length, weight)
      * @returns {TProductDimensions}
      */
     private getDimensions(product: Product): TProductDimensions {
@@ -261,12 +372,23 @@ export class CheckoutService {
         return { height, width, length, weight };
     }
 
-    private createTrackingCode(address: AddressSchema) {
+    /**
+     * Create tracking code base on address info and timestamp
+     * @param address address to create tracking code
+     * @returns {string} tracking code
+     */
+    private createTrackingCode(address: AddressSchema): string {
         const timestamp = Date.now();
         const trackingCode = `${address.districtLevel.district_id}-${address.wardLevel.ward_code}-${timestamp}`;
         return trackingCode;
     }
 
+    /**
+     * Reduce stock of product
+     * @param productSelected {Array<ProductCartDTO>} - Product selected to reduce stock
+     * @param session The session store transaction
+     * @returns Array of Promise to update product stock
+     */
     private async reduceStock(productSelected: Array<ProductCartDTO>, session: ClientSession) {
         return Promise.all(
             productSelected.map(async (product) => {
@@ -299,6 +421,13 @@ export class CheckoutService {
         );
     }
 
+    /**
+     * Remove product from cart
+     * @param userId User id to get cart
+     * @param productSelected Product selected to remove from cart
+     * @param session The session store transaction
+     * @returns Promise to update cart
+     */
     private async removeProductFromCart(
         userId: Types.ObjectId,
         productSelected: Array<ProductCartDTO>,
@@ -318,5 +447,38 @@ export class CheckoutService {
         );
         cart.cartCountProducts = cart.products.length;
         return this.cartService.updateCartLockSession({ ...cart }, session);
+    }
+
+    /**
+     * Get payment url
+     * @param paymentMethod Enum of payment method
+     * @param resultOrder Order information
+     * @returns Payment url
+     */
+    private async getPaymentUrl(
+        paymentMethod: CreateOrderRequestDTO['paymentMethod'],
+        resultOrder: Order,
+    ): Promise<string | null> {
+        switch (paymentMethod) {
+            case PaymentMethodEnum.VNPAY:
+                const vnpayUrl = await this.vnpayService.createPaymentUrl({
+                    vnp_IpAddr: '127.0.0.1',
+                    vnp_Amount: resultOrder.checkoutOrder.totalPrice,
+                    vnp_OrderInfo: `Thanh toan don hang TechCell ${resultOrder._id.toString()}`,
+                    vnp_OrderType: ProductCode.Bill,
+                    vnp_TxnRef: resultOrder._id.toString(),
+                });
+
+                if (!vnpayUrl) {
+                    throw new RpcException(
+                        new InternalServerErrorException('Cannot create payment url'),
+                    );
+                }
+                return vnpayUrl;
+            case PaymentMethodEnum.COD:
+            // case PaymentMethodEnum.MOMO:
+            default:
+                return null;
+        }
     }
 }

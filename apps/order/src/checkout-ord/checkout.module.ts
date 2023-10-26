@@ -19,7 +19,7 @@ import { RedisModule } from '@app/common/Redis';
             paymentGateway: process.env.VNPAY_PAYMENT_URL,
             secureSecret: process.env.VNPAY_SECRET_KEY,
             tmnCode: process.env.VNPAY_TMN_CODE,
-            returnUrl: 'https://api.techcell.cloud/checkout/vnpay-return',
+            returnUrl: process.env.VNPAY_RETURN_URL,
         }),
         ProductsModule,
         OrdersModule,

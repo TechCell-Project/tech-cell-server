@@ -7,18 +7,16 @@ export enum OrderStatus {
     SHIPPING = 'shipping',
 }
 
-export enum PaymentProvider {
-    VNPAY = 'vnpay',
-    PAYPAL = 'paypal',
-    MOMO = 'momo',
-    ZALOPAY = 'zalopay',
-    CASH = 'cash',
-}
-
 export enum PaymentStatus {
     PENDING = 'pending',
     CANCELLED = 'cancelled',
     COMPLETED = 'completed',
     PROCESSING = 'processing',
     REFUNDED = 'refunded',
+}
+
+export enum PaymentMethodEnum {
+    COD = 'COD',
+    VNPAY = 'VNPAY',
+    MOMO = 'MOMO',
 }
