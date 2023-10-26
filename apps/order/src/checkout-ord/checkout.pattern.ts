@@ -1,5 +1,7 @@
 export const CheckoutMessagePattern = {
     createOrder: { cmd: 'checkout_create_order' },
-    checkoutVnpay: { cmd: 'checkout_vnpay' },
     reviewOrder: { cmd: 'checkout_review_order' },
+    checkoutVnpay: { cmd: 'checkout_vnpay' },
+    vnpayReturnUrl: { cmd: 'checkout_vnpay_return_url' },
+    vnpayIpnUrl: { cmd: 'checkout_vnpay_ipn_url' },
 };

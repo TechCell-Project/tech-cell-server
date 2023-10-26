@@ -9999,10 +9999,10 @@ vm2@^3.9.17:
     acorn "^8.7.0"
     acorn-walk "^8.2.0"
 
-vnpay@^0.2.0:
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/vnpay/-/vnpay-0.2.0.tgz#58633e2017e5ffedbb3741592d1d374d5b085327"
-  integrity sha512-iBq8wJoS2DF5kT2m7Rtxg7Gt7HRsuSwO7JXBWqUrYo+ML6InvmQsxygAGjWCkkHkmG+zjjFwL0ltJNjbYYPeGA==
+vnpay@^0.2.1:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/vnpay/-/vnpay-0.2.1.tgz#ea17707a06778278e137e2b7a2bb990cc3ac0378"
+  integrity sha512-ojtR2mbVA2wHHK8QETzX806jLaNLLKxIMJ63Tb1hZNXcv0KsHe7HE7/1R++HPAXV0P8DL+5Z46JWybhxVokttg==
   dependencies:
     class-validator "^0.14.0"
     moment-timezone "^0.5.43"

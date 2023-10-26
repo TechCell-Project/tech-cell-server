@@ -11,6 +11,6 @@ async function bootstrap() {
     useRabbitMQ(app, 'RABBITMQ_ORDER_QUEUE');
     await app.startAllMicroservices();
     logger.log(`⚡️ service is ready`);
-    app.listen(3000);
+    app.listen(3001);
 }
 bootstrap();

@@ -91,7 +91,7 @@
         "slugify": "^1.6.6",
         "streamifier": "^0.1.1",
         "swagger-stats": "^0.99.7",
-        "vnpay": "^0.2.0"
+        "vnpay": "^0.2.1"
     },
     "devDependencies": {
         "@compodoc/compodoc": "^1.1.21",

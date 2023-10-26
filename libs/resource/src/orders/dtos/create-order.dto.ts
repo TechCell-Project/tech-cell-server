@@ -28,7 +28,7 @@ class ShippingOrderDTO implements ShippingOrderSchema {
 }
 
 class PaymentOrderDTO implements PaymentOrder {
-    provider: string;
+    method: string;
     status: string;
 }
 

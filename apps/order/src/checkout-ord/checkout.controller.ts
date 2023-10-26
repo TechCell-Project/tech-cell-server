@@ -3,16 +3,15 @@ import { Controller } from '@nestjs/common';
 import { CheckoutService } from './checkout.service';
 import { Ctx, MessagePattern, Payload, RmqContext } from '@nestjs/microservices';
 import { CheckoutMessagePattern } from './checkout.pattern';
-import { VnpayService } from '@app/third-party/vnpay.vn';
 import { TCurrentUser } from '@app/common/types';
-import { ReviewOrderRequestDTO } from './dtos';
+import { ReviewOrderRequestDTO, VnpayIpnUrlDTO } from './dtos';
+import { CreateOrderRequestDTO } from './dtos/create-order-request.dto';
 
 @Controller('checkout')
 export class CheckoutController {
     constructor(
         private readonly checkoutService: CheckoutService,
         private readonly rabbitmqService: RabbitMQService,
-        private readonly vnpayService: VnpayService,
     ) {}
 
     @MessagePattern(CheckoutMessagePattern.reviewOrder)
@@ -40,16 +39,28 @@ export class CheckoutController {
         @Payload()
         {
             user,
-            dataReview,
+            data2CreateOrder,
         }: {
             user: TCurrentUser;
-            dataReview: ReviewOrderRequestDTO;
+            data2CreateOrder: CreateOrderRequestDTO;
         },
     ) {
         this.rabbitmqService.acknowledgeMessage(context);
         return this.checkoutService.createOrder({
             user,
-            dataReview,
+            data2CreateOrder,
         });
+    }
+
+    @MessagePattern(CheckoutMessagePattern.vnpayIpnUrl)
+    async vnpayIpnUrl(@Ctx() context: RmqContext, @Payload() { ...query }: VnpayIpnUrlDTO) {
+        this.rabbitmqService.acknowledgeMessage(context);
+        return this.checkoutService.vnpayIpnUrl({ ...query });
+    }
+
+    @MessagePattern(CheckoutMessagePattern.vnpayReturnUrl)
+    async vnpayReturnUrl(@Ctx() context: RmqContext, @Payload() { ...query }: VnpayIpnUrlDTO) {
+        this.rabbitmqService.acknowledgeMessage(context);
+        return this.checkoutService.vnpayReturnUrl({ ...query });
     }
 }
