@@ -3,13 +3,16 @@ import { GhnWardDTO, GhnProvinceDTO, GhnDistrictDTO } from '@app/third-party/gia
 import {
     Inject,
     Injectable,
-    InternalServerErrorException,
+    HttpException,
+    NotFoundException,
     BadRequestException,
+    InternalServerErrorException,
 } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { Store } from 'cache-manager';
 import { convertTimeString } from 'convert-time-string';
 import { REDIS_CACHE } from '@app/common/constants/cache.constant';
+import { AxiosError } from 'axios';
 
 @Injectable()
 export class AddressSearchService {
@@ -23,57 +26,95 @@ export class AddressSearchService {
     private readonly GET_WARDS_CACHE_KEY = 'address_search_get_wards';
 
     async getProvinces(): Promise<GhnProvinceDTO[]> {
-        const listProvinceCache = await this.cacheManager.get(this.GET_PROVINCES_CACHE_KEY);
-        if (listProvinceCache) {
-            return listProvinceCache as GhnProvinceDTO[];
-        }
+        try {
+            const listProvinceCache: GhnProvinceDTO[] = await this.cacheManager.get(
+                this.GET_PROVINCES_CACHE_KEY,
+            );
+            if (listProvinceCache) {
+                return listProvinceCache;
+            }
 
-        const listProvince = await this.ghnService.getProvinces();
-        if (!listProvince) {
-            throw new RpcException(new InternalServerErrorException('Cannot get provinces'));
-        }
+            const listProvince = await this.ghnService.getProvinces();
+            if (!listProvince) {
+                throw new NotFoundException('Cannot found provinces');
+            }
 
-        await this.setCache(this.GET_PROVINCES_CACHE_KEY, listProvince);
-        return listProvince;
+            await this.setCache(this.GET_PROVINCES_CACHE_KEY, listProvince);
+            return listProvince;
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                throw new RpcException(new BadRequestException(error.response.data.message));
+            }
+            if (error instanceof HttpException) {
+                throw new RpcException(error);
+            }
+            throw new RpcException(new InternalServerErrorException(error.message));
+        }
     }
 
     async getDistricts(provinceId: number): Promise<GhnDistrictDTO[]> {
-        if (!provinceId) throw new RpcException(new BadRequestException('Province id is required'));
+        try {
+            if (!provinceId) {
+                throw new BadRequestException('Province id is required');
+            }
 
-        const districtCacheKey = `${this.GET_DISTRICTS_CACHE_KEY}_${provinceId}`;
-        const listDistrictCache = await this.cacheManager.get(districtCacheKey);
-        if (listDistrictCache) {
-            return listDistrictCache as GhnDistrictDTO[];
+            const districtCacheKey = `${this.GET_DISTRICTS_CACHE_KEY}_${provinceId}`;
+            const listDistrictCache: GhnDistrictDTO[] = await this.cacheManager.get(
+                districtCacheKey,
+            );
+            if (listDistrictCache) {
+                return listDistrictCache;
+            }
+
+            const listDistrict = await this.ghnService.getDistricts(provinceId);
+            if (!listDistrict) {
+                throw new NotFoundException('Cannot found districts');
+            }
+
+            await this.setCache(districtCacheKey, listDistrict);
+            return listDistrict;
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                throw new RpcException(new BadRequestException(error.response.data.message));
+            }
+            if (error instanceof HttpException) {
+                throw new RpcException(error);
+            }
+            throw new RpcException(new InternalServerErrorException(error.message));
         }
-
-        const listDistrict = await this.ghnService.getDistricts(provinceId);
-        if (!listDistrict) {
-            throw new RpcException(new InternalServerErrorException('Cannot get districts'));
-        }
-
-        await this.setCache(districtCacheKey, listDistrict);
-        return listDistrict;
     }
 
     async getWards(districtId: number): Promise<GhnWardDTO[]> {
-        if (!districtId) throw new RpcException(new BadRequestException('District id is required'));
+        try {
+            if (!districtId) {
+                throw new BadRequestException('District id is required');
+            }
 
-        const wardCacheKey = `${this.GET_WARDS_CACHE_KEY}_${districtId}`;
-        const listWardCache = await this.cacheManager.get(wardCacheKey);
-        if (listWardCache) {
-            return listWardCache as GhnWardDTO[];
+            const wardCacheKey = `${this.GET_WARDS_CACHE_KEY}_${districtId}`;
+            const listWardCache: GhnWardDTO[] = await this.cacheManager.get(wardCacheKey);
+            if (listWardCache) {
+                return listWardCache;
+            }
+            const listWard = await this.ghnService.getWards(districtId);
+
+            if (!listWard) {
+                throw new NotFoundException('Cannot found wards');
+            }
+
+            await this.setCache(wardCacheKey, listWard);
+            return listWard;
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                throw new RpcException(new BadRequestException(error.response.data.message));
+            }
+            if (error instanceof HttpException) {
+                throw new RpcException(error);
+            }
+            throw new RpcException(new InternalServerErrorException(error.message));
         }
-
-        const listWard = await this.ghnService.getWards(districtId);
-        if (!listWard) {
-            throw new RpcException(new InternalServerErrorException('Cannot get wards'));
-        }
-
-        await this.setCache(wardCacheKey, listWard);
-        return listWard;
     }
 
-    private async setCache(key: string, value: any) {
-        return this.cacheManager.set(key, value, convertTimeString('1h'));
+    private async setCache(key: string, value: any, ttl?: number) {
+        return this.cacheManager.set(key, value, ttl ?? convertTimeString('1h'));
     }
 }
