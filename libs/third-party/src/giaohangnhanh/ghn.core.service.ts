@@ -11,7 +11,7 @@ import { TShippingFeeResponse } from './types/shipping-fee-response.ghn';
 
 export class GhnCoreService {
     private GHN_URL: string = process.env.GHN_URL;
-    private GHN_SHOP_ID: string | number = 189724;
+    private GHN_SHOP_ID: string | number = +process.env.GHN_SHOP_ID;
     private GHN_API_TOKEN: string = process.env.GHN_API_TOKEN;
 
     constructor(protected readonly httpService: HttpService, protected readonly logger: Logger) {
@@ -33,11 +33,10 @@ export class GhnCoreService {
         const data = await firstValueFrom(
             this.httpService.get(url).pipe(
                 catchError((error: AxiosError) => {
-                    this.logger.error(error.message);
-                    throw new Error(error.message);
+                    throw error;
                 }),
                 map((response) =>
-                    (response.data.data as TGhnProvince[]).map(
+                    (response.data.data as TGhnProvince[])?.map(
                         (province) => new GhnProvinceDTO(province),
                     ),
                 ),
@@ -57,11 +56,10 @@ export class GhnCoreService {
                 })
                 .pipe(
                     catchError((error: AxiosError) => {
-                        this.logger.error(error.message);
-                        throw new Error(error.message);
+                        throw error;
                     }),
                     map((response) =>
-                        (response.data.data as TGhnDistrict[]).map(
+                        (response.data.data as TGhnDistrict[])?.map(
                             (district) => new GhnDistrictDTO(district),
                         ),
                     ),
@@ -82,11 +80,10 @@ export class GhnCoreService {
                 })
                 .pipe(
                     catchError((error: AxiosError) => {
-                        this.logger.error(error.message);
-                        throw new Error(error.message);
+                        throw error;
                     }),
                     map((response) =>
-                        (response.data.data as TGhnWard[]).map((ward) => new GhnWardDTO(ward)),
+                        (response.data.data as TGhnWard[])?.map((ward) => new GhnWardDTO(ward)),
                     ),
                 ),
         );
@@ -101,7 +98,6 @@ export class GhnCoreService {
             this.httpService.post(url, bodyPayload).pipe(
                 catchError((error: AxiosError) => {
                     this.logger.error(error);
-                    console.error(error);
                     throw new Error(error.message);
                 }),
                 map((response) => response.data.data as TShippingFeeResponse),
