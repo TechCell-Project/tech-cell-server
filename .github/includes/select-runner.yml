@@ -5,6 +5,9 @@ jobs:
       runner-label: ${{ steps.set-runner.outputs.runner-label }}
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
       - name: Set runner
         id: set-runner
         run: |
