@@ -8,8 +8,8 @@ import {
     Logger,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { ClientRMQ, RpcException } from '@nestjs/microservices';
-import { catchError, firstValueFrom } from 'rxjs';
+import { ClientRMQ, RmqContext, RpcException } from '@nestjs/microservices';
+import { catchError, firstValueFrom, of } from 'rxjs';
 import { ITokenVerifiedResponse, AuthMessagePattern } from '~apps/auth';
 import {
     AUTH_SERVICE,
@@ -20,6 +20,10 @@ import {
 } from '@app/common/constants';
 import { TCurrentUser } from '../types';
 import { UserRole } from '@app/resource/users/enums';
+import { Socket } from 'socket.io';
+import { Request } from 'express';
+import { WsException } from '@nestjs/websockets';
+import { RequestType } from '../types/current-request-type';
 
 /**
  * @description Base Auth Guard, verify jwt token from request and add user to request if login success
@@ -36,55 +40,66 @@ export class AuthCoreGuard implements CanActivate {
     }
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
-        if (context.getType() !== 'http') {
-            return false;
-        }
-
         if (this.resolveSkipAuth(context)) {
             return true;
         }
 
-        const request = context.switchToHttp().getRequest();
-        const authHeader = request.headers['authorization'];
-        if (!authHeader) return false;
-        const authHeaderParts = (authHeader as string).split(' ');
-        if (authHeaderParts.length !== 2) return false;
+        const { authHeader, requestType } = this.getAccessToken(context);
+
+        const authHeaderParts = authHeader.split(' ');
+        if (authHeaderParts.length !== 2) {
+            this.throwException(new UnauthorizedException(), requestType);
+            return false;
+        }
         const [, jwt] = authHeaderParts;
 
         const dataVerified: ITokenVerifiedResponse = await firstValueFrom(
             this.authService.send(AuthMessagePattern.verifyJwt, { jwt }).pipe(
                 catchError((error) => {
-                    throw new RpcException(error);
+                    this.throwException(error, requestType);
+                    return of(null);
                 }),
             ),
         );
 
         if (!dataVerified.role || !this._acceptRoles.includes(dataVerified.role)) {
-            throw new ForbiddenException('Forbidden permission');
+            this.throwException(new ForbiddenException('Forbidden permission'), requestType);
         }
 
         // Check if token is expired
         if (!dataVerified.exp) {
-            throw new UnauthorizedException();
+            this.throwException(new UnauthorizedException(), requestType);
         }
         const TOKEN_EXP_MS = dataVerified.exp * 1000;
         const isJwtValid = Date.now() < TOKEN_EXP_MS;
         if (!isJwtValid) {
-            throw new UnauthorizedException('Token expired');
+            this.throwException(new UnauthorizedException('Token expired'), requestType);
         }
         this.addUserToRequest(dataVerified, context);
         return isJwtValid;
     }
 
+    /**
+     * Add user to request
+     * @param user The user to add to request
+     * @param context The execution context of the current call
+     */
     protected addUserToRequest(user: TCurrentUser, context: ExecutionContext) {
-        if (context.getType() === 'http') {
-            const request = context.switchToHttp().getRequest();
-            request.user = user;
-        }
-
-        if (context.getType() === 'rpc') {
-            const ctx = context.switchToRpc().getData();
-            ctx.user = user;
+        switch (context.getType()?.toLowerCase()) {
+            case RequestType.Http:
+                const request: Request = context.switchToHttp().getRequest();
+                request.user = user;
+                break;
+            case RequestType.Rpc:
+                const ctx = context.switchToRpc().getData();
+                ctx.user = user;
+                break;
+            case RequestType.Ws:
+                const client: Socket = context.switchToWs().getClient();
+                client.handshake.auth.user = user;
+                break;
+            default:
+                break;
         }
     }
 
@@ -142,6 +157,62 @@ export class AuthCoreGuard implements CanActivate {
         } catch (error) {
             this.logger.error(error);
             return false;
+        }
+    }
+
+    /**
+     * Get access token from request
+     * @param context The execution context of the current call
+     * @returns The authorization header and the type of request
+     */
+    private getAccessToken(context: ExecutionContext): {
+        authHeader: string;
+        requestType: RequestType;
+    } {
+        let authHeader: string | undefined = undefined;
+        let requestType: undefined | RequestType = undefined;
+
+        if (context.getType() === RequestType.Http) {
+            const request: Request = context.switchToHttp().getRequest();
+            authHeader = request.headers?.authorization;
+            requestType = RequestType.Http;
+            if (!authHeader) {
+                throw new UnauthorizedException();
+            }
+        } else if (context.getType() === RequestType.Ws) {
+            const client: Socket = context.switchToWs().getClient();
+            authHeader = client.handshake?.headers?.authorization;
+            requestType = RequestType.Ws;
+            if (!authHeader) {
+                throw new WsException(new UnauthorizedException());
+            }
+        } else if (context.getType() === RequestType.Rpc) {
+            const ctx: RmqContext = context.switchToRpc().getContext();
+            authHeader = ctx?.['headers']?.['authorization'];
+            requestType = RequestType.Rpc;
+            if (!authHeader) {
+                throw new RpcException(new UnauthorizedException());
+            }
+        } else {
+            throw new UnauthorizedException();
+        }
+
+        return { authHeader, requestType: requestType };
+    }
+
+    /**
+     * Re-throw error with correct type of request
+     * @param error The error to throw
+     * @param requestType Type of request
+     */
+    private throwException(error: any, requestType: RequestType): void {
+        switch (requestType) {
+            case RequestType.Ws:
+                throw new WsException(error);
+            case RequestType.Rpc:
+                throw new RpcException(error);
+            default:
+                throw error;
         }
     }
 }
