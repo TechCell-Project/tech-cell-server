@@ -1,9 +1,14 @@
 declare namespace NodeJS {
     interface ProcessEnv {
         /**
-         * HTTP port of api gateway
+         * HTTP port of api gateway service
          */
         API_PORT: string;
+
+        /**
+         * HTTP port of communications service
+         */
+        COMMUNICATIONS_PORT: string;
 
         /**
          * The Global TTL(Time to live) of throttle
@@ -22,30 +27,6 @@ declare namespace NodeJS {
         THROTTLE_GLOBAL_LIMIT: string;
 
         /**
-         * Host of email server
-         * @description This value is used for `nodemailer` module
-         * @example
-         * EMAIL_HOST = 'smtp.gmail.com'
-         */
-        EMAIL_HOST: string;
-
-        /**
-         * User of email server
-         * @description This value is used for `nodemailer` module
-         * @example
-         * EMAIL_USER = 'example'
-         */
-        EMAIL_USER: string;
-
-        /**
-         * Password of email server
-         * @description This value is used for `nodemailer` module
-         * @example
-         * EMAIL_PASSWORD = 'example'
-         */
-        EMAIL_PASSWORD: string;
-
-        /**
          * Sender of email server
          * @description This value is used for `nodemailer` module
          * @default 'TechCell Teams <teams@techcell.cloud>'
@@ -55,6 +36,30 @@ declare namespace NodeJS {
         MAIL_SENDER: string;
 
         /**
+         * Host of email server
+         * @description This value is used for `nodemailer` module
+         * @example
+         * EMAIL_HOST = 'smtp.gmail.com'
+         */
+        GMAIL_HOST: string;
+
+        /**
+         * User of email server
+         * @description This value is used for `nodemailer` module
+         * @example
+         * EMAIL_USER = 'example'
+         */
+        GMAIL_USER: string;
+
+        /**
+         * Password of email server
+         * @description This value is used for `nodemailer` module
+         * @example
+         * EMAIL_PASSWORD = 'example'
+         */
+        GMAIL_PASSWORD: string;
+
+        /**
          * The gmail host
          * @description This value is used for `nodemailer` module
          * @example
@@ -62,23 +67,36 @@ declare namespace NodeJS {
          * @see https://nodemailer.com/smtp/well-known/
          * @see https://support.google.com/a/answer/176600?hl=en
          */
-        GMAIL_HOST: string;
+        SENDGRID_HOST: string;
 
         /**
          * The gmail user
          * @description This value is used for `nodemailer` module
          * @example
-         * GMAIL_USER = 'example'
+         * SENDGRID_USER = 'apikey'
          */
-        GMAIL_USER: string;
+        SENDGRID_USER: string;
 
         /**
          * The gmail password
          * @description This value is used for `nodemailer` module
          * @example
-         * GMAIL_PASSWORD = 'example'
+         * SENDGRID_PASSWORD = 'example'
          */
-        GMAIL_PASSWORD: string;
+        SENDGRID_PASSWORD: string;
+
+        /**
+         * The resend data
+         */
+        RESEND_HOST: string;
+        /**
+         * The resend data
+         */
+        RESEND_USER: string;
+        /**
+         * The resend data
+         */
+        RESEND_API_KEY: string;
 
         /**
          * The expire time of `OTP` code
@@ -352,5 +370,50 @@ declare namespace NodeJS {
          * CLOUDINARY_API_SECRET = example
          */
         CLOUDINARY_API_SECRET: string;
+
+        /**
+         * The `vnpay` data
+         */
+        VNPAY_VERSION: string;
+        /**
+         * The `vnpay` data
+         */
+        VNPAY_PAYMENT_URL: string;
+        /**
+         * The `vnpay` data
+         */
+        VNPAY_TMNCODE: string;
+        /**
+         * The `vnpay` data
+         */
+        VNPAY_SECRET_KEY: string;
+        /**
+         * The `vnpay` data
+         */
+        VNPAY_CURR_CODE: string;
+        /**
+         * The `vnpay` data
+         */
+        VNPAY_LOCALE: string;
+        /**
+         * The `vnpay` data
+         */
+        VNPAY_RETURN_URL: string;
+        /**
+         * The `vnpay` data
+         */
+
+        /**
+         * The `giaohangnhanh` data
+         */
+        GHN_URL: string;
+        /**
+         * The `giaohangnhanh` data
+         */
+        GHN_API_TOKEN: string;
+        /**
+         * The `giaohangnhanh` data
+         */
+        GHN_SHOP_ID: string;
     }
 }

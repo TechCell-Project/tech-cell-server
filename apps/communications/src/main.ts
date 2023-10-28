@@ -3,14 +3,26 @@ import { CommunicationsModule } from './communications.module';
 import { useRabbitMQ } from '@app/common/RabbitMQ';
 import { Logger } from '@nestjs/common';
 import { RpcExceptionFilter } from '@app/common/filters/';
+import helmet from 'helmet';
 
 async function bootstrap() {
-    const logger = new Logger('mail');
+    const port = process.env.COMMUNICATIONS_PORT || 8001;
+    const logger = new Logger('communications');
     const app = await NestFactory.create(CommunicationsModule);
+
+    app.enableCors();
+    app.use(helmet());
+
     app.useGlobalFilters(new RpcExceptionFilter());
     useRabbitMQ(app, 'RABBITMQ_COMMUNICATIONS_QUEUE');
-    await app.startAllMicroservices();
-    logger.log(`⚡️ service is ready`);
-    await app.listen(3000);
+
+    await app.startAllMicroservices().then(() => logger.log(`⚡️ microservices is ready`));
+    await app
+        .listen(port)
+        .then(() =>
+            logger.log(
+                `⚡️ http is ready, listening on port ${port}, url: http://localhost:${port}`,
+            ),
+        );
 }
 bootstrap();
