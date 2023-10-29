@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { NotificationRepository } from './notification.repository';
 import { CreateNotifyDTO } from './dtos';
-import { ClientSession, Types } from 'mongoose';
+import { ClientSession, FilterQuery, QueryOptions, Types, ProjectionType } from 'mongoose';
+import { Notification } from '@app/resource/notifications';
 
 @Injectable()
 export class NotificationService {
@@ -9,6 +10,18 @@ export class NotificationService {
 
     async createNotification(notification: CreateNotifyDTO, session?: ClientSession) {
         return this.notificationRepository.create(notification, {}, session);
+    }
+
+    async getUserNotifications(
+        query: FilterQuery<Notification>,
+        options?: QueryOptions<Notification>,
+        projection?: ProjectionType<Notification>,
+    ) {
+        return this.notificationRepository.find({
+            filterQuery: query,
+            queryOptions: options,
+            projection: projection,
+        });
     }
 
     async markNotificationAsRead(

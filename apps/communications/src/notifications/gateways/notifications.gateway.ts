@@ -11,14 +11,14 @@ import {
 import { firstValueFrom, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Server, Socket } from 'socket.io';
-import { NotificationsMessageSubscribe } from './notifications.message';
+import { NotificationsMessageSubscribe } from '../constants/notifications.message';
 import { Logger, UseGuards } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import { ITokenVerifiedResponse } from '~apps/auth/interfaces';
 import { AuthMessagePattern } from '~apps/auth/auth.pattern';
 import { AuthGuard } from '@app/common';
 import { UserRole } from '@app/resource/users/enums';
-import { NotifyRoom } from './notifications.constant';
+import { NotifyRoom } from '../constants/notifications.constant';
 import { NotificationService } from '@app/resource';
 import { Types } from 'mongoose';
 

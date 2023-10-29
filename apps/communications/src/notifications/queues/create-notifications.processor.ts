@@ -1,11 +1,11 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
-import { NOTIFICATIONS_JOB_CREATE } from '../notifications.constant';
+import { NOTIFICATIONS_JOB_CREATE } from '../constants/notifications.constant';
 import { NotificationService, NotificationType } from '@app/resource/notifications';
 import { UsersService } from '@app/resource/users';
-import { NotificationsMessageSubscribe } from '../notifications.message';
-import { NotificationsCallGateway } from '../notifications.call.gateway';
+import { NotificationsMessageSubscribe } from '../constants/notifications.message';
+import { NotificationsCallGateway } from '../gateways/notifications.call.gateway';
 import { ICreateNotificationQueue } from '../interfaces';
 
 @Injectable()

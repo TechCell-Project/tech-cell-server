@@ -4,11 +4,11 @@ import { AUTH_SERVICE } from '@app/common/constants/services.constant';
 import { ClientRMQ } from '@nestjs/microservices';
 import { NotificationService } from '@app/resource/notifications';
 import { Order, User, UsersService } from '@app/resource';
-import { NOTIFICATIONS_JOB_CREATE } from './notifications.constant';
+import { NOTIFICATIONS_JOB_CREATE } from '../constants/notifications.constant';
 import { UserRole } from '@app/resource/users/enums';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
-import { ICreateNotificationQueue, IPushNotifyToAllUserQueue } from './interfaces';
+import { ICreateNotificationQueue, IPushNotifyToAllUserQueue } from '../interfaces';
 
 @Injectable()
 export class NotificationsCallGateway extends NotificationsGateway {
