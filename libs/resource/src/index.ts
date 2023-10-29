@@ -2,6 +2,7 @@ export * from './attributes';
 export * from './carts';
 export * from './categories';
 export * from './discounts';
+export * from './notifications';
 export * from './orders';
 export * from './otp';
 export * from './products';

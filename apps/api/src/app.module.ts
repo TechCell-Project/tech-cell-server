@@ -11,6 +11,7 @@ import {
     MANAGEMENTS_SERVICE,
     ORDER_SERVICE,
     TASK_SERVICE,
+    COMMUNICATIONS_SERVICE,
 } from '@app/common/constants';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
@@ -71,6 +72,10 @@ import { ScheduleModule } from '@nestjs/schedule';
         RabbitMQModule.registerRmq(MANAGEMENTS_SERVICE, process.env.RABBITMQ_MANAGEMENTS_QUEUE),
         RabbitMQModule.registerRmq(ORDER_SERVICE, process.env.RABBITMQ_ORDER_QUEUE),
         RabbitMQModule.registerRmq(TASK_SERVICE, process.env.RABBITMQ_TASK_QUEUE),
+        RabbitMQModule.registerRmq(
+            COMMUNICATIONS_SERVICE,
+            process.env.RABBITMQ_COMMUNICATIONS_QUEUE,
+        ),
     ],
     controllers: ListControllers,
     providers: [

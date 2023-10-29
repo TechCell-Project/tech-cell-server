@@ -89,7 +89,7 @@ services:
         env_file:
             - .env
         ports:
-            - 8000:8000
+            - 8000:${API_PORT}
         networks:
             - techcell_backend
         restart: always
@@ -116,6 +116,8 @@ services:
             - RABBITMQ_URLS=amqp://techcell_server:techcell_server_9901@haproxy:5672
         env_file:
             - .env
+        ports:
+            - 8001:${COMMUNICATIONS_PORT}
         networks:
             - techcell_backend
         restart: always

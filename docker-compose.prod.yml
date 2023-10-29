@@ -90,7 +90,7 @@ services:
         env_file:
             - .env
         ports:
-            - 8000:8000
+            - 8000:${API_PORT:-8000}
         networks:
             - techcell_backend
         restart: always
@@ -113,6 +113,8 @@ services:
         image: lehuygiang28/techcell_communications
         env_file:
             - .env
+        ports:
+            - 8001:${COMMUNICATIONS_PORT:-8001}
         networks:
             - techcell_backend
         restart: always

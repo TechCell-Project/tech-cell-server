@@ -56,7 +56,7 @@ export class UsersService {
     }
 
     async getUsers(
-        getUserArgs: Partial<User>,
+        getUserArgs: Partial<FilterQuery<User>>,
         queryArgs?: Partial<QueryOptions<User>>,
         projectionArgs?: Partial<ProjectionType<User>>,
     ) {
