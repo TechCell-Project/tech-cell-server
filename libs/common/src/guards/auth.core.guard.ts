@@ -46,8 +46,8 @@ export class AuthCoreGuard implements CanActivate {
 
         const { authHeader, requestType } = this.getAccessToken(context);
 
-        const authHeaderParts = authHeader.split(' ');
-        if (authHeaderParts.length !== 2) {
+        const authHeaderParts = authHeader?.split(' ');
+        if (authHeaderParts && authHeaderParts?.length !== 2) {
             this.throwException(new UnauthorizedException(), requestType);
             return false;
         }
@@ -166,7 +166,7 @@ export class AuthCoreGuard implements CanActivate {
      * @returns The authorization header and the type of request
      */
     private getAccessToken(context: ExecutionContext): {
-        authHeader: string;
+        authHeader: string | undefined;
         requestType: RequestType;
     } {
         let authHeader: string | undefined = undefined;
@@ -193,9 +193,10 @@ export class AuthCoreGuard implements CanActivate {
             if (!authHeader) {
                 throw new RpcException(new UnauthorizedException());
             }
-        } else {
-            throw new UnauthorizedException();
         }
+
+        if (!requestType) throw new Error('Request type is not defined' + context.getType());
+        if (!authHeader) throw new Error('Authorization header is not defined');
 
         return { authHeader, requestType: requestType };
     }
@@ -211,8 +212,9 @@ export class AuthCoreGuard implements CanActivate {
                 throw new WsException(error);
             case RequestType.Rpc:
                 throw new RpcException(error);
+            case RequestType.Http:
             default:
-                throw error;
+                throw new RpcException(error);
         }
     }
 }

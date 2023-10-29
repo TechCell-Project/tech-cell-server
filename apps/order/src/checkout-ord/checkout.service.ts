@@ -3,12 +3,13 @@ import { UsersService } from '@app/resource/users';
 import { GhnService } from '@app/third-party/giaohangnhanh';
 import {
     BadRequestException,
+    Inject,
     Injectable,
     InternalServerErrorException,
     Logger,
     UnprocessableEntityException,
 } from '@nestjs/common';
-import { RpcException } from '@nestjs/microservices';
+import { ClientRMQ, RpcException } from '@nestjs/microservices';
 import { ClientSession, Types } from 'mongoose';
 import { ReviewOrderRequestDTO, ReviewedOrderResponseDTO, VnpayIpnUrlDTO } from './dtos';
 import { Product, ProductsService } from '@app/resource';
@@ -26,6 +27,8 @@ import { VnpayService } from '@app/third-party/vnpay.vn';
 import { ProductCode } from '@app/third-party/vnpay.vn/enums';
 import { PaymentMethodEnum } from './enums';
 import { ResponseForVnpayDTO } from './dtos/response-for-vnpay.dto';
+import { COMMUNICATIONS_SERVICE } from '@app/common/constants/services.constant';
+import { NotifyEventPattern } from '~apps/communications/notifications';
 
 @Injectable()
 export class CheckoutService {
@@ -38,6 +41,7 @@ export class CheckoutService {
         private readonly orderService: OrdersService,
         private readonly cartService: CartsService,
         private readonly redlockService: RedlockService,
+        @Inject(COMMUNICATIONS_SERVICE) private readonly communicationsService: ClientRMQ,
     ) {}
 
     /**
@@ -242,6 +246,12 @@ export class CheckoutService {
         } finally {
             await session.endSession();
         }
+
+        // Emit a event to communications service that a new order is created
+        this.communicationsService.emit(NotifyEventPattern.newOrderCreated, {
+            order: resultOrder,
+            customer: userFound,
+        });
 
         return { ...resultOrder, paymentUrl: paymentUrl ?? undefined };
     }

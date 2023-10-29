@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { RabbitMQService } from '@app/common/RabbitMQ';
+import { RabbitMQModule, RabbitMQService } from '@app/common/RabbitMQ';
 import { HttpModule } from '@nestjs/axios';
 import { CheckoutService } from './checkout.service';
 import { CheckoutController } from './checkout.controller';
@@ -9,6 +9,7 @@ import { VnpayModule } from '@app/third-party/vnpay.vn';
 import { OrdersModule } from '@app/resource/orders';
 import { CartsModule } from '@app/resource/carts';
 import { RedisModule } from '@app/common/Redis';
+import { COMMUNICATIONS_SERVICE } from '@app/common/constants/services.constant';
 
 @Module({
     imports: [
@@ -25,6 +26,10 @@ import { RedisModule } from '@app/common/Redis';
         OrdersModule,
         CartsModule,
         RedisModule,
+        RabbitMQModule.registerRmq(
+            COMMUNICATIONS_SERVICE,
+            process.env.RABBITMQ_COMMUNICATIONS_QUEUE,
+        ),
     ],
     controllers: [CheckoutController],
     providers: [RabbitMQService, CheckoutService],

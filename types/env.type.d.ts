@@ -382,7 +382,7 @@ declare namespace NodeJS {
         /**
          * The `vnpay` data
          */
-        VNPAY_TMNCODE: string;
+        VNPAY_TMN_CODE: string;
         /**
          * The `vnpay` data
          */

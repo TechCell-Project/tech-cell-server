@@ -4,6 +4,7 @@ import { useRabbitMQ } from '@app/common/RabbitMQ';
 import { Logger } from '@nestjs/common';
 import { RpcExceptionFilter } from '@app/common/filters/';
 import helmet from 'helmet';
+import { RedisIoAdapter } from '@app/common/socket.io';
 
 async function bootstrap() {
     const port = process.env.COMMUNICATIONS_PORT || 8001;
@@ -15,6 +16,10 @@ async function bootstrap() {
 
     app.useGlobalFilters(new RpcExceptionFilter());
     useRabbitMQ(app, 'RABBITMQ_COMMUNICATIONS_QUEUE');
+
+    const redisIoAdapter = new RedisIoAdapter(app);
+    await redisIoAdapter.connectToRedis();
+    app.useWebSocketAdapter(redisIoAdapter);
 
     await app.startAllMicroservices().then(() => logger.log(`⚡️ microservices is ready`));
     await app

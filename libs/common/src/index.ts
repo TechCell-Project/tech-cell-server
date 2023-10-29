@@ -1,4 +1,5 @@
 export * from './appConfig';
+export * from './bullmq';
 export * from './constants';
 export * from './database';
 export * from './filters';

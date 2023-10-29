@@ -1,58 +1,61 @@
 import {
-    MessageBody,
+    OnGatewayInit,
     OnGatewayConnection,
+    OnGatewayDisconnect,
     WebSocketGateway,
     WebSocketServer,
+    MessageBody,
+    SubscribeMessage,
+    WsResponse,
 } from '@nestjs/websockets';
 import { firstValueFrom, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Server, Socket } from 'socket.io';
 import { NotificationsMessageSubscribe } from './notifications.message';
-import { Inject, Logger } from '@nestjs/common';
+import { Logger, UseGuards } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import { ITokenVerifiedResponse } from '~apps/auth/interfaces';
 import { AuthMessagePattern } from '~apps/auth/auth.pattern';
-import { AUTH_SERVICE } from '@app/common';
+import { AuthGuard } from '@app/common';
 import { UserRole } from '@app/resource/users/enums';
-import { NotifyRoom } from './constant.notify';
+import { NotifyRoom } from './notifications.constant';
+import { NotificationService } from '@app/resource';
+import { Types } from 'mongoose';
 
 @WebSocketGateway({
     cors: {
         origin: '*',
     },
 })
-export class NotificationsGateway implements OnGatewayConnection {
-    private readonly logger = new Logger(NotificationsGateway.name);
-    constructor(@Inject(AUTH_SERVICE) private readonly authService: ClientRMQ) {}
+export class NotificationsGateway
+    implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+{
+    protected logger = new Logger(NotificationsGateway.name);
+    protected connectedClients: Map<string, Socket>;
+
+    constructor(
+        protected readonly authService: ClientRMQ,
+        protected readonly notificationService: NotificationService,
+    ) {}
 
     @WebSocketServer()
-    private readonly server: Server;
+    readonly server: Server;
+
+    afterInit() {
+        this.logger.log('Notification gateway initialized');
+        this.connectedClients = new Map<string, Socket>();
+    }
 
     /**
      * @description Handle connection from client and join to room base on user role and user id
      */
     async handleConnection(client: Socket) {
-        const authHeaderParts = client.handshake?.headers?.authorization?.split(' ');
-        if (authHeaderParts.length !== 2) {
-            client.disconnect(true);
-            return;
-        }
-        const [, jwt] = authHeaderParts;
-
-        const userVerified: ITokenVerifiedResponse = await firstValueFrom(
-            this.authService.send(AuthMessagePattern.verifyJwt, { jwt }).pipe(
-                catchError(() => {
-                    return of(null);
-                }),
-            ),
-        );
-
+        const userVerified: ITokenVerifiedResponse | null = await this.authenticateClient(client);
         if (!userVerified) {
             return client.disconnect(true);
         }
 
         const rooms = [NotifyRoom.AllUserRoom, `user_id_${userVerified._id}`];
-
         if (userVerified.role === UserRole.SuperAdmin) {
             rooms.push(NotifyRoom.SuperAdminRoom, NotifyRoom.AdminRoom);
         }
@@ -66,26 +69,113 @@ export class NotificationsGateway implements OnGatewayConnection {
         }
 
         if (userVerified.role === UserRole.User) {
-            rooms.push(`user_id_${userVerified._id}`);
+            rooms.push(NotifyRoom.UserRoom);
         }
 
+        this.logger.log(`Client ${client.id} connected to ${rooms.join(', ')}`);
+        this.connectedClients.set(client.id, client);
         return client.join(rooms);
     }
 
-    async newOrderAdmin(@MessageBody() data: any) {
-        this.server.to(NotifyRoom.AllUserRoom).emit(NotificationsMessageSubscribe.NewOrderAdmin, {
-            time: Date.now().toString(),
-            connected: [
-                ...(await this.server.in(NotifyRoom.AllUserRoom).fetchSockets()).map(
-                    (socket) => socket.id,
-                ),
-            ].length,
-            data,
-        });
+    /**
+     * @description Handle disconnect from client
+     */
+    async handleDisconnect(client: Socket) {
+        this.logger.log(`Client ${client.id} disconnected`);
+        this.connectedClients.delete(client.id);
+    }
+
+    @UseGuards(AuthGuard)
+    @SubscribeMessage(NotificationsMessageSubscribe.MarkNotificationAsRead)
+    async markNotificationAsRead(
+        @MessageBody() { notificationId }: { notificationId: string },
+    ): Promise<
+        WsResponse<{
+            isSuccess: boolean;
+            message: string;
+        }>
+    > {
+        if (!notificationId) {
+            return {
+                event: NotificationsMessageSubscribe.MarkNotificationAsRead,
+                data: {
+                    isSuccess: false,
+                    message: 'Notification id is required',
+                },
+            };
+        }
+
+        if (!Types.ObjectId.isValid(notificationId)) {
+            return {
+                event: NotificationsMessageSubscribe.MarkNotificationAsRead,
+                data: {
+                    isSuccess: false,
+                    message: 'Notification id is invalid',
+                },
+            };
+        }
+
+        const notification = await this.notificationService.markNotificationAsRead(
+            new Types.ObjectId(notificationId),
+        );
+        if (notification === null) {
+            return {
+                event: NotificationsMessageSubscribe.MarkNotificationAsRead,
+                data: {
+                    isSuccess: false,
+                    message: 'Notification not found',
+                },
+            };
+        }
+
+        if (notification === false) {
+            return {
+                event: NotificationsMessageSubscribe.MarkNotificationAsRead,
+                data: {
+                    isSuccess: false,
+                    message: 'Notification already read',
+                },
+            };
+        }
 
         return {
-            isSuccess: true,
-            message: 'success',
+            event: NotificationsMessageSubscribe.MarkNotificationAsRead,
+            data: {
+                isSuccess: true,
+                message: 'Mark notification as read successfully',
+            },
         };
+    }
+
+    // Utils below
+
+    /**
+     * @description Authenticate client by jwt token
+     * @param client Socket client
+     * @returns ITokenVerifiedResponse | null
+     */
+    private async authenticateClient(client: Socket): Promise<ITokenVerifiedResponse> | null {
+        let authHeaderParts = client.handshake?.headers?.authorization?.split(' ');
+        if (!authHeaderParts) {
+            authHeaderParts = client.handshake?.auth?.token?.split(' ');
+        }
+        if (authHeaderParts?.length !== 2) {
+            return null;
+        }
+        const [, jwt] = authHeaderParts;
+        const userVerified: ITokenVerifiedResponse = await firstValueFrom(
+            this.authService.send(AuthMessagePattern.verifyJwt, { jwt }).pipe(
+                catchError(() => {
+                    return of(null);
+                }),
+            ),
+        );
+
+        if (!userVerified) {
+            return null;
+        }
+
+        client.handshake.auth.user = userVerified;
+        return userVerified;
     }
 }

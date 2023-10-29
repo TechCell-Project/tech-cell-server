@@ -1,3 +1,3 @@
 export const NotifyEventPattern = {
-    newOrderAdmin: { event: 'notifications.push.new-order-admin' },
+    newOrderCreated: { event: 'notifications.push.new_order_created' },
 };
