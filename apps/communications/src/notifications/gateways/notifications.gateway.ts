@@ -21,6 +21,8 @@ import { UserRole } from '@app/resource/users/enums';
 import { NotifyRoom } from '../constants/notifications.constant';
 import { NotificationService } from '@app/resource';
 import { Types } from 'mongoose';
+import { CurrentUser } from '@app/common/decorators';
+import { TCurrentUser } from '@app/common/types';
 
 @WebSocketGateway({
     cors: {
@@ -89,6 +91,7 @@ export class NotificationsGateway
     @SubscribeMessage(NotificationsMessageSubscribe.MarkNotificationAsRead)
     async markNotificationAsRead(
         @MessageBody() { notificationId }: { notificationId: string },
+        @CurrentUser() user: TCurrentUser,
     ): Promise<
         WsResponse<{
             isSuccess: boolean;
@@ -115,9 +118,10 @@ export class NotificationsGateway
             };
         }
 
-        const notification = await this.notificationService.markNotificationAsRead(
-            new Types.ObjectId(notificationId),
-        );
+        const notification = await this.notificationService.markNotificationAsRead({
+            _id: new Types.ObjectId(notificationId),
+            recipientId: new Types.ObjectId(user._id),
+        });
         if (notification === null) {
             return {
                 event: NotificationsMessageSubscribe.MarkNotificationAsRead,
