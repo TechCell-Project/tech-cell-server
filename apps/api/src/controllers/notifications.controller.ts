@@ -1,4 +1,4 @@
-import { Controller, Get, Inject, UseGuards, Query, Post } from '@nestjs/common';
+import { Controller, Get, Inject, UseGuards, Query } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import { COMMUNICATIONS_SERVICE } from '@app/common/constants';
 import { AuthGuard, catchException } from '@app/common';

@@ -1,8 +1,7 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { AppConfigModule } from '@app/common';
+import { AppConfigModule, MongodbModule } from '@app/common';
 import { RabbitMQModule } from '@app/common/RabbitMQ';
-import { HealthModule } from '@app/common/HealthCheck';
 import { ListControllers } from './controllers';
 import {
     SEARCH_SERVICE,
@@ -26,6 +25,8 @@ import { UploadConstants } from '@app/common/constants/upload.constant';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { ApiTaskService } from './services';
 import { ScheduleModule } from '@nestjs/schedule';
+import { TerminusModule } from '@nestjs/terminus';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
     imports: [
@@ -43,8 +44,13 @@ import { ScheduleModule } from '@nestjs/schedule';
                 }),
             }),
         }),
+        HttpModule,
+        MongodbModule,
+        RabbitMQModule,
+        TerminusModule.forRoot({
+            errorLogStyle: 'pretty',
+        }),
         CloudinaryModule,
-        HealthModule,
         MulterModule.registerAsync({
             useFactory: () => ({
                 dest: UploadConstants.multerUploadTmpFolderDir,
