@@ -10,6 +10,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { JwtGuard } from './guards';
 import { OtpModule } from '@app/resource/otp';
 import { COMMUNICATIONS_SERVICE } from '@app/common/constants';
+import { AuthHealthIndicator } from './auth.health';
 
 @Module({
     imports: [
@@ -26,6 +27,7 @@ import { COMMUNICATIONS_SERVICE } from '@app/common/constants';
     ],
     controllers: [AuthController],
     providers: [
+        AuthHealthIndicator,
         JwtGuard,
         RabbitMQService,
         AuthService,

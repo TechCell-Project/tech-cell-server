@@ -8,6 +8,8 @@ import { AttributesMntModule } from './attributes-mnt';
 import { CategoriesMntModule } from './categories-mnt';
 import { ImagesMntModule } from './images-mnt/images-mnt.module';
 import { DiscountsMntModule } from './discounts-mnt';
+import { ManagementsHealthIndicator } from './managements.health';
+import { ManagementsController } from './managements.controller';
 
 @Module({
     imports: [
@@ -20,6 +22,7 @@ import { DiscountsMntModule } from './discounts-mnt';
         ImagesMntModule,
         DiscountsMntModule,
     ],
-    providers: [RabbitMQService],
+    controllers: [ManagementsController],
+    providers: [RabbitMQService, ManagementsHealthIndicator],
 })
 export class ManagementsModule {}

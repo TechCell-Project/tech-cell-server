@@ -5,6 +5,9 @@ import { AttributesSearchModule } from './attributes-search/attributes-search.mo
 import { CategoriesSearchModule } from './categories-search/categories-search.module';
 import { UsersSearchModule } from './users-search/users-search.module';
 import { AddressSearchModule } from './address-search';
+import { SearchController } from './search.controller';
+import { SearchHealthIndicator } from './search.health';
+import { RabbitMQService } from '@app/common/RabbitMQ/services';
 
 @Module({
     imports: [
@@ -15,5 +18,7 @@ import { AddressSearchModule } from './address-search';
         CategoriesSearchModule,
         AddressSearchModule,
     ],
+    controllers: [SearchController],
+    providers: [SearchHealthIndicator, RabbitMQService],
 })
 export class SearchModule {}

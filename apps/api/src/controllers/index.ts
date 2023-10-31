@@ -12,8 +12,10 @@ import { ProfileController } from './profile.controller';
 import { AddressController } from './address.controller';
 import { NotificationsController } from './notifications.controller';
 // import { DiscountsController } from './discounts.controller';
+import { HealthController } from './health.controller';
 
 export const ListControllers = [
+    HealthController,
     AdminController,
     AuthController,
     ProfileController,

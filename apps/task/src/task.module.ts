@@ -5,6 +5,8 @@ import { CloudinaryModule } from '@app/third-party/cloudinary.com';
 import { ImageTaskModule } from './image-task/image-task.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { DatabaseTaskModule } from './database-task/database-task.module';
+import { TaskHealthIndicator } from './task.health';
+import { TaskController } from './task.controller';
 
 @Module({
     imports: [
@@ -14,6 +16,7 @@ import { DatabaseTaskModule } from './database-task/database-task.module';
         ImageTaskModule,
         DatabaseTaskModule,
     ],
-    providers: [RabbitMQService],
+    controllers: [TaskController],
+    providers: [RabbitMQService, TaskHealthIndicator],
 })
 export class TaskModule {}
