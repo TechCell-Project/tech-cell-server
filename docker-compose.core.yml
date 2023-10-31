@@ -9,8 +9,8 @@ services:
         cap_add:
             - NET_ADMIN
         environment:
-            - PUID=1001
-            - PGID=1002
+            - PUID=1002
+            - PGID=1003
             - TZ=Etc/UTC
             - URL=techcell.cloud
             - SUBDOMAINS=api, socket, redis, mongodb, amqp, amqp-m
