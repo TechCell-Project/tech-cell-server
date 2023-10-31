@@ -1,23 +1,62 @@
 version: '3'
 
 services:
+    swag:
+        build:
+            context: ./containers/swag
+            dockerfile: Dockerfile
+        container_name: swag
+        cap_add:
+            - NET_ADMIN
+        environment:
+            - PUID=1001
+            - PGID=1002
+            - TZ=Etc/UTC
+            - URL=techcell.cloud
+            - SUBDOMAINS=swag, swag-ws, redis, mongodb, amqp, amqp-m
+            - VALIDATION=http
+            - CERTPROVIDER=zerossl #optional
+            - DNSPLUGIN=cloudflare #optional
+            # - DUCKDNSTOKEN=<token> #optional
+            - EMAIL=teams@techcell.cloud #optional
+            - ONLY_SUBDOMAINS=true #optional
+            # - EXTRA_DOMAINS=<extradomains> #optional
+            - STAGING=false #optional
+        volumes:
+            - ./containers/swag/nginx/proxy-confs:/config/nginx/proxy-confs
+            - swag-ssl:/config
+        ports:
+            - 80:80
+            - 443:443
+        networks:
+            - techcell_backend
+        restart: unless-stopped
+
     haproxy:
         build:
             context: ./containers/haproxy
             dockerfile: Dockerfile
+        container_name: haproxy
         depends_on:
             - rabbitmq1
             - rabbitmq2
             - rabbitmq3
+            - redis
+            - mongodb-primary
         ports:
-            - 15672:15672
-            - 5672:5672
             - 1936:1936
+            - 5672:5672
+            - 15672:15672
+            - 6379:6379
+            - 27017:27017
+        volumes:
+            - ./containers/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
         networks:
             - techcell_backend
         restart: unless-stopped
 
     rabbitmq1:
+        container_name: rabbitmq1
         build:
             context: ./containers/rabbitmq
             dockerfile: Dockerfile
@@ -32,6 +71,7 @@ services:
         restart: unless-stopped
 
     rabbitmq2:
+        container_name: rabbitmq2
         build:
             context: ./containers/rabbitmq
             dockerfile: Dockerfile
@@ -46,6 +86,7 @@ services:
         restart: unless-stopped
 
     rabbitmq3:
+        container_name: rabbitmq3
         build:
             context: ./containers/rabbitmq
             dockerfile: Dockerfile
@@ -60,6 +101,7 @@ services:
         restart: unless-stopped
 
     mongodb-primary:
+        container_name: mongodb-primary
         image: docker.io/bitnami/mongodb:5.0
         environment:
             - MONGODB_ADVERTISED_HOSTNAME=mongodb-primary
@@ -70,13 +112,12 @@ services:
             - .env
         volumes:
             - 'mongodb_master_data:/bitnami/mongodb'
-        ports:
-            - '27027:27017'
         networks:
             - techcell_backend
-        restart: always
+        restart: unless-stopped
 
     mongodb-secondary:
+        container_name: mongodb-secondary
         image: docker.io/bitnami/mongodb:5.0
         depends_on:
             - mongodb-primary
@@ -90,9 +131,10 @@ services:
             - .env
         networks:
             - techcell_backend
-        restart: always
+        restart: unless-stopped
 
     mongodb-arbiter:
+        container_name: mongodb-arbiter
         image: docker.io/bitnami/mongodb:5.0
         depends_on:
             - mongodb-primary
@@ -106,26 +148,28 @@ services:
             - .env
         networks:
             - techcell_backend
-        restart: always
+        restart: unless-stopped
 
     redis:
+        container_name: redis
+        hostname: redis
         image: docker.io/bitnami/redis:7.0
         environment:
             - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL,CONFIG
             - REDIS_PASSWORD=${REDIS_PASSWORD}
-        ports:
-            - '6379:6379'
         networks:
             - techcell_backend
         volumes:
             - 'redis_data:/redis/data'
-        restart: always
+        restart: unless-stopped
         # sysctl -w vm.overcommit_memory=1
 
 networks:
     techcell_backend:
 
 volumes:
+    swag-ssl:
+        driver: local
     mongodb_master_data:
         driver: local
     rabbitmq_data:

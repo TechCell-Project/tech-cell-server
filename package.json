@@ -32,7 +32,7 @@
         "up:deploy:build": "docker compose -f docker-compose.prod.yml up -d --build",
         "down:deploy": "docker compose -f docker-compose.prod.yml down",
         "compodoc": "npx @compodoc/compodoc -p tsconfig.json -s",
-        "get-logs": "docker cp tech-cell-server-utility-1:/usr/src/app/logs .",
+        "get-logs": "docker cp utility:/usr/src/app/logs .",
         "tc-cli": "node ./scripts/deploy-docker.js"
     },
     "dependencies": {
