@@ -13,7 +13,7 @@ services:
             - PGID=1002
             - TZ=Etc/UTC
             - URL=techcell.cloud
-            - SUBDOMAINS=swag, swag-ws, redis, mongodb, amqp, amqp-m
+            - SUBDOMAINS=api, socket, redis, mongodb, amqp, amqp-m
             - VALIDATION=http
             - CERTPROVIDER=zerossl #optional
             - DNSPLUGIN=cloudflare #optional
