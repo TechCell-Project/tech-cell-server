@@ -1,4 +1,4 @@
-FROM lscr.io/linuxserver/swag:2.7.3
+FROM lscr.io/linuxserver/swag:2
 
 COPY ./nginx/proxy-confs/*.conf /config/nginx/proxy-confs/*.conf
 
