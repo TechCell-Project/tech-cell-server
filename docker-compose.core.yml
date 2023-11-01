@@ -9,11 +9,11 @@ services:
         cap_add:
             - NET_ADMIN
         environment:
-            - PUID=1002
-            - PGID=1003
+            - PUID=${PUID:-1001}
+            - PGID=${PGID:-1002}
             - TZ=Etc/UTC
             - URL=techcell.cloud
-            - SUBDOMAINS=api, socket, redis, mongodb, amqp, amqp-m
+            - SUBDOMAINS=api, socket, redis, mongodb, amqp, amqp-m, docs
             - VALIDATION=http
             - CERTPROVIDER=zerossl #optional
             - DNSPLUGIN=cloudflare #optional
@@ -24,6 +24,7 @@ services:
             - STAGING=false #optional
         volumes:
             - ./containers/swag/nginx/proxy-confs:/config/nginx/proxy-confs
+            - ./containers/swag/www:/config/www
             - swag-ssl:/config
         ports:
             - 80:80
