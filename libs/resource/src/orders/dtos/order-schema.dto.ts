@@ -9,7 +9,7 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { AddressSchemaDTO } from '@app/resource/users/dtos/user-schema.dto';
 import { PaymentMethodEnum } from '~apps/order/checkout-ord/enums';
-import { OrderStatus, PaymentStatus } from '../enums';
+import { OrderStatusEnum, PaymentStatusEnum } from '../enums';
 
 export class ProductOrderSchemaDTO implements ProductOrderSchema {
     @ApiProperty({ type: String, example: '5f9d7a9b9b3f3b1b1c9f9b3f' })
@@ -57,7 +57,7 @@ export class PaymentOrderDTO implements PaymentOrder {
     @ApiProperty({ type: String, enum: PaymentMethodEnum })
     method: string;
 
-    @ApiProperty({ type: String, enum: PaymentStatus })
+    @ApiProperty({ type: String, enum: PaymentStatusEnum })
     status: string;
 }
 
@@ -83,6 +83,6 @@ export class OrderSchemaDTO implements Order {
     @ApiProperty({ type: String, example: '1490-1A0807-1698349462504' })
     trackingCode: string;
 
-    @ApiProperty({ type: String, enum: OrderStatus, example: OrderStatus.PENDING })
+    @ApiProperty({ type: String, enum: OrderStatusEnum, example: OrderStatusEnum.PENDING })
     orderStatus: string;
 }

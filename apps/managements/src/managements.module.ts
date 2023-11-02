@@ -10,6 +10,7 @@ import { ImagesMntModule } from './images-mnt/images-mnt.module';
 import { DiscountsMntModule } from './discounts-mnt';
 import { ManagementsHealthIndicator } from './managements.health';
 import { ManagementsController } from './managements.controller';
+import { OrdersMntModule } from './orders-mnt';
 
 @Module({
     imports: [
@@ -21,6 +22,7 @@ import { ManagementsController } from './managements.controller';
         CategoriesMntModule,
         ImagesMntModule,
         DiscountsMntModule,
+        OrdersMntModule,
     ],
     controllers: [ManagementsController],
     providers: [RabbitMQService, ManagementsHealthIndicator],

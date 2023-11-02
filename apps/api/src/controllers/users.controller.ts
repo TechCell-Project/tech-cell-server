@@ -65,7 +65,10 @@ export class UsersController {
         summary: 'Get list of users',
         description: 'Get list of users',
     })
-    @ApiOkResponse({ description: 'Get users success', type: ListDataResponseDTO })
+    @ApiOkResponse({
+        description: 'Get users success',
+        type: ListDataResponseDTO<UserMntResponseDto>,
+    })
     @ApiNotFoundResponse({ description: 'No users found' })
     @UseGuards(ModGuard)
     @Get('/')

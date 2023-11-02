@@ -1,7 +1,7 @@
 import { AbstractDocument } from '@app/resource/abstract';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
-import { OrderStatus } from '../enums';
+import { OrderStatusEnum } from '../enums';
 import {
     CheckoutOrderSchema,
     PaymentOrder,
@@ -26,10 +26,10 @@ export class Order extends AbstractDocument {
     @Prop({ required: false, type: PaymentOrder, default: {} })
     paymentOrder?: PaymentOrder;
 
-    @Prop({ required: true, type: String, unique: true })
+    @Prop({ required: true, type: String })
     trackingCode: string;
 
-    @Prop({ required: true, type: String, enum: OrderStatus, default: OrderStatus.PENDING })
+    @Prop({ required: true, type: String, enum: OrderStatusEnum, default: OrderStatusEnum.PENDING })
     orderStatus: string;
 }
 

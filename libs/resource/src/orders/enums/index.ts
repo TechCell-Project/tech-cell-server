@@ -1,4 +1,4 @@
-export enum OrderStatus {
+export enum OrderStatusEnum {
     PENDING = 'pending',
     CANCELLED = 'cancelled',
     COMPLETED = 'completed',
@@ -7,7 +7,7 @@ export enum OrderStatus {
     SHIPPING = 'shipping',
 }
 
-export enum PaymentStatus {
+export enum PaymentStatusEnum {
     PENDING = 'pending',
     CANCELLED = 'cancelled',
     COMPLETED = 'completed',
@@ -18,5 +18,4 @@ export enum PaymentStatus {
 export enum PaymentMethodEnum {
     COD = 'COD',
     VNPAY = 'VNPAY',
-    MOMO = 'MOMO',
 }

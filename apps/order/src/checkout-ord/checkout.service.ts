@@ -16,7 +16,7 @@ import { Product, ProductsService } from '@app/resource';
 import { TProductDimensions } from './types';
 import { ItemShipping } from '@app/third-party/giaohangnhanh/dtos';
 import { CreateOrderDTO } from '@app/resource/orders/dtos/create-order.dto';
-import { OrderStatus, PaymentStatus } from '@app/resource/orders/enums';
+import { OrderStatusEnum, PaymentStatusEnum } from '@app/resource/orders/enums';
 import { AddressSchema } from '@app/resource/users/schemas/address.schema';
 import { Order, OrdersService } from '@app/resource/orders';
 import { ProductCartDTO } from '@app/resource/carts/dtos/product-cart.dto';
@@ -147,6 +147,7 @@ export class CheckoutService {
                 );
             }
 
+            productUserSelected.productId = new Types.ObjectId(productUserSelected.productId);
             const price = productWithSku.price.base;
             return total + price;
         }, 0);
@@ -203,12 +204,12 @@ export class CheckoutService {
                 totalPrice:
                     reviewedOrder.totalProductPrice + reviewedOrder.shipping.giaohangnhanh.total,
             },
-            orderStatus: OrderStatus.PENDING,
+            orderStatus: OrderStatusEnum.PENDING,
             products: reviewedOrder.productSelected,
             trackingCode: this.createTrackingCode(userFound.address[reviewedOrder.addressSelected]),
             paymentOrder: {
                 method: data2CreateOrder.paymentMethod,
-                status: PaymentStatus.PROCESSING,
+                status: PaymentStatusEnum.PROCESSING,
             },
         });
 
@@ -296,9 +297,9 @@ export class CheckoutService {
 
             // If payment, or order is completed, or canceled, return error
             if (
-                order.orderStatus === OrderStatus.COMPLETED ||
-                order.paymentOrder.status === PaymentStatus.COMPLETED ||
-                order.orderStatus === OrderStatus.CANCELLED
+                order.orderStatus === OrderStatusEnum.COMPLETED ||
+                order.paymentOrder.status === PaymentStatusEnum.COMPLETED ||
+                order.orderStatus === OrderStatusEnum.CANCELLED
             ) {
                 return {
                     RspCode: '02',
@@ -308,11 +309,11 @@ export class CheckoutService {
 
             order.paymentOrder.method = PaymentMethodEnum.VNPAY;
             if (query.vnp_ResponseCode === '00' || query.vnp_TransactionStatus === '00') {
-                order.paymentOrder.status = PaymentStatus.COMPLETED;
-                order.orderStatus = OrderStatus.PROCESSING;
+                order.paymentOrder.status = PaymentStatusEnum.COMPLETED;
+                order.orderStatus = OrderStatusEnum.PROCESSING;
             } else {
-                order.paymentOrder.status = PaymentStatus.CANCELLED;
-                order.orderStatus = OrderStatus.CANCELLED;
+                order.paymentOrder.status = PaymentStatusEnum.CANCELLED;
+                order.orderStatus = OrderStatusEnum.CANCELLED;
             }
 
             await this.orderService.updateOrderById(order._id, order);

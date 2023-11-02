@@ -4,6 +4,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Order, OrderSchema } from './schemas/order.schema';
 import { OrderRepository } from './orders.repository';
 import { OrdersService } from './orders.service';
+import { RedisModule } from '@app/common/Redis';
 
 @Module({
     imports: [
@@ -14,6 +15,11 @@ import { OrdersService } from './orders.service';
                 schema: OrderSchema,
             },
         ]),
+        RedisModule.register({
+            host: process.env.REDIS_HOST,
+            port: +process.env.REDIS_PORT,
+            password: process.env.REDIS_PASSWORD,
+        }),
     ],
     providers: [OrderRepository, OrdersService],
     exports: [OrdersService],
