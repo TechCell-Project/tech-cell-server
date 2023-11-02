@@ -119,7 +119,12 @@ export class ProductsService {
         updateQueries: UpdateQuery<Partial<Product>>,
         session: ClientSession = null,
     ) {
-        return await this.productsRepository.findOneAndUpdate(productId, updateQueries, session);
+        return await this.productsRepository.findOneAndUpdate(
+            productId,
+            updateQueries,
+            {},
+            session,
+        );
     }
 
     async isImageInUse(publicId: string) {
