@@ -12,7 +12,14 @@ import {
 } from '@nestjs/terminus';
 import { Transport, RmqOptions, RedisOptions, ClientRMQ } from '@nestjs/microservices';
 import { catchError, firstValueFrom, map, of, timeout, TimeoutError } from 'rxjs';
-import { ApiOperation, ApiTags, ApiTooManyRequestsResponse } from '@nestjs/swagger';
+import {
+    ApiBadRequestResponse,
+    ApiInternalServerErrorResponse,
+    ApiNotFoundResponse,
+    ApiOperation,
+    ApiTags,
+    ApiTooManyRequestsResponse,
+} from '@nestjs/swagger';
 import {
     AUTH_SERVICE,
     COMMUNICATIONS_SERVICE,
@@ -31,6 +38,18 @@ import { TaskMessagePattern } from '~apps/task/task.pattern';
 import { UtilityMessagePattern } from '~apps/utility';
 import { Throttle } from '@nestjs/throttler';
 
+@ApiBadRequestResponse({
+    description: 'Invalid request, please check your request data!',
+})
+@ApiNotFoundResponse({
+    description: 'Not found data, please try again!',
+})
+@ApiTooManyRequestsResponse({
+    description: 'Too many requests, please try again later!',
+})
+@ApiInternalServerErrorResponse({
+    description: 'Internal server error, please try again later!',
+})
 @Throttle(3, 60)
 @ApiTags('health')
 @Controller('health')

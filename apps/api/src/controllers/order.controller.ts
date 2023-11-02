@@ -1,7 +1,17 @@
 import { Controller, Inject, UseGuards, Post, Body, HttpCode, Get, Query } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
-import { ORDER_SERVICE } from '@app/common/constants';
-import { ApiExcludeEndpoint, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ACCESS_TOKEN_NAME, ORDER_SERVICE } from '@app/common/constants';
+import {
+    ApiBadRequestResponse,
+    ApiBearerAuth,
+    ApiExcludeEndpoint,
+    ApiInternalServerErrorResponse,
+    ApiNotFoundResponse,
+    ApiResponse,
+    ApiTags,
+    ApiTooManyRequestsResponse,
+    ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 import { CheckoutMessagePattern } from '~apps/order/checkout-ord/checkout.pattern';
 import { AuthGuard, catchException } from '@app/common';
 import { CurrentUser } from '@app/common/decorators';
@@ -14,6 +24,22 @@ import {
 import { CreateOrderRequestDTO } from '~apps/order/checkout-ord/dtos/create-order-request.dto';
 import { OrderSchemaDTO } from '@app/resource/orders/dtos/order-schema.dto';
 
+@ApiBadRequestResponse({
+    description: 'Invalid request, please check your request data!',
+})
+@ApiNotFoundResponse({
+    description: 'Not found data, please try again!',
+})
+@ApiUnauthorizedResponse({
+    description: 'Unauthorized, please login!',
+})
+@ApiTooManyRequestsResponse({
+    description: 'Too many requests, please try again later!',
+})
+@ApiInternalServerErrorResponse({
+    description: 'Internal server error, please try again later!',
+})
+@ApiBearerAuth(ACCESS_TOKEN_NAME)
 @ApiTags('order')
 @Controller('order')
 export class OrderController {

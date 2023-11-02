@@ -18,10 +18,13 @@ import {
     ApiCreatedResponse,
     ApiExcludeEndpoint,
     ApiForbiddenResponse,
+    ApiInternalServerErrorResponse,
     ApiNotFoundResponse,
     ApiOkResponse,
     ApiOperation,
     ApiTags,
+    ApiTooManyRequestsResponse,
+    ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import {
     ChangeRoleRequestDTO,
@@ -38,9 +41,26 @@ import { UsersSearchMessagePattern } from '~apps/search/users-search';
 import { GetUsersQueryDTO } from '~apps/search/users-search/dtos';
 import { ACCESS_TOKEN_NAME } from '@app/common/constants/api.constant';
 
-@ApiTags('users (admin only)')
+@ApiBadRequestResponse({
+    description: 'Invalid request, please check your request data!',
+})
+@ApiNotFoundResponse({
+    description: 'Not found data, please try again!',
+})
+@ApiUnauthorizedResponse({
+    description: 'Unauthorized, please login!',
+})
+@ApiForbiddenResponse({
+    description: 'Forbidden permission, required Mod or Admin',
+})
+@ApiTooManyRequestsResponse({
+    description: 'Too many requests, please try again later!',
+})
+@ApiInternalServerErrorResponse({
+    description: 'Internal server error, please try again later!',
+})
+@ApiTags('users managements (admin only)')
 @ApiBearerAuth(ACCESS_TOKEN_NAME)
-@ApiForbiddenResponse({ description: 'Forbidden permission, required Mod or Admin' })
 @Controller('users')
 export class UsersController {
     constructor(
