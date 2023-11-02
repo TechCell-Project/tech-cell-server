@@ -36,6 +36,7 @@ import { ImageUploadedResponseDTO } from '~apps/managements/images-mnt/dtos/imag
 import { PublicIdDTO } from '~apps/managements/images-mnt/dtos/publicId.dto';
 import { ImagesMntMessagePattern } from '~apps/managements/images-mnt/images-mnt.pattern';
 import {
+    ACCESS_TOKEN_NAME,
     ARRAY_IMAGE_FILE_MAX_COUNT,
     IMAGE_FILE_MAX_SIZE_IN_BYTES,
     IMAGE_FILE_MAX_SIZE_IN_MB,
@@ -45,15 +46,18 @@ import { MANAGEMENTS_SERVICE } from '@app/common/constants/services.constant';
 import { Request } from 'express';
 
 @ApiBadRequestResponse({
-    description: 'Invalid request',
+    description: 'Invalid request, please check your request data!',
+})
+@ApiNotFoundResponse({
+    description: 'Not found data, please try again!',
 })
 @ApiTooManyRequestsResponse({
-    description: 'Too many requests',
+    description: 'Too many requests, please try again later!',
 })
 @ApiInternalServerErrorResponse({
-    description: 'Internal server error',
+    description: 'Internal server error, please try again later!',
 })
-@ApiBearerAuth('accessToken')
+@ApiBearerAuth(ACCESS_TOKEN_NAME)
 @ApiTags('images')
 @Controller('images')
 export class ImagesController {

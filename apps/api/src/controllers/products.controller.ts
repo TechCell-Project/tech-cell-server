@@ -37,13 +37,16 @@ import {
 import { UpdateProductRequestDTO } from '~apps/managements/products-mnt/dtos/update-product-request.dto';
 
 @ApiBadRequestResponse({
-    description: 'Invalid request',
+    description: 'Invalid request, please check your request data!',
+})
+@ApiNotFoundResponse({
+    description: 'Not found data, please try again!',
 })
 @ApiTooManyRequestsResponse({
-    description: 'Too many requests',
+    description: 'Too many requests, please try again later!',
 })
 @ApiInternalServerErrorResponse({
-    description: 'Internal server error',
+    description: 'Internal server error, please try again later!',
 })
 @ApiTags('products')
 @ApiExtraModels(CreateProductRequestDTO, UpdateProductRequestDTO)

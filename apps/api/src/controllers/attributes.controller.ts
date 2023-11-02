@@ -28,13 +28,28 @@ import { AttributesMntMessagePattern } from '~apps/managements/attributes-mnt/at
 import {
     ApiBadRequestResponse,
     ApiCreatedResponse,
+    ApiInternalServerErrorResponse,
     ApiNotFoundResponse,
     ApiOkResponse,
     ApiOperation,
     ApiTags,
+    ApiTooManyRequestsResponse,
 } from '@nestjs/swagger';
 import { ListDataResponseDTO } from '@app/common/dtos';
+import { Attribute } from '@app/resource';
 
+@ApiBadRequestResponse({
+    description: 'Invalid request, please check your request data!',
+})
+@ApiNotFoundResponse({
+    description: 'Not found data, please try again!',
+})
+@ApiTooManyRequestsResponse({
+    description: 'Too many requests, please try again later!',
+})
+@ApiInternalServerErrorResponse({
+    description: 'Internal server error, please try again later!',
+})
 @ApiTags('attributes')
 @Controller('/attributes')
 export class AttributesController {
@@ -47,7 +62,10 @@ export class AttributesController {
         summary: 'Get list of attribute',
         description: 'Get list of attribute',
     })
-    @ApiOkResponse({ type: ListDataResponseDTO, description: 'Get attributes successfully!' })
+    @ApiOkResponse({
+        type: ListDataResponseDTO<Attribute>,
+        description: 'Get attributes successfully!',
+    })
     @ApiNotFoundResponse({ description: 'Attributes not found!' })
     @Get('/')
     async getAttributes(@Query() requestQuery: GetAttributesRequestDTO) {

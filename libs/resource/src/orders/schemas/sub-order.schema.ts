@@ -1,7 +1,7 @@
 import { AddressSchema } from '@app/resource/users/schemas/address.schema';
 import { Prop } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
-import { PaymentMethodEnum, PaymentStatus } from '../enums';
+import { PaymentMethodEnum, PaymentStatusEnum } from '../enums';
 
 export class ProductOrderSchema {
     @Prop({ type: Types.ObjectId, ref: 'Product' })
@@ -43,6 +43,6 @@ export class PaymentOrder {
     @Prop({ required: true, type: String, enum: PaymentMethodEnum })
     method: string;
 
-    @Prop({ required: true, type: String, enum: PaymentStatus })
+    @Prop({ required: true, type: String, enum: PaymentStatusEnum })
     status: string;
 }

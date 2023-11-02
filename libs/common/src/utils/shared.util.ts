@@ -5,7 +5,7 @@ import { validate } from 'class-validator';
 import { catchError, throwError } from 'rxjs';
 import { emailRegex } from '@app/common/constants/regex.constant';
 import * as sanitizeHtml from 'sanitize-html';
-import { Types } from 'mongoose';
+import { QueryOptions, Types } from 'mongoose';
 import { ObjectIdLike } from 'bson';
 
 const logger = new Logger('SharedUtil');
@@ -176,4 +176,25 @@ export function convertToObjectId(
  */
 export async function sleep(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ *
+ * @param page page query
+ * @param pageSize pageSize query
+ * @returns
+ */
+export function convertPageQueryToMongoose({
+    page = 0,
+    pageSize = 0,
+}: {
+    page?: number;
+    pageSize?: number;
+}): Pick<QueryOptions, 'skip' | 'limit'> {
+    const limit = Math.max(0, pageSize);
+    const skip = Math.max(0, page - 1) * Math.max(0, pageSize);
+    return {
+        skip,
+        limit,
+    };
 }

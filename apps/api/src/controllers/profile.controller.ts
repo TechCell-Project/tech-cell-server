@@ -2,12 +2,17 @@ import { Body, Controller, Get, Inject, Patch, UseGuards } from '@nestjs/common'
 import { ClientRMQ } from '@nestjs/microservices';
 import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '@app/common/constants';
 import {
+    ApiBadRequestResponse,
     ApiBearerAuth,
     ApiConsumes,
     ApiForbiddenResponse,
+    ApiInternalServerErrorResponse,
+    ApiNotFoundResponse,
     ApiOkResponse,
     ApiOperation,
     ApiTags,
+    ApiTooManyRequestsResponse,
+    ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { AuthGuard, catchException } from '@app/common';
 import { CurrentUser } from '@app/common/decorators';
@@ -21,8 +26,25 @@ import {
     UsersMntMessagePattern,
 } from '~apps/managements/users-mnt';
 
+@ApiBadRequestResponse({
+    description: 'Invalid request, please check your request data!',
+})
+@ApiNotFoundResponse({
+    description: 'Not found data, please try again!',
+})
+@ApiUnauthorizedResponse({
+    description: 'Unauthorized, please login!',
+})
+@ApiForbiddenResponse({
+    description: 'Forbidden permission, you need login to access this',
+})
+@ApiTooManyRequestsResponse({
+    description: 'Too many requests, please try again later!',
+})
+@ApiInternalServerErrorResponse({
+    description: 'Internal server error, please try again later!',
+})
 @ApiBearerAuth(ACCESS_TOKEN_NAME)
-@ApiForbiddenResponse({ description: 'Forbidden permission, you need login to access this' })
 @UseGuards(AuthGuard)
 @ApiTags('profile')
 @Controller('/profile')

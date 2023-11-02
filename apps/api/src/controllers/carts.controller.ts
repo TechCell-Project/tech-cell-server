@@ -14,7 +14,16 @@ import {
     UseGuards,
 } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
-import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+    ApiBadRequestResponse,
+    ApiBearerAuth,
+    ApiInternalServerErrorResponse,
+    ApiNotFoundResponse,
+    ApiOkResponse,
+    ApiOperation,
+    ApiTags,
+    ApiTooManyRequestsResponse,
+} from '@nestjs/swagger';
 import {
     CartsOrdMessagePattern,
     AddCartRequestDTO,
@@ -23,9 +32,21 @@ import {
 import { ACCESS_TOKEN_NAME } from '@app/common/constants/api.constant';
 import { ORDER_SERVICE } from '@app/common/constants/services.constant';
 
+@ApiBadRequestResponse({
+    description: 'Invalid request, please check your request data!',
+})
+@ApiNotFoundResponse({
+    description: 'Not found data, please try again!',
+})
+@ApiTooManyRequestsResponse({
+    description: 'Too many requests, please try again later!',
+})
+@ApiInternalServerErrorResponse({
+    description: 'Internal server error, please try again later!',
+})
+@ApiBearerAuth(ACCESS_TOKEN_NAME)
 @ApiTags('carts')
 @Controller('carts')
-@ApiBearerAuth(ACCESS_TOKEN_NAME)
 @UseGuards(AuthGuard)
 export class CartsController {
     constructor(@Inject(ORDER_SERVICE) private readonly orderService: ClientRMQ) {}

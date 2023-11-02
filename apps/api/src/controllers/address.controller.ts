@@ -4,11 +4,31 @@ import { GhnProvinceDTO } from '@app/third-party/giaohangnhanh/dtos/province.dto
 import { GhnWardDTO } from '@app/third-party/giaohangnhanh/dtos/ward.dto';
 import { Controller, Get, Inject, Param } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
-import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+    ApiBadRequestResponse,
+    ApiInternalServerErrorResponse,
+    ApiNotFoundResponse,
+    ApiOkResponse,
+    ApiOperation,
+    ApiTags,
+    ApiTooManyRequestsResponse,
+} from '@nestjs/swagger';
 import { AddressSearchMessagePattern } from '~apps/search/address-search';
 import { QueryDistrictsDTO, QueryWardsDTO } from '~apps/search/address-search/dtos';
 import { SEARCH_SERVICE } from '@app/common/constants/services.constant';
 
+@ApiBadRequestResponse({
+    description: 'Invalid request, please check your request data!',
+})
+@ApiNotFoundResponse({
+    description: 'Not found data, please try again!',
+})
+@ApiTooManyRequestsResponse({
+    description: 'Too many requests, please try again later!',
+})
+@ApiInternalServerErrorResponse({
+    description: 'Internal server error, please try again later!',
+})
 @ApiTags('address')
 @Controller('address')
 export class AddressController {

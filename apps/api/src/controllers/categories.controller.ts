@@ -5,10 +5,12 @@ import { catchException } from '@app/common';
 import {
     ApiBadRequestResponse,
     ApiCreatedResponse,
+    ApiInternalServerErrorResponse,
     ApiNotFoundResponse,
     ApiOkResponse,
     ApiOperation,
     ApiTags,
+    ApiTooManyRequestsResponse,
 } from '@nestjs/swagger';
 import {
     CategoriesSearchMessagePattern,
@@ -22,6 +24,18 @@ import {
 } from '~apps/managements/categories-mnt';
 import { CategoryIdParam } from '@app/resource/categories/dtos';
 
+@ApiBadRequestResponse({
+    description: 'Invalid request, please check your request data!',
+})
+@ApiNotFoundResponse({
+    description: 'Not found data, please try again!',
+})
+@ApiTooManyRequestsResponse({
+    description: 'Too many requests, please try again later!',
+})
+@ApiInternalServerErrorResponse({
+    description: 'Internal server error, please try again later!',
+})
 @ApiTags('categories')
 @Controller('categories')
 export class CategoriesController {

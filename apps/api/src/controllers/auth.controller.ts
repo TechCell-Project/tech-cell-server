@@ -28,6 +28,7 @@ import {
     ApiBearerAuth,
     ApiExcludeEndpoint,
     ApiOperation,
+    ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import {
@@ -55,6 +56,18 @@ import { TCurrentUser } from '@app/common/types';
 import { AuthGuard } from '@app/common/guards';
 import { ACCESS_TOKEN_NAME } from '@app/common/constants/api.constant';
 
+@ApiBadRequestResponse({
+    description: 'Invalid request, please check your request data!',
+})
+@ApiNotFoundResponse({
+    description: 'Not found data, please try again!',
+})
+@ApiTooManyRequestsResponse({
+    description: 'Too many requests, please try again later!',
+})
+@ApiInternalServerErrorResponse({
+    description: 'Internal server error, please try again later!',
+})
 @ApiTags('authentication')
 @ApiTooManyRequestsResponse({ description: 'Too many requests, please try again later' })
 @Controller('auth')

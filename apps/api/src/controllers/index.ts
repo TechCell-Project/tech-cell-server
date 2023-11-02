@@ -13,6 +13,7 @@ import { AddressController } from './address.controller';
 import { NotificationsController } from './notifications.controller';
 // import { DiscountsController } from './discounts.controller';
 import { HealthController } from './health.controller';
+import { OrdersManagementController } from './order-management.controller';
 
 export const ListControllers = [
     HealthController,
@@ -27,6 +28,7 @@ export const ListControllers = [
     CartsController,
     AddressController,
     OrderController,
+    OrdersManagementController,
     // DiscountsController,
     NotificationsController,
     AppController,
