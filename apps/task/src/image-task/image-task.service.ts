@@ -32,16 +32,16 @@ export class ImageTaskService {
         // Remove unused image
         for (const image of images.resources) {
             this.logger.log(`Check image ${image.public_id}`);
-            const inUseArray = await Promise.all([
+            const [...inUseArray] = await Promise.all([
                 this.productsService.isImageInUse(image.public_id),
                 this.usersService.isImageInUse(image.public_id),
             ]);
-            if (inUseArray.some((inUse) => inUse === false)) {
+            if (inUseArray.some((inUse) => inUse === true)) {
+                this.logger.warn(`Image in use:: '${image.public_id}'`);
+            } else {
                 await this.cloudinaryService.deleteFile(image.public_id).then(() => {
                     this.logger.verbose(`Deleted:: '${image.public_id}'`);
                 });
-            } else {
-                this.logger.warn(`Image in use:: '${image.public_id}'`);
             }
         }
 
