@@ -10,7 +10,7 @@ import {
     HealthIndicatorResult,
     HealthCheckError,
 } from '@nestjs/terminus';
-import { Transport, RmqOptions, RedisOptions, ClientRMQ } from '@nestjs/microservices';
+import { Transport, RedisOptions, ClientRMQ } from '@nestjs/microservices';
 import { catchError, firstValueFrom, map, of, timeout, TimeoutError } from 'rxjs';
 import {
     ApiBadRequestResponse,
@@ -103,14 +103,6 @@ export class HealthController {
                         host: process.env.REDIS_HOST,
                         port: +process.env.REDIS_PORT,
                         password: process.env.REDIS_PASSWORD,
-                    },
-                }),
-            async () =>
-                this.microservice.pingCheck<RmqOptions>('rabbitmq', {
-                    transport: Transport.RMQ,
-                    timeout: 3000,
-                    options: {
-                        urls: [process.env.RABBITMQ_URLS],
                     },
                 }),
             async () =>
