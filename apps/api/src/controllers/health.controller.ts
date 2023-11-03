@@ -100,9 +100,9 @@ export class HealthController {
                     transport: Transport.REDIS,
                     timeout: 3000,
                     options: {
-                        host: process.env.REDIS_HOST || 'localhost',
-                        port: +process.env.REDIS_PORT || 6379,
-                        password: process.env.REDIS_PASSWORD || 'techcell',
+                        host: process.env.REDIS_HOST,
+                        port: +process.env.REDIS_PORT,
+                        password: process.env.REDIS_PASSWORD,
                     },
                 }),
             async () =>
@@ -110,10 +110,9 @@ export class HealthController {
                     transport: Transport.RMQ,
                     timeout: 3000,
                     options: {
-                        urls: [process.env.RABBITMQ_URLS || 'amqp://localhost:5672'],
+                        urls: [process.env.RABBITMQ_URLS],
                     },
                 }),
-            () => this.http.pingCheck('rabbitmq managements', 'https://amqp-m.techcell.cloud'),
             async () =>
                 healthCheckService(
                     this.authService,
@@ -183,16 +182,17 @@ async function healthCheckService(
             map((res) => res),
         ),
     ).catch((err) => {
+        const res: HealthIndicatorResult = {
+            [key]: {
+                status: 'down',
+                message: err?.message ?? 'Service is down',
+            },
+        };
+
         if (err instanceof TimeoutError) {
-            const res: HealthIndicatorResult = {
-                [key]: {
-                    status: 'down',
-                    message: 'timeout',
-                },
-            };
-            throw new HealthCheckError(`${key} healthy failed`, res);
+            res[key].message = 'timeout';
         }
 
-        throw new HealthCheckError(`${key} healthy failed`, { err });
+        throw new HealthCheckError(`${key} healthy failed`, res);
     });
 }
