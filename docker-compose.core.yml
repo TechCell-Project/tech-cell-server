@@ -52,17 +52,6 @@ services:
             - 15672:15672
             - 6379:6379
             - 27017:27017
-        command:
-            [
-                'haproxy',
-                '-f',
-                '/usr/local/etc/haproxy/haproxy.cfg',
-                '-c',
-                '-V',
-                'stats',
-                'auth',
-                '${HAPROXY_USER}:${HAPROXY_PASSWORD}',
-            ]
         volumes:
             - ./containers/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
             - ./ssl/letsencrypt:/swag-config/etc/letsencrypt
