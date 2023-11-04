@@ -32,6 +32,8 @@
         "down:prod": "yarn tc-cli prod --down",
         "restart:prod": "yarn down:prod && yarn up:prod",
         "update:prod": "yarn tc-cli prod --pull && yarn up:prod",
+        "build:prod": "yarn tc-cli prod --build",
+        "push:prod": "yarn tc-cli prod --push",
         "get-logs": "docker cp swag:/config/log/. ./logs && docker cp utility:/usr/src/app/logs ."
     },
     "dependencies": {
