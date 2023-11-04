@@ -18,6 +18,7 @@ import { ProductStatus } from '@app/resource/products/enums';
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { Types } from 'mongoose';
 import { replaceWhitespaceTo, sanitizeHtmlString } from '@app/common/utils';
+import { AttributeSchema } from '@app/resource/products/schemas';
 
 export class PriceDTO {
     @ApiProperty({
@@ -104,7 +105,7 @@ export class ImageRequestDTO {
     isThumbnail?: boolean;
 }
 
-export class AttributeDTO {
+export class AttributeDTO implements AttributeSchema {
     @ApiProperty({
         type: String,
         required: true,
@@ -137,6 +138,14 @@ export class AttributeDTO {
     @IsString()
     @IsOptional()
     u?: string;
+
+    @ApiProperty({
+        type: String,
+        required: false,
+        description: 'Name of attribute',
+        example: 'màn hình',
+    })
+    name?: string;
 }
 
 export class VariationRequestDTO {

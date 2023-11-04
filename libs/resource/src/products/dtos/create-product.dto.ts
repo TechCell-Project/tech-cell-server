@@ -46,6 +46,15 @@ class AttributeDTO implements AttributeSchema {
     @IsString()
     @IsOptional()
     u?: string;
+
+    @ApiProperty({
+        description: 'Name of attribute',
+        example: 'RAM',
+        required: false,
+    })
+    @IsString()
+    @IsOptional()
+    name?: string;
 }
 
 class PriceDTO {
