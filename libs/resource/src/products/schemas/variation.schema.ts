@@ -22,6 +22,9 @@ export class AttributeSchema {
 
     @Prop({ required: false })
     u?: string;
+
+    @Prop({ required: false })
+    name?: string;
 }
 
 export class VariationSchema {

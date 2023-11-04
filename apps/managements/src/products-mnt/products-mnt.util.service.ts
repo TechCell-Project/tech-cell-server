@@ -1,4 +1,5 @@
 import {
+    Attribute,
     AttributesService,
     CategoriesService,
     CreateProductDTO,
@@ -229,8 +230,9 @@ export class ProductsMntUtilService {
             );
         }
 
+        let allAttributesFromDb: Attribute[] = [];
         try {
-            await Promise.all(
+            [...allAttributesFromDb] = await Promise.all(
                 allAttributesUserImport.map((label: string) =>
                     this.attributesService.getAttributeByLabel(label),
                 ),
@@ -238,6 +240,25 @@ export class ProductsMntUtilService {
         } catch (error) {
             throw new RpcException(new BadRequestException(error.message));
         }
+
+        // Reassign attributes with name
+        product.generalAttributes = generalAttributes.map((attribute) => {
+            const foundAttribute = allAttributesFromDb.find((a) => a.label === attribute.k);
+            return {
+                ...attribute,
+                name: foundAttribute.name,
+            };
+        });
+        product.variations = variations.map((variation) => {
+            const attributes = variation.attributes.map((attribute) => {
+                const foundAttribute = allAttributesFromDb.find((a) => a.label === attribute.k);
+                return {
+                    ...attribute,
+                    name: foundAttribute.name,
+                };
+            });
+            return { ...variation, attributes };
+        });
 
         return product;
     }
