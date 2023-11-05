@@ -1,11 +1,4 @@
-import {
-    Injectable,
-    UnauthorizedException,
-    Inject,
-    Logger,
-    HttpException,
-    HttpStatus,
-} from '@nestjs/common';
+import { Injectable, Inject, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { TokenExpiredError } from 'jsonwebtoken';
 import { UsersService } from '@app/resource/users';
@@ -25,9 +18,11 @@ import {
 } from '@app/common';
 import { convertTimeString, TimeUnitOutPut } from 'convert-time-string';
 import { cleanUserBeforeResponse } from '@app/resource/users/utils';
+import { AuthExceptions } from './auth.exception';
 
 @Injectable()
 export class AuthUtilService {
+    protected readonly logger = new Logger(AuthUtilService.name);
     constructor(
         protected jwtService: JwtService,
         protected usersService: UsersService,
@@ -75,17 +70,22 @@ export class AuthUtilService {
         return { accessToken, refreshToken, ...cleanUserBeforeResponse(user) };
     }
 
-    async validateUserLogin(emailOrUsername: string, password: string) {
+    async validateUserLogin(emailOrUsername: string, password: string): Promise<User | null> {
         const query = isEmail(emailOrUsername)
             ? { email: emailOrUsername }
             : { userName: emailOrUsername };
-        const user = await this.usersService.getUser(query, { lean: true });
 
-        const doesUserExist = !!user;
-        if (!doesUserExist) return false;
+        let user: User;
+        try {
+            user = await this.usersService.getUser(query, { lean: true });
+        } catch (error) {
+            user = null;
+        }
+
+        if (!user) return null;
 
         const doesPasswordMatch = await this.doesPasswordMatch(password, user.password);
-        if (!doesPasswordMatch) return false;
+        if (!doesPasswordMatch) return null;
 
         return user;
     }
@@ -110,7 +110,7 @@ export class AuthUtilService {
             );
             return true;
         } catch (error) {
-            Logger.error(`Error when revoke access token: ${error.message}`);
+            this.logger.error(`Error when revoke access token: ${error.message}`);
             return false;
         }
     }
@@ -122,7 +122,7 @@ export class AuthUtilService {
             if (isRevoked) return true;
             return false;
         } catch (error) {
-            Logger.error(`Error when check revoked access token: ${error.message}`);
+            this.logger.error(`Error when check revoked access token: ${error.message}`);
             return true;
         }
     }
@@ -140,7 +140,7 @@ export class AuthUtilService {
             );
             return true;
         } catch (error) {
-            Logger.error(`Error when revoke refresh token: ${error.message}`);
+            this.logger.error(`Error when revoke refresh token: ${error.message}`);
             return false;
         }
     }
@@ -152,7 +152,7 @@ export class AuthUtilService {
             if (isRevoked) return true;
             return false;
         } catch (error) {
-            Logger.error(`Error when check revoked refresh token: ${error.message}`);
+            this.logger.error(`Error when check revoked refresh token: ${error.message}`);
             return true;
         }
     }
@@ -165,11 +165,9 @@ export class AuthUtilService {
             return dataVerified;
         } catch (error) {
             if (error instanceof TokenExpiredError) {
-                throw new RpcException(
-                    new UnauthorizedException('Token has expired, please login again.'),
-                );
+                throw new RpcException(AuthExceptions.tokenIsExpired);
             }
-            throw new RpcException(new UnauthorizedException('Invalid token, please login again.'));
+            throw new RpcException(AuthExceptions.tokenIsInvalid);
         }
     }
 

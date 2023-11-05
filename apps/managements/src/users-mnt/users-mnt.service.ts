@@ -19,10 +19,11 @@ import { TCurrentUser } from '@app/common/types';
 import { UsersService } from '@app/resource/users';
 import { Store } from 'cache-manager';
 import { CloudinaryService } from '@app/third-party/cloudinary.com';
+import { UsersMntExceptions } from './users-mnt.exception';
 
 @Injectable()
 export class UsersMntService extends UsersMntUtilService {
-    protected readonly logger: Logger;
+    protected readonly logger = new Logger(UsersMntService.name);
     constructor(
         protected readonly usersService: UsersService,
         @Inject(REDIS_CACHE) protected cacheManager: Store,
@@ -36,7 +37,7 @@ export class UsersMntService extends UsersMntUtilService {
         const newUser = new CreateUserDTO(createUserRequestDto);
 
         if (createUserRequestDto.role === UserRole.SuperAdmin) {
-            throw new RpcException(new BadRequestException('Cannot create Super Admin'));
+            throw new RpcException(UsersMntExceptions.cantCreateSuperAdmin);
         }
 
         const [userCreated] = await Promise.all([
@@ -54,7 +55,7 @@ export class UsersMntService extends UsersMntUtilService {
         note,
     }: BlockUnblockRequestDTO & { victimId: string; actorId: string }) {
         if (victimId === actorId) {
-            throw new RpcException(new BadRequestException('Cannot block yourself'));
+            throw new RpcException(UsersMntExceptions.cantBlockYourself);
         }
 
         const [victimUser, blockByUser] = await Promise.all([
@@ -65,10 +66,11 @@ export class UsersMntService extends UsersMntUtilService {
         this.canBlockAndUnblockUser({
             victimUser,
             actorUser: blockByUser,
+            action: 'block',
         });
 
         if (victimUser.block && victimUser?.block?.isBlocked) {
-            throw new RpcException(new BadRequestException('User is already blocked'));
+            throw new RpcException(UsersMntExceptions.userAlreadyBlocked);
         }
 
         const actLogs = (victimUser.block && victimUser?.block?.activityLogs) || [];
@@ -104,7 +106,7 @@ export class UsersMntService extends UsersMntUtilService {
         note,
     }: BlockUnblockRequestDTO & { victimId: string; actorId: string }) {
         if (victimId === actorId) {
-            throw new RpcException(new BadRequestException('Cannot unblock yourself'));
+            throw new RpcException(UsersMntExceptions.cantUnblockYourself);
         }
 
         const [victimUser, unblockByUser] = await Promise.all([
@@ -115,10 +117,11 @@ export class UsersMntService extends UsersMntUtilService {
         this.canBlockAndUnblockUser({
             victimUser,
             actorUser: unblockByUser,
+            action: 'unblock',
         });
 
         if (victimUser.block && !victimUser.block.isBlocked) {
-            throw new RpcException(new BadRequestException('User is not blocked'));
+            throw new RpcException(UsersMntExceptions.userAlreadyUnblocked);
         }
 
         const actLogs = (victimUser.block && victimUser?.block?.activityLogs) || [];
@@ -194,7 +197,7 @@ export class UsersMntService extends UsersMntUtilService {
                 message: `Generate ${num} users success`,
             };
         } catch (error) {
-            Logger.error(error);
+            this.logger.error(error);
             throw new RpcException(new BadRequestException(error.message));
         }
     }
@@ -216,7 +219,7 @@ export class UsersMntService extends UsersMntUtilService {
         if (dataUpdate?.userName) {
             const isUsernameExist = await this.usersService.isUserNameExist(dataUpdate.userName);
             if (isUsernameExist) {
-                throw new RpcException(new BadRequestException('Username already exists'));
+                throw new RpcException(UsersMntExceptions.userNameIsAlreadyExist);
             }
         }
 
@@ -232,7 +235,7 @@ export class UsersMntService extends UsersMntUtilService {
             } catch (error) {
                 delete dataUpdate.avatarPublicId;
                 imageCloud = null;
-                throw new RpcException(new BadRequestException('Avatar not found'));
+                throw new RpcException(UsersMntExceptions.avatarIsNotfound);
             }
         }
 
@@ -278,7 +281,7 @@ export class UsersMntService extends UsersMntUtilService {
         }
 
         if (newAddr.length > 0 && newAddr.filter((a) => a?.isDefault).length > 1) {
-            throw new RpcException(new BadRequestException('Only one address can be default'));
+            throw new RpcException(UsersMntExceptions.onlyOneAddressIsDefault);
         }
 
         userFound.address = newAddr;
