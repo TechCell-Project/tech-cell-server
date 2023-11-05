@@ -1,5 +1,5 @@
 import { UsersService } from '@app/resource';
-import { BadRequestException, ForbiddenException, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { isAdmin, isMod, isSuperAdmin, isUser } from '@app/common/utils';
 import { RpcException } from '@nestjs/microservices';
 import { User } from '@app/resource/users/schemas';
@@ -7,6 +7,7 @@ import { REQUIRE_USER_REFRESH } from '@app/common/constants';
 import { Store } from 'cache-manager';
 import { UserRole } from '@app/resource/users/enums';
 import { convertTimeString } from 'convert-time-string';
+import { UsersMntExceptions } from './users-mnt.exception';
 
 @Injectable()
 export class UsersMntUtilService {
@@ -44,16 +45,26 @@ export class UsersMntUtilService {
     protected canBlockAndUnblockUser({
         victimUser,
         actorUser,
+        action,
     }: {
         victimUser: User;
         actorUser: User;
+        action: 'block' | 'unblock';
     }) {
         if (victimUser._id.toString() === actorUser._id.toString()) {
-            throw new RpcException(new BadRequestException('You cannot block/unblock yourself'));
+            if (action === 'block') {
+                throw new RpcException(UsersMntExceptions.cantBlockYourself);
+            } else {
+                throw new RpcException(UsersMntExceptions.cantUnblockYourself);
+            }
         }
 
         if (!this.requiredHigherRole({ victimUser, actorUser })) {
-            throw new RpcException(new BadRequestException('You cannot block/unblock this user'));
+            if (action === 'block') {
+                throw new RpcException(UsersMntExceptions.cantBlockThisUser);
+            } else {
+                throw new RpcException(UsersMntExceptions.cantUnblockThisUser);
+            }
         }
 
         return true;
@@ -74,31 +85,23 @@ export class UsersMntUtilService {
         roleToChange: string;
     }) {
         if (!isSuperAdmin(actorUser) && !isAdmin(actorUser)) {
-            throw new RpcException(
-                new ForbiddenException('You do not have permission to change roles'),
-            );
+            throw new RpcException(UsersMntExceptions.notHavePermissionToChangeRole);
         }
 
         if (victimUser._id.toString() === actorUser._id.toString()) {
-            throw new RpcException(new BadRequestException('You cannot change your own role'));
+            throw new RpcException(UsersMntExceptions.cantChangeYourOwnRole);
         }
 
         if (isSuperAdmin(victimUser) && !isSuperAdmin(actorUser)) {
-            throw new RpcException(
-                new ForbiddenException('You do not have permission to change SuperAdmin role'),
-            );
+            throw new RpcException(UsersMntExceptions.cantChangeSuperAdminRole);
         }
 
         if (roleToChange === UserRole.SuperAdmin) {
-            throw new RpcException(
-                new BadRequestException('You cannot grant SuperAdmin role to anyone'),
-            );
+            throw new RpcException(UsersMntExceptions.cantGrantSuperAdminRole);
         }
 
         if (actorUser.role === UserRole.Admin && roleToChange === UserRole.Admin) {
-            throw new RpcException(
-                new ForbiddenException('You do not have permission to grant Admin role'),
-            );
+            throw new RpcException(UsersMntExceptions.notHavePermissionToGrantAdminRole);
         }
 
         return true;
