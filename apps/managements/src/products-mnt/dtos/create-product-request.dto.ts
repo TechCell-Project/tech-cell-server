@@ -33,7 +33,7 @@ export class PriceDTO {
     @IsNumber(
         { maxDecimalPlaces: 0 },
         {
-            message: 'base must be integer',
+            message: 'Base price must be number',
         },
     )
     @Min(0)
@@ -53,7 +53,7 @@ export class PriceDTO {
     @IsNumber(
         { maxDecimalPlaces: 0 },
         {
-            message: 'sale must be integer',
+            message: 'Sale price must be number',
         },
     )
     @Min(0)
@@ -74,7 +74,7 @@ export class PriceDTO {
     @IsNumber(
         { maxDecimalPlaces: 0 },
         {
-            message: 'special must be integer',
+            message: 'Special price must be number',
         },
     )
     @Min(0)
