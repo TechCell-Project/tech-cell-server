@@ -6,7 +6,7 @@ import { Transform } from 'class-transformer';
 import { isTrueSet } from '@app/common';
 import { IsOptional } from 'class-validator';
 
-export class AttributeDTO implements AttributeSchema {
+export class ProductAttributeDTO implements AttributeSchema {
     @ApiProperty({
         description: 'Key of the attribute',
         type: String,
@@ -30,7 +30,7 @@ export class AttributeDTO implements AttributeSchema {
     u?: string;
 }
 
-export class ImageDTO implements ImageSchema {
+export class ProductImageDTO implements ImageSchema {
     @ApiProperty({
         description: 'Public Id of the image',
         type: String,
@@ -55,7 +55,7 @@ export class ImageDTO implements ImageSchema {
     isThumbnail?: boolean;
 }
 
-export class PriceDTO implements PriceSchema {
+export class ProductPriceDTO implements PriceSchema {
     @ApiProperty({
         description: 'The base price',
         example: 1299999,
@@ -80,7 +80,7 @@ export class PriceDTO implements PriceSchema {
     special?: number;
 }
 
-export class VariationDTO implements VariationSchema {
+export class ProductVariationDTO implements VariationSchema {
     @ApiProperty({
         description: 'The unique sku of product variation',
         example: 'Apple_Iphone_14_black_16ram',
@@ -89,15 +89,15 @@ export class VariationDTO implements VariationSchema {
 
     @ApiProperty({
         description: "Attributes of product's variations",
-        type: [AttributeDTO],
+        type: [ProductAttributeDTO],
     })
-    attributes: AttributeDTO[];
+    attributes: ProductAttributeDTO[];
 
     @ApiProperty({
         description: 'Price of product',
-        type: PriceDTO,
+        type: ProductPriceDTO,
     })
-    price: PriceDTO;
+    price: ProductPriceDTO;
 
     @ApiProperty({
         description: 'Number of stock',
@@ -106,9 +106,9 @@ export class VariationDTO implements VariationSchema {
 
     @ApiProperty({
         description: "Image of product's variations",
-        type: [ImageDTO],
+        type: [ProductImageDTO],
     })
-    images: ImageDTO[];
+    images: ProductImageDTO[];
 
     @ApiProperty({
         description: 'Status of product',
@@ -158,25 +158,25 @@ export class ProductDTO implements Product {
 
     @ApiProperty({
         description: 'General attributes of product',
-        type: AttributeDTO,
+        type: ProductAttributeDTO,
     })
-    generalAttributes: AttributeDTO[];
+    generalAttributes: ProductAttributeDTO[];
 
     @ApiProperty({
         description: 'General images of product',
-        type: [ImageDTO],
+        type: [ProductImageDTO],
     })
-    generalImages: ImageDTO[];
+    generalImages: ProductImageDTO[];
 
     @ApiProperty({
         description: 'Description images of product',
-        type: [ImageDTO],
+        type: [ProductImageDTO],
     })
-    descriptionImages: ImageDTO[];
+    descriptionImages: ProductImageDTO[];
 
     @ApiProperty({
         description: 'Variations of product',
-        type: [VariationDTO],
+        type: [ProductVariationDTO],
     })
-    variations: VariationDTO[];
+    variations: ProductVariationDTO[];
 }

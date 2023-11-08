@@ -28,13 +28,18 @@ import {
 } from '@nestjs/swagger';
 import { ProductsMntMessagePattern } from '~apps/managements/products-mnt';
 import { ProductsSearchMessagePattern } from '~apps/search/products-search';
-import { GetProductByIdQueryDTO, GetProductsDTO } from '~apps/search/products-search/dtos';
+import {
+    GetProductByIdQueryDTO,
+    GetProductsDTO,
+    ListProductResponseDTO,
+} from '~apps/search/products-search/dtos';
 import { CreateProductRequestDTO } from '~apps/managements/products-mnt/dtos';
 import {
     ProductIdParamsDTO,
     ProductSkuParamsDTO,
 } from '~apps/managements/products-mnt/dtos/params.dto';
 import { UpdateProductRequestDTO } from '~apps/managements/products-mnt/dtos/update-product-request.dto';
+import { ProductDTO } from '@app/resource/products/dtos/product.dto';
 
 @ApiBadRequestResponse({
     description: 'Invalid request, please check your request data!',
@@ -60,7 +65,7 @@ export class ProductsController {
     @ApiOperation({
         summary: 'Get products list',
     })
-    @ApiOkResponse({ description: 'Get products successfully!' })
+    @ApiOkResponse({ description: 'Get products successfully!', type: ListProductResponseDTO })
     @ApiNotFoundResponse({ description: 'Products not found.' })
     @Get('/')
     async getProducts(@Query() requestQuery: GetProductsDTO) {
@@ -94,6 +99,7 @@ export class ProductsController {
     })
     @ApiOkResponse({
         description: 'Get product information successfully!',
+        type: ProductDTO,
     })
     @Get('/:productId')
     async getProductById(
