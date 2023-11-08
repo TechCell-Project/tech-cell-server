@@ -4,7 +4,7 @@ import { Types } from 'mongoose';
 import { User } from '../schemas';
 import { AddressSchemaDTO, BlockSchemaDTO, ImageSchemaDTO } from './user-schema.dto';
 
-export class UserMntResponseDto implements Omit<User, 'password'> {
+export class UserMntResponseDTO implements Omit<User, 'password'> {
     @ApiProperty({
         description: 'The user id',
         type: String,

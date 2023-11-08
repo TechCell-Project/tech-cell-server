@@ -17,7 +17,7 @@ import {
 import { AuthGuard, catchException } from '@app/common';
 import { CurrentUser } from '@app/common/decorators';
 import { TCurrentUser } from '@app/common/types';
-import { UserMntResponseDto } from '@app/resource/users/dtos';
+import { UserMntResponseDTO } from '@app/resource/users/dtos';
 import { UsersSearchMessagePattern } from '~apps/search/users-search';
 import { ACCESS_TOKEN_NAME } from '@app/common/constants/api.constant';
 import {
@@ -58,7 +58,7 @@ export class ProfileController {
         summary: 'Get current user info',
         description: 'Get current user info',
     })
-    @ApiOkResponse({ description: 'Get current user info success', type: UserMntResponseDto })
+    @ApiOkResponse({ description: 'Get current user info success', type: UserMntResponseDTO })
     @Get('/')
     async getProfile(@CurrentUser() user: TCurrentUser) {
         return this.searchService
@@ -70,7 +70,7 @@ export class ProfileController {
         summary: 'Update current user info',
         description: 'Update current user info',
     })
-    @ApiOkResponse({ description: 'Update current user info success', type: UserMntResponseDto })
+    @ApiOkResponse({ description: 'Update current user info success', type: UserMntResponseDTO })
     @Patch('/info')
     async updateUserInfo(
         @CurrentUser() user: TCurrentUser,
@@ -86,7 +86,7 @@ export class ProfileController {
         description: 'Update current user address',
     })
     @ApiConsumes('application/json')
-    @ApiOkResponse({ description: 'Update current user address success', type: UserMntResponseDto })
+    @ApiOkResponse({ description: 'Update current user address success', type: UserMntResponseDTO })
     @Patch('/address')
     async updateUserAddress(
         @CurrentUser() user: TCurrentUser,
