@@ -16,13 +16,14 @@ import {
     CategoriesSearchMessagePattern,
     GetCategoriesRequestDTO,
     GetCategoryByLabelRequestDTO,
+    ListCategoryResponseDTO,
 } from '~apps/search/categories-search';
 import {
     CategoriesMntMessagePattern,
     CreateCategoryRequestDTO,
     UpdateCategoryRequestDTO,
 } from '~apps/managements/categories-mnt';
-import { CategoryIdParam } from '@app/resource/categories/dtos';
+import { CategoryDTO, CategoryIdParam } from '@app/resource/categories/dtos';
 
 @ApiBadRequestResponse({
     description: 'Invalid request, please check your request data!',
@@ -48,7 +49,7 @@ export class CategoriesController {
         summary: 'Get list of categories',
         description: 'Get list of categories',
     })
-    @ApiOkResponse({ description: 'Get categories successfully!' })
+    @ApiOkResponse({ description: 'Get categories successfully!', type: ListCategoryResponseDTO })
     @ApiNotFoundResponse({ description: 'Categories not found!' })
     @Get('/')
     async getCategories(@Query() query: GetCategoriesRequestDTO) {
@@ -61,7 +62,7 @@ export class CategoriesController {
         summary: 'Get category by id',
         description: 'Get category by id',
     })
-    @ApiOkResponse({ description: 'Get category successfully!' })
+    @ApiOkResponse({ description: 'Get category successfully!', type: CategoryDTO })
     @ApiNotFoundResponse({ description: 'Category not found!' })
     @Get(':categoryId')
     async getCategoryById(@Param() { categoryId }: CategoryIdParam) {
@@ -74,7 +75,7 @@ export class CategoriesController {
         summary: 'Get category by label',
         description: 'Get category by label',
     })
-    @ApiOkResponse({ description: 'Get category successfully!' })
+    @ApiOkResponse({ description: 'Get category successfully!', type: CategoryDTO })
     @ApiNotFoundResponse({ description: 'Category not found!' })
     @Get('/label/:label')
     async getCategoryByLabel(@Param() { label }: GetCategoryByLabelRequestDTO) {

@@ -228,7 +228,7 @@ export class VariationRequestDTO {
     sku: string;
 }
 
-export class CategoryDTO {
+export class CategoryIdDTO {
     @ApiProperty({
         type: String,
         required: true,
@@ -313,14 +313,14 @@ export class CreateProductRequestDTO {
     description: string;
 
     @ApiProperty({
-        type: CategoryDTO,
+        type: CategoryIdDTO,
         required: true,
         description: 'Category of product',
     })
     @ValidateNested()
     @IsNotEmptyObject()
-    @Type(() => CategoryDTO)
-    category: CategoryDTO;
+    @Type(() => CategoryIdDTO)
+    category: CategoryIdDTO;
 
     @ApiProperty({
         type: [VariationRequestDTO],
