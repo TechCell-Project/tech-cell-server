@@ -1,6 +1,6 @@
 import { Controller, Get, Inject, Patch, Query, Param, Body, UseGuards } from '@nestjs/common';
 import { ACCESS_TOKEN_NAME, MANAGEMENTS_SERVICE, ModGuard, catchException } from '@app/common';
-import { ListDataResponseDTO, ObjectIdParamDTO } from '@app/common/dtos';
+import { ObjectIdParamDTO } from '@app/common/dtos';
 import { ClientRMQ } from '@nestjs/microservices';
 import {
     ApiBadRequestResponse,
@@ -12,7 +12,11 @@ import {
     ApiTags,
     ApiTooManyRequestsResponse,
 } from '@nestjs/swagger';
-import { GetOrdersRequestDTO, UpdateOrderStatusDTO } from '~apps/managements/orders-mnt/dtos';
+import {
+    GetOrdersRequestDTO,
+    UpdateOrderStatusDTO,
+    ListOrderResponseDTO,
+} from '~apps/managements/orders-mnt/dtos';
 import { OrdersMntMessagePattern } from '~apps/managements/orders-mnt/orders-mnt.pattern';
 import { OrderSchemaDTO } from '@app/resource/orders/dtos/order-schema.dto';
 
@@ -38,7 +42,7 @@ export class OrdersManagementController {
     @ApiOperation({ summary: 'Get orders' })
     @ApiOkResponse({
         description: 'Get orders successfully!',
-        type: ListDataResponseDTO<OrderSchemaDTO>,
+        type: ListOrderResponseDTO,
     })
     @Get('/')
     async getOrders(@Query() { ...data }: GetOrdersRequestDTO) {
