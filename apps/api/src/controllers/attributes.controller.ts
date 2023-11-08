@@ -18,6 +18,7 @@ import {
     GetAttributeByIdRequestDTO,
     GetAttributeByLabelRequestDTO,
     GetAttributesRequestDTO,
+    ListAttributeResponseDTO,
 } from '~apps/search/attributes-search';
 import {
     DeleteAttributeByIdRequestDTO,
@@ -35,8 +36,7 @@ import {
     ApiTags,
     ApiTooManyRequestsResponse,
 } from '@nestjs/swagger';
-import { ListDataResponseDTO } from '@app/common/dtos';
-import { Attribute } from '@app/resource';
+import { AttributeDTO } from '@app/resource/attributes/dtos';
 
 @ApiBadRequestResponse({
     description: 'Invalid request, please check your request data!',
@@ -63,7 +63,7 @@ export class AttributesController {
         description: 'Get list of attribute',
     })
     @ApiOkResponse({
-        type: ListDataResponseDTO<Attribute>,
+        type: ListAttributeResponseDTO,
         description: 'Get attributes successfully!',
     })
     @ApiNotFoundResponse({ description: 'Attributes not found!' })
@@ -78,7 +78,7 @@ export class AttributesController {
         summary: 'Get attribute by id',
         description: 'Get attribute by id',
     })
-    @ApiOkResponse({ description: 'Get attribute by id successfully!' })
+    @ApiOkResponse({ description: 'Get attribute by id successfully!', type: AttributeDTO })
     @ApiNotFoundResponse({ description: 'Attribute not found!' })
     @Get('/:attributeId')
     async getAttributeById(@Param() { attributeId }: GetAttributeByIdRequestDTO) {
