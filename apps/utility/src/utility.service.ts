@@ -4,10 +4,14 @@ import { Store } from 'cache-manager';
 import * as path from 'path';
 import * as fs from 'fs/promises';
 import { LogType } from './enums';
+import { BotGateway } from '@app/common/Discordjs/bot';
 
 @Injectable()
 export class UtilityService {
-    constructor(@Inject(REDIS_CACHE) private cacheManager: Store) {}
+    constructor(
+        @Inject(REDIS_CACHE) private cacheManager: Store,
+        private readonly botGateway: BotGateway,
+    ) {}
 
     async writeLogsToFile(message: string, type: LogType) {
         let logDirectory: string;
@@ -32,5 +36,9 @@ export class UtilityService {
         return await fs.writeFile(path.join(logDirectory, fileName), dataToWrite, {
             flag: 'a',
         });
+    }
+
+    async writeLogsToDiscord(message: any) {
+        return await this.botGateway.writeLogs(message);
     }
 }

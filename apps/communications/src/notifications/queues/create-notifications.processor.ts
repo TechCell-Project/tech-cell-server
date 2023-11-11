@@ -7,14 +7,21 @@ import { UsersService } from '@app/resource/users';
 import { NotificationsMessageSubscribe } from '../constants/notifications.message';
 import { NotificationsCallGateway } from '../gateways/notifications.call.gateway';
 import { ICreateNotificationQueue } from '../interfaces';
+import { cleanUserBeforeResponse } from '@app/resource/users/utils/user.util';
 
 @Injectable()
+// The @Processor decorator marks the class as a job processor.
+// The job processor is responsible for processing jobs of a certain type.
 @Processor(NOTIFICATIONS_JOB_CREATE, {
-    concurrency: 10,
-    // limiter: {
-    //     max: 2,
-    //     duration: 60000,
-    // },
+    // The concurrency option specifies how many jobs this processor can handle concurrently.
+    // In this case, it can handle up to 100 jobs at the same time.
+    concurrency: 50,
+    // The limiter option is used to rate limit the job processing.
+    // In this case, the processor can handle a maximum of 100 jobs per 10,000 milliseconds (or 10 seconds).
+    limiter: {
+        max: 200,
+        duration: 10000,
+    },
 })
 export class CreateNotificationProcessor extends WorkerHost {
     private readonly logger = new Logger(CreateNotificationProcessor.name);
@@ -38,6 +45,7 @@ export class CreateNotificationProcessor extends WorkerHost {
                 content: `${customer?.userName} đã đặt đơn hàng mới #${order?._id}`,
                 data: {
                     order,
+                    customer: cleanUserBeforeResponse(customer),
                 },
             });
 

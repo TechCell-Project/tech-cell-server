@@ -25,7 +25,7 @@ export class UtilityController {
     @EventPattern(UtilityEventPattern.writeLogsToDiscord)
     async writeLogsToDiscord(@Ctx() context: RmqContext, @Payload() { message }: { message: any }) {
         this.rabbitMqService.acknowledgeMessage(context);
-        return await this.botGateway.writeLogs(message);
+        return await this.utilityService.writeLogsToDiscord(message);
     }
 
     @EventPattern(UtilityEventPattern.writeLogsToFile)
