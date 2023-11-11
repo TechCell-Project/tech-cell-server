@@ -152,7 +152,7 @@ export class CartsOrdService {
                 updatedAt: new Date(Date.now()),
             });
         } else {
-            const newQuantity = (oldCart.products[foundIndex].quantity += quantity);
+            const newQuantity = (oldCart.products[foundIndex].quantity = quantity);
             if (newQuantity <= 0) {
                 // Reduce quantity if input quantity is negative
                 oldCart.products.splice(foundIndex, 1);

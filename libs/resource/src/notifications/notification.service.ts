@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { NotificationRepository } from './notification.repository';
 import { CreateNotifyDTO } from './dtos';
-import { ClientSession, FilterQuery, QueryOptions, Types, ProjectionType } from 'mongoose';
+import { ClientSession, FilterQuery, QueryOptions, ProjectionType } from 'mongoose';
 import { Notification } from '@app/resource/notifications';
 
 @Injectable()
