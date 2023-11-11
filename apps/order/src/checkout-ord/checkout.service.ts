@@ -254,7 +254,7 @@ export class CheckoutService {
             customer: userFound,
         });
 
-        return { ...resultOrder, paymentUrl: paymentUrl ?? undefined };
+        return { ...resultOrder, customer: userFound, paymentUrl: paymentUrl ?? undefined };
     }
 
     /**
