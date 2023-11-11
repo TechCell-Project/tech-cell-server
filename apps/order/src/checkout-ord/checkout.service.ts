@@ -29,6 +29,7 @@ import { PaymentMethodEnum } from './enums';
 import { ResponseForVnpayDTO } from './dtos/response-for-vnpay.dto';
 import { COMMUNICATIONS_SERVICE } from '@app/common/constants/services.constant';
 import { NotifyEventPattern } from '~apps/communications/notifications';
+import { cleanUserBeforeResponse } from '@app/resource/users/utils';
 
 @Injectable()
 export class CheckoutService {
@@ -254,7 +255,11 @@ export class CheckoutService {
             customer: userFound,
         });
 
-        return { ...resultOrder, customer: userFound, paymentUrl: paymentUrl ?? undefined };
+        return {
+            ...resultOrder,
+            customer: cleanUserBeforeResponse(userFound),
+            paymentUrl: paymentUrl ?? undefined,
+        };
     }
 
     /**
