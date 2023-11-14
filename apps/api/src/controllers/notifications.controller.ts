@@ -15,7 +15,7 @@ import {
     ApiTooManyRequestsResponse,
     ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { Notification } from '@app/resource';
+import { NotificationsDTO } from '@app/resource/notifications/dtos';
 
 @ApiBadRequestResponse({
     description: 'Invalid request, please check your request data!',
@@ -41,7 +41,7 @@ export class NotificationsController {
         @Inject(COMMUNICATIONS_SERVICE) private readonly communicationsService: ClientRMQ,
     ) {}
 
-    @ApiOkResponse({ description: 'Get user notifications', type: [Notification] })
+    @ApiOkResponse({ description: 'Get user notifications', type: [NotificationsDTO] })
     @Get('/')
     async getUserNotifications(
         @Query() { ...query }: GetUserNotificationsDTO,

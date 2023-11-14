@@ -8,12 +8,18 @@ export enum ReadType {
     all = 'all',
 }
 
+export enum OrderBy {
+    newest = 'newest',
+    oldest = 'oldest',
+}
+
 export class GetUserNotificationsDTO extends IntersectionType(PaginationQuery) {
     constructor(data: Partial<GetUserNotificationsDTO>) {
         super(data);
-        this.page = super.page;
-        this.pageSize = super.pageSize;
+        this.page = data?.page ? Number(data.page) : 1;
+        this.pageSize = data?.pageSize ? Number(data.pageSize) : 10;
         this.readType = data?.readType ?? ReadType.all;
+        this.orderBy = data?.orderBy ?? OrderBy.newest;
     }
 
     @ApiProperty({
@@ -25,4 +31,14 @@ export class GetUserNotificationsDTO extends IntersectionType(PaginationQuery) {
     @IsOptional()
     @IsEnum(ReadType)
     readType?: ReadType;
+
+    @ApiProperty({
+        required: false,
+        enum: OrderBy,
+        default: OrderBy.newest,
+        type: String,
+    })
+    @IsOptional()
+    @IsEnum(OrderBy)
+    orderBy?: OrderBy;
 }

@@ -2,7 +2,6 @@ import { AbstractDocument } from '@app/resource/abstract';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { NotificationType } from '../enums';
 import { SYSTEM_ISSUER } from '../notifications.constant';
-import { UserRole } from '@app/resource/users/enums';
 
 export class NotifyData {
     [key: string]: any;

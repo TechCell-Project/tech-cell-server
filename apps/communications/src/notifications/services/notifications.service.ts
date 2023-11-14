@@ -1,8 +1,8 @@
 import { TCurrentUser } from '@app/common/types';
-import { NotificationService } from '@app/resource/notifications';
+import { Notification, NotificationService } from '@app/resource/notifications';
 import { Injectable } from '@nestjs/common';
-import { Types } from 'mongoose';
-import { GetUserNotificationsDTO, ReadType } from '../dtos/get-user-notifications.dto';
+import { QueryOptions, Types } from 'mongoose';
+import { GetUserNotificationsDTO, OrderBy, ReadType } from '../dtos/get-user-notifications.dto';
 
 @Injectable()
 export class NotificationsService {
@@ -10,17 +10,23 @@ export class NotificationsService {
 
     async getUserNotifications(
         user: TCurrentUser,
-        { page, pageSize, readType }: GetUserNotificationsDTO,
+        { page, pageSize, readType, orderBy }: GetUserNotificationsDTO,
     ) {
         const query = {
             recipientId: new Types.ObjectId(user._id),
             ...(readType === ReadType.read && { readAt: { $ne: null } }),
             ...(readType === ReadType.unread && { readAt: null }),
         };
-        const options = {
+        const options: QueryOptions<Notification> = {
             limit: pageSize,
             skip: page * pageSize,
         };
+
+        if (orderBy === OrderBy.oldest) {
+            options.sort = { createdAt: 1 };
+        } else {
+            options.sort = { createdAt: -1 };
+        }
 
         return await this.notificationService.getUserNotifications(query, options);
     }
