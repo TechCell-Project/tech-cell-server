@@ -3,6 +3,7 @@ import { Notification, NotificationService } from '@app/resource/notifications';
 import { Injectable } from '@nestjs/common';
 import { QueryOptions, Types } from 'mongoose';
 import { GetUserNotificationsDTO, OrderBy, ReadType } from '../dtos/get-user-notifications.dto';
+import { ListDataResponseDTO } from '@app/common/dtos';
 
 @Injectable()
 export class NotificationsService {
@@ -28,6 +29,18 @@ export class NotificationsService {
             options.sort = { createdAt: -1 };
         }
 
-        return await this.notificationService.getUserNotifications(query, options);
+        const [notifies, totalRecord] = await Promise.all([
+            this.notificationService.getUserNotifications(query, options),
+            this.notificationService.countUserNotifications(query),
+        ]);
+
+        const totalPage = Math.ceil(totalRecord / pageSize);
+        return new ListDataResponseDTO<Notification>({
+            page,
+            pageSize,
+            totalPage,
+            totalRecord,
+            data: notifies,
+        });
     }
 }
