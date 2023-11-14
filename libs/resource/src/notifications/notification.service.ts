@@ -12,6 +12,10 @@ export class NotificationService {
         return this.notificationRepository.create(notification, {}, session);
     }
 
+    async countUserNotifications(query: FilterQuery<Notification>) {
+        return this.notificationRepository.count(query);
+    }
+
     async getUserNotifications(
         query: FilterQuery<Notification>,
         options?: QueryOptions<Notification>,
