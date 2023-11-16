@@ -1,13 +1,15 @@
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { Types } from 'mongoose';
-import { IsArray, IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, IsUrl } from 'class-validator';
+import { IsArray, IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { UserRole } from '@app/resource/users/enums';
 import { AddressSchemaDTO, ImageSchemaDTO } from '@app/resource/users/dtos';
 import { User } from '@app/resource';
 
 export class UserDataResponseDTO implements Omit<User, 'password'> {
     @ApiProperty({
+        format: 'ObjectId',
+        type: String,
         example: '6487d9e0949d97a9ba8bffff',
     })
     @Type(() => String)

@@ -112,7 +112,6 @@ export class AuthController {
     @ApiOkResponse({ description: 'Email is not in use. Can register' })
     @ApiConflictResponse({
         description: 'User already registered',
-        type: UserDataResponseDTO,
     })
     @HttpCode(HttpStatus.OK)
     @Post('check-email')
