@@ -1,6 +1,18 @@
 version: '3'
 
 services:
+    compodoc-techcell:
+        container_name: compodoc-techcell
+        build:
+            context: ./
+            dockerfile: ./containers/compodoc-techcell/Dockerfile
+        image: lehuygiang28/compodoc-techcell
+        ports:
+            - 9001:${COMPODOC_PORT:-9001}
+        networks:
+            - techcell_backend
+        restart: unless-stopped
+
     api:
         container_name: api
         build:
