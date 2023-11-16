@@ -1,8 +1,12 @@
 .github/
 .vscode/
+.vs/
 node_modules/
 dist/
 logs/
 .env
 .env*
 *.conf.sample
+compodoc/
+uploads/
+ssl/
