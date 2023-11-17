@@ -9,7 +9,7 @@ import {
     FIRSTNAME_MAX_LENGTH,
     LASTNAME_MIN_LENGTH,
     LASTNAME_MAX_LENGTH,
-} from '@app/common/constants/common.constant';
+} from '~libs/common/constants/common.constant';
 
 export class RegisterRequestDTO {
     @ApiProperty({

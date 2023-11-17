@@ -16,13 +16,13 @@ import { Logger, UseGuards } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import { ITokenVerifiedResponse } from '~apps/auth/interfaces';
 import { AuthMessagePattern } from '~apps/auth/auth.pattern';
-import { AuthGuard } from '@app/common';
+import { AuthGuard } from '~libs/common';
 import { UserRole } from '@app/resource/users/enums';
 import { NotifyRoom } from '../constants/notifications.constant';
 import { NotificationService } from '@app/resource';
 import { Types } from 'mongoose';
-import { CurrentUser } from '@app/common/decorators';
-import { TCurrentUser } from '@app/common/types';
+import { CurrentUser } from '~libs/common/decorators';
+import { TCurrentUser } from '~libs/common/types';
 
 @WebSocketGateway({
     cors: {

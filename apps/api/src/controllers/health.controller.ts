@@ -28,7 +28,7 @@ import {
     SEARCH_SERVICE,
     TASK_SERVICE,
     UTILITY_SERVICE,
-} from '@app/common/constants/services.constant';
+} from '~libs/common/constants/services.constant';
 import { SearchMessagePattern } from '~apps/search/search.pattern';
 import { AuthMessagePattern } from '~apps/auth/auth.pattern';
 import { CommunicationsMessagePattern } from '~apps/communications/communications.pattern';

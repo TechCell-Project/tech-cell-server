@@ -20,9 +20,9 @@ import {
 } from '~apps/communications/mail';
 import { OtpType } from '@app/resource/otp';
 import { IUserFacebookResponse, IUserGoogleResponse, ITokenVerifiedResponse } from './interfaces';
-import { buildUniqueUserNameFromEmail, delStartWith, generateRandomString } from '@app/common';
-import { PASSWORD_MAX_LENGTH, USERS_CACHE_PREFIX } from '@app/common/constants';
-import { TCurrentUser } from '@app/common/types';
+import { buildUniqueUserNameFromEmail, delStartWith, generateRandomString } from '~libs/common';
+import { PASSWORD_MAX_LENGTH, USERS_CACHE_PREFIX } from '~libs/common/constants';
+import { TCurrentUser } from '~libs/common/types';
 import { Types } from 'mongoose';
 import { LoginTicket, OAuth2Client, OAuth2ClientOptions } from 'google-auth-library';
 import { cleanUserBeforeResponse } from '@app/resource/users/utils/user.util';

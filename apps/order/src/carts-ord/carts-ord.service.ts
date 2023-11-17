@@ -4,8 +4,8 @@ import { AddCartRequestDTO } from './dtos/create-cart-request.dto';
 import { RpcException } from '@nestjs/microservices';
 import { QueryOptions, Types } from 'mongoose';
 import { ProductsService } from '@app/resource';
-import { PaginationQuery } from '@app/common/dtos';
-import { TCurrentUser } from '@app/common/types';
+import { PaginationQuery } from '~libs/common/dtos';
+import { TCurrentUser } from '~libs/common/types';
 import { DeleteProductsCartRequestDTO } from './dtos';
 import { CartState } from '@app/resource/carts/enums';
 

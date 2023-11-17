@@ -1,5 +1,5 @@
-import { AdminGuard, catchException } from '@app/common';
-import { PaginationQuery } from '@app/common/dtos';
+import { AdminGuard, catchException } from '~libs/common';
+import { PaginationQuery } from '~libs/common/dtos';
 import { Body, Controller, Get, Inject, Post, Query, UseGuards } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import {
@@ -11,7 +11,7 @@ import {
 } from '@nestjs/swagger';
 import { DiscountsMntMessagePattern } from '~apps/managements/discounts-mnt';
 import { CreateDiscountRequestDTO } from '~apps/managements/discounts-mnt/dtos';
-import { ACCESS_TOKEN_NAME, MANAGEMENTS_SERVICE } from '@app/common/constants';
+import { ACCESS_TOKEN_NAME, MANAGEMENTS_SERVICE } from '~libs/common/constants';
 
 // TODO: Need implement
 @ApiExcludeController()

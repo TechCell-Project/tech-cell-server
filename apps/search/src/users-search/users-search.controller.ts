@@ -2,7 +2,7 @@ import { Controller } from '@nestjs/common';
 import { UsersSearchMessagePattern } from './users-search.pattern';
 import { Ctx, MessagePattern, Payload, RmqContext } from '@nestjs/microservices';
 import { GetUsersQueryDTO } from './dtos';
-import { RabbitMQService } from '@app/common/RabbitMQ';
+import { RabbitMQService } from '~libs/common/RabbitMQ';
 import { UsersSearchService } from './users-search.service';
 
 @Controller()

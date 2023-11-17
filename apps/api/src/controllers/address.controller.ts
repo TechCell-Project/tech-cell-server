@@ -1,4 +1,4 @@
-import { catchException } from '@app/common';
+import { catchException } from '~libs/common';
 import { GhnDistrictDTO } from '@app/third-party/giaohangnhanh/dtos/district.dto';
 import { GhnProvinceDTO } from '@app/third-party/giaohangnhanh/dtos/province.dto';
 import { GhnWardDTO } from '@app/third-party/giaohangnhanh/dtos/ward.dto';
@@ -15,7 +15,7 @@ import {
 } from '@nestjs/swagger';
 import { AddressSearchMessagePattern } from '~apps/search/address-search';
 import { QueryDistrictsDTO, QueryWardsDTO } from '~apps/search/address-search/dtos';
-import { SEARCH_SERVICE } from '@app/common/constants/services.constant';
+import { SEARCH_SERVICE } from '~libs/common/constants/services.constant';
 
 @ApiBadRequestResponse({
     description: 'Invalid request, please check your request data!',

@@ -1,10 +1,10 @@
 import { Controller, Get, Inject, UseGuards, Query } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
-import { ACCESS_TOKEN_NAME, COMMUNICATIONS_SERVICE } from '@app/common/constants';
-import { AuthGuard, catchException } from '@app/common';
+import { ACCESS_TOKEN_NAME, COMMUNICATIONS_SERVICE } from '~libs/common/constants';
+import { AuthGuard, catchException } from '~libs/common';
 import { GetUserNotificationsDTO, NotifyMessagePattern } from '~apps/communications/notifications';
-import { CurrentUser } from '@app/common/decorators';
-import { TCurrentUser } from '@app/common/types';
+import { CurrentUser } from '~libs/common/decorators';
+import { TCurrentUser } from '~libs/common/types';
 import {
     ApiBadRequestResponse,
     ApiBearerAuth,

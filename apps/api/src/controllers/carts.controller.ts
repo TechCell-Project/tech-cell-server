@@ -1,7 +1,7 @@
-import { AuthGuard, catchException } from '@app/common';
-import { CurrentUser } from '@app/common/decorators';
-import { PaginationQuery } from '@app/common/dtos';
-import { TCurrentUser } from '@app/common/types';
+import { AuthGuard, catchException } from '~libs/common';
+import { CurrentUser } from '~libs/common/decorators';
+import { PaginationQuery } from '~libs/common/dtos';
+import { TCurrentUser } from '~libs/common/types';
 import {
     Body,
     Controller,
@@ -29,8 +29,8 @@ import {
     AddCartRequestDTO,
     DeleteProductsCartRequestDTO,
 } from '~apps/order/carts-ord';
-import { ACCESS_TOKEN_NAME } from '@app/common/constants/api.constant';
-import { ORDER_SERVICE } from '@app/common/constants/services.constant';
+import { ACCESS_TOKEN_NAME } from '~libs/common/constants/api.constant';
+import { ORDER_SERVICE } from '~libs/common/constants/services.constant';
 
 @ApiBadRequestResponse({
     description: 'Invalid request, please check your request data!',

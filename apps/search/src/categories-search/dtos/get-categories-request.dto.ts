@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
-import { MAX_CATEGORY_PER_PAGE } from '@app/common/constants/category.constant';
+import { MAX_CATEGORY_PER_PAGE } from '~libs/common/constants/category.constant';
 
 export class GetCategoriesRequestDTO {
     @ApiProperty({

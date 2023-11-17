@@ -1,11 +1,11 @@
-import { RabbitMQService } from '@app/common/RabbitMQ';
+import { RabbitMQService } from '~libs/common/RabbitMQ';
 import { Controller } from '@nestjs/common';
 import { CartsOrdService } from './carts-ord.service';
 import { Ctx, MessagePattern, Payload, RmqContext } from '@nestjs/microservices';
 import { CartsOrdMessagePattern } from './carts-ord.pattern';
 import { AddCartRequestDTO } from './dtos/create-cart-request.dto';
-import { PaginationQuery } from '@app/common/dtos';
-import { TCurrentUser } from '@app/common/types';
+import { PaginationQuery } from '~libs/common/dtos';
+import { TCurrentUser } from '~libs/common/types';
 import { DeleteProductsCartRequestDTO } from './dtos';
 
 @Controller('carts')

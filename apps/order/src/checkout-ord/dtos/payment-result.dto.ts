@@ -1,4 +1,4 @@
-import { isTrueSet } from '@app/common';
+import { isTrueSet } from '~libs/common';
 import { Transform } from 'class-transformer';
 import { IsBoolean, IsEnum, IsString } from 'class-validator';
 import { PaymentStatusEnum } from '../enums';

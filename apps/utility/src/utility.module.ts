@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { UtilityController } from './utility.controller';
 import { UtilityService } from './utility.service';
-import { DiscordModule, AppConfigModule } from '@app/common';
-import { RabbitMQService } from '@app/common/RabbitMQ';
-import { RedisCacheModule } from '@app/common/RedisCache';
+import { DiscordModule, AppConfigModule } from '~libs/common';
+import { RabbitMQService } from '~libs/common/RabbitMQ';
+import { RedisCacheModule } from '~libs/common/RedisCache';
 import { UtilityHealthIndicator } from './utility.health';
 
 @Module({

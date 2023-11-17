@@ -1,5 +1,5 @@
-import { RedisCacheModule } from '@app/common/RedisCache';
-import { RabbitMQService } from '@app/common/RabbitMQ';
+import { RedisCacheModule } from '~libs/common/RedisCache';
+import { RabbitMQService } from '~libs/common/RabbitMQ';
 import { CloudinaryService } from '@app/third-party/cloudinary.com';
 import { ProductsModule } from '@app/resource/products';
 import { Module } from '@nestjs/common';

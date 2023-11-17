@@ -1,10 +1,10 @@
-import { MongodbModule } from '@app/common';
+import { MongodbModule } from '~libs/common';
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Order, OrderSchema } from './schemas/order.schema';
 import { OrderRepository } from './orders.repository';
 import { OrdersService } from './orders.service';
-import { RedisModule } from '@app/common/Redis';
+import { RedisModule } from '~libs/common/Redis';
 
 @Module({
     imports: [

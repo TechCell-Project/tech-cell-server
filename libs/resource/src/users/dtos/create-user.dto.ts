@@ -2,7 +2,7 @@ import { IsBoolean, IsEmail, IsNotEmpty, IsOptional, IsString, Length } from 'cl
 import { CreateUserRequestDto } from '~apps/managements/users-mnt/dtos';
 import { UserRole } from '../enums';
 import { Transform } from 'class-transformer';
-import { isTrueSet } from '@app/common/utils/shared.util';
+import { isTrueSet } from '~libs/common/utils/shared.util';
 
 export class CreateUserDTO {
     constructor(data: CreateUserRequestDto) {

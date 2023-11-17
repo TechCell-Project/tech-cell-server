@@ -1,13 +1,13 @@
 import { AttributesService, CategoriesService, Product, ProductsService } from '@app/resource';
 import { Inject, Injectable } from '@nestjs/common';
-import { delStartWith } from '@app/common/utils';
+import { delStartWith } from '~libs/common/utils';
 import {
     REDIS_CACHE,
     PRODUCTS_CACHE_PREFIX,
     PRODUCTS_ALL,
     PRODUCTS_PAGESIZE,
     PRODUCTS_PAGE,
-} from '@app/common/constants';
+} from '~libs/common/constants';
 import { Store } from 'cache-manager';
 
 @Injectable()

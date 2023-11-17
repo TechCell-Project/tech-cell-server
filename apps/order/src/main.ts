@@ -1,8 +1,8 @@
 import { NestFactory } from '@nestjs/core';
 import { OrderModule } from './order.module';
-import { useRabbitMQ } from '@app/common/RabbitMQ';
+import { useRabbitMQ } from '~libs/common/RabbitMQ';
 import { Logger } from '@nestjs/common';
-import { RpcExceptionFilter } from '@app/common/filters/';
+import { RpcExceptionFilter } from '~libs/common/filters/';
 
 async function bootstrap() {
     const logger = new Logger('order');

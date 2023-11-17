@@ -1,9 +1,9 @@
-import { RabbitMQService } from '@app/common/RabbitMQ';
+import { RabbitMQService } from '~libs/common/RabbitMQ';
 import { Controller } from '@nestjs/common';
 import { CheckoutService } from './checkout.service';
 import { Ctx, MessagePattern, Payload, RmqContext } from '@nestjs/microservices';
 import { CheckoutMessagePattern } from './checkout.pattern';
-import { TCurrentUser } from '@app/common/types';
+import { TCurrentUser } from '~libs/common/types';
 import { ReviewOrderRequestDTO, VnpayIpnUrlDTO } from './dtos';
 import { CreateOrderRequestDTO } from './dtos/create-order-request.dto';
 

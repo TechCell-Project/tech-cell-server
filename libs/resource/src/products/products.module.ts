@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ProductsService } from './products.service';
-import { MongodbModule } from '@app/common';
+import { MongodbModule } from '~libs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Product, ProductSchema } from './schemas/product.schema';
 import { ProductsRepository } from './products.repository';
-import { RedisModule } from '@app/common/Redis';
+import { RedisModule } from '~libs/common/Redis';
 
 @Module({
     imports: [

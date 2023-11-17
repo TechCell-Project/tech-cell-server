@@ -10,7 +10,7 @@ import {
     UpdateQuery,
 } from 'mongoose';
 import { Order } from './schemas';
-import { RedlockService } from '@app/common/Redis/services';
+import { RedlockService } from '~libs/common/Redis/services';
 
 @Injectable()
 export class OrdersService {

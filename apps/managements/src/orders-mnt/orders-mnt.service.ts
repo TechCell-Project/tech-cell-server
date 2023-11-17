@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { Order, OrdersService } from '@app/resource/orders';
 import { GetOrdersRequestDTO } from './dtos/get-orders-request.dto';
-import { convertPageQueryToMongoose } from '@app/common/utils';
+import { convertPageQueryToMongoose } from '~libs/common/utils';
 import { FilterQuery, Types } from 'mongoose';
-import { ListDataResponseDTO } from '@app/common/dtos';
-import { AllEnum } from '@app/common/base/enums';
+import { ListDataResponseDTO } from '~libs/common/dtos';
+import { AllEnum } from '~libs/common/base/enums';
 
 @Injectable()
 export class OrdersMntService {

@@ -1,4 +1,4 @@
-import { TCurrentUser } from '@app/common/types';
+import { TCurrentUser } from '~libs/common/types';
 import { UsersService } from '@app/resource/users';
 import { GhnService } from '@app/third-party/giaohangnhanh';
 import {
@@ -21,13 +21,13 @@ import { AddressSchema } from '@app/resource/users/schemas/address.schema';
 import { Order, OrdersService } from '@app/resource/orders';
 import { ProductCartDTO } from '@app/resource/carts/dtos/product-cart.dto';
 import { CartsService } from '@app/resource/carts/carts.service';
-import { RedlockService } from '@app/common/Redis/services/redlock.service';
+import { RedlockService } from '~libs/common/Redis/services/redlock.service';
 import { CreateOrderRequestDTO } from './dtos/create-order-request.dto';
 import { VnpayService } from '@app/third-party/vnpay.vn';
 import { ProductCode } from '@app/third-party/vnpay.vn/enums';
 import { PaymentMethodEnum } from './enums';
 import { ResponseForVnpayDTO } from './dtos/response-for-vnpay.dto';
-import { COMMUNICATIONS_SERVICE } from '@app/common/constants/services.constant';
+import { COMMUNICATIONS_SERVICE } from '~libs/common/constants/services.constant';
 import { NotifyEventPattern } from '~apps/communications/notifications';
 import { cleanUserBeforeResponse } from '@app/resource/users/utils';
 

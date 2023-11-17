@@ -1,4 +1,4 @@
-import { REDIS_CLIENT } from '@app/common/constants';
+import { REDIS_CLIENT } from '~libs/common/constants';
 import { Inject, Injectable } from '@nestjs/common';
 import { Redis } from 'ioredis';
 

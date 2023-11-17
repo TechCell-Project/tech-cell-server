@@ -1,4 +1,4 @@
-import { ListDataResponseDTO } from '@app/common/dtos/list-data-response.dto';
+import { ListDataResponseDTO } from '~libs/common/dtos/list-data-response.dto';
 import { AttributeDTO } from '@app/resource/attributes/dtos';
 import { ApiProperty, IntersectionType } from '@nestjs/swagger';
 

@@ -1,7 +1,7 @@
 import { AttributesService } from '@app/resource/attributes';
 import { Inject, Injectable } from '@nestjs/common';
 import { Store } from 'cache-manager';
-import { REDIS_CACHE } from '@app/common/constants';
+import { REDIS_CACHE } from '~libs/common/constants';
 import { CreateAttributeDTO, UpdateAttributeDTO } from '@app/resource/attributes/dtos';
 
 @Injectable()

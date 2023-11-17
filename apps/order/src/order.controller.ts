@@ -2,7 +2,7 @@ import { Ctx, MessagePattern, Payload, RmqContext } from '@nestjs/microservices'
 import { OrderMessagePattern } from './order.pattern';
 import { Controller } from '@nestjs/common';
 import { OrderHealthIndicator } from './order.health';
-import { RabbitMQService } from '@app/common/RabbitMQ';
+import { RabbitMQService } from '~libs/common/RabbitMQ';
 
 @Controller('/')
 export class OrderController {

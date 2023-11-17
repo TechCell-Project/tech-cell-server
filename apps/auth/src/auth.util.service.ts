@@ -7,7 +7,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtPayloadDto, UserDataResponseDTO } from '~apps/auth/dtos';
 import * as bcrypt from 'bcrypt';
 import { RpcException, ClientRMQ } from '@nestjs/microservices';
-import { COMMUNICATIONS_SERVICE, REDIS_CACHE, REQUIRE_USER_REFRESH } from '@app/common/constants';
+import { COMMUNICATIONS_SERVICE, REDIS_CACHE, REQUIRE_USER_REFRESH } from '~libs/common/constants';
 import { OtpService } from '@app/resource/otp';
 import { Store } from 'cache-manager';
 import {
@@ -15,7 +15,7 @@ import {
     buildRevokeRefreshTokenKey,
     buildUniqueUserNameFromEmail,
     isEmail,
-} from '@app/common';
+} from '~libs/common';
 import { convertTimeString, TimeUnitOutPut } from 'convert-time-string';
 import { cleanUserBeforeResponse } from '@app/resource/users/utils';
 import { AuthExceptions } from './auth.exception';

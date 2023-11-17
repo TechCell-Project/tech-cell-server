@@ -1,7 +1,7 @@
 import { RpcException } from '@nestjs/microservices';
 import { FilterQuery, ProjectionFields, QueryOptions, Types } from 'mongoose';
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { ListDataResponseDTO } from '@app/common/dtos';
+import { ListDataResponseDTO } from '~libs/common/dtos';
 import { GetUsersQueryDTO } from './dtos';
 import { User } from '@app/resource/users';
 import { UsersSearchUtilService } from './users-search.util.service';

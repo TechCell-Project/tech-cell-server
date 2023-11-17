@@ -1,6 +1,6 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { NotificationsGateway } from './notifications.gateway';
-import { AUTH_SERVICE } from '@app/common/constants/services.constant';
+import { AUTH_SERVICE } from '~libs/common/constants/services.constant';
 import { ClientRMQ } from '@nestjs/microservices';
 import { NotificationService } from '@app/resource/notifications';
 import { Order, User, UsersService } from '@app/resource';

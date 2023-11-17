@@ -1,4 +1,4 @@
-import { AdminGuard, catchException } from '@app/common';
+import { AdminGuard, catchException } from '~libs/common';
 import {
     BadRequestException,
     Controller,
@@ -41,8 +41,8 @@ import {
     IMAGE_FILE_MAX_SIZE_IN_BYTES,
     IMAGE_FILE_MAX_SIZE_IN_MB,
     SINGLE_IMAGE_FILE_MAX_COUNT,
-} from '@app/common/constants/api.constant';
-import { MANAGEMENTS_SERVICE } from '@app/common/constants/services.constant';
+} from '~libs/common/constants/api.constant';
+import { MANAGEMENTS_SERVICE } from '~libs/common/constants/services.constant';
 import { Request } from 'express';
 
 @ApiBadRequestResponse({

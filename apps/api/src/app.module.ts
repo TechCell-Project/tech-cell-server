@@ -1,7 +1,7 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { AppConfigModule, MongodbModule } from '@app/common';
-import { RabbitMQModule } from '@app/common/RabbitMQ';
+import { AppConfigModule, MongodbModule } from '~libs/common';
+import { RabbitMQModule } from '~libs/common/RabbitMQ';
 import { ListControllers } from './controllers';
 import {
     SEARCH_SERVICE,
@@ -11,7 +11,7 @@ import {
     ORDER_SERVICE,
     TASK_SERVICE,
     COMMUNICATIONS_SERVICE,
-} from '@app/common/constants';
+} from '~libs/common/constants';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerStorageRedisService } from 'nestjs-throttler-storage-redis';
@@ -21,7 +21,7 @@ import { CloudinaryModule } from '@app/third-party/cloudinary.com';
 import { MulterModule } from '@nestjs/platform-express/multer';
 import { diskStorage } from 'multer';
 import { v4 as uuidv4 } from 'uuid';
-import { UploadConstants } from '@app/common/constants/upload.constant';
+import { UploadConstants } from '~libs/common/constants/upload.constant';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { ApiTaskService } from './services';
 import { ScheduleModule } from '@nestjs/schedule';

@@ -2,7 +2,7 @@ import { CategoriesService, Category, CategoryIdParam } from '@app/resource/cate
 import { Injectable } from '@nestjs/common';
 import { GetCategoriesRequestDTO } from './dtos';
 import { FilterQuery, QueryOptions, Types } from 'mongoose';
-import { ListDataResponseDTO } from '@app/common/dtos';
+import { ListDataResponseDTO } from '~libs/common/dtos';
 import { generateRegexQuery } from 'regex-vietnamese';
 
 @Injectable()

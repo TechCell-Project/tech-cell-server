@@ -17,7 +17,7 @@ import { Transform, Type } from 'class-transformer';
 import { ProductStatus } from '@app/resource/products/enums';
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { Types } from 'mongoose';
-import { replaceWhitespaceTo, sanitizeHtmlString } from '@app/common/utils';
+import { replaceWhitespaceTo, sanitizeHtmlString } from '~libs/common/utils';
 import { AttributeSchema } from '@app/resource/products/schemas';
 
 export class PriceDTO {

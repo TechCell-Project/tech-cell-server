@@ -1,5 +1,5 @@
-import { AllEnum } from '@app/common/base/enums';
-import { PaginationQuery } from '@app/common/dtos';
+import { AllEnum } from '~libs/common/base/enums';
+import { PaginationQuery } from '~libs/common/dtos';
 import { OrderStatusEnum, PaymentMethodEnum, PaymentStatusEnum } from '@app/resource/orders/enums';
 import { ApiProperty, IntersectionType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';

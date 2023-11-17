@@ -10,7 +10,7 @@ import {
     Request,
 } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
-import { AUTH_SERVICE } from '@app/common/constants';
+import { AUTH_SERVICE } from '~libs/common/constants';
 import {
     ApiTags,
     ApiBody,
@@ -50,11 +50,11 @@ import {
     IUserGoogleResponse,
     AuthMessagePattern,
 } from '~apps/auth';
-import { catchException } from '@app/common';
-import { CurrentUser } from '@app/common/decorators';
-import { TCurrentUser } from '@app/common/types';
-import { AuthGuard } from '@app/common/guards';
-import { ACCESS_TOKEN_NAME } from '@app/common/constants/api.constant';
+import { catchException } from '~libs/common';
+import { CurrentUser } from '~libs/common/decorators';
+import { TCurrentUser } from '~libs/common/types';
+import { AuthGuard } from '~libs/common/guards';
+import { ACCESS_TOKEN_NAME } from '~libs/common/constants/api.constant';
 
 @ApiBadRequestResponse({
     description: 'Invalid request, please check your request data!',

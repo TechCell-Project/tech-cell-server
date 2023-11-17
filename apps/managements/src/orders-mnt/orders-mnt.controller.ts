@@ -1,4 +1,4 @@
-import { RabbitMQService } from '@app/common/RabbitMQ/services';
+import { RabbitMQService } from '~libs/common/RabbitMQ/services';
 import { Controller } from '@nestjs/common';
 import { GetOrdersRequestDTO } from './dtos/get-orders-request.dto';
 import { OrdersMntService } from './orders-mnt.service';

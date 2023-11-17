@@ -1,9 +1,9 @@
 import { UsersService } from '@app/resource';
 import { Injectable, Logger } from '@nestjs/common';
-import { isAdmin, isMod, isSuperAdmin, isUser } from '@app/common/utils';
+import { isAdmin, isMod, isSuperAdmin, isUser } from '~libs/common/utils';
 import { RpcException } from '@nestjs/microservices';
 import { User } from '@app/resource/users/schemas';
-import { REQUIRE_USER_REFRESH } from '@app/common/constants';
+import { REQUIRE_USER_REFRESH } from '~libs/common/constants';
 import { Store } from 'cache-manager';
 import { UserRole } from '@app/resource/users/enums';
 import { convertTimeString } from 'convert-time-string';

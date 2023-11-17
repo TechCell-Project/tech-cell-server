@@ -19,7 +19,7 @@ import { ImageSchema } from '../schemas/image.schema';
 import { CreateProductRequestDTO } from '~apps/managements/products-mnt/dtos';
 import { ApiProperty } from '@nestjs/swagger';
 import { Types } from 'mongoose';
-import { isTrueSet } from '@app/common/utils/shared.util';
+import { isTrueSet } from '~libs/common/utils/shared.util';
 
 class AttributeDTO implements AttributeSchema {
     @ApiProperty({

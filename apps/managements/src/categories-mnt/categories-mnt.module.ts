@@ -1,5 +1,5 @@
-import { RedisCacheModule } from '@app/common/RedisCache';
-import { RabbitMQService } from '@app/common/RabbitMQ';
+import { RedisCacheModule } from '~libs/common/RedisCache';
+import { RabbitMQService } from '~libs/common/RabbitMQ';
 import { AttributesModule } from '@app/resource/attributes';
 import { Module } from '@nestjs/common';
 import { CategoriesMntController } from './categories-mnt.controller';
