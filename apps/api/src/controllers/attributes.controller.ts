@@ -127,7 +127,7 @@ export class AttributesController {
         @Body() { label, name, description }: UpdateAttributeRequestDTO,
     ) {
         return this.managementsService
-            .send(AttributesMntMessagePattern.updateAttributeDescription, {
+            .send(AttributesMntMessagePattern.updateAttributeInfo, {
                 attributeId,
                 label,
                 name,
