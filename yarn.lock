@@ -58,6 +58,44 @@
     ora "5.4.1"
     rxjs "7.8.1"
 
+"@automock/adapters.nestjs@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@automock/adapters.nestjs/-/adapters.nestjs-2.0.0.tgz#15329a0c25b7700b05f1ff655d9702e7e4bc8d87"
+  integrity sha512-RXh8UN5aE5QEllW8LrKJNb2cb7yG+asb7VZb9PxQFfvAL4zAXGskpcx+lhfCOHLeNk6JMnTKkMZNOMyQ2XSqSA==
+  dependencies:
+    "@automock/common" "^3.0.0"
+    "@automock/types" "^2.0.0"
+    reflect-metadata "^0.1.13"
+
+"@automock/common@^3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@automock/common/-/common-3.0.0.tgz#1261f9645dbc033a708d09ea38bebf3244c37c4d"
+  integrity sha512-r57/27nwLcVziZa8svTcYMHJjpx+nVX//rWUrpx7ePKWR2vcFheWrpEoydKA1+pulLuWl3dahUDbuAcaZ9cD+A==
+  dependencies:
+    "@automock/types" "^2.0.0"
+
+"@automock/core@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@automock/core/-/core-2.0.0.tgz#e1556e761b496d2d76904740dbb6fb12ac8c24ca"
+  integrity sha512-Gmd1JWnzxSMmgE484casZ9gi+I3ZpTREsEd1smMoA8BtcrXpQRN5UlxNAyFG+WvHDUShgA6sHURTtrU/3jeIvA==
+  dependencies:
+    "@automock/common" "^3.0.0"
+    "@automock/types" "^2.0.0"
+    lodash.isequal "^4.5.0"
+
+"@automock/jest@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@automock/jest/-/jest-2.0.0.tgz#81e21ffc2e15346c47a4d7723464af5d78a7acae"
+  integrity sha512-YWJ5+AS8l/zH6WURMn3BwFHvCTv9lQGjErtkPfI+51BJyRyGIXZ+Nvj6CdEw5NCi2LVlXL9OCd485y2er92sgg==
+  dependencies:
+    "@automock/core" "^2.0.0"
+    "@automock/types" "^2.0.0"
+
+"@automock/types@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@automock/types/-/types-2.0.0.tgz#f095d69e9bd2d3ec71efe927280ba6b7779e94f6"
+  integrity sha512-ID3xW7QHVMJ2m9O6PC5C61kWuY3WiVFq/6JbMRofDKnV666EIryOeBXXs94RS4tojI3w5Gmk6FckUn74FNa5ng==
+
 "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.12.13", "@babel/code-frame@^7.16.7", "@babel/code-frame@^7.21.4":
   version "7.21.4"
   resolved "https://registry.yarnpkg.com/@babel/code-frame/-/code-frame-7.21.4.tgz#d0fa9e4413aca81f2b23b9442797bda1826edb39"
@@ -7268,6 +7306,11 @@ lodash.isarguments@^3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/lodash.isarguments/-/lodash.isarguments-3.1.0.tgz#2f573d85c6a24289ff00663b491c1d338ff3458a"
   integrity sha512-chi4NHZlZqZD18a0imDHnZPrDeBbTtVN7GXMwuGdRH9qotxAjYs3aVLKc7zNOG9eddR5Ksd8rvFEBc9SsggPpg==
+
+lodash.isequal@^4.5.0:
+  version "4.5.0"
+  resolved "https://registry.yarnpkg.com/lodash.isequal/-/lodash.isequal-4.5.0.tgz#415c4478f2bcc30120c22ce10ed3226f7d3e18e0"
+  integrity sha512-pDo3lu8Jhfjqls6GkMgpahsF9kCyayhgykjyLMNFTKWrpVdAQtYyB4muAMWozBB4ig/dtWAmsMxLEI8wuz+DYQ==
 
 lodash.memoize@4.x:
   version "4.1.2"

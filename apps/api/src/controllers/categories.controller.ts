@@ -91,7 +91,7 @@ export class CategoriesController {
     @ApiCreatedResponse({ description: 'The category has been successfully created.' })
     @ApiBadRequestResponse({ description: 'Something wrong, re-check your input.' })
     @Post('/')
-    async createCategories(@Body() data: CreateCategoryRequestDTO) {
+    async createCategory(@Body() data: CreateCategoryRequestDTO) {
         return this.managementsService
             .send(CategoriesMntMessagePattern.createCategory, { ...data })
             .pipe(catchException());

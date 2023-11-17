@@ -18,7 +18,7 @@ export class AttributesMntController {
         return await this.attributeMntService.createAttribute(payload);
     }
 
-    @MessagePattern(AttributesMntMessagePattern.updateAttributeDescription)
+    @MessagePattern(AttributesMntMessagePattern.updateAttributeInfo)
     async updateAttributeDescription(
         @Ctx() context: RmqContext,
         @Payload()

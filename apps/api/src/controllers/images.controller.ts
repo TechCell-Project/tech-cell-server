@@ -212,7 +212,6 @@ export class ImagesController {
         const imageUrls = images.map((image) =>
             ImagesController.buildUploadImageUrl(req, image.filename),
         );
-        console.log(imageUrls);
         return this.managementsService
             .send(ImagesMntMessagePattern.uploadArrayImage, { images, imageUrls })
             .pipe(catchException());

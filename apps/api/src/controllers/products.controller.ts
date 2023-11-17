@@ -33,12 +33,12 @@ import {
     GetProductsDTO,
     ListProductResponseDTO,
 } from '~apps/search/products-search/dtos';
-import { CreateProductRequestDTO } from '~apps/managements/products-mnt/dtos';
 import {
+    CreateProductRequestDTO,
+    UpdateProductRequestDTO,
     ProductIdParamsDTO,
     ProductSkuParamsDTO,
-} from '~apps/managements/products-mnt/dtos/params.dto';
-import { UpdateProductRequestDTO } from '~apps/managements/products-mnt/dtos/update-product-request.dto';
+} from '~apps/managements/products-mnt/dtos';
 import { ProductDTO } from '~libs/resource/products/dtos/product.dto';
 
 @ApiBadRequestResponse({
