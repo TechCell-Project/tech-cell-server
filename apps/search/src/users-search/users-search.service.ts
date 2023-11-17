@@ -3,7 +3,7 @@ import { FilterQuery, ProjectionFields, QueryOptions, Types } from 'mongoose';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ListDataResponseDTO } from '~libs/common/dtos';
 import { GetUsersQueryDTO } from './dtos';
-import { User } from '@app/resource/users';
+import { User } from '~libs/resource/users';
 import { UsersSearchUtilService } from './users-search.util.service';
 
 @Injectable()

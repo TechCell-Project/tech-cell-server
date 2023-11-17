@@ -15,7 +15,7 @@ import {
     ApiTooManyRequestsResponse,
     ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { ListNotificationsResponseDTO, NotificationsDTO } from '@app/resource/notifications/dtos';
+import { ListNotificationsResponseDTO } from '~libs/resource/notifications/dtos';
 
 @ApiBadRequestResponse({
     description: 'Invalid request, please check your request data!',

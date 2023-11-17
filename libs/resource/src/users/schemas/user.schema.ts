@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { AbstractDocument } from '@app/resource/abstract';
-import { UserRole } from '@app/resource/users/enums';
+import { AbstractDocument } from '~libs/resource/abstract';
+import { UserRole } from '~libs/resource/users/enums';
 import { BlockSchema } from './block.schema';
 import { AddressSchema } from './address.schema';
 import { ImageSchema } from './image.schema';

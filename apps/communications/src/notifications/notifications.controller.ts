@@ -2,7 +2,7 @@ import { Controller } from '@nestjs/common';
 import { Ctx, EventPattern, MessagePattern, Payload, RmqContext } from '@nestjs/microservices';
 import { NotifyEventPattern, NotifyMessagePattern } from './constants/notifications.pattern';
 import { RabbitMQService } from '~libs/common/RabbitMQ/services';
-import { Order, User } from '@app/resource';
+import { Order, User } from '~libs/resource';
 import { NotificationsCallGateway } from './gateways';
 import { NotificationsService } from './services';
 import { TCurrentUser } from '~libs/common/types';

@@ -1,4 +1,4 @@
-import { AbstractDocument } from '@app/resource/abstract';
+import { AbstractDocument } from '~libs/resource/abstract';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { NotificationType } from '../enums';
 import { SYSTEM_ISSUER } from '../notifications.constant';

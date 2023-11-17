@@ -17,7 +17,7 @@ import {
 import { AuthGuard, catchException } from '~libs/common';
 import { CurrentUser } from '~libs/common/decorators';
 import { TCurrentUser } from '~libs/common/types';
-import { UserMntResponseDTO } from '@app/resource/users/dtos';
+import { UserMntResponseDTO } from '~libs/resource/users/dtos';
 import { UsersSearchMessagePattern } from '~apps/search/users-search';
 import { ACCESS_TOKEN_NAME } from '~libs/common/constants/api.constant';
 import {

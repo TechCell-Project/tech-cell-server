@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { AbstractDocument } from '@app/resource/abstract';
-import { Attribute } from '@app/resource/attributes';
+import { AbstractDocument } from '~libs/resource/abstract';
+import { Attribute } from '~libs/resource/attributes';
 
 @Schema({ timestamps: true })
 export class Category extends AbstractDocument {

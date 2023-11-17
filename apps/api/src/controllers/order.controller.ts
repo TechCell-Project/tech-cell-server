@@ -22,7 +22,7 @@ import {
     VnpayIpnUrlDTO,
 } from '~apps/order/checkout-ord/dtos';
 import { CreateOrderRequestDTO } from '~apps/order/checkout-ord/dtos/create-order-request.dto';
-import { OrderSchemaDTO } from '@app/resource/orders/dtos/order-schema.dto';
+import { OrderSchemaDTO } from '~libs/resource/orders/dtos/order-schema.dto';
 
 @ApiBadRequestResponse({
     description: 'Invalid request, please check your request data!',

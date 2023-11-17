@@ -1,4 +1,4 @@
-import { AddressSchema } from '@app/resource/users/schemas/address.schema';
+import { AddressSchema } from '~libs/resource/users/schemas/address.schema';
 import { Prop } from '@nestjs/mongoose';
 import { Types } from 'mongoose';
 import { PaymentMethodEnum, PaymentStatusEnum } from '../enums';

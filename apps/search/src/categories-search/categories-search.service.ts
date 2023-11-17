@@ -1,4 +1,4 @@
-import { CategoriesService, Category, CategoryIdParam } from '@app/resource/categories';
+import { CategoriesService, Category, CategoryIdParam } from '~libs/resource/categories';
 import { Injectable } from '@nestjs/common';
 import { GetCategoriesRequestDTO } from './dtos';
 import { FilterQuery, QueryOptions, Types } from 'mongoose';

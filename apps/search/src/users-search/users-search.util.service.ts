@@ -1,6 +1,6 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { REDIS_CACHE } from '~libs/common/constants';
-import { User, UsersService } from '@app/resource/users';
+import { User, UsersService } from '~libs/resource/users';
 import { Store } from 'cache-manager';
 import { GetUsersQueryDTO } from './dtos';
 import { FilterQuery, QueryOptions } from 'mongoose';

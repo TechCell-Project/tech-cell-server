@@ -4,7 +4,7 @@ import { Ctx, MessagePattern, Payload, RmqContext } from '@nestjs/microservices'
 import { CategoriesSearchService } from './categories-search.service';
 import { CategoriesSearchMessagePattern } from './categories-search.pattern';
 import { GetCategoriesRequestDTO, GetCategoryByLabelRequestDTO } from './dtos';
-import { CategoryIdParam } from '@app/resource/categories/dtos';
+import { CategoryIdParam } from '~libs/resource/categories/dtos';
 
 @Controller()
 export class CategoriesSearchController {

@@ -1,4 +1,4 @@
-import { OrderStatusEnum } from '@app/resource/orders/enums';
+import { OrderStatusEnum } from '~libs/resource/orders/enums';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsNotEmpty } from 'class-validator';
 

@@ -7,7 +7,7 @@ import {
     Product,
     ProductsService,
     VariationDTO,
-} from '@app/resource';
+} from '~libs/resource';
 import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common';
 import {
     allowToAction,
@@ -22,7 +22,7 @@ import { AttributeDTO, CreateProductRequestDTO } from './dtos';
 import { RpcException } from '@nestjs/microservices';
 import { CloudinaryService } from '@app/third-party/cloudinary.com';
 import { UpdateProductRequestDTO } from './dtos/update-product-request.dto';
-import { ProductStatus } from '@app/resource/products/enums';
+import { ProductStatus } from '~libs/resource/products/enums';
 
 @Injectable()
 export class ProductsMntUtilService {

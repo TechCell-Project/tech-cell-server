@@ -1,4 +1,4 @@
-import { AttributesService, CategoriesService, Product, ProductsService } from '@app/resource';
+import { AttributesService, CategoriesService, Product, ProductsService } from '~libs/resource';
 import { Inject, Injectable } from '@nestjs/common';
 import { delStartWith } from '~libs/common/utils';
 import {

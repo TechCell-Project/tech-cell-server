@@ -14,11 +14,11 @@ import {
     IsNotEmptyObject,
 } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
-import { ProductStatus } from '@app/resource/products/enums';
+import { ProductStatus } from '~libs/resource/products/enums';
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { Types } from 'mongoose';
 import { replaceWhitespaceTo, sanitizeHtmlString } from '~libs/common/utils';
-import { AttributeSchema } from '@app/resource/products/schemas';
+import { AttributeSchema } from '~libs/resource/products/schemas';
 
 export class PriceDTO {
     @ApiProperty({

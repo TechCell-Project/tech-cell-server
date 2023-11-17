@@ -1,5 +1,5 @@
 import { ListDataResponseDTO } from '~libs/common/dtos';
-import { OrderSchemaDTO } from '@app/resource/orders/dtos/order-schema.dto';
+import { OrderSchemaDTO } from '~libs/resource/orders/dtos/order-schema.dto';
 import { ApiProperty, IntersectionType } from '@nestjs/swagger';
 
 export class ListOrderResponseDTO extends IntersectionType(ListDataResponseDTO) {

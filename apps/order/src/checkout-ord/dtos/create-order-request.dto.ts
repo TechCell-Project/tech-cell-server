@@ -1,6 +1,6 @@
 import { ApiProperty, IntersectionType } from '@nestjs/swagger';
 import { ReviewOrderRequestDTO } from './checkout-review-order-request.dto';
-import { ProductCartDTO } from '@app/resource/carts/dtos/product-cart.dto';
+import { ProductCartDTO } from '~libs/resource/carts/dtos/product-cart.dto';
 import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
 import { PaymentMethodEnum } from '../enums';
 

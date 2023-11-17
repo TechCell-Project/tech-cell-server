@@ -4,11 +4,11 @@ import { RedisCacheModule } from '~libs/common/RedisCache';
 import { RabbitMQModule, RabbitMQService } from '~libs/common/RabbitMQ';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { UsersModule } from '@app/resource/users';
+import { UsersModule } from '~libs/resource/users';
 import { AccessTokenStrategy, GoogleStrategy, FacebookStrategy } from './strategies';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtGuard } from './guards';
-import { OtpModule } from '@app/resource/otp';
+import { OtpModule } from '~libs/resource/otp';
 import { COMMUNICATIONS_SERVICE } from '~libs/common/constants';
 import { AuthHealthIndicator } from './auth.health';
 

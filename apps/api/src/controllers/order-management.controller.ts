@@ -18,7 +18,7 @@ import {
     ListOrderResponseDTO,
 } from '~apps/managements/orders-mnt/dtos';
 import { OrdersMntMessagePattern } from '~apps/managements/orders-mnt/orders-mnt.pattern';
-import { OrderSchemaDTO } from '@app/resource/orders/dtos/order-schema.dto';
+import { OrderSchemaDTO } from '~libs/resource/orders/dtos/order-schema.dto';
 
 @ApiBadRequestResponse({
     description: 'Invalid request, please check your request data!',

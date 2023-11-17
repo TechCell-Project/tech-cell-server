@@ -2,7 +2,7 @@ import { Controller } from '@nestjs/common';
 import { Ctx, MessagePattern, RmqContext, Payload } from '@nestjs/microservices';
 import { RabbitMQService } from '~libs/common/RabbitMQ';
 import { AttributesMntMessagePattern } from './attributes-mnt.pattern';
-import { CreateAttributeDTO } from '@app/resource/attributes/dtos/create-attribute.dto';
+import { CreateAttributeDTO } from '~libs/resource/attributes/dtos/create-attribute.dto';
 import { AttributesMntService } from './attributes-mnt.service';
 
 @Controller()

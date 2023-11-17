@@ -1,4 +1,4 @@
-import { Attribute, AttributesService } from '@app/resource/attributes';
+import { Attribute, AttributesService } from '~libs/resource/attributes';
 import { Inject, Injectable } from '@nestjs/common';
 import { Store } from 'cache-manager';
 import { REDIS_CACHE } from '~libs/common/constants';

@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { AbstractDocument } from '@app/resource/abstract';
+import { AbstractDocument } from '~libs/resource/abstract';
 import * as mongoose from 'mongoose';
 import { ProductStatus } from '../enums';
 import { AttributeSchema, VariationSchema } from './variation.schema';

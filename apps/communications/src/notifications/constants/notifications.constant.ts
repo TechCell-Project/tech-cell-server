@@ -1,4 +1,4 @@
-import { UserRole } from '@app/resource/users/enums';
+import { UserRole } from '~libs/resource/users/enums';
 
 export const NotifyRoom = {
     AdminRoom: `${UserRole.Admin}_room`,

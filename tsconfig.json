@@ -20,8 +20,8 @@
         "paths": {
             "~libs/common": ["libs/common/src"],
             "~libs/common/*": ["libs/common/src/*"],
-            "@app/resource": ["libs/resource/src"],
-            "@app/resource/*": ["libs/resource/src/*"],
+            "~libs/resource": ["libs/resource/src"],
+            "~libs/resource/*": ["libs/resource/src/*"],
             "@app/third-party": ["libs/third-party/src"],
             "@app/third-party/*": ["libs/third-party/src/*"],
             "~apps/api/*": ["apps/api/src/*"],

@@ -33,7 +33,7 @@ import {
     CreateUserRequestDto,
 } from '~apps/managements/users-mnt';
 import { catchException } from '~libs/common';
-import { UserMntResponseDTO } from '@app/resource/users/dtos';
+import { UserMntResponseDTO } from '~libs/resource/users/dtos';
 import { CurrentUser } from '~libs/common/decorators';
 import { TCurrentUser } from '~libs/common/types';
 import { UsersSearchMessagePattern } from '~apps/search/users-search';

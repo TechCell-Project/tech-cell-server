@@ -36,7 +36,7 @@ import {
     ApiTags,
     ApiTooManyRequestsResponse,
 } from '@nestjs/swagger';
-import { AttributeDTO } from '@app/resource/attributes/dtos';
+import { AttributeDTO } from '~libs/resource/attributes/dtos';
 
 @ApiBadRequestResponse({
     description: 'Invalid request, please check your request data!',

@@ -1,6 +1,6 @@
-import { Discount } from '@app/resource/discounts';
-import { ApplyDiscountTo, DiscountType } from '@app/resource/discounts/enums';
-import { SelectProduct } from '@app/resource/products/dtos/select-product.dto';
+import { Discount } from '~libs/resource/discounts';
+import { ApplyDiscountTo, DiscountType } from '~libs/resource/discounts/enums';
+import { SelectProduct } from '~libs/resource/products/dtos/select-product.dto';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsDate, IsEnum, IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator';
 

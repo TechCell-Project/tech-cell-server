@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Order, OrdersService } from '@app/resource/orders';
+import { Order, OrdersService } from '~libs/resource/orders';
 import { GetOrdersRequestDTO } from './dtos/get-orders-request.dto';
 import { convertPageQueryToMongoose } from '~libs/common/utils';
 import { FilterQuery, Types } from 'mongoose';

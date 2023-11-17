@@ -1,6 +1,6 @@
 import { CanActivate, Injectable } from '@nestjs/common';
 import { AuthCoreGuard } from './auth.core.guard';
-import { UserRole } from '@app/resource/users/enums';
+import { UserRole } from '~libs/resource/users/enums';
 import { Reflector } from '@nestjs/core';
 
 /**

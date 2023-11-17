@@ -1,14 +1,14 @@
 import { Injectable, Inject, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { TokenExpiredError } from 'jsonwebtoken';
-import { UsersService } from '@app/resource/users';
-import { User } from '@app/resource/users/schemas';
+import { UsersService } from '~libs/resource/users';
+import { User } from '~libs/resource/users/schemas';
 import { ConfigService } from '@nestjs/config';
 import { JwtPayloadDto, UserDataResponseDTO } from '~apps/auth/dtos';
 import * as bcrypt from 'bcrypt';
 import { RpcException, ClientRMQ } from '@nestjs/microservices';
 import { COMMUNICATIONS_SERVICE, REDIS_CACHE, REQUIRE_USER_REFRESH } from '~libs/common/constants';
-import { OtpService } from '@app/resource/otp';
+import { OtpService } from '~libs/resource/otp';
 import { Store } from 'cache-manager';
 import {
     buildRevokeAccessTokenKey,
@@ -17,7 +17,7 @@ import {
     isEmail,
 } from '~libs/common';
 import { convertTimeString, TimeUnitOutPut } from 'convert-time-string';
-import { cleanUserBeforeResponse } from '@app/resource/users/utils';
+import { cleanUserBeforeResponse } from '~libs/resource/users/utils';
 import { AuthExceptions } from './auth.exception';
 
 @Injectable()

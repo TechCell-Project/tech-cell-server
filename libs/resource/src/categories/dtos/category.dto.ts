@@ -1,6 +1,6 @@
 import { Category } from '../schemas';
 import { ApiProperty } from '@nestjs/swagger';
-import { AttributeDTO } from '@app/resource/attributes/dtos';
+import { AttributeDTO } from '~libs/resource/attributes/dtos';
 import { Types } from 'mongoose';
 
 export class CategoryDTO implements Category {

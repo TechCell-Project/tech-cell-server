@@ -1,4 +1,4 @@
-import { ImageSchemaDTO } from '@app/resource/users/dtos';
+import { ImageSchemaDTO } from '~libs/resource/users/dtos';
 import { ApiProperty, OmitType } from '@nestjs/swagger';
 import { IsNotEmpty, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 

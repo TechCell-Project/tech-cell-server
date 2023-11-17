@@ -2,11 +2,11 @@ import { ConflictException, Injectable, BadRequestException } from '@nestjs/comm
 import { ProductsMntUtilService } from './products-mnt.util.service';
 import { CreateProductRequestDTO } from './dtos';
 import { RpcException } from '@nestjs/microservices';
-import { CreateProductDTO } from '@app/resource';
+import { CreateProductDTO } from '~libs/resource';
 import { UpdateProductRequestDTO } from './dtos/update-product-request.dto';
 import { ProductIdParamsDTO, ProductSkuParamsDTO } from './dtos/params.dto';
 import { Types } from 'mongoose';
-import { ProductStatus } from '@app/resource/products/enums';
+import { ProductStatus } from '~libs/resource/products/enums';
 
 @Injectable()
 export class ProductsMntService extends ProductsMntUtilService {

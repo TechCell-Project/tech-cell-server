@@ -8,7 +8,7 @@ import {
     ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ProductCartDTO } from '@app/resource/carts/dtos/product-cart.dto';
+import { ProductCartDTO } from '~libs/resource/carts/dtos/product-cart.dto';
 import { ApiProperty } from '@nestjs/swagger';
 
 class Shipping {

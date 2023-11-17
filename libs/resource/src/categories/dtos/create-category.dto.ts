@@ -1,4 +1,4 @@
-import { Attribute } from '@app/resource/attributes';
+import { Attribute } from '~libs/resource/attributes';
 import { Type } from 'class-transformer';
 import { IsLowercase, IsNotEmpty, IsOptional, IsString, Matches } from 'class-validator';
 

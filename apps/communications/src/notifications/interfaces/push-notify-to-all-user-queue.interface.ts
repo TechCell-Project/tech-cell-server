@@ -1,4 +1,4 @@
-import { User } from '@app/resource';
+import { User } from '~libs/resource';
 
 export interface IPushNotifyToAllUserQueue {
     userToNotify: User;

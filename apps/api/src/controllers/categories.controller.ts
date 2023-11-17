@@ -23,7 +23,7 @@ import {
     CreateCategoryRequestDTO,
     UpdateCategoryRequestDTO,
 } from '~apps/managements/categories-mnt';
-import { CategoryDTO, CategoryIdParam } from '@app/resource/categories/dtos';
+import { CategoryDTO, CategoryIdParam } from '~libs/resource/categories/dtos';
 
 @ApiBadRequestResponse({
     description: 'Invalid request, please check your request data!',

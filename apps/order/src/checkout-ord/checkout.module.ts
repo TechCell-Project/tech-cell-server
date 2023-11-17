@@ -3,11 +3,11 @@ import { RabbitMQModule, RabbitMQService } from '~libs/common/RabbitMQ';
 import { HttpModule } from '@nestjs/axios';
 import { CheckoutService } from './checkout.service';
 import { CheckoutController } from './checkout.controller';
-import { ProductsModule, UsersModule } from '@app/resource';
+import { ProductsModule, UsersModule } from '~libs/resource';
 import { GhnModule } from '@app/third-party/giaohangnhanh';
 import { VnpayModule } from '@app/third-party/vnpay.vn';
-import { OrdersModule } from '@app/resource/orders';
-import { CartsModule } from '@app/resource/carts';
+import { OrdersModule } from '~libs/resource/orders';
+import { CartsModule } from '~libs/resource/carts';
 import { RedisModule } from '~libs/common/Redis';
 import { COMMUNICATIONS_SERVICE } from '~libs/common/constants/services.constant';
 

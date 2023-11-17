@@ -1,4 +1,4 @@
-import { CategoriesModule } from '@app/resource';
+import { CategoriesModule } from '~libs/resource';
 import { Module } from '@nestjs/common';
 import { RedisCacheModule } from '~libs/common/RedisCache';
 import { RabbitMQService } from '~libs/common/RabbitMQ';

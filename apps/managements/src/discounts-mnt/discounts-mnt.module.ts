@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { DiscountsMntController } from './discounts-mnt.controller';
 import { DiscountsMntService } from './discounts-mnt.service';
-import { DiscountsModule } from '@app/resource';
+import { DiscountsModule } from '~libs/resource';
 import { RabbitMQService } from '~libs/common/RabbitMQ';
 
 @Module({
