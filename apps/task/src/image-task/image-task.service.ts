@@ -46,9 +46,9 @@ export class ImageTaskService {
         }
 
         // Continue remove unused image if next_cursor is not null
-        if (images['next_cursor'] != null) {
-            if (images['rate_limit_remaining'] < RESULT_PER_REQUEST) {
-                const resetAt = new Date(images['rate_limit_reset_at'] * 1000);
+        if (images?.next_cursor != null) {
+            if (images?.rate_limit_remaining < RESULT_PER_REQUEST) {
+                const resetAt = new Date(+images?.rate_limit_reset_at * 1000);
                 this.logger.log(`Rate limit exceeded. Reset at ${resetAt}`);
 
                 // Wait until rate limit has been reset
@@ -57,12 +57,12 @@ export class ImageTaskService {
                 await new Promise((resolve) => setTimeout(resolve, timeToReset));
 
                 this.logger.log('Rate limit has been reset. Continuing remove unused image');
-                await this.removeUnusedImage(images['next_cursor']);
+                await this.removeUnusedImage(images?.next_cursor);
             } else {
                 this.logger.log('Waiting for 30 minutes before continuing');
                 await new Promise((resolve) => setTimeout(resolve, 1000 * 60 * 30));
                 this.logger.log('Continue remove unused image');
-                await this.removeUnusedImage(images['next_cursor']);
+                await this.removeUnusedImage(images?.next_cursor);
             }
         } else {
             this.logger.log('Finish remove unused image');
