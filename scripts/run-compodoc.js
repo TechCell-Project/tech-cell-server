@@ -17,17 +17,17 @@ function run() {
 }
 
 function runCompodoc(build = false) {
-    let command = `compodoc`;
+    let command = `npx @compodoc/compodoc`;
     command += ` --output ${folder}`;
     command += ` --port ${port}`;
+    command += ` --name "TechCell documentation"`;
+    command += ` --customFavicon ${faviconDir}`;
+    command += ` --customLogo ${logoDir}`;
 
     if (!build) {
         command += ` -s`;
     } else {
         command += ` -p tsconfig.doc.json`;
-        command += ` --name "TechCell documentation"`;
-        command += ` --customFavicon ${faviconDir}`;
-        command += ` --customLogo ${logoDir}`;
         command += ` --disableCoverage`;
         command += ` --hideGenerator`;
     }
