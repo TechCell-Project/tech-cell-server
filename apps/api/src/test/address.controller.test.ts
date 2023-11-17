@@ -5,7 +5,7 @@ import { SEARCH_SERVICE } from '~libs/common/constants';
 import { of } from 'rxjs';
 import { AddressSearchMessagePattern } from '~apps/search/address-search/address-search.pattern';
 
-describe('AddressController', () => {
+describe(AddressController, () => {
     let addressController: AddressController;
     let searchService: jest.Mocked<ClientRMQ>;
 
