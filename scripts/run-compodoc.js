@@ -7,24 +7,30 @@ const faviconDir = `./assets/icons/favicon.ico`;
 const logoDir = `./assets/logos/logo-red.png`;
 
 function run() {
-    if (process.argv.includes('--build')) {
+    if (process.argv.includes('--build') || process.argv.includes('-b')) {
         return runCompodoc(true);
+    }
+    if (process.argv.includes('--serve') || process.argv.includes('-s')) {
+        return runCompodoc(false);
     }
     return runCompodoc();
 }
 
 function runCompodoc(build = false) {
-    let command = `npx @compodoc/compodoc -p tsconfig.doc.json`;
-    if (!build) {
-        command += ` --serve`;
-    }
-    command += ` --port ${port}`;
+    let command = `compodoc`;
     command += ` --output ${folder}`;
-    command += ` --name "TechCell documentation"`;
-    command += ` --customFavicon ${faviconDir}`;
-    command += ` --customLogo ${logoDir}`;
-    command += ` --disableCoverage`;
-    command += ` --hideGenerator`;
+    command += ` --port ${port}`;
+
+    if (!build) {
+        command += ` -s`;
+    } else {
+        command += ` -p tsconfig.doc.json`;
+        command += ` --name "TechCell documentation"`;
+        command += ` --customFavicon ${faviconDir}`;
+        command += ` --customLogo ${logoDir}`;
+        command += ` --disableCoverage`;
+        command += ` --hideGenerator`;
+    }
 
     const compodocProcess = spawn(command, {
         shell: true,
