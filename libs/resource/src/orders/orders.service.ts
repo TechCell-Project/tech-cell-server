@@ -65,6 +65,15 @@ export class OrdersService {
         });
     }
 
+    async getOrderByIdPopulate(id: Types.ObjectId) {
+        return this.orderRepository.findOne(
+            {
+                _id: id,
+            },
+            { lean: false },
+        );
+    }
+
     async getOrderByIdOrNull(id: Types.ObjectId) {
         try {
             const order = await this.orderRepository.findOne({
