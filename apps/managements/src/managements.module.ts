@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
-import { AppConfigModule } from '@app/common';
-import { RabbitMQService } from '@app/common/RabbitMQ';
-import { CloudinaryModule } from '@app/third-party/cloudinary.com';
+import { AppConfigModule } from '~libs/common';
+import { RabbitMQService } from '~libs/common/RabbitMQ';
+import { CloudinaryModule } from '~libs/third-party/cloudinary.com';
 import { UsersMntModule } from '~apps/managements/users-mnt';
 import { ProductsMntModule } from '~apps/managements/products-mnt';
 import { AttributesMntModule } from './attributes-mnt';

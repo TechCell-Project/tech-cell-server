@@ -1,4 +1,4 @@
-import { UploadConstants } from '@app/common/constants/upload.constant';
+import { UploadConstants } from '~libs/common/constants/upload.constant';
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { promisify } from 'util';

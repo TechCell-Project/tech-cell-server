@@ -1,6 +1,6 @@
 import { Controller, Inject, UseGuards, Post, Body, HttpCode, Get, Query } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
-import { ACCESS_TOKEN_NAME, ORDER_SERVICE } from '@app/common/constants';
+import { ACCESS_TOKEN_NAME, ORDER_SERVICE } from '~libs/common/constants';
 import {
     ApiBadRequestResponse,
     ApiBearerAuth,
@@ -13,16 +13,16 @@ import {
     ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { CheckoutMessagePattern } from '~apps/order/checkout-ord/checkout.pattern';
-import { AuthGuard, catchException } from '@app/common';
-import { CurrentUser } from '@app/common/decorators';
-import { TCurrentUser } from '@app/common/types';
+import { AuthGuard, catchException } from '~libs/common';
+import { CurrentUser } from '~libs/common/decorators';
+import { TCurrentUser } from '~libs/common/types';
 import {
     ReviewOrderRequestDTO,
     ReviewedOrderResponseDTO,
     VnpayIpnUrlDTO,
 } from '~apps/order/checkout-ord/dtos';
 import { CreateOrderRequestDTO } from '~apps/order/checkout-ord/dtos/create-order-request.dto';
-import { OrderSchemaDTO } from '@app/resource/orders/dtos/order-schema.dto';
+import { OrderSchemaDTO } from '~libs/resource/orders/dtos/order-schema.dto';
 
 @ApiBadRequestResponse({
     description: 'Invalid request, please check your request data!',

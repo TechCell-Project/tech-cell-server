@@ -1,15 +1,15 @@
 import { Module } from '@nestjs/common';
-import { RabbitMQModule, RabbitMQService } from '@app/common/RabbitMQ';
+import { RabbitMQModule, RabbitMQService } from '~libs/common/RabbitMQ';
 import { HttpModule } from '@nestjs/axios';
 import { CheckoutService } from './checkout.service';
 import { CheckoutController } from './checkout.controller';
-import { ProductsModule, UsersModule } from '@app/resource';
-import { GhnModule } from '@app/third-party/giaohangnhanh';
-import { VnpayModule } from '@app/third-party/vnpay.vn';
-import { OrdersModule } from '@app/resource/orders';
-import { CartsModule } from '@app/resource/carts';
-import { RedisModule } from '@app/common/Redis';
-import { COMMUNICATIONS_SERVICE } from '@app/common/constants/services.constant';
+import { ProductsModule, UsersModule } from '~libs/resource';
+import { GhnModule } from '~libs/third-party/giaohangnhanh';
+import { VnpayModule } from '~libs/third-party/vnpay.vn';
+import { OrdersModule } from '~libs/resource/orders';
+import { CartsModule } from '~libs/resource/carts';
+import { RedisModule } from '~libs/common/Redis';
+import { COMMUNICATIONS_SERVICE } from '~libs/common/constants/services.constant';
 
 @Module({
     imports: [

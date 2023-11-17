@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { NotificationsController } from './notifications.controller';
-import { RabbitMQModule } from '@app/common/RabbitMQ';
-import { AUTH_SERVICE } from '@app/common/constants';
-import { NotificationModule } from '@app/resource/notifications';
+import { RabbitMQModule } from '~libs/common/RabbitMQ';
+import { AUTH_SERVICE } from '~libs/common/constants';
+import { NotificationModule } from '~libs/resource/notifications';
 import { NotificationsCallGateway } from './gateways';
-import { UsersModule } from '@app/resource';
-import { BullMqModule } from '@app/common';
+import { UsersModule } from '~libs/resource';
+import { BullMqModule } from '~libs/common';
 import { BullModule } from '@nestjs/bullmq';
 import {
     NOTIFICATIONS_PREFIX,

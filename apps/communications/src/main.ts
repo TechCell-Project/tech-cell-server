@@ -1,10 +1,10 @@
 import { NestFactory } from '@nestjs/core';
 import { CommunicationsModule } from './communications.module';
-import { useRabbitMQ } from '@app/common/RabbitMQ';
+import { useRabbitMQ } from '~libs/common/RabbitMQ';
 import { Logger } from '@nestjs/common';
-import { RpcExceptionFilter } from '@app/common/filters/';
+import { RpcExceptionFilter } from '~libs/common/filters/';
 import helmet from 'helmet';
-import { RedisIoAdapter } from '@app/common/socket.io';
+import { RedisIoAdapter } from '~libs/common/socket.io';
 
 async function bootstrap() {
     const port = process.env.COMMUNICATIONS_PORT || 8001;

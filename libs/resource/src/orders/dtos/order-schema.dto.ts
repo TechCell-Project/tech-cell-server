@@ -7,7 +7,7 @@ import {
     ShippingOrderSchema,
 } from '../schemas/sub-order.schema';
 import { ApiProperty } from '@nestjs/swagger';
-import { AddressSchemaDTO } from '@app/resource/users/dtos/user-schema.dto';
+import { AddressSchemaDTO } from '~libs/resource/users/dtos/user-schema.dto';
 import { PaymentMethodEnum } from '~apps/order/checkout-ord/enums';
 import { OrderStatusEnum, PaymentStatusEnum } from '../enums';
 

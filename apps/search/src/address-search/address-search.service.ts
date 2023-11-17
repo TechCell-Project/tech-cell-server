@@ -1,5 +1,5 @@
-import { GhnService } from '@app/third-party';
-import { GhnWardDTO, GhnProvinceDTO, GhnDistrictDTO } from '@app/third-party/giaohangnhanh/dtos';
+import { GhnService } from '~libs/third-party';
+import { GhnWardDTO, GhnProvinceDTO, GhnDistrictDTO } from '~libs/third-party/giaohangnhanh/dtos';
 import {
     Inject,
     Injectable,
@@ -11,7 +11,7 @@ import {
 import { RpcException } from '@nestjs/microservices';
 import { Store } from 'cache-manager';
 import { convertTimeString } from 'convert-time-string';
-import { REDIS_CACHE } from '@app/common/constants/cache.constant';
+import { REDIS_CACHE } from '~libs/common/constants/cache.constant';
 import { AxiosError } from 'axios';
 
 @Injectable()

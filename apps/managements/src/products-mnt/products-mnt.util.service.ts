@@ -7,7 +7,7 @@ import {
     Product,
     ProductsService,
     VariationDTO,
-} from '@app/resource';
+} from '~libs/resource';
 import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common';
 import {
     allowToAction,
@@ -15,14 +15,14 @@ import {
     delStartWith,
     findDuplicates,
     replaceWhitespaceTo,
-} from '@app/common/utils';
-import { REDIS_CACHE, PRODUCTS_CACHE_PREFIX } from '@app/common/constants';
+} from '~libs/common/utils';
+import { REDIS_CACHE, PRODUCTS_CACHE_PREFIX } from '~libs/common/constants';
 import { Store } from 'cache-manager';
 import { AttributeDTO, CreateProductRequestDTO } from './dtos';
 import { RpcException } from '@nestjs/microservices';
-import { CloudinaryService } from '@app/third-party/cloudinary.com';
+import { CloudinaryService } from '~libs/third-party/cloudinary.com';
 import { UpdateProductRequestDTO } from './dtos/update-product-request.dto';
-import { ProductStatus } from '@app/resource/products/enums';
+import { ProductStatus } from '~libs/resource/products/enums';
 
 @Injectable()
 export class ProductsMntUtilService {

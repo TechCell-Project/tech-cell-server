@@ -1,5 +1,5 @@
 import { ConflictException, Injectable } from '@nestjs/common';
-import { IBaseQuery } from '@app/resource/interfaces';
+import { IBaseQuery } from '~libs/resource/interfaces';
 import { CreateCategoryDTO, UpdateCategoryDTO } from './dtos';
 import { CategoriesRepository } from './categories.repository';
 import { Category } from './schemas';

@@ -9,16 +9,16 @@ import {
     UpdateUserRequestDTO,
 } from './dtos';
 import { RpcException } from '@nestjs/microservices';
-import { BlockActivity, UserRole } from '@app/resource/users/enums';
+import { BlockActivity, UserRole } from '~libs/resource/users/enums';
 import { UsersMntUtilService } from './users-mnt.util.service';
-import { delStartWith, generateRandomString } from '@app/common';
-import { AddressSchemaDTO, CreateUserDTO, ImageSchemaDTO } from '@app/resource/users/dtos';
-import { REDIS_CACHE, USERS_CACHE_PREFIX } from '@app/common/constants';
-import { cleanUserBeforeResponse, delCacheUsers } from '@app/resource/users/utils';
-import { TCurrentUser } from '@app/common/types';
-import { UsersService } from '@app/resource/users';
+import { delStartWith, generateRandomString } from '~libs/common';
+import { AddressSchemaDTO, CreateUserDTO, ImageSchemaDTO } from '~libs/resource/users/dtos';
+import { REDIS_CACHE, USERS_CACHE_PREFIX } from '~libs/common/constants';
+import { cleanUserBeforeResponse, delCacheUsers } from '~libs/resource/users/utils';
+import { TCurrentUser } from '~libs/common/types';
+import { UsersService } from '~libs/resource/users';
 import { Store } from 'cache-manager';
-import { CloudinaryService } from '@app/third-party/cloudinary.com';
+import { CloudinaryService } from '~libs/third-party/cloudinary.com';
 import { UsersMntExceptions } from './users-mnt.exception';
 
 @Injectable()

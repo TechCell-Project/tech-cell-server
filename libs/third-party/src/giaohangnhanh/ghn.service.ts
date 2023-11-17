@@ -1,7 +1,7 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable, Logger } from '@nestjs/common';
 import { GhnCoreService } from './ghn.core.service';
-import { AddressSchema } from '@app/resource/users/schemas/address.schema';
+import { AddressSchema } from '~libs/resource/users/schemas/address.schema';
 import { generateRegexQuery } from 'regex-vietnamese';
 import { GetShippingFeeDTO, ItemShipping } from './dtos/get-shipping-fee.dto';
 

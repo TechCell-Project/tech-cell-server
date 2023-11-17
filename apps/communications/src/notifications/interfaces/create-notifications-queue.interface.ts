@@ -1,5 +1,5 @@
-import { Order } from '@app/resource/orders';
-import { User } from '@app/resource/users';
+import { Order } from '~libs/resource/orders';
+import { User } from '~libs/resource/users';
 
 export interface ICreateNotificationQueue {
     order: Order;

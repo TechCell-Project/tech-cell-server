@@ -1,6 +1,6 @@
 import { Controller, Get, Inject, Patch, Query, Param, Body, UseGuards } from '@nestjs/common';
-import { ACCESS_TOKEN_NAME, MANAGEMENTS_SERVICE, ModGuard, catchException } from '@app/common';
-import { ObjectIdParamDTO } from '@app/common/dtos';
+import { ACCESS_TOKEN_NAME, MANAGEMENTS_SERVICE, ModGuard, catchException } from '~libs/common';
+import { ObjectIdParamDTO } from '~libs/common/dtos';
 import { ClientRMQ } from '@nestjs/microservices';
 import {
     ApiBadRequestResponse,
@@ -18,7 +18,7 @@ import {
     ListOrderResponseDTO,
 } from '~apps/managements/orders-mnt/dtos';
 import { OrdersMntMessagePattern } from '~apps/managements/orders-mnt/orders-mnt.pattern';
-import { OrderSchemaDTO } from '@app/resource/orders/dtos/order-schema.dto';
+import { OrderSchemaDTO } from '~libs/resource/orders/dtos/order-schema.dto';
 
 @ApiBadRequestResponse({
     description: 'Invalid request, please check your request data!',

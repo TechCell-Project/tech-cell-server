@@ -1,4 +1,4 @@
-import { ProductCartDTO } from '@app/resource/carts/dtos/product-cart.dto';
+import { ProductCartDTO } from '~libs/resource/carts/dtos/product-cart.dto';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import {

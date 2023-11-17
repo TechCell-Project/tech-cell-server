@@ -1,4 +1,4 @@
-import { BaseHealthIndicator } from '@app/common/base/health';
+import { BaseHealthIndicator } from '~libs/common/base/health';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()

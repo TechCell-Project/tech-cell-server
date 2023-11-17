@@ -1,5 +1,5 @@
-import { ListDataResponseDTO } from '@app/common/dtos/list-data-response.dto';
-import { UserMntResponseDTO } from '@app/resource/users/dtos/user-mnt-response.dto';
+import { ListDataResponseDTO } from '~libs/common/dtos/list-data-response.dto';
+import { UserMntResponseDTO } from '~libs/resource/users/dtos/user-mnt-response.dto';
 import { ApiProperty, IntersectionType } from '@nestjs/swagger';
 
 export class ListUserResponseDTO extends IntersectionType(ListDataResponseDTO) {

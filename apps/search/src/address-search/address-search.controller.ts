@@ -3,7 +3,7 @@ import { AddressSearchService } from './address-search.service';
 import { Ctx, MessagePattern, Payload, RmqContext } from '@nestjs/microservices';
 import { AddressSearchMessagePattern } from './address-search.pattern';
 import { QueryDistrictsDTO, QueryWardsDTO } from './dtos';
-import { RabbitMQService } from '@app/common/RabbitMQ';
+import { RabbitMQService } from '~libs/common/RabbitMQ';
 
 @Controller('address-search')
 export class AddressSearchController {

@@ -11,8 +11,8 @@ import {
     Delete,
 } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
-import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '@app/common/constants';
-import { ModGuard, SuperAdminGuard, catchException } from '@app/common';
+import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~libs/common/constants';
+import { ModGuard, SuperAdminGuard, catchException } from '~libs/common';
 import {
     ApiBody,
     ApiNotFoundResponse,
@@ -39,7 +39,7 @@ import {
     ProductSkuParamsDTO,
 } from '~apps/managements/products-mnt/dtos/params.dto';
 import { UpdateProductRequestDTO } from '~apps/managements/products-mnt/dtos/update-product-request.dto';
-import { ProductDTO } from '@app/resource/products/dtos/product.dto';
+import { ProductDTO } from '~libs/resource/products/dtos/product.dto';
 
 @ApiBadRequestResponse({
     description: 'Invalid request, please check your request data!',

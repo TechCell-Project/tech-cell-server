@@ -1,4 +1,4 @@
-import { PaginationQuery } from '@app/common/dtos';
+import { PaginationQuery } from '~libs/common/dtos';
 import { ApiProperty, IntersectionType } from '@nestjs/swagger';
 import { IsEnum, IsOptional } from 'class-validator';
 

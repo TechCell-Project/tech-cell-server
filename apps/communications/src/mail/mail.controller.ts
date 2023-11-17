@@ -1,6 +1,6 @@
 import { Controller, Inject } from '@nestjs/common';
 import { MailService } from './mail.service';
-import { RabbitMQService } from '@app/common/RabbitMQ';
+import { RabbitMQService } from '~libs/common/RabbitMQ';
 import { Ctx, Payload, RmqContext, EventPattern } from '@nestjs/microservices';
 import { ConfirmEmailRegisterDTO, ForgotPasswordEmailDTO } from './dtos';
 import { MailEventPattern } from './mail.pattern';

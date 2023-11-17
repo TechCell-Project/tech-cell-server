@@ -1,6 +1,6 @@
-import { RedisCacheModule } from '@app/common/RedisCache';
-import { RabbitMQService } from '@app/common/RabbitMQ';
-import { AttributesModule } from '@app/resource';
+import { RedisCacheModule } from '~libs/common/RedisCache';
+import { RabbitMQService } from '~libs/common/RabbitMQ';
+import { AttributesModule } from '~libs/resource';
 import { Module } from '@nestjs/common';
 import { AttributesMntController } from './attributes-mnt.controller';
 import { AttributesMntService } from './attributes-mnt.service';

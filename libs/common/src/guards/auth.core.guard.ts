@@ -17,9 +17,9 @@ import {
     SKIP_AUTH_ADMIN_GUARD,
     SKIP_AUTH_MOD_GUARD,
     SKIP_AUTH_GUARD,
-} from '@app/common/constants';
+} from '~libs/common/constants';
 import { TCurrentUser } from '../types';
-import { UserRole } from '@app/resource/users/enums';
+import { UserRole } from '~libs/resource/users/enums';
 import { Socket } from 'socket.io';
 import { Request } from 'express';
 import { WsException } from '@nestjs/websockets';

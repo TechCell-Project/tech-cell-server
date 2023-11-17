@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { RabbitMQService } from '@app/common/RabbitMQ/services';
+import { RabbitMQService } from '~libs/common/RabbitMQ/services';
 import { OrdersMntController } from './orders-mnt.controller';
 import { OrdersMntService } from './orders-mnt.service';
-import { OrdersModule } from '@app/resource/orders';
+import { OrdersModule } from '~libs/resource/orders';
 
 @Module({
     imports: [OrdersModule],

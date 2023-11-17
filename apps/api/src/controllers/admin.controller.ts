@@ -1,8 +1,8 @@
 import { Controller, Get, Inject, UseGuards } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
-import { TASK_SERVICE } from '@app/common/constants';
+import { TASK_SERVICE } from '~libs/common/constants';
 import { ApiExcludeController } from '@nestjs/swagger';
-import { SuperAdminGuard, catchException } from '@app/common';
+import { SuperAdminGuard, catchException } from '~libs/common';
 import { DatabaseTaskEventPattern } from '~apps/task/database-task';
 
 @ApiExcludeController()

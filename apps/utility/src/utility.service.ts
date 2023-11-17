@@ -1,10 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { REDIS_CACHE } from '@app/common/constants';
+import { REDIS_CACHE } from '~libs/common/constants';
 import { Store } from 'cache-manager';
 import * as path from 'path';
 import * as fs from 'fs/promises';
 import { LogType } from './enums';
-import { BotGateway } from '@app/common/Discordjs/bot';
+import { BotGateway } from '~libs/common/Discordjs/bot';
 
 @Injectable()
 export class UtilityService {

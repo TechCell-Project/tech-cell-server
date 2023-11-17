@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { ProductsSearchUtilService } from './products-search.util.service';
 import { GetProductByIdQueryDTO, GetProductsDTO } from './dtos';
 import { FilterQuery, QueryOptions, Types } from 'mongoose';
-import { Product } from '@app/resource';
-import { ListDataResponseDTO } from '@app/common/dtos';
-import { isTrueSet } from '@app/common/utils/shared.util';
+import { Product } from '~libs/resource';
+import { ListDataResponseDTO } from '~libs/common/dtos';
+import { isTrueSet } from '~libs/common/utils/shared.util';
 import { generateRegexQuery } from 'regex-vietnamese';
 
 @Injectable()

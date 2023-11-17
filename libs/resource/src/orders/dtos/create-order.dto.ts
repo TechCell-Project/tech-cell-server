@@ -6,7 +6,7 @@ import {
     ProductOrderSchema,
     ShippingOrderSchema,
 } from '../schemas/sub-order.schema';
-import { AddressSchemaDTO } from '@app/resource/users/dtos';
+import { AddressSchemaDTO } from '~libs/resource/users/dtos';
 
 class ProductOrderDTO implements ProductOrderSchema {
     productId: Types.ObjectId;

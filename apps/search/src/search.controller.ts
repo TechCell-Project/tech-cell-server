@@ -2,7 +2,7 @@ import { Ctx, MessagePattern, Payload, RmqContext } from '@nestjs/microservices'
 import { SearchMessagePattern } from './search.pattern';
 import { Controller } from '@nestjs/common';
 import { SearchHealthIndicator } from './search.health';
-import { RabbitMQService } from '@app/common/RabbitMQ';
+import { RabbitMQService } from '~libs/common/RabbitMQ';
 
 @Controller('/')
 export class SearchController {

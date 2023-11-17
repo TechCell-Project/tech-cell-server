@@ -1,9 +1,9 @@
-import { TCurrentUser } from '@app/common/types';
-import { Notification, NotificationService } from '@app/resource/notifications';
+import { TCurrentUser } from '~libs/common/types';
+import { Notification, NotificationService } from '~libs/resource/notifications';
 import { Injectable } from '@nestjs/common';
 import { QueryOptions, Types } from 'mongoose';
 import { GetUserNotificationsDTO, OrderBy, ReadType } from '../dtos/get-user-notifications.dto';
-import { ListDataResponseDTO } from '@app/common/dtos';
+import { ListDataResponseDTO } from '~libs/common/dtos';
 
 @Injectable()
 export class NotificationsService {

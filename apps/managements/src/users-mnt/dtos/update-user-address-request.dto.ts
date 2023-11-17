@@ -1,4 +1,4 @@
-import { AddressSchemaDTO } from '@app/resource/users/dtos';
+import { AddressSchemaDTO } from '~libs/resource/users/dtos';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { ArrayMaxSize, ArrayMinSize, IsArray, ValidateNested } from 'class-validator';

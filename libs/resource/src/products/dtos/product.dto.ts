@@ -3,7 +3,7 @@ import { AttributeSchema, ImageSchema, PriceSchema, Product, VariationSchema } f
 import { ProductStatus } from '../enums/ProductStatus.enum';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { isTrueSet } from '@app/common';
+import { isTrueSet } from '~libs/common';
 import { IsOptional } from 'class-validator';
 
 export class ProductAttributeDTO implements AttributeSchema {

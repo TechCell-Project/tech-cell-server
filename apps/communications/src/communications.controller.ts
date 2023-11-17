@@ -3,7 +3,7 @@ import { Controller, Res, Get } from '@nestjs/common';
 import { NotificationsMessageSubscribe } from './notifications/constants/notifications.message';
 import { Ctx, MessagePattern, Payload, RmqContext } from '@nestjs/microservices';
 import { CommunicationsMessagePattern } from './communications.pattern';
-import { RabbitMQService } from '@app/common/RabbitMQ/services';
+import { RabbitMQService } from '~libs/common/RabbitMQ/services';
 import { CommunicationsHealthIndicator } from './communications.health';
 
 @Controller('/')

@@ -1,4 +1,4 @@
-import { AbstractRepository } from '@app/resource/abstract';
+import { AbstractRepository } from '~libs/resource/abstract';
 import { Notification } from './schemas/notification.schema';
 import { Logger } from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';

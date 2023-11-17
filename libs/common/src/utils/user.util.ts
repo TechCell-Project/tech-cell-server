@@ -1,4 +1,4 @@
-import { UserRole } from '@app/resource/users/enums';
+import { UserRole } from '~libs/resource/users/enums';
 import { generateRandomString } from './shared.util';
 
 export const isSuperAdmin = (user: any) => user.role === UserRole.SuperAdmin;

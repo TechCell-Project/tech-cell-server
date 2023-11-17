@@ -7,7 +7,7 @@ import { ClientSession, FilterQuery, Types, UpdateQuery } from 'mongoose';
 import { ProductStatus } from './enums';
 import { SelectType } from '~apps/search/enums';
 import { SelectTypeDTO } from '~apps/search/dtos';
-import { RedlockService } from '@app/common/Redis/services';
+import { RedlockService } from '~libs/common/Redis/services';
 
 @Injectable()
 export class ProductsService {

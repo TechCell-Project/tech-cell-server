@@ -11,8 +11,8 @@ import {
     Delete,
 } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
-import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '@app/common/constants';
-import { AdminGuard, catchException } from '@app/common';
+import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~libs/common/constants';
+import { AdminGuard, catchException } from '~libs/common';
 import {
     AttributesSearchMessagePattern,
     GetAttributeByIdRequestDTO,
@@ -36,7 +36,7 @@ import {
     ApiTags,
     ApiTooManyRequestsResponse,
 } from '@nestjs/swagger';
-import { AttributeDTO } from '@app/resource/attributes/dtos';
+import { AttributeDTO } from '~libs/resource/attributes/dtos';
 
 @ApiBadRequestResponse({
     description: 'Invalid request, please check your request data!',

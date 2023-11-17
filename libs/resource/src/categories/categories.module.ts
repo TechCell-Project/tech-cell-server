@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { MongodbModule } from '@app/common';
+import { MongodbModule } from '~libs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Category, CategorySchema } from './schemas';
 import { CategoriesService } from './categories.service';

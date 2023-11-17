@@ -17,7 +17,7 @@ import {
     ValidateNested,
 } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
-import { isTrueSet } from '@app/common/utils/shared.util';
+import { isTrueSet } from '~libs/common/utils/shared.util';
 import { ImageSchema } from '../schemas/image.schema';
 
 class BlockActivitySchemaDTO {

@@ -10,8 +10,8 @@ import {
     Post,
 } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
-import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '@app/common/constants';
-import { ModGuard, SuperAdminGuard } from '@app/common/guards';
+import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~libs/common/constants';
+import { ModGuard, SuperAdminGuard } from '~libs/common/guards';
 import {
     ApiBadRequestResponse,
     ApiBearerAuth,
@@ -32,13 +32,13 @@ import {
     BlockUnblockRequestDTO,
     CreateUserRequestDto,
 } from '~apps/managements/users-mnt';
-import { catchException } from '@app/common';
-import { UserMntResponseDTO } from '@app/resource/users/dtos';
-import { CurrentUser } from '@app/common/decorators';
-import { TCurrentUser } from '@app/common/types';
+import { catchException } from '~libs/common';
+import { UserMntResponseDTO } from '~libs/resource/users/dtos';
+import { CurrentUser } from '~libs/common/decorators';
+import { TCurrentUser } from '~libs/common/types';
 import { UsersSearchMessagePattern } from '~apps/search/users-search';
 import { GetUsersQueryDTO, ListUserResponseDTO } from '~apps/search/users-search/dtos';
-import { ACCESS_TOKEN_NAME } from '@app/common/constants/api.constant';
+import { ACCESS_TOKEN_NAME } from '~libs/common/constants/api.constant';
 
 @ApiBadRequestResponse({
     description: 'Invalid request, please check your request data!',

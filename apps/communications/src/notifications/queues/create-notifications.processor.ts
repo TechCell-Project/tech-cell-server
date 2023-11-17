@@ -2,12 +2,12 @@ import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
 import { NOTIFICATIONS_JOB_CREATE } from '../constants/notifications.constant';
-import { NotificationService, NotificationType } from '@app/resource/notifications';
-import { UsersService } from '@app/resource/users';
+import { NotificationService, NotificationType } from '~libs/resource/notifications';
+import { UsersService } from '~libs/resource/users';
 import { NotificationsMessageSubscribe } from '../constants/notifications.message';
 import { NotificationsCallGateway } from '../gateways/notifications.call.gateway';
 import { ICreateNotificationQueue } from '../interfaces';
-import { cleanUserBeforeResponse } from '@app/resource/users/utils/user.util';
+import { cleanUserBeforeResponse } from '~libs/resource/users/utils/user.util';
 
 @Injectable()
 // The @Processor decorator marks the class as a job processor.

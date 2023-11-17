@@ -1,7 +1,7 @@
 import { Controller } from '@nestjs/common';
 import { DatabaseTaskService } from './database-task.service';
 import { Ctx, Payload, RmqContext, EventPattern } from '@nestjs/microservices';
-import { RabbitMQService } from '@app/common/RabbitMQ';
+import { RabbitMQService } from '~libs/common/RabbitMQ';
 import { DatabaseTaskEventPattern } from './database-task.pattern';
 
 @Controller()

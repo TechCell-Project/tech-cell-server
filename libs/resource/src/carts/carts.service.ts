@@ -5,7 +5,7 @@ import { CreateCartDTO } from './dtos';
 import { IGetCartByProduct } from './interfaces';
 import { Cart } from './schemas';
 import { CartState } from './enums';
-import { RedlockService } from '@app/common/Redis/services';
+import { RedlockService } from '~libs/common/Redis/services';
 
 @Injectable()
 export class CartsService {

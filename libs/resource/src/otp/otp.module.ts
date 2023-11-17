@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { MongodbModule } from '@app/common';
+import { MongodbModule } from '~libs/common';
 import { OtpService } from './otp.service';
 import { OtpRepository } from './otp.repository';
 import { Otp, OtpSchema } from './otp.schema';

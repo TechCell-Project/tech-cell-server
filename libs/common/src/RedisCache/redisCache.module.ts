@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { redisStore } from 'cache-manager-ioredis-yet';
-import { REDIS_CACHE } from '@app/common/constants';
+import { REDIS_CACHE } from '~libs/common/constants';
 
 @Module({
     providers: [

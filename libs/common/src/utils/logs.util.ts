@@ -1,5 +1,5 @@
 import { Logger } from '@nestjs/common';
-import { MAX_DISCORD_BODY_LENGTH } from '@app/common/constants/common.constant';
+import { MAX_DISCORD_BODY_LENGTH } from '~libs/common/constants/common.constant';
 
 /**
  * @description Format JSON string to array of messages that can be sent to discord
