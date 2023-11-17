@@ -1,6 +1,6 @@
 import { TestBed } from '@automock/jest';
 import { ClientRMQ } from '@nestjs/microservices';
-import { AddressController } from '../controllers/address.controller';
+import { AddressController } from '../address.controller';
 import { SEARCH_SERVICE } from '~libs/common/constants';
 import { of } from 'rxjs';
 import { AddressSearchMessagePattern } from '~apps/search/address-search/address-search.pattern';

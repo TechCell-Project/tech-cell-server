@@ -1,7 +1,7 @@
 import { of } from 'rxjs';
 import { TestBed } from '@automock/jest';
 import { ClientRMQ } from '@nestjs/microservices';
-import { ProductsController } from '../controllers/products.controller';
+import { ProductsController } from '../products.controller';
 import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~libs/common/constants';
 import { ProductsMntMessagePattern } from '~apps/managements/products-mnt';
 import { ProductsSearchMessagePattern } from '~apps/search/products-search';

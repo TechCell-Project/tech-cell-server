@@ -1,7 +1,7 @@
 import { of } from 'rxjs';
 import { TestBed } from '@automock/jest';
 import { ClientRMQ } from '@nestjs/microservices';
-import { CategoriesController } from '../controllers/categories.controller';
+import { CategoriesController } from '../categories.controller';
 import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~libs/common/constants';
 import {
     CategoriesSearchMessagePattern,

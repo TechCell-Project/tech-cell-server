@@ -1,7 +1,7 @@
 import { of } from 'rxjs';
 import { TestBed } from '@automock/jest';
 import { ClientRMQ } from '@nestjs/microservices';
-import { ImagesController } from '../controllers/images.controller';
+import { ImagesController } from '../images.controller';
 import { MANAGEMENTS_SERVICE } from '~libs/common/constants';
 import { PublicIdDTO } from '~apps/managements/images-mnt/dtos/publicId.dto';
 import { ImagesMntMessagePattern } from '~apps/managements/images-mnt/images-mnt.pattern';

@@ -1,7 +1,7 @@
 import { of } from 'rxjs';
 import { TestBed } from '@automock/jest';
 import { ClientRMQ } from '@nestjs/microservices';
-import { AttributesController } from '../controllers/attributes.controller';
+import { AttributesController } from '../attributes.controller';
 import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~libs/common/constants';
 import { AttributesSearchMessagePattern } from '~apps/search/attributes-search/attributes-search.pattern';
 import { AttributesMntMessagePattern } from '~apps/managements/attributes-mnt/attributes-mnt.pattern';

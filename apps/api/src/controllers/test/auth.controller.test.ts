@@ -1,6 +1,6 @@
 import { TestBed } from '@automock/jest';
 import { ClientRMQ } from '@nestjs/microservices';
-import { AuthController } from '../controllers/auth.controller';
+import { AuthController } from '../auth.controller';
 import { AUTH_SERVICE } from '~libs/common/constants';
 import { of } from 'rxjs';
 import { AuthMessagePattern } from '~apps/auth/auth.pattern';

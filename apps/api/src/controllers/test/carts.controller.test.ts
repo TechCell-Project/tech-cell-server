@@ -1,7 +1,7 @@
 import { of } from 'rxjs';
 import { TestBed } from '@automock/jest';
 import { ClientRMQ } from '@nestjs/microservices';
-import { CartsController } from '../controllers/carts.controller';
+import { CartsController } from '../carts.controller';
 import { ORDER_SERVICE } from '~libs/common/constants';
 import { TCurrentUser } from '~libs/common/types';
 import { PaginationQuery } from '~libs/common/dtos';
