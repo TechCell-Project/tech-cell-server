@@ -14,6 +14,7 @@ import {
 } from './constants';
 import { CreateNotificationProcessor, PushNotifyToAllUserProcessor } from './queues';
 import { NotificationsService } from './services';
+import { RedisModule } from '~libs/common/Redis';
 
 @Module({
     imports: [
@@ -28,6 +29,11 @@ import { NotificationsService } from './services';
         BullModule.registerQueue({
             prefix: NOTIFICATIONS_PREFIX,
             name: NOTIFICATIONS_JOB_PUSH_ALL,
+        }),
+        RedisModule.register({
+            host: process.env.REDIS_HOST,
+            port: +process.env.REDIS_PORT,
+            password: process.env.REDIS_PASSWORD,
         }),
     ],
     controllers: [NotificationsController],

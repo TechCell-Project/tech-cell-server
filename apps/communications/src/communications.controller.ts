@@ -19,6 +19,11 @@ export class CommunicationsController {
         return this.communicationsHealthIndicator.isHealthy(key);
     }
 
+    @Get('/')
+    async index(@Res() res: Response) {
+        return this.ping(res);
+    }
+
     @Get('/ping')
     async ping(@Res() res: Response) {
         res.json({

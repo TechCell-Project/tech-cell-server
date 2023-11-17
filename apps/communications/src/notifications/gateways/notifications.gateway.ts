@@ -23,10 +23,13 @@ import { NotificationService } from '~libs/resource';
 import { Types } from 'mongoose';
 import { CurrentUser } from '~libs/common/decorators';
 import { TCurrentUser } from '~libs/common/types';
+import { instrument, RedisStore } from '@socket.io/admin-ui';
+import { RedisService } from '~libs/common/Redis/services/redis.service';
 
 @WebSocketGateway({
     cors: {
         origin: '*',
+        credentials: true,
     },
 })
 export class NotificationsGateway
@@ -38,14 +41,25 @@ export class NotificationsGateway
     constructor(
         protected readonly authService: ClientRMQ,
         protected readonly notificationService: NotificationService,
+        protected readonly redisService: RedisService,
     ) {}
 
     @WebSocketServer()
     readonly server: Server;
 
-    afterInit() {
+    async afterInit() {
         this.logger.log('Notification gateway initialized');
         this.connectedClients = new Map<string, Socket>();
+        instrument(this.server, {
+            mode: 'development',
+            auth: {
+                type: 'basic',
+                username: process.env.SOCKET_ADMIN_USER,
+                password: process.env.SOCKET_ADMIN_PASSWORD,
+            },
+            namespaceName: 'notifications',
+            store: new RedisStore(this.redisService.getClient()),
+        });
     }
 
     /**

@@ -6,6 +6,10 @@ import { Redis } from 'ioredis';
 export class RedisService {
     constructor(@Inject(REDIS_CLIENT) private readonly redisClient: Redis) {}
 
+    public getClient(): Redis {
+        return this.redisClient;
+    }
+
     public async get(key: string): Promise<string> {
         return this.redisClient.get(key);
     }

@@ -21,13 +21,9 @@ async function bootstrap() {
     await redisIoAdapter.connectToRedis();
     app.useWebSocketAdapter(redisIoAdapter);
 
-    await app.startAllMicroservices().then(() => logger.log(`⚡️ microservices is ready`));
-    await app
-        .listen(port)
-        .then(() =>
-            logger.log(
-                `⚡️ http is ready, listening on port ${port}, url: http://localhost:${port}`,
-            ),
-        );
+    app.startAllMicroservices().then(() => logger.log(`⚡️ microservices is ready`));
+    app.listen(port).then(() =>
+        logger.log(`⚡️ http is ready, listening on port ${port}, url: http://localhost:${port}`),
+    );
 }
 bootstrap();
