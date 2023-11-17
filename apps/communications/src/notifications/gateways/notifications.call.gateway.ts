@@ -9,6 +9,7 @@ import { UserRole } from '~libs/resource/users/enums';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { ICreateNotificationQueue, IPushNotifyToAllUserQueue } from '../interfaces';
+import { RedisService } from '~libs/common/Redis/services/redis.service';
 
 @Injectable()
 export class NotificationsCallGateway extends NotificationsGateway {
@@ -17,8 +18,9 @@ export class NotificationsCallGateway extends NotificationsGateway {
         @InjectQueue(NOTIFICATIONS_JOB_CREATE) protected notifyQueue: Queue,
         protected readonly notificationService: NotificationService,
         protected readonly usersService: UsersService,
+        protected readonly redisService: RedisService,
     ) {
-        super(authService, notificationService);
+        super(authService, notificationService, redisService);
         this.logger = new Logger(NotificationsCallGateway.name);
     }
 
