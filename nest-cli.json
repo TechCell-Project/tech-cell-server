@@ -46,15 +46,6 @@
                 "tsConfigPath": "apps/api/tsconfig.app.json"
             }
         },
-        "utility": {
-            "type": "application",
-            "root": "apps/utility",
-            "entryFile": "main",
-            "sourceRoot": "apps/utility/src",
-            "compilerOptions": {
-                "tsConfigPath": "apps/utility/tsconfig.app.json"
-            }
-        },
         "auth": {
             "type": "application",
             "root": "apps/auth",
@@ -62,6 +53,17 @@
             "sourceRoot": "apps/auth/src",
             "compilerOptions": {
                 "tsConfigPath": "apps/auth/tsconfig.app.json"
+            }
+        },
+        "communications": {
+            "type": "application",
+            "root": "apps/communications",
+            "entryFile": "main",
+            "sourceRoot": "apps/communications/src",
+            "compilerOptions": {
+                "tsConfigPath": "apps/communications/tsconfig.app.json",
+                "assets": ["mail/templates/**"],
+                "watchAssets": true
             }
         },
         "managements": {
@@ -100,15 +102,13 @@
                 "tsConfigPath": "apps/task/tsconfig.app.json"
             }
         },
-        "communications": {
+        "utility": {
             "type": "application",
-            "root": "apps/communications",
+            "root": "apps/utility",
             "entryFile": "main",
-            "sourceRoot": "apps/communications/src",
+            "sourceRoot": "apps/utility/src",
             "compilerOptions": {
-                "tsConfigPath": "apps/communications/tsconfig.app.json",
-                "assets": ["mail/templates/**"],
-                "watchAssets": true
+                "tsConfigPath": "apps/utility/tsconfig.app.json"
             }
         }
     }

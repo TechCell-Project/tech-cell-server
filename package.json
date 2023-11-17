@@ -165,12 +165,12 @@
             "^~libs/third-party(|/.*)$": "<rootDir>/libs/third-party/src/$1",
             "^~apps/api(|/.*)$": "<rootDir>/apps/api/src/$1",
             "^~apps/auth(|/.*)$": "<rootDir>/apps/auth/src/$1",
-            "^~apps/search(|/.*)$": "<rootDir>/apps/search/src/$1",
-            "^~apps/utility(|/.*)$": "<rootDir>/apps/utility/src/$1",
+            "^~apps/communications(|/.*)$": "<rootDir>/apps/communications/src/$1",
             "^~apps/managements(|/.*)$": "<rootDir>/apps/managements/src/$1",
-            "^~apps/task(|/.*)$": "<rootDir>/apps/task/src/$1",
             "^~apps/order(|/.*)$": "<rootDir>/apps/order/src/$1",
-            "^~apps/communications(|/.*)$": "<rootDir>/apps/communications/src/$1"
+            "^~apps/search(|/.*)$": "<rootDir>/apps/search/src/$1",
+            "^~apps/task(|/.*)$": "<rootDir>/apps/task/src/$1",
+            "^~apps/utility(|/.*)$": "<rootDir>/apps/utility/src/$1"
         }
     },
     "lint-staged": {

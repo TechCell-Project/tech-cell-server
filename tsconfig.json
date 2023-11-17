@@ -27,18 +27,18 @@
             "~apps/api/*": ["apps/api/src/*"],
             "~apps/auth/*": ["apps/auth/src/*"],
             "~apps/auth": ["apps/auth/src"],
-            "~apps/search": ["apps/search/src"],
-            "~apps/search/*": ["apps/search/src/*"],
-            "~apps/utility": ["apps/utility/src"],
-            "~apps/utility/*": ["apps/utility/src/*"],
-            "~apps/task": ["apps/task/src"],
-            "~apps/task/*": ["apps/task/src/*"],
+            "~apps/communications": ["apps/communications/src"],
+            "~apps/communications/*": ["apps/communications/src/*"],
             "~apps/managements": ["apps/managements/src"],
             "~apps/managements/*": ["apps/managements/src/*"],
             "~apps/order": ["apps/order/src"],
             "~apps/order/*": ["apps/order/src/*"],
-            "~apps/communications": ["apps/communications/src"],
-            "~apps/communications/*": ["apps/communications/src/*"]
+            "~apps/search": ["apps/search/src"],
+            "~apps/search/*": ["apps/search/src/*"],
+            "~apps/task": ["apps/task/src"],
+            "~apps/task/*": ["apps/task/src/*"],
+            "~apps/utility": ["apps/utility/src"],
+            "~apps/utility/*": ["apps/utility/src/*"]
         }
     }
 }
