@@ -59,7 +59,10 @@ export class CartsController {
     @Get('/')
     async getCarts(@Query() query: PaginationQuery, @CurrentUser() user: TCurrentUser) {
         return this.orderService
-            .send(CartsOrdMessagePattern.getCarts, { query, user })
+            .send<{
+                query: PaginationQuery;
+                user: TCurrentUser;
+            }>(CartsOrdMessagePattern.getCarts, { query, user })
             .pipe(catchException());
     }
 
@@ -73,7 +76,10 @@ export class CartsController {
     @Post('/')
     async addCart(@Body() { ...cartData }: AddCartRequestDTO, @CurrentUser() user: TCurrentUser) {
         return this.orderService
-            .send(CartsOrdMessagePattern.addCart, { cartData, user })
+            .send<{
+                cartData: AddCartRequestDTO;
+                user: TCurrentUser;
+            }>(CartsOrdMessagePattern.addCart, { cartData, user })
             .pipe(catchException());
     }
 
@@ -89,7 +95,10 @@ export class CartsController {
         @CurrentUser() user: TCurrentUser,
     ) {
         return this.orderService
-            .send(CartsOrdMessagePattern.deleteProductsCart, { cartsData, user })
+            .send<{
+                cartsData: DeleteProductsCartRequestDTO;
+                user: TCurrentUser;
+            }>(CartsOrdMessagePattern.deleteProductsCart, { cartsData, user })
             .pipe(catchException());
     }
 }
