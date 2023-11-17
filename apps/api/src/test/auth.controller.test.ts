@@ -151,13 +151,16 @@ describe(AuthController, () => {
     describe('change-password', () => {
         const message = AuthMessagePattern.changePassword;
         test(`should called authService.send with ${JSON.stringify(message)}`, async () => {
-            const data: ChangePasswordRequestDTO = {
+            const changePwData: ChangePasswordRequestDTO = {
                 oldPassword: 'oldPassword',
                 newPassword: 'newPassword',
                 reNewPassword: 'newPassword',
             };
-            await authController.changePassword(data, mockCurrentUser);
-            expect(authService.send).toBeCalledWith(message, data);
+            await authController.changePassword(changePwData, mockCurrentUser);
+            expect(authService.send).toBeCalledWith(message, {
+                changePwData,
+                user: mockCurrentUser,
+            });
         });
     });
 
