@@ -1,6 +1,6 @@
-import { AdminGuard, catchException } from '~libs/common';
+import { catchException } from '~libs/common';
 import { PaginationQuery } from '~libs/common/dtos';
-import { Body, Controller, Get, Inject, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Inject, Post, Query } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import {
     ApiBearerAuth,
