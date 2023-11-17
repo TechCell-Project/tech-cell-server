@@ -4,7 +4,7 @@ import { UsersMntController } from './users-mnt.controller';
 import { UsersMntService } from './users-mnt.service';
 import { RedisCacheModule } from '~libs/common/RedisCache';
 import { RabbitMQService } from '~libs/common/RabbitMQ';
-import { CloudinaryService } from '@app/third-party';
+import { CloudinaryService } from '~libs/third-party';
 
 @Module({
     imports: [RedisCacheModule, UsersModule],

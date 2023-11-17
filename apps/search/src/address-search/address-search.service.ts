@@ -1,5 +1,5 @@
-import { GhnService } from '@app/third-party';
-import { GhnWardDTO, GhnProvinceDTO, GhnDistrictDTO } from '@app/third-party/giaohangnhanh/dtos';
+import { GhnService } from '~libs/third-party';
+import { GhnWardDTO, GhnProvinceDTO, GhnDistrictDTO } from '~libs/third-party/giaohangnhanh/dtos';
 import {
     Inject,
     Injectable,

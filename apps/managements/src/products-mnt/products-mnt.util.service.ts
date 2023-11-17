@@ -20,7 +20,7 @@ import { REDIS_CACHE, PRODUCTS_CACHE_PREFIX } from '~libs/common/constants';
 import { Store } from 'cache-manager';
 import { AttributeDTO, CreateProductRequestDTO } from './dtos';
 import { RpcException } from '@nestjs/microservices';
-import { CloudinaryService } from '@app/third-party/cloudinary.com';
+import { CloudinaryService } from '~libs/third-party/cloudinary.com';
 import { UpdateProductRequestDTO } from './dtos/update-product-request.dto';
 import { ProductStatus } from '~libs/resource/products/enums';
 

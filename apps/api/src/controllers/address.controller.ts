@@ -1,7 +1,7 @@
 import { catchException } from '~libs/common';
-import { GhnDistrictDTO } from '@app/third-party/giaohangnhanh/dtos/district.dto';
-import { GhnProvinceDTO } from '@app/third-party/giaohangnhanh/dtos/province.dto';
-import { GhnWardDTO } from '@app/third-party/giaohangnhanh/dtos/ward.dto';
+import { GhnDistrictDTO } from '~libs/third-party/giaohangnhanh/dtos/district.dto';
+import { GhnProvinceDTO } from '~libs/third-party/giaohangnhanh/dtos/province.dto';
+import { GhnWardDTO } from '~libs/third-party/giaohangnhanh/dtos/ward.dto';
 import { Controller, Get, Inject, Param } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import {

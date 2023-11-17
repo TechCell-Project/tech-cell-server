@@ -18,7 +18,7 @@ import { cleanUserBeforeResponse, delCacheUsers } from '~libs/resource/users/uti
 import { TCurrentUser } from '~libs/common/types';
 import { UsersService } from '~libs/resource/users';
 import { Store } from 'cache-manager';
-import { CloudinaryService } from '@app/third-party/cloudinary.com';
+import { CloudinaryService } from '~libs/third-party/cloudinary.com';
 import { UsersMntExceptions } from './users-mnt.exception';
 
 @Injectable()

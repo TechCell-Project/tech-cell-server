@@ -1,6 +1,6 @@
 import { Cron } from '@nestjs/schedule';
 import { Injectable, Logger } from '@nestjs/common';
-import { CloudinaryService } from '@app/third-party/cloudinary.com';
+import { CloudinaryService } from '~libs/third-party/cloudinary.com';
 import { ProductsService } from '~libs/resource/products';
 import { UsersService } from '~libs/resource/users';
 
