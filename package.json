@@ -17,7 +17,7 @@
         "start:debug": "nest start --debug --watch",
         "start:prod": "node ./scripts/start-production.js",
         "lint": "eslint \"{src,apps,libs,test,types,constants}/**/*.ts\" --fix",
-        "test": "jest --detectOpenHandles",
+        "test": "jest",
         "test:watch": "jest --watch",
         "test:cov": "jest --coverage",
         "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
