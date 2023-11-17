@@ -5,13 +5,48 @@ import { convertPageQueryToMongoose } from '~libs/common/utils';
 import { FilterQuery, Types } from 'mongoose';
 import { ListDataResponseDTO } from '~libs/common/dtos';
 import { AllEnum } from '~libs/common/base/enums';
+import { Product, ProductsService } from '~libs/resource';
 
 @Injectable()
 export class OrdersMntService {
-    constructor(private readonly ordersService: OrdersService) {}
+    constructor(
+        private readonly ordersService: OrdersService,
+        private readonly productsService: ProductsService,
+    ) {}
 
     async getOrder(orderId: Types.ObjectId) {
-        return await this.ordersService.getOrderById(orderId);
+        const order = await this.ordersService.getOrderById(orderId);
+        const products = await Promise.all(
+            order.products.map((prod) =>
+                this.productsService.getProduct({
+                    filterQueries: {
+                        _id: prod.productId,
+                    },
+                }),
+            ),
+        );
+
+        const mapProducts = products.reduce((map, product) => {
+            map[product._id.toString()] = product;
+            return map;
+        }, {});
+
+        order.products.forEach((productInOrder) => {
+            const foundProduct: Product = mapProducts[productInOrder.productId.toString()];
+            const foundProductVariant = foundProduct.variations.find(
+                (variant) => variant.sku === productInOrder.sku,
+            );
+
+            if (foundProduct) {
+                Object.assign(productInOrder, {
+                    name: foundProduct.name,
+                    generalImages: foundProduct.generalImages,
+                    ...(foundProductVariant ?? {}),
+                });
+            }
+        });
+
+        return order;
     }
 
     async getOrders(data: GetOrdersRequestDTO) {

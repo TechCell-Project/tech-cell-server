@@ -40,10 +40,11 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
         options?: Partial<QueryOptions<TDocument>>,
         projection?: ProjectionType<TDocument>,
     ): Promise<TDocument> {
-        const document = await this.model.findOne(filterQuery, projection, {
-            lean: true,
-            ...options,
-        });
+        const document = await this.model
+            .findOne(filterQuery, projection, {
+                ...options,
+            })
+            .lean(options?.lean ?? true);
 
         if (!document) {
             this.logger.warn(`${this.model.modelName} not found with filterQuery`, filterQuery);

@@ -19,6 +19,7 @@ import {
 } from '~apps/managements/orders-mnt/dtos';
 import { OrdersMntMessagePattern } from '~apps/managements/orders-mnt/orders-mnt.pattern';
 import { OrderSchemaDTO } from '~libs/resource/orders/dtos/order-schema.dto';
+import { GetOrderByIdResponseDTO } from '~apps/managements/orders-mnt/dtos/get-order-by-id-response.dto';
 
 @ApiBadRequestResponse({
     description: 'Invalid request, please check your request data!',
@@ -52,7 +53,7 @@ export class OrdersManagementController {
     }
 
     @ApiOperation({ summary: 'Get order' })
-    @ApiOkResponse({ description: 'Get order successfully!', type: OrderSchemaDTO })
+    @ApiOkResponse({ description: 'Get order successfully!', type: GetOrderByIdResponseDTO })
     @Get('/:id')
     async getOrder(@Param() { id }: ObjectIdParamDTO) {
         return this.managementsService
