@@ -48,7 +48,7 @@ import { HttpModule } from '@nestjs/axios';
         MongodbModule,
         RabbitMQModule,
         TerminusModule.forRoot({
-            errorLogStyle: 'pretty',
+            errorLogStyle: 'json',
         }),
         CloudinaryModule,
         MulterModule.registerAsync({
