@@ -14,6 +14,8 @@
         "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
         "lint": "eslint \"{src,apps,libs,types}/**/*.ts\" --fix",
         "start": "nest start",
+        "repl": "nest start api --entryFile ../../repl.ts",
+        "repl:dev": "nest start api --watch --entryFile ../../repl.ts",
         "start:dev": "nest start --watch",
         "start:debug": "nest start --debug --watch",
         "start:prod": "node ./scripts/start-production.js",
