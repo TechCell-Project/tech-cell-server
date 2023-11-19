@@ -2,16 +2,22 @@
 const fs = require('fs').promises;
 const { spawn } = require('child_process');
 
-const SEARCH_DIR = './dist/apps/';
+const BUILD_DIR = './dist';
+const SEARCH_DIR = `${BUILD_DIR}/apps/`;
 const SERVICE_NAME = process.argv[2];
+const REPL = process.argv[3];
 
 async function startProduction() {
     let dir;
     try {
         dir = await fs.opendir(`${SEARCH_DIR}${SERVICE_NAME}`);
         console.log(`Found ${SERVICE_NAME}, running '${SERVICE_NAME}' services in production...`);
-
-        const childProcess = spawn('node', [`${SEARCH_DIR}${SERVICE_NAME}/main.js`]);
+        let childProcess;
+        if (REPL === 'repl') {
+            childProcess = spawn('node', [`${BUILD_DIR}/repl.ts.js`]);
+        } else {
+            childProcess = spawn('node', [`${SEARCH_DIR}${SERVICE_NAME}/main.js`]);
+        }
         childProcess.stdout.on('data', (data) => {
             console.log(data.toString());
         });

@@ -198,3 +198,16 @@ export function convertPageQueryToMongoose({
         limit,
     };
 }
+
+/**
+ * Convert date to string in format {dd-MM-yyyy}
+ * @param currentDate The date to convert to string
+ * @returns {string} - The date string in format {dd-MM-yyyy}
+ */
+export function dateToString(currentDate = new Date()): string {
+    const day = currentDate.getDate().toString().padStart(2, '0');
+    const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
+    const year = currentDate.getFullYear().toString();
+
+    return `${day}-${month}-${year}`;
+}
