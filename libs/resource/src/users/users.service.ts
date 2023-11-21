@@ -56,7 +56,7 @@ export class UsersService {
     }
 
     async getUsers(
-        getUserArgs: Partial<User>,
+        getUserArgs: Partial<FilterQuery<User>>,
         queryArgs?: Partial<QueryOptions<User>>,
         projectionArgs?: Partial<ProjectionType<User>>,
     ) {
@@ -91,5 +91,13 @@ export class UsersService {
 
     async countUsers(filterQuery: FilterQuery<User>) {
         return this.usersRepository.count(filterQuery);
+    }
+
+    async isUserNameExist(userName: string): Promise<boolean> {
+        return (await this.usersRepository.count({ userName })) > 0;
+    }
+
+    public async isImageInUse(publicId: string): Promise<boolean> {
+        return (await this.usersRepository.count({ 'avatar.publicId': publicId })) > 0;
     }
 }

@@ -1,28 +1,50 @@
 import { Body, Controller, Get, Inject, Patch, UseGuards } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
-import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '@app/common/constants';
+import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~libs/common/constants';
 import {
+    ApiBadRequestResponse,
     ApiBearerAuth,
     ApiConsumes,
     ApiForbiddenResponse,
+    ApiInternalServerErrorResponse,
+    ApiNotFoundResponse,
     ApiOkResponse,
     ApiOperation,
     ApiTags,
+    ApiTooManyRequestsResponse,
+    ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { AuthGuard, catchException } from '@app/common';
-import { CurrentUser } from '@app/common/decorators';
-import { TCurrentUser } from '@app/common/types';
-import { UserMntResponseDto } from '@app/resource/users/dtos';
+import { AuthGuard, catchException } from '~libs/common';
+import { CurrentUser } from '~libs/common/decorators';
+import { TCurrentUser } from '~libs/common/types';
+import { UserMntResponseDTO } from '~libs/resource/users/dtos';
 import { UsersSearchMessagePattern } from '~apps/search/users-search';
-import { ACCESS_TOKEN_NAME } from '@app/common/constants/api.constant';
+import { ACCESS_TOKEN_NAME } from '~libs/common/constants/api.constant';
 import {
     UpdateUserAddressRequestDTO,
     UpdateUserRequestDTO,
     UsersMntMessagePattern,
 } from '~apps/managements/users-mnt';
 
+@ApiBadRequestResponse({
+    description: 'Invalid request, please check your request data!',
+})
+@ApiNotFoundResponse({
+    description: 'Not found data, please try again!',
+})
+@ApiUnauthorizedResponse({
+    description: 'Unauthorized, please login!',
+})
+@ApiForbiddenResponse({
+    description: 'Forbidden permission, you need login to access this',
+})
+@ApiTooManyRequestsResponse({
+    description: 'Too many requests, please try again later!',
+})
+@ApiInternalServerErrorResponse({
+    description: 'Internal server error, please try again later!',
+})
 @ApiBearerAuth(ACCESS_TOKEN_NAME)
-@ApiForbiddenResponse({ description: 'Forbidden permission, you need login to access this' })
 @UseGuards(AuthGuard)
 @ApiTags('profile')
 @Controller('/profile')
@@ -36,7 +58,7 @@ export class ProfileController {
         summary: 'Get current user info',
         description: 'Get current user info',
     })
-    @ApiOkResponse({ description: 'Get current user info success', type: UserMntResponseDto })
+    @ApiOkResponse({ description: 'Get current user info success', type: UserMntResponseDTO })
     @Get('/')
     async getProfile(@CurrentUser() user: TCurrentUser) {
         return this.searchService
@@ -48,7 +70,7 @@ export class ProfileController {
         summary: 'Update current user info',
         description: 'Update current user info',
     })
-    @ApiOkResponse({ description: 'Update current user info success', type: UserMntResponseDto })
+    @ApiOkResponse({ description: 'Update current user info success', type: UserMntResponseDTO })
     @Patch('/info')
     async updateUserInfo(
         @CurrentUser() user: TCurrentUser,
@@ -64,7 +86,7 @@ export class ProfileController {
         description: 'Update current user address',
     })
     @ApiConsumes('application/json')
-    @ApiOkResponse({ description: 'Update current user address success', type: UserMntResponseDto })
+    @ApiOkResponse({ description: 'Update current user address success', type: UserMntResponseDTO })
     @Patch('/address')
     async updateUserAddress(
         @CurrentUser() user: TCurrentUser,

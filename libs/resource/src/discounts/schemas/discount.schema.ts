@@ -1,11 +1,11 @@
-import { AbstractDocument } from '@app/common';
+import { AbstractDocument } from '~libs/resource/abstract';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { SelectProduct } from '@app/resource/products/dtos/select-product.dto';
+import { SelectProduct } from '~libs/resource/products/dtos/select-product.dto';
 import { ApplyDiscountTo, DiscountType } from '../enums';
-import { User } from '@app/resource/users';
+import { User } from '~libs/resource/users';
 import { Types } from 'mongoose';
 
-@Schema({ versionKey: false, timestamps: true })
+@Schema({ timestamps: true })
 export class Discount extends AbstractDocument {
     @Prop({
         required: true,

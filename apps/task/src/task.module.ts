@@ -1,10 +1,12 @@
 import { Module } from '@nestjs/common';
-import { AppConfigModule } from '@app/common';
-import { RabbitMQService } from '@app/common/RabbitMQ';
-import { CloudinaryModule } from '@app/third-party/cloudinary.com';
+import { AppConfigModule } from '~libs/common';
+import { RabbitMQService } from '~libs/common/RabbitMQ';
+import { CloudinaryModule } from '~libs/third-party/cloudinary.com';
 import { ImageTaskModule } from './image-task/image-task.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { DatabaseTaskModule } from './database-task/database-task.module';
+import { TaskHealthIndicator } from './task.health';
+import { TaskController } from './task.controller';
 
 @Module({
     imports: [
@@ -14,6 +16,7 @@ import { DatabaseTaskModule } from './database-task/database-task.module';
         ImageTaskModule,
         DatabaseTaskModule,
     ],
-    providers: [RabbitMQService],
+    controllers: [TaskController],
+    providers: [RabbitMQService, TaskHealthIndicator],
 })
 export class TaskModule {}

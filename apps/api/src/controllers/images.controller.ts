@@ -1,4 +1,4 @@
-import { AdminGuard, catchException } from '@app/common';
+import { AdminGuard, catchException } from '~libs/common';
 import {
     BadRequestException,
     Controller,
@@ -36,24 +36,28 @@ import { ImageUploadedResponseDTO } from '~apps/managements/images-mnt/dtos/imag
 import { PublicIdDTO } from '~apps/managements/images-mnt/dtos/publicId.dto';
 import { ImagesMntMessagePattern } from '~apps/managements/images-mnt/images-mnt.pattern';
 import {
+    ACCESS_TOKEN_NAME,
     ARRAY_IMAGE_FILE_MAX_COUNT,
     IMAGE_FILE_MAX_SIZE_IN_BYTES,
     IMAGE_FILE_MAX_SIZE_IN_MB,
     SINGLE_IMAGE_FILE_MAX_COUNT,
-} from '@app/common/constants/api.constant';
-import { MANAGEMENTS_SERVICE } from '@app/common/constants/services.constant';
+} from '~libs/common/constants/api.constant';
+import { MANAGEMENTS_SERVICE } from '~libs/common/constants/services.constant';
 import { Request } from 'express';
 
 @ApiBadRequestResponse({
-    description: 'Invalid request',
+    description: 'Invalid request, please check your request data!',
+})
+@ApiNotFoundResponse({
+    description: 'Not found data, please try again!',
 })
 @ApiTooManyRequestsResponse({
-    description: 'Too many requests',
+    description: 'Too many requests, please try again later!',
 })
 @ApiInternalServerErrorResponse({
-    description: 'Internal server error',
+    description: 'Internal server error, please try again later!',
 })
-@ApiBearerAuth('accessToken')
+@ApiBearerAuth(ACCESS_TOKEN_NAME)
 @ApiTags('images')
 @Controller('images')
 export class ImagesController {
@@ -208,7 +212,6 @@ export class ImagesController {
         const imageUrls = images.map((image) =>
             ImagesController.buildUploadImageUrl(req, image.filename),
         );
-        console.log(imageUrls);
         return this.managementsService
             .send(ImagesMntMessagePattern.uploadArrayImage, { images, imageUrls })
             .pipe(catchException());

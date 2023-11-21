@@ -1,6 +1,6 @@
 import { Controller, Get, Inject } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
-import { UTILITY_SERVICE } from '@app/common/constants';
+import { UTILITY_SERVICE } from '~libs/common/constants';
 import { ApiExcludeController, ApiTags } from '@nestjs/swagger';
 
 @ApiExcludeController()

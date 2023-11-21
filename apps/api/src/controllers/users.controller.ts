@@ -10,18 +10,21 @@ import {
     Post,
 } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
-import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '@app/common/constants';
-import { ModGuard, SuperAdminGuard } from '@app/common/guards';
+import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~libs/common/constants';
+import { ModGuard, SuperAdminGuard } from '~libs/common/guards';
 import {
     ApiBadRequestResponse,
     ApiBearerAuth,
     ApiCreatedResponse,
     ApiExcludeEndpoint,
     ApiForbiddenResponse,
+    ApiInternalServerErrorResponse,
     ApiNotFoundResponse,
     ApiOkResponse,
     ApiOperation,
     ApiTags,
+    ApiTooManyRequestsResponse,
+    ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import {
     ChangeRoleRequestDTO,
@@ -29,18 +32,34 @@ import {
     BlockUnblockRequestDTO,
     CreateUserRequestDto,
 } from '~apps/managements/users-mnt';
-import { catchException } from '@app/common';
-import { UserMntResponseDto } from '@app/resource/users/dtos';
-import { CurrentUser } from '@app/common/decorators';
-import { TCurrentUser } from '@app/common/types';
-import { ListDataResponseDTO } from '@app/common/dtos';
+import { catchException } from '~libs/common';
+import { UserMntResponseDTO } from '~libs/resource/users/dtos';
+import { CurrentUser } from '~libs/common/decorators';
+import { TCurrentUser } from '~libs/common/types';
 import { UsersSearchMessagePattern } from '~apps/search/users-search';
-import { GetUsersQueryDTO } from '~apps/search/users-search/dtos';
-import { ACCESS_TOKEN_NAME } from '@app/common/constants/api.constant';
+import { GetUsersQueryDTO, ListUserResponseDTO } from '~apps/search/users-search/dtos';
+import { ACCESS_TOKEN_NAME } from '~libs/common/constants/api.constant';
 
-@ApiTags('users (admin only)')
+@ApiBadRequestResponse({
+    description: 'Invalid request, please check your request data!',
+})
+@ApiNotFoundResponse({
+    description: 'Not found data, please try again!',
+})
+@ApiUnauthorizedResponse({
+    description: 'Unauthorized, please login!',
+})
+@ApiForbiddenResponse({
+    description: 'Forbidden permission, required Mod or Admin',
+})
+@ApiTooManyRequestsResponse({
+    description: 'Too many requests, please try again later!',
+})
+@ApiInternalServerErrorResponse({
+    description: 'Internal server error, please try again later!',
+})
+@ApiTags('users managements (admin only)')
 @ApiBearerAuth(ACCESS_TOKEN_NAME)
-@ApiForbiddenResponse({ description: 'Forbidden permission, required Mod or Admin' })
 @Controller('users')
 export class UsersController {
     constructor(
@@ -52,7 +71,7 @@ export class UsersController {
         summary: 'Create new user',
         description: 'Create new user',
     })
-    @ApiCreatedResponse({ description: 'Create user success', type: UserMntResponseDto })
+    @ApiCreatedResponse({ description: 'Create user success', type: UserMntResponseDTO })
     @UseGuards(SuperAdminGuard)
     @Post('/')
     async createUser(@Body() createUserRequestDto: CreateUserRequestDto) {
@@ -65,7 +84,10 @@ export class UsersController {
         summary: 'Get list of users',
         description: 'Get list of users',
     })
-    @ApiOkResponse({ description: 'Get users success', type: ListDataResponseDTO })
+    @ApiOkResponse({
+        description: 'Get users success',
+        type: ListUserResponseDTO,
+    })
     @ApiNotFoundResponse({ description: 'No users found' })
     @UseGuards(ModGuard)
     @Get('/')
@@ -79,7 +101,7 @@ export class UsersController {
         summary: 'Get user by id',
         description: 'Get user by id',
     })
-    @ApiOkResponse({ description: 'Get users success', type: UserMntResponseDto })
+    @ApiOkResponse({ description: 'Get users success', type: UserMntResponseDTO })
     @ApiNotFoundResponse({ description: 'No users found' })
     @UseGuards(ModGuard)
     @Get('/:id')
@@ -93,7 +115,7 @@ export class UsersController {
         summary: 'Block user',
         description: 'Block user',
     })
-    @ApiOkResponse({ description: 'Block user success', type: UserMntResponseDto })
+    @ApiOkResponse({ description: 'Block user success', type: UserMntResponseDTO })
     @ApiBadRequestResponse({
         description: 'Invalid request',
     })
@@ -118,7 +140,7 @@ export class UsersController {
         summary: 'Unblock user',
         description: 'Unblock user',
     })
-    @ApiOkResponse({ description: 'Unblock user success', type: UserMntResponseDto })
+    @ApiOkResponse({ description: 'Unblock user success', type: UserMntResponseDTO })
     @ApiBadRequestResponse({
         description: 'Invalid request',
     })
@@ -143,7 +165,7 @@ export class UsersController {
         summary: 'Change role user',
         description: 'Change role user',
     })
-    @ApiOkResponse({ description: 'Change role user success', type: UserMntResponseDto })
+    @ApiOkResponse({ description: 'Change role user success', type: UserMntResponseDTO })
     @ApiBadRequestResponse({
         description: 'Invalid request',
     })

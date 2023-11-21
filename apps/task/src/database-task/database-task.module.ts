@@ -1,5 +1,5 @@
-import { MongodbModule } from '@app/common';
-import { RabbitMQService } from '@app/common/RabbitMQ';
+import { MongodbModule } from '~libs/common';
+import { RabbitMQService } from '~libs/common/RabbitMQ';
 import { Module } from '@nestjs/common';
 import { DB_TASK_CONSTANT } from './database-task.constant';
 import { DatabaseTaskService } from './database-task.service';

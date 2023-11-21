@@ -1,8 +1,8 @@
-import { AttributesService } from '@app/resource/attributes';
+import { AttributesService } from '~libs/resource/attributes';
 import { Inject, Injectable } from '@nestjs/common';
 import { Store } from 'cache-manager';
-import { REDIS_CACHE } from '@app/common/constants';
-import { CreateAttributeDTO, UpdateAttributeDTO } from '@app/resource/attributes/dtos';
+import { REDIS_CACHE } from '~libs/common/constants';
+import { CreateAttributeDTO, UpdateAttributeDTO } from '~libs/resource/attributes/dtos';
 
 @Injectable()
 export class AttributesMntService {

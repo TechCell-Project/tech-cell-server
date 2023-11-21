@@ -1,7 +1,7 @@
-import { AbstractDocument } from '@app/common';
+import { AbstractDocument } from '~libs/resource/abstract';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
-@Schema({ timestamps: true, versionKey: false })
+@Schema({ timestamps: true })
 export class Attribute extends AbstractDocument {
     @Prop({ unique: true })
     label: string;

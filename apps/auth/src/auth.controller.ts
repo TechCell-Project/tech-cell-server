@@ -1,6 +1,6 @@
 import { Controller, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { RabbitMQService } from '@app/common/RabbitMQ';
+import { RabbitMQService } from '~libs/common/RabbitMQ';
 import { Ctx, MessagePattern, Payload, RmqContext } from '@nestjs/microservices';
 import {
     UserDataResponseDTO,
@@ -17,14 +17,22 @@ import {
 import { JwtGuard } from './guards/jwt.guard';
 import { IUserFacebookResponse, IUserGoogleResponse } from './interfaces';
 import { AuthMessagePattern } from './auth.pattern';
-import { TCurrentUser } from '@app/common/types';
+import { TCurrentUser } from '~libs/common/types';
+import { AuthHealthIndicator } from './auth.health';
 
 @Controller()
 export class AuthController {
     constructor(
-        private readonly authService: AuthService,
         private readonly rabbitMqService: RabbitMQService,
+        private readonly authService: AuthService,
+        private readonly authHealthIndicator: AuthHealthIndicator,
     ) {}
+
+    @MessagePattern(AuthMessagePattern.isHealthy)
+    async isHealthy(@Ctx() context: RmqContext, @Payload() { key }: { key: string }) {
+        this.rabbitMqService.acknowledgeMessage(context);
+        return this.authHealthIndicator.isHealthy(key);
+    }
 
     @MessagePattern(AuthMessagePattern.login)
     async login(

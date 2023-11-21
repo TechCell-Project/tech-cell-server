@@ -1,7 +1,8 @@
-import { CloudinaryService } from '@app/third-party/cloudinary.com';
-import { ProductsService } from '@app/resource/products';
-import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
+import { Injectable, Logger } from '@nestjs/common';
+import { CloudinaryService } from '~libs/third-party/cloudinary.com';
+import { ProductsService } from '~libs/resource/products';
+import { UsersService } from '~libs/resource/users';
 
 @Injectable()
 export class ImageTaskService {
@@ -10,6 +11,7 @@ export class ImageTaskService {
     constructor(
         private readonly cloudinaryService: CloudinaryService,
         private readonly productsService: ProductsService,
+        private readonly usersService: UsersService,
     ) {}
 
     /**
@@ -30,20 +32,23 @@ export class ImageTaskService {
         // Remove unused image
         for (const image of images.resources) {
             this.logger.log(`Check image ${image.public_id}`);
-            const isImageInUse = await this.productsService.isImageInUse(image.public_id);
-            if (!isImageInUse) {
+            const [...inUseArray] = await Promise.all([
+                this.productsService.isImageInUse(image.public_id),
+                this.usersService.isImageInUse(image.public_id),
+            ]);
+            if (inUseArray.some((inUse) => inUse === true)) {
+                this.logger.warn(`Image in use:: '${image.public_id}'`);
+            } else {
                 await this.cloudinaryService.deleteFile(image.public_id).then(() => {
                     this.logger.verbose(`Deleted:: '${image.public_id}'`);
                 });
-            } else {
-                this.logger.warn(`Image in use:: '${image.public_id}'`);
             }
         }
 
         // Continue remove unused image if next_cursor is not null
-        if (images['next_cursor'] != null) {
-            if (images['rate_limit_remaining'] < RESULT_PER_REQUEST) {
-                const resetAt = new Date(images['rate_limit_reset_at'] * 1000);
+        if (images?.next_cursor != null) {
+            if (images?.rate_limit_remaining < RESULT_PER_REQUEST) {
+                const resetAt = new Date(+images?.rate_limit_reset_at * 1000);
                 this.logger.log(`Rate limit exceeded. Reset at ${resetAt}`);
 
                 // Wait until rate limit has been reset
@@ -52,12 +57,12 @@ export class ImageTaskService {
                 await new Promise((resolve) => setTimeout(resolve, timeToReset));
 
                 this.logger.log('Rate limit has been reset. Continuing remove unused image');
-                await this.removeUnusedImage(images['next_cursor']);
+                await this.removeUnusedImage(images?.next_cursor);
             } else {
                 this.logger.log('Waiting for 30 minutes before continuing');
                 await new Promise((resolve) => setTimeout(resolve, 1000 * 60 * 30));
                 this.logger.log('Continue remove unused image');
-                await this.removeUnusedImage(images['next_cursor']);
+                await this.removeUnusedImage(images?.next_cursor);
             }
         } else {
             this.logger.log('Finish remove unused image');

@@ -1,11 +1,11 @@
-import { Attribute, AttributesService } from '@app/resource/attributes';
+import { Attribute, AttributesService } from '~libs/resource/attributes';
 import { Inject, Injectable } from '@nestjs/common';
 import { Store } from 'cache-manager';
-import { REDIS_CACHE } from '@app/common/constants';
+import { REDIS_CACHE } from '~libs/common/constants';
 import { GetAttributesRequestDTO } from './dtos';
 import { SelectType } from './enums';
 import { FilterQuery, QueryOptions } from 'mongoose';
-import { ListDataResponseDTO } from '@app/common/dtos';
+import { ListDataResponseDTO } from '~libs/common/dtos';
 import { generateRegexQuery } from 'regex-vietnamese';
 
 @Injectable()

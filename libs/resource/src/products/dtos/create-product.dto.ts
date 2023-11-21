@@ -12,13 +12,14 @@ import {
     IsBoolean,
     IsMongoId,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import { ProductStatus } from '../enums';
 import { AttributeSchema, VariationSchema } from '../schemas';
 import { ImageSchema } from '../schemas/image.schema';
 import { CreateProductRequestDTO } from '~apps/managements/products-mnt/dtos';
 import { ApiProperty } from '@nestjs/swagger';
 import { Types } from 'mongoose';
+import { isTrueSet } from '~libs/common/utils/shared.util';
 
 class AttributeDTO implements AttributeSchema {
     @ApiProperty({
@@ -45,6 +46,15 @@ class AttributeDTO implements AttributeSchema {
     @IsString()
     @IsOptional()
     u?: string;
+
+    @ApiProperty({
+        description: 'Name of attribute',
+        example: 'RAM',
+        required: false,
+    })
+    @IsString()
+    @IsOptional()
+    name?: string;
 }
 
 class PriceDTO {
@@ -104,6 +114,7 @@ export class ImageDTO implements ImageSchema {
     })
     @IsOptional()
     @IsBoolean()
+    @Transform(({ value }) => isTrueSet(value))
     isThumbnail?: boolean;
 }
 

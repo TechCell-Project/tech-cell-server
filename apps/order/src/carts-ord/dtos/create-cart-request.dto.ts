@@ -10,12 +10,16 @@ export class AddCartRequestDTO {
         this.quantity = cartData?.quantity ? Number(cartData?.quantity) : 0;
     }
 
-    @ApiProperty({ type: String, description: 'Product ID' })
+    @ApiProperty({ type: String, description: 'Product ID', example: '5f9d5f3b9d6b2b0017b6d5a0' })
     @IsNotEmpty()
     @IsMongoId({ message: 'Invalid product id' })
     productId: Types.ObjectId;
 
-    @ApiProperty({ type: String, description: "sku of product's variation" })
+    @ApiProperty({
+        type: String,
+        description: "sku of product's variation",
+        example: 'iphone_13-color.black-storage.128.gb',
+    })
     @IsNotEmpty()
     @IsString()
     sku: string;
@@ -24,6 +28,7 @@ export class AddCartRequestDTO {
         type: Number,
         description:
             'Quantity of product, can be a negative to reduce quantity or remove product from cart',
+        example: 1,
     })
     @IsNotEmpty()
     @IsNumber()

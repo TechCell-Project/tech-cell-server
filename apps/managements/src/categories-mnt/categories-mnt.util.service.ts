@@ -1,8 +1,8 @@
-import { CategoriesService } from '@app/resource/categories';
-import { AttributesService } from '@app/resource/attributes';
+import { CategoriesService } from '~libs/resource/categories';
+import { AttributesService } from '~libs/resource/attributes';
 import { Inject, Injectable } from '@nestjs/common';
 import { Store } from 'cache-manager';
-import { REDIS_CACHE } from '@app/common/constants';
+import { REDIS_CACHE } from '~libs/common/constants';
 
 @Injectable()
 export class CategoriesMntUtilService {
@@ -12,9 +12,14 @@ export class CategoriesMntUtilService {
         @Inject(REDIS_CACHE) protected cacheManager: Store,
     ) {}
 
+    public readonly MUST_HAVE_ATTRIBUTES = ['height', 'weight', 'length', 'width'];
+
     protected async validateCategoryRequireAttributes(requireAttributes: string[]) {
+        const requireAttributesArray = Array.from(
+            new Set([...requireAttributes, ...this.MUST_HAVE_ATTRIBUTES]),
+        );
         return await Promise.all(
-            requireAttributes.map(async (attributeLabel) => {
+            requireAttributesArray.map(async (attributeLabel) => {
                 const attribute = await this.attributesService.getAttributeByLabel(attributeLabel);
                 delete attribute['_id'];
                 delete attribute['createdAt'];

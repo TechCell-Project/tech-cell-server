@@ -10,7 +10,7 @@ import {
     Request,
 } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
-import { AUTH_SERVICE } from '@app/common/constants';
+import { AUTH_SERVICE } from '~libs/common/constants';
 import {
     ApiTags,
     ApiBody,
@@ -28,6 +28,7 @@ import {
     ApiBearerAuth,
     ApiExcludeEndpoint,
     ApiOperation,
+    ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import {
@@ -49,12 +50,24 @@ import {
     IUserGoogleResponse,
     AuthMessagePattern,
 } from '~apps/auth';
-import { catchException } from '@app/common';
-import { CurrentUser } from '@app/common/decorators';
-import { TCurrentUser } from '@app/common/types';
-import { AuthGuard } from '@app/common/guards';
-import { ACCESS_TOKEN_NAME } from '@app/common/constants/api.constant';
+import { catchException } from '~libs/common';
+import { CurrentUser } from '~libs/common/decorators';
+import { TCurrentUser } from '~libs/common/types';
+import { AuthGuard } from '~libs/common/guards';
+import { ACCESS_TOKEN_NAME } from '~libs/common/constants/api.constant';
 
+@ApiBadRequestResponse({
+    description: 'Invalid request, please check your request data!',
+})
+@ApiNotFoundResponse({
+    description: 'Not found data, please try again!',
+})
+@ApiTooManyRequestsResponse({
+    description: 'Too many requests, please try again later!',
+})
+@ApiInternalServerErrorResponse({
+    description: 'Internal server error, please try again later!',
+})
 @ApiTags('authentication')
 @ApiTooManyRequestsResponse({ description: 'Too many requests, please try again later' })
 @Controller('auth')
@@ -99,7 +112,6 @@ export class AuthController {
     @ApiOkResponse({ description: 'Email is not in use. Can register' })
     @ApiConflictResponse({
         description: 'User already registered',
-        type: UserDataResponseDTO,
     })
     @HttpCode(HttpStatus.OK)
     @Post('check-email')

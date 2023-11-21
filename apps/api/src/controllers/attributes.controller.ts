@@ -11,13 +11,14 @@ import {
     Delete,
 } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
-import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '@app/common/constants';
-import { AdminGuard, catchException } from '@app/common';
+import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~libs/common/constants';
+import { AdminGuard, catchException } from '~libs/common';
 import {
     AttributesSearchMessagePattern,
     GetAttributeByIdRequestDTO,
     GetAttributeByLabelRequestDTO,
     GetAttributesRequestDTO,
+    ListAttributeResponseDTO,
 } from '~apps/search/attributes-search';
 import {
     DeleteAttributeByIdRequestDTO,
@@ -28,13 +29,27 @@ import { AttributesMntMessagePattern } from '~apps/managements/attributes-mnt/at
 import {
     ApiBadRequestResponse,
     ApiCreatedResponse,
+    ApiInternalServerErrorResponse,
     ApiNotFoundResponse,
     ApiOkResponse,
     ApiOperation,
     ApiTags,
+    ApiTooManyRequestsResponse,
 } from '@nestjs/swagger';
-import { ListDataResponseDTO } from '@app/common/dtos';
+import { AttributeDTO } from '~libs/resource/attributes/dtos';
 
+@ApiBadRequestResponse({
+    description: 'Invalid request, please check your request data!',
+})
+@ApiNotFoundResponse({
+    description: 'Not found data, please try again!',
+})
+@ApiTooManyRequestsResponse({
+    description: 'Too many requests, please try again later!',
+})
+@ApiInternalServerErrorResponse({
+    description: 'Internal server error, please try again later!',
+})
 @ApiTags('attributes')
 @Controller('/attributes')
 export class AttributesController {
@@ -47,7 +62,10 @@ export class AttributesController {
         summary: 'Get list of attribute',
         description: 'Get list of attribute',
     })
-    @ApiOkResponse({ type: ListDataResponseDTO, description: 'Get attributes successfully!' })
+    @ApiOkResponse({
+        type: ListAttributeResponseDTO,
+        description: 'Get attributes successfully!',
+    })
     @ApiNotFoundResponse({ description: 'Attributes not found!' })
     @Get('/')
     async getAttributes(@Query() requestQuery: GetAttributesRequestDTO) {
@@ -60,7 +78,7 @@ export class AttributesController {
         summary: 'Get attribute by id',
         description: 'Get attribute by id',
     })
-    @ApiOkResponse({ description: 'Get attribute by id successfully!' })
+    @ApiOkResponse({ description: 'Get attribute by id successfully!', type: AttributeDTO })
     @ApiNotFoundResponse({ description: 'Attribute not found!' })
     @Get('/:attributeId')
     async getAttributeById(@Param() { attributeId }: GetAttributeByIdRequestDTO) {
@@ -109,7 +127,7 @@ export class AttributesController {
         @Body() { label, name, description }: UpdateAttributeRequestDTO,
     ) {
         return this.managementsService
-            .send(AttributesMntMessagePattern.updateAttributeDescription, {
+            .send(AttributesMntMessagePattern.updateAttributeInfo, {
                 attributeId,
                 label,
                 name,

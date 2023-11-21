@@ -1,8 +1,7 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { AppConfigModule } from '@app/common';
-import { RabbitMQModule } from '@app/common/RabbitMQ';
-import { HealthModule } from '@app/common/HealthCheck';
+import { AppConfigModule, MongodbModule } from '~libs/common';
+import { RabbitMQModule } from '~libs/common/RabbitMQ';
 import { ListControllers } from './controllers';
 import {
     SEARCH_SERVICE,
@@ -11,20 +10,23 @@ import {
     MANAGEMENTS_SERVICE,
     ORDER_SERVICE,
     TASK_SERVICE,
-} from '@app/common/constants';
+    COMMUNICATIONS_SERVICE,
+} from '~libs/common/constants';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerStorageRedisService } from 'nestjs-throttler-storage-redis';
 import { MorganMiddleware } from './middlewares';
 import { GoogleStrategy, AccessTokenStrategy, FacebookStrategy } from '~apps/auth/strategies';
-import { CloudinaryModule } from '@app/third-party/cloudinary.com';
+import { CloudinaryModule } from '~libs/third-party/cloudinary.com';
 import { MulterModule } from '@nestjs/platform-express/multer';
 import { diskStorage } from 'multer';
 import { v4 as uuidv4 } from 'uuid';
-import { UploadConstants } from '@app/common/constants/upload.constant';
+import { UploadConstants } from '~libs/common/constants/upload.constant';
 import { ServeStaticModule } from '@nestjs/serve-static';
-import { ApiTaskService } from './api-task.service';
+import { ApiTaskService } from './services';
 import { ScheduleModule } from '@nestjs/schedule';
+import { TerminusModule } from '@nestjs/terminus';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
     imports: [
@@ -42,8 +44,13 @@ import { ScheduleModule } from '@nestjs/schedule';
                 }),
             }),
         }),
+        HttpModule,
+        MongodbModule,
+        RabbitMQModule,
+        TerminusModule.forRoot({
+            errorLogStyle: 'json',
+        }),
         CloudinaryModule,
-        HealthModule,
         MulterModule.registerAsync({
             useFactory: () => ({
                 dest: UploadConstants.multerUploadTmpFolderDir,
@@ -71,6 +78,10 @@ import { ScheduleModule } from '@nestjs/schedule';
         RabbitMQModule.registerRmq(MANAGEMENTS_SERVICE, process.env.RABBITMQ_MANAGEMENTS_QUEUE),
         RabbitMQModule.registerRmq(ORDER_SERVICE, process.env.RABBITMQ_ORDER_QUEUE),
         RabbitMQModule.registerRmq(TASK_SERVICE, process.env.RABBITMQ_TASK_QUEUE),
+        RabbitMQModule.registerRmq(
+            COMMUNICATIONS_SERVICE,
+            process.env.RABBITMQ_COMMUNICATIONS_QUEUE,
+        ),
     ],
     controllers: ListControllers,
     providers: [

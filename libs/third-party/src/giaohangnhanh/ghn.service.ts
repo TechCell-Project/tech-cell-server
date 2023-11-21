@@ -1,7 +1,7 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable, Logger } from '@nestjs/common';
 import { GhnCoreService } from './ghn.core.service';
-import { AddressSchema } from '@app/resource/users/schemas/address.schema';
+import { AddressSchema } from '~libs/resource/users/schemas/address.schema';
 import { generateRegexQuery } from 'regex-vietnamese';
 import { GetShippingFeeDTO, ItemShipping } from './dtos/get-shipping-fee.dto';
 
@@ -11,29 +11,28 @@ export class GhnService extends GhnCoreService {
         super(httpService, new Logger(GhnService.name));
     }
 
-    public async calculateShippingFee({ address }: { address: AddressSchema }) {
+    public async calculateShippingFee({
+        address,
+        items,
+    }: {
+        address: AddressSchema;
+        items: ItemShipping[];
+    }) {
         const { selectedDistrict, selectedWard } = await this.getSelectedAddress(address);
 
-        const itemFee = new ItemShipping({
-            name: 'TEST1',
-            quantity: 1,
-            height: 200,
-            weight: 1000,
-            length: 200,
-            width: 200,
-        });
         const dataFee = new GetShippingFeeDTO({
             service_type_id: 2,
             to_district_id: selectedDistrict.district_id,
             to_ward_code: selectedWard.ward_code,
             weight: 1000,
-            items: [itemFee],
+            items: items,
         });
         const fee = await this.getShippingFee(dataFee).catch((error) => {
             this.logger.error(error);
+            throw new Error(error);
         });
 
-        return { fee };
+        return fee;
     }
 
     // Utils

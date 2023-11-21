@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { DiscountsService } from '@app/resource';
+import { DiscountsService } from '~libs/resource';
 import { CreateDiscountRequestDTO } from './dtos';
 
 @Injectable()

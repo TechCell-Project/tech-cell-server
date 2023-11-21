@@ -1,6 +1,6 @@
 import { Store } from 'cache-manager';
 import { Logger } from '@nestjs/common';
-import { REVOKE_ACCESS_TOKEN, REVOKE_REFRESH_TOKEN } from '@app/common/constants';
+import { REVOKE_ACCESS_TOKEN, REVOKE_REFRESH_TOKEN } from '~libs/common/constants';
 
 /**
  *  Delete all keys with the prefix

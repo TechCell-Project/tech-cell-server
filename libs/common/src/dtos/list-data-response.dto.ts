@@ -1,23 +1,22 @@
-import { Attribute, Category, Product, User } from '@app/resource';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, IsNumber } from 'class-validator';
 
-interface IListDataResponse {
+interface IListDataResponse<T> {
     page?: number;
     pageSize?: number;
     totalPage?: number;
     totalRecord?: number;
-    data?: (User | Attribute | Product | Category)[];
+    data?: Array<T>;
 }
 
-export class ListDataResponseDTO {
+export class ListDataResponseDTO<T> {
     constructor({
         page = 0,
         pageSize = 0,
         totalPage = 0,
         totalRecord = 0,
         data = [],
-    }: IListDataResponse) {
+    }: IListDataResponse<T>) {
         this.page = page;
         this.pageSize = pageSize;
         this.totalPage = totalPage;
@@ -41,22 +40,23 @@ export class ListDataResponseDTO {
 
     @ApiProperty({
         example: 1,
-        description: 'Total page',
+        description: 'Total page with page size',
     })
     @IsNumber()
     totalPage: number;
 
     @ApiProperty({
         example: 10,
-        description: 'Total record',
+        description: 'Total record with filter',
     })
     @IsNumber()
     totalRecord: number;
 
     @ApiProperty({
         example: [],
-        description: 'Array of data response',
+        description: 'Array of data response same as get one response but in array',
+        type: Array<T>,
     })
     @IsArray()
-    data: Array<User | Attribute | Product | Category>;
+    data: Array<T>;
 }

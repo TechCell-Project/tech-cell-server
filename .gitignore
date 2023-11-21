@@ -26,6 +26,7 @@ lerna-debug.log*
 *.launch
 .settings/
 *.sublime-workspace
+/.vs
 
 # IDE - VSCode
 .vscode/*
@@ -34,8 +35,16 @@ lerna-debug.log*
 !.vscode/launch.json
 !.vscode/extensions.json
 
-.vs
-.vscode
 # env
-.env
-.env.prod
+.env*
+!.env.example
+
+# Config nginx
+*.conf.sample
+/ssl
+
+# Docs
+/compodoc
+
+# Uploads folder
+/uploads

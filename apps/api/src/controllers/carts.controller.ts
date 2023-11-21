@@ -1,17 +1,52 @@
-import { AuthGuard, catchException } from '@app/common';
-import { CurrentUser } from '@app/common/decorators';
-import { PaginationQuery } from '@app/common/dtos';
-import { TCurrentUser } from '@app/common/types';
-import { Body, Controller, Get, HttpCode, Inject, Post, Query, UseGuards } from '@nestjs/common';
+import { AuthGuard, catchException } from '~libs/common';
+import { CurrentUser } from '~libs/common/decorators';
+import { PaginationQuery } from '~libs/common/dtos';
+import { TCurrentUser } from '~libs/common/types';
+import {
+    Body,
+    Controller,
+    Delete,
+    Get,
+    HttpCode,
+    Inject,
+    Post,
+    Query,
+    UseGuards,
+} from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
-import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CartsOrdMessagePattern, AddCartRequestDTO } from '~apps/order/carts-ord';
-import { ACCESS_TOKEN_NAME } from '@app/common/constants/api.constant';
-import { ORDER_SERVICE } from '@app/common/constants/services.constant';
+import {
+    ApiBadRequestResponse,
+    ApiBearerAuth,
+    ApiInternalServerErrorResponse,
+    ApiNotFoundResponse,
+    ApiOkResponse,
+    ApiOperation,
+    ApiTags,
+    ApiTooManyRequestsResponse,
+} from '@nestjs/swagger';
+import {
+    CartsOrdMessagePattern,
+    AddCartRequestDTO,
+    DeleteProductsCartRequestDTO,
+} from '~apps/order/carts-ord';
+import { ACCESS_TOKEN_NAME } from '~libs/common/constants/api.constant';
+import { ORDER_SERVICE } from '~libs/common/constants/services.constant';
 
+@ApiBadRequestResponse({
+    description: 'Invalid request, please check your request data!',
+})
+@ApiNotFoundResponse({
+    description: 'Not found data, please try again!',
+})
+@ApiTooManyRequestsResponse({
+    description: 'Too many requests, please try again later!',
+})
+@ApiInternalServerErrorResponse({
+    description: 'Internal server error, please try again later!',
+})
+@ApiBearerAuth(ACCESS_TOKEN_NAME)
 @ApiTags('carts')
 @Controller('carts')
-@ApiBearerAuth(ACCESS_TOKEN_NAME)
 @UseGuards(AuthGuard)
 export class CartsController {
     constructor(@Inject(ORDER_SERVICE) private readonly orderService: ClientRMQ) {}
@@ -24,20 +59,46 @@ export class CartsController {
     @Get('/')
     async getCarts(@Query() query: PaginationQuery, @CurrentUser() user: TCurrentUser) {
         return this.orderService
-            .send(CartsOrdMessagePattern.getCarts, { query, user })
+            .send<{
+                query: PaginationQuery;
+                user: TCurrentUser;
+            }>(CartsOrdMessagePattern.getCarts, { query, user })
             .pipe(catchException());
     }
 
     @ApiOperation({
-        summary: 'Add cart',
-        description: 'Add cart',
+        summary: 'Add/update cart',
+        description:
+            'Add/update cart. If user already has cart, it will be updated. Set quantity to 0 to remove product from cart',
     })
-    @ApiOkResponse({ description: 'Cart updated!' })
+    @ApiOkResponse({ description: 'Cart added!' })
     @HttpCode(200)
     @Post('/')
     async addCart(@Body() { ...cartData }: AddCartRequestDTO, @CurrentUser() user: TCurrentUser) {
         return this.orderService
-            .send(CartsOrdMessagePattern.addCart, { cartData, user })
+            .send<{
+                cartData: AddCartRequestDTO;
+                user: TCurrentUser;
+            }>(CartsOrdMessagePattern.addCart, { cartData, user })
+            .pipe(catchException());
+    }
+
+    @ApiOperation({
+        summary: 'Delete products cart',
+        description: 'Delete products cart',
+    })
+    @ApiOkResponse({ description: 'Cart deleted!' })
+    @HttpCode(200)
+    @Delete('/')
+    async deleteProductsCart(
+        @Body() { ...cartsData }: DeleteProductsCartRequestDTO,
+        @CurrentUser() user: TCurrentUser,
+    ) {
+        return this.orderService
+            .send<{
+                cartsData: DeleteProductsCartRequestDTO;
+                user: TCurrentUser;
+            }>(CartsOrdMessagePattern.deleteProductsCart, { cartsData, user })
             .pipe(catchException());
     }
 }

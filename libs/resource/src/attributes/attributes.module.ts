@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { MongodbModule } from '@app/common';
+import { MongodbModule } from '~libs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Attribute, AttributeSchema } from './schemas';
 import { AttributesService } from './attributes.service';

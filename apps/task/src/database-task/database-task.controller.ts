@@ -1,7 +1,7 @@
 import { Controller } from '@nestjs/common';
 import { DatabaseTaskService } from './database-task.service';
-import { Ctx, Payload, RmqContext, EventPattern } from '@nestjs/microservices';
-import { RabbitMQService } from '@app/common/RabbitMQ';
+import { Ctx, RmqContext, EventPattern } from '@nestjs/microservices';
+import { RabbitMQService } from '~libs/common/RabbitMQ';
 import { DatabaseTaskEventPattern } from './database-task.pattern';
 
 @Controller()
@@ -12,7 +12,7 @@ export class DatabaseTaskController {
     ) {}
 
     @EventPattern(DatabaseTaskEventPattern.forceCopyPrimaryToBackup)
-    async forceCopyPrimaryToBackup(@Ctx() context: RmqContext, @Payload() data: any) {
+    async forceCopyPrimaryToBackup(@Ctx() context: RmqContext) {
         this.rabbitMqService.acknowledgeMessage(context);
         return this.databaseTaskService.copyPrimaryToBackup();
     }

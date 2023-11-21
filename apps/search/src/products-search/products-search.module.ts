@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { ProductsModule } from '@app/resource/products';
+import { ProductsModule } from '~libs/resource/products';
 import { ProductsSearchController } from './products-search.controller';
 import { ProductsSearchService } from './products-search.service';
-import { RedisCacheModule } from '@app/common/RedisCache';
-import { RabbitMQService } from '@app/common/RabbitMQ';
-import { AttributesModule, CategoriesModule } from '@app/resource';
+import { RedisCacheModule } from '~libs/common/RedisCache';
+import { RabbitMQService } from '~libs/common/RabbitMQ';
+import { AttributesModule, CategoriesModule } from '~libs/resource';
 
 @Module({
     imports: [ProductsModule, RedisCacheModule, AttributesModule, CategoriesModule],

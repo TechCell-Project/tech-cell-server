@@ -1,7 +1,7 @@
-import { IntersectionType, PartialType } from '@nestjs/swagger';
+import { PartialType } from '@nestjs/swagger';
 import { AttributeDTO, CreateProductRequestDTO } from './create-product-request.dto';
 import { Types } from 'mongoose';
-import { sanitizeHtmlString } from '@app/common/utils';
+import { sanitizeHtmlString } from '~libs/common/utils';
 
 export class UpdateProductRequestDTO extends PartialType(CreateProductRequestDTO) {
     constructor(data: UpdateProductRequestDTO) {

@@ -11,8 +11,8 @@ import {
     Delete,
 } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
-import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '@app/common/constants';
-import { ModGuard, SuperAdminGuard, catchException } from '@app/common';
+import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~libs/common/constants';
+import { ModGuard, SuperAdminGuard, catchException } from '~libs/common';
 import {
     ApiBody,
     ApiNotFoundResponse,
@@ -28,22 +28,30 @@ import {
 } from '@nestjs/swagger';
 import { ProductsMntMessagePattern } from '~apps/managements/products-mnt';
 import { ProductsSearchMessagePattern } from '~apps/search/products-search';
-import { GetProductByIdQueryDTO, GetProductsDTO } from '~apps/search/products-search/dtos';
-import { CreateProductRequestDTO } from '~apps/managements/products-mnt/dtos';
 import {
+    GetProductByIdQueryDTO,
+    GetProductsDTO,
+    ListProductResponseDTO,
+} from '~apps/search/products-search/dtos';
+import {
+    CreateProductRequestDTO,
+    UpdateProductRequestDTO,
     ProductIdParamsDTO,
     ProductSkuParamsDTO,
-} from '~apps/managements/products-mnt/dtos/params.dto';
-import { UpdateProductRequestDTO } from '~apps/managements/products-mnt/dtos/update-product-request.dto';
+} from '~apps/managements/products-mnt/dtos';
+import { ProductDTO } from '~libs/resource/products/dtos/product.dto';
 
 @ApiBadRequestResponse({
-    description: 'Invalid request',
+    description: 'Invalid request, please check your request data!',
+})
+@ApiNotFoundResponse({
+    description: 'Not found data, please try again!',
 })
 @ApiTooManyRequestsResponse({
-    description: 'Too many requests',
+    description: 'Too many requests, please try again later!',
 })
 @ApiInternalServerErrorResponse({
-    description: 'Internal server error',
+    description: 'Internal server error, please try again later!',
 })
 @ApiTags('products')
 @ApiExtraModels(CreateProductRequestDTO, UpdateProductRequestDTO)
@@ -57,7 +65,7 @@ export class ProductsController {
     @ApiOperation({
         summary: 'Get products list',
     })
-    @ApiOkResponse({ description: 'Get products successfully!' })
+    @ApiOkResponse({ description: 'Get products successfully!', type: ListProductResponseDTO })
     @ApiNotFoundResponse({ description: 'Products not found.' })
     @Get('/')
     async getProducts(@Query() requestQuery: GetProductsDTO) {
@@ -91,6 +99,7 @@ export class ProductsController {
     })
     @ApiOkResponse({
         description: 'Get product information successfully!',
+        type: ProductDTO,
     })
     @Get('/:productId')
     async getProductById(

@@ -1,10 +1,11 @@
 import { Controller } from '@nestjs/common';
 import { UtilityService } from './utility.service';
-import { UtilityEventPattern } from './utility.pattern';
-import { RabbitMQService } from '@app/common/RabbitMQ';
-import { Ctx, RmqContext, Payload, EventPattern } from '@nestjs/microservices';
-import { BotGateway } from '@app/common/Discordjs/bot/bot.gateway';
+import { UtilityEventPattern, UtilityMessagePattern } from './utility.pattern';
+import { RabbitMQService } from '~libs/common/RabbitMQ';
+import { Ctx, RmqContext, Payload, EventPattern, MessagePattern } from '@nestjs/microservices';
+import { BotGateway } from '~libs/common/Discordjs/bot/bot.gateway';
 import { LogType } from './enums';
+import { UtilityHealthIndicator } from './utility.health';
 
 @Controller()
 export class UtilityController {
@@ -12,12 +13,19 @@ export class UtilityController {
         private readonly utilityService: UtilityService,
         private readonly rabbitMqService: RabbitMQService,
         private readonly botGateway: BotGateway,
+        private readonly utilityHealthIndicator: UtilityHealthIndicator,
     ) {}
+
+    @MessagePattern(UtilityMessagePattern.isHealthy)
+    isHealthy(@Ctx() context: RmqContext, @Payload() { key }: { key: string }) {
+        this.rabbitMqService.acknowledgeMessage(context);
+        return this.utilityHealthIndicator.isHealthy(key);
+    }
 
     @EventPattern(UtilityEventPattern.writeLogsToDiscord)
     async writeLogsToDiscord(@Ctx() context: RmqContext, @Payload() { message }: { message: any }) {
         this.rabbitMqService.acknowledgeMessage(context);
-        return await this.botGateway.writeLogs(message);
+        return await this.utilityService.writeLogsToDiscord(message);
     }
 
     @EventPattern(UtilityEventPattern.writeLogsToFile)

@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { UsersModule } from '@app/resource/users';
+import { UsersModule } from '~libs/resource/users';
 import { UsersMntController } from './users-mnt.controller';
 import { UsersMntService } from './users-mnt.service';
-import { RedisCacheModule } from '@app/common/RedisCache';
-import { RabbitMQService } from '@app/common/RabbitMQ';
-import { CloudinaryService } from '@app/third-party';
+import { RedisCacheModule } from '~libs/common/RedisCache';
+import { RabbitMQService } from '~libs/common/RabbitMQ';
+import { CloudinaryService } from '~libs/third-party';
 
 @Module({
     imports: [RedisCacheModule, UsersModule],

@@ -1,27 +1,42 @@
 import { Controller, Inject, Get, Query, Post, Body, Patch, Param } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
-import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '@app/common/constants';
-import { catchException } from '@app/common';
+import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~libs/common/constants';
+import { catchException } from '~libs/common';
 import {
     ApiBadRequestResponse,
     ApiCreatedResponse,
+    ApiInternalServerErrorResponse,
     ApiNotFoundResponse,
     ApiOkResponse,
     ApiOperation,
     ApiTags,
+    ApiTooManyRequestsResponse,
 } from '@nestjs/swagger';
 import {
     CategoriesSearchMessagePattern,
     GetCategoriesRequestDTO,
     GetCategoryByLabelRequestDTO,
+    ListCategoryResponseDTO,
 } from '~apps/search/categories-search';
 import {
     CategoriesMntMessagePattern,
     CreateCategoryRequestDTO,
     UpdateCategoryRequestDTO,
 } from '~apps/managements/categories-mnt';
-import { CategoryIdParam } from '@app/resource/categories/dtos';
+import { CategoryDTO, CategoryIdParam } from '~libs/resource/categories/dtos';
 
+@ApiBadRequestResponse({
+    description: 'Invalid request, please check your request data!',
+})
+@ApiNotFoundResponse({
+    description: 'Not found data, please try again!',
+})
+@ApiTooManyRequestsResponse({
+    description: 'Too many requests, please try again later!',
+})
+@ApiInternalServerErrorResponse({
+    description: 'Internal server error, please try again later!',
+})
 @ApiTags('categories')
 @Controller('categories')
 export class CategoriesController {
@@ -34,7 +49,7 @@ export class CategoriesController {
         summary: 'Get list of categories',
         description: 'Get list of categories',
     })
-    @ApiOkResponse({ description: 'Get categories successfully!' })
+    @ApiOkResponse({ description: 'Get categories successfully!', type: ListCategoryResponseDTO })
     @ApiNotFoundResponse({ description: 'Categories not found!' })
     @Get('/')
     async getCategories(@Query() query: GetCategoriesRequestDTO) {
@@ -47,7 +62,7 @@ export class CategoriesController {
         summary: 'Get category by id',
         description: 'Get category by id',
     })
-    @ApiOkResponse({ description: 'Get category successfully!' })
+    @ApiOkResponse({ description: 'Get category successfully!', type: CategoryDTO })
     @ApiNotFoundResponse({ description: 'Category not found!' })
     @Get(':categoryId')
     async getCategoryById(@Param() { categoryId }: CategoryIdParam) {
@@ -60,7 +75,7 @@ export class CategoriesController {
         summary: 'Get category by label',
         description: 'Get category by label',
     })
-    @ApiOkResponse({ description: 'Get category successfully!' })
+    @ApiOkResponse({ description: 'Get category successfully!', type: CategoryDTO })
     @ApiNotFoundResponse({ description: 'Category not found!' })
     @Get('/label/:label')
     async getCategoryByLabel(@Param() { label }: GetCategoryByLabelRequestDTO) {
@@ -76,7 +91,7 @@ export class CategoriesController {
     @ApiCreatedResponse({ description: 'The category has been successfully created.' })
     @ApiBadRequestResponse({ description: 'Something wrong, re-check your input.' })
     @Post('/')
-    async createCategories(@Body() data: CreateCategoryRequestDTO) {
+    async createCategory(@Body() data: CreateCategoryRequestDTO) {
         return this.managementsService
             .send(CategoriesMntMessagePattern.createCategory, { ...data })
             .pipe(catchException());

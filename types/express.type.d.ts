@@ -1,4 +1,4 @@
-import { TCurrentUser } from '@app/common/types';
+import { TCurrentUser } from '~libs/common/types';
 
 declare namespace Express {
     interface Request {

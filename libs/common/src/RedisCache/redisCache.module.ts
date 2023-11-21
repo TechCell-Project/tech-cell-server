@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { redisStore } from 'cache-manager-redis-yet';
-import { REDIS_CACHE } from '@app/common/constants';
+import { redisStore } from 'cache-manager-ioredis-yet';
+import { REDIS_CACHE } from '~libs/common/constants';
 
 @Module({
     providers: [
@@ -8,10 +8,8 @@ import { REDIS_CACHE } from '@app/common/constants';
             provide: REDIS_CACHE,
             useFactory: async () =>
                 await redisStore({
-                    socket: {
-                        host: process.env.REDIS_HOST,
-                        port: +process.env.REDIS_PORT, // '+' means convert string to number
-                    },
+                    host: process.env.REDIS_HOST,
+                    port: +process.env.REDIS_PORT, // '+' means convert string to number
                     password: process.env.REDIS_PASSWORD,
                     ttl: 5000, // 5 secs
                 }),

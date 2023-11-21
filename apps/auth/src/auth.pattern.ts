@@ -1,4 +1,5 @@
 export const AuthMessagePattern = {
+    isHealthy: { cmd: 'auth_is-healthy' },
     login: { cmd: 'auth_login' },
     checkEmail: { cmd: 'auth_check_email' },
     register: { cmd: 'auth_register' },

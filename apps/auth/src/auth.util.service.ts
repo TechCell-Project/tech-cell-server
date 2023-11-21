@@ -1,32 +1,28 @@
-import {
-    Injectable,
-    UnauthorizedException,
-    Inject,
-    Logger,
-    HttpException,
-    HttpStatus,
-} from '@nestjs/common';
+import { Injectable, Inject, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { TokenExpiredError } from 'jsonwebtoken';
-import { UsersService } from '@app/resource/users';
-import { User } from '@app/resource/users/schemas';
+import { UsersService } from '~libs/resource/users';
+import { User } from '~libs/resource/users/schemas';
 import { ConfigService } from '@nestjs/config';
 import { JwtPayloadDto, UserDataResponseDTO } from '~apps/auth/dtos';
 import * as bcrypt from 'bcrypt';
 import { RpcException, ClientRMQ } from '@nestjs/microservices';
-import { COMMUNICATIONS_SERVICE, REDIS_CACHE, REQUIRE_USER_REFRESH } from '@app/common/constants';
-import { OtpService } from '@app/resource/otp';
+import { COMMUNICATIONS_SERVICE, REDIS_CACHE, REQUIRE_USER_REFRESH } from '~libs/common/constants';
+import { OtpService } from '~libs/resource/otp';
 import { Store } from 'cache-manager';
 import {
     buildRevokeAccessTokenKey,
     buildRevokeRefreshTokenKey,
     buildUniqueUserNameFromEmail,
     isEmail,
-} from '@app/common';
+} from '~libs/common';
 import { convertTimeString, TimeUnitOutPut } from 'convert-time-string';
+import { cleanUserBeforeResponse } from '~libs/resource/users/utils';
+import { AuthExceptions } from './auth.exception';
 
 @Injectable()
 export class AuthUtilService {
+    protected readonly logger = new Logger(AuthUtilService.name);
     constructor(
         protected jwtService: JwtService,
         protected usersService: UsersService,
@@ -63,12 +59,6 @@ export class AuthUtilService {
         await this.cacheManager.del(cacheUserKey);
     }
 
-    protected cleanUserBeforeResponse(user: User): Omit<User, 'password' | 'block'> {
-        delete user.password;
-        if (user.block) delete user.block;
-        return user;
-    }
-
     async buildUserTokenResponse(user: User): Promise<UserDataResponseDTO> {
         const { _id, email, role } = user;
         const { accessToken, refreshToken } = await this.signTokens({
@@ -77,20 +67,25 @@ export class AuthUtilService {
             role,
         });
 
-        return { accessToken, refreshToken, ...this.cleanUserBeforeResponse(user) };
+        return { accessToken, refreshToken, ...cleanUserBeforeResponse(user) };
     }
 
-    async validateUserLogin(emailOrUsername: string, password: string) {
+    async validateUserLogin(emailOrUsername: string, password: string): Promise<User | null> {
         const query = isEmail(emailOrUsername)
             ? { email: emailOrUsername }
             : { userName: emailOrUsername };
-        const user = await this.usersService.getUser(query, { lean: true });
 
-        const doesUserExist = !!user;
-        if (!doesUserExist) return false;
+        let user: User;
+        try {
+            user = await this.usersService.getUser(query, { lean: true });
+        } catch (error) {
+            user = null;
+        }
+
+        if (!user) return null;
 
         const doesPasswordMatch = await this.doesPasswordMatch(password, user.password);
-        if (!doesPasswordMatch) return false;
+        if (!doesPasswordMatch) return null;
 
         return user;
     }
@@ -115,7 +110,7 @@ export class AuthUtilService {
             );
             return true;
         } catch (error) {
-            Logger.error(`Error when revoke access token: ${error.message}`);
+            this.logger.error(`Error when revoke access token: ${error.message}`);
             return false;
         }
     }
@@ -127,7 +122,7 @@ export class AuthUtilService {
             if (isRevoked) return true;
             return false;
         } catch (error) {
-            Logger.error(`Error when check revoked access token: ${error.message}`);
+            this.logger.error(`Error when check revoked access token: ${error.message}`);
             return true;
         }
     }
@@ -145,7 +140,7 @@ export class AuthUtilService {
             );
             return true;
         } catch (error) {
-            Logger.error(`Error when revoke refresh token: ${error.message}`);
+            this.logger.error(`Error when revoke refresh token: ${error.message}`);
             return false;
         }
     }
@@ -157,7 +152,7 @@ export class AuthUtilService {
             if (isRevoked) return true;
             return false;
         } catch (error) {
-            Logger.error(`Error when check revoked refresh token: ${error.message}`);
+            this.logger.error(`Error when check revoked refresh token: ${error.message}`);
             return true;
         }
     }
@@ -170,11 +165,9 @@ export class AuthUtilService {
             return dataVerified;
         } catch (error) {
             if (error instanceof TokenExpiredError) {
-                throw new RpcException(
-                    new UnauthorizedException('Token has expired, please login again.'),
-                );
+                throw new RpcException(AuthExceptions.tokenIsExpired);
             }
-            throw new RpcException(new UnauthorizedException('Invalid token, please login again.'));
+            throw new RpcException(AuthExceptions.tokenIsInvalid);
         }
     }
 

@@ -1,16 +1,24 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 
 @Catch(RpcException)
 export class RpcExceptionFilter implements ExceptionFilter {
     catch(exception: RpcException, host: ArgumentsHost) {
-        const error: object | string = exception.getError();
         const ctx = host.switchToHttp();
         const response = ctx.getResponse<Response>();
+        const request = ctx.getRequest<Request>();
+
+        const error: object | string = exception.getError();
+        const errObj = {
+            timestamps: new Date().toISOString(),
+            path: request.url,
+        };
 
         if (typeof error === 'string') {
-            return response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: error });
+            return response
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .json({ ...errObj, message: error, statusCode: HttpStatus.INTERNAL_SERVER_ERROR });
         }
 
         const statusCode = error
@@ -19,6 +27,10 @@ export class RpcExceptionFilter implements ExceptionFilter {
 
         const errorMessage = error ?? { message: 'Internal server error', statusCode };
 
-        return response.status(statusCode).json({ ...errorMessage });
+        return response.status(statusCode).json({
+            ...errObj,
+            ...errorMessage,
+            statusCode,
+        });
     }
 }

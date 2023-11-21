@@ -1,4 +1,5 @@
 import {
+    Attribute,
     AttributesService,
     CategoriesService,
     CreateProductDTO,
@@ -6,7 +7,7 @@ import {
     Product,
     ProductsService,
     VariationDTO,
-} from '@app/resource';
+} from '~libs/resource';
 import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common';
 import {
     allowToAction,
@@ -14,14 +15,14 @@ import {
     delStartWith,
     findDuplicates,
     replaceWhitespaceTo,
-} from '@app/common/utils';
-import { REDIS_CACHE, PRODUCTS_CACHE_PREFIX } from '@app/common/constants';
+} from '~libs/common/utils';
+import { REDIS_CACHE, PRODUCTS_CACHE_PREFIX } from '~libs/common/constants';
 import { Store } from 'cache-manager';
 import { AttributeDTO, CreateProductRequestDTO } from './dtos';
 import { RpcException } from '@nestjs/microservices';
-import { CloudinaryService } from '@app/third-party/cloudinary.com';
+import { CloudinaryService } from '~libs/third-party/cloudinary.com';
 import { UpdateProductRequestDTO } from './dtos/update-product-request.dto';
-import { ProductStatus } from '@app/resource/products/enums';
+import { ProductStatus } from '~libs/resource/products/enums';
 
 @Injectable()
 export class ProductsMntUtilService {
@@ -229,8 +230,9 @@ export class ProductsMntUtilService {
             );
         }
 
+        let allAttributesFromDb: Attribute[] = [];
         try {
-            await Promise.all(
+            [...allAttributesFromDb] = await Promise.all(
                 allAttributesUserImport.map((label: string) =>
                     this.attributesService.getAttributeByLabel(label),
                 ),
@@ -238,6 +240,25 @@ export class ProductsMntUtilService {
         } catch (error) {
             throw new RpcException(new BadRequestException(error.message));
         }
+
+        // Reassign attributes with name
+        product.generalAttributes = generalAttributes.map((attribute) => {
+            const foundAttribute = allAttributesFromDb.find((a) => a.label === attribute.k);
+            return {
+                ...attribute,
+                name: foundAttribute.name,
+            };
+        });
+        product.variations = variations.map((variation) => {
+            const attributes = variation.attributes.map((attribute) => {
+                const foundAttribute = allAttributesFromDb.find((a) => a.label === attribute.k);
+                return {
+                    ...attribute,
+                    name: foundAttribute.name,
+                };
+            });
+            return { ...variation, attributes };
+        });
 
         return product;
     }

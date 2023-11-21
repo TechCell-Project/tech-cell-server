@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Once, InjectDiscordClient, On } from '@discord-nestjs/core';
 import { Client, TextChannel } from 'discord.js';
-import { formatJsonLogsDiscord } from '@app/common/utils';
+import { formatJsonLogsDiscord } from '~libs/common/utils';
 
 @Injectable()
 export class BotGateway {

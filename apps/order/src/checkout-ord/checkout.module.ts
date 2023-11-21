@@ -1,11 +1,15 @@
 import { Module } from '@nestjs/common';
-import { RabbitMQService } from '@app/common/RabbitMQ';
+import { RabbitMQModule, RabbitMQService } from '~libs/common/RabbitMQ';
 import { HttpModule } from '@nestjs/axios';
 import { CheckoutService } from './checkout.service';
 import { CheckoutController } from './checkout.controller';
-import { UsersModule } from '@app/resource';
-import { GhnModule } from '@app/third-party/giaohangnhanh';
-import { VnpayModule } from '@app/third-party/vnpay.vn';
+import { ProductsModule, UsersModule } from '~libs/resource';
+import { GhnModule } from '~libs/third-party/giaohangnhanh';
+import { VnpayModule } from '~libs/third-party/vnpay.vn';
+import { OrdersModule } from '~libs/resource/orders';
+import { CartsModule } from '~libs/resource/carts';
+import { RedisModule } from '~libs/common/Redis';
+import { COMMUNICATIONS_SERVICE } from '~libs/common/constants/services.constant';
 
 @Module({
     imports: [
@@ -16,8 +20,16 @@ import { VnpayModule } from '@app/third-party/vnpay.vn';
             paymentGateway: process.env.VNPAY_PAYMENT_URL,
             secureSecret: process.env.VNPAY_SECRET_KEY,
             tmnCode: process.env.VNPAY_TMN_CODE,
-            returnUrl: 'https://api.techcell.cloud/checkout/vnpay-return',
+            returnUrl: process.env.VNPAY_RETURN_URL,
         }),
+        ProductsModule,
+        OrdersModule,
+        CartsModule,
+        RedisModule,
+        RabbitMQModule.registerRmq(
+            COMMUNICATIONS_SERVICE,
+            process.env.RABBITMQ_COMMUNICATIONS_QUEUE,
+        ),
     ],
     controllers: [CheckoutController],
     providers: [RabbitMQService, CheckoutService],

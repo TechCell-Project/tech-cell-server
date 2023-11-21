@@ -3,9 +3,9 @@ import { RpcException } from '@nestjs/microservices';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { catchError, throwError } from 'rxjs';
-import { emailRegex } from '@app/common/constants/regex.constant';
+import { emailRegex } from '~libs/common/constants/regex.constant';
 import * as sanitizeHtml from 'sanitize-html';
-import { Types } from 'mongoose';
+import { QueryOptions, Types } from 'mongoose';
 import { ObjectIdLike } from 'bson';
 
 const logger = new Logger('SharedUtil');
@@ -166,4 +166,48 @@ export function convertToObjectId(
         logger.error(error);
         throw new Error('Invalid ObjectId');
     }
+}
+
+/**
+ *
+ * @param ms The time to sleep in milliseconds
+ * @description This function is used to sleep in async function
+ * @returns A promise that resolves after the specified time
+ */
+export async function sleep(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ *
+ * @param page page query
+ * @param pageSize pageSize query
+ * @returns
+ */
+export function convertPageQueryToMongoose({
+    page = 0,
+    pageSize = 0,
+}: {
+    page?: number;
+    pageSize?: number;
+}): Pick<QueryOptions, 'skip' | 'limit'> {
+    const limit = Math.max(0, pageSize);
+    const skip = Math.max(0, page - 1) * Math.max(0, pageSize);
+    return {
+        skip,
+        limit,
+    };
+}
+
+/**
+ * Convert date to string in format {dd-MM-yyyy}
+ * @param currentDate The date to convert to string
+ * @returns {string} - The date string in format {dd-MM-yyyy}
+ */
+export function dateToString(currentDate = new Date()): string {
+    const day = currentDate.getDate().toString().padStart(2, '0');
+    const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
+    const year = currentDate.getFullYear().toString();
+
+    return `${day}-${month}-${year}`;
 }

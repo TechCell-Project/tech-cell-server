@@ -14,10 +14,11 @@ import {
     IsNotEmptyObject,
 } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
-import { ProductStatus } from '@app/resource/products/enums';
+import { ProductStatus } from '~libs/resource/products/enums';
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { Types } from 'mongoose';
-import { replaceWhitespaceTo, sanitizeHtmlString } from '@app/common/utils';
+import { replaceWhitespaceTo, sanitizeHtmlString } from '~libs/common/utils';
+import { AttributeSchema } from '~libs/resource/products/schemas';
 
 export class PriceDTO {
     @ApiProperty({
@@ -32,7 +33,7 @@ export class PriceDTO {
     @IsNumber(
         { maxDecimalPlaces: 0 },
         {
-            message: 'base must be integer',
+            message: 'Base price must be number',
         },
     )
     @Min(0)
@@ -52,7 +53,7 @@ export class PriceDTO {
     @IsNumber(
         { maxDecimalPlaces: 0 },
         {
-            message: 'sale must be integer',
+            message: 'Sale price must be number',
         },
     )
     @Min(0)
@@ -73,7 +74,7 @@ export class PriceDTO {
     @IsNumber(
         { maxDecimalPlaces: 0 },
         {
-            message: 'special must be integer',
+            message: 'Special price must be number',
         },
     )
     @Min(0)
@@ -104,7 +105,7 @@ export class ImageRequestDTO {
     isThumbnail?: boolean;
 }
 
-export class AttributeDTO {
+export class AttributeDTO implements AttributeSchema {
     @ApiProperty({
         type: String,
         required: true,
@@ -137,6 +138,14 @@ export class AttributeDTO {
     @IsString()
     @IsOptional()
     u?: string;
+
+    @ApiProperty({
+        type: String,
+        required: false,
+        description: 'Name of attribute',
+        example: 'màn hình',
+    })
+    name?: string;
 }
 
 export class VariationRequestDTO {
@@ -219,7 +228,7 @@ export class VariationRequestDTO {
     sku: string;
 }
 
-export class CategoryDTO {
+export class CategoryIdDTO {
     @ApiProperty({
         type: String,
         required: true,
@@ -304,14 +313,14 @@ export class CreateProductRequestDTO {
     description: string;
 
     @ApiProperty({
-        type: CategoryDTO,
+        type: CategoryIdDTO,
         required: true,
         description: 'Category of product',
     })
     @ValidateNested()
     @IsNotEmptyObject()
-    @Type(() => CategoryDTO)
-    category: CategoryDTO;
+    @Type(() => CategoryIdDTO)
+    category: CategoryIdDTO;
 
     @ApiProperty({
         type: [VariationRequestDTO],

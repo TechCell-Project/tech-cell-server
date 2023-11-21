@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { AbstractDocument } from '@app/common';
+import { AbstractDocument } from '~libs/resource/abstract';
 import * as mongoose from 'mongoose';
 import { ProductStatus } from '../enums';
 import { AttributeSchema, VariationSchema } from './variation.schema';
@@ -8,7 +8,7 @@ import { Types } from 'mongoose';
 
 export type ProductDocument = mongoose.HydratedDocument<Product>;
 
-@Schema({ timestamps: true, versionKey: false })
+@Schema({ timestamps: true })
 export class Product extends AbstractDocument {
     @Prop({ required: true })
     name: string;
