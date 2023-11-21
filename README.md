@@ -39,7 +39,7 @@
 - [Ubuntu](https://ubuntu.com/) or [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) (Windows subsystems for Linux) is **recommended** for both development and production
 - Windows is **not** recommended, can use in development **not** for production
 
-# 🚀 Use the app
+# 🚀 Use the app 
 
 ## 📝 Before start
 
