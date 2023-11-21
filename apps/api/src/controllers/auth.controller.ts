@@ -204,7 +204,7 @@ export class AuthController {
     @ApiForbiddenResponse({
         description: 'Your refreshToken token invalid, can not get new token',
     })
-    @Throttle(3, 60) // limit 3 requests per 60 seconds
+    @Throttle(50, 60)
     @Post('refresh-token')
     async getNewToken(@Body() { refreshToken }: NewTokenRequestDTO) {
         return this.authService
