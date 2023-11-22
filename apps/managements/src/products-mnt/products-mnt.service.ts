@@ -47,9 +47,8 @@ export class ProductsMntService extends ProductsMntUtilService {
         /* REASSIGN IMAGE */
         // Resolve images to add the url to image object
         // Because user just post the `publicId` of image
-        const { generalImages, descriptionImages, variations } = await this.resolveImages(
-            productData,
-        );
+        const { generalImages, descriptionImages, variations } =
+            await this.resolveImages(productData);
 
         // Assign `generalImages` product
         if (generalImages?.length > 0) {
@@ -108,9 +107,8 @@ export class ProductsMntService extends ProductsMntUtilService {
 
         // Resolve images to add the url to image object
         // Because user just post the `publicId` of image
-        const { generalImages, descriptionImages, variations } = await this.resolveImages(
-            productUpdatedData,
-        );
+        const { generalImages, descriptionImages, variations } =
+            await this.resolveImages(productUpdatedData);
 
         // Resolve add new variations
         // If the variation is already exist, throw the exception

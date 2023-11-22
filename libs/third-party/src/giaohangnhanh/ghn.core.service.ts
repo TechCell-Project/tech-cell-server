@@ -14,7 +14,10 @@ export class GhnCoreService {
     private GHN_SHOP_ID: string | number = +process.env.GHN_SHOP_ID;
     private GHN_API_TOKEN: string = process.env.GHN_API_TOKEN;
 
-    constructor(protected readonly httpService: HttpService, protected readonly logger: Logger) {
+    constructor(
+        protected readonly httpService: HttpService,
+        protected readonly logger: Logger,
+    ) {
         this.logger = new Logger(GhnCoreService.name);
 
         this.httpService.axiosRef.defaults.headers = Object.assign(
@@ -35,10 +38,11 @@ export class GhnCoreService {
                 catchError((error: AxiosError) => {
                     throw error;
                 }),
-                map((response) =>
-                    (response.data.data as TGhnProvince[])?.map(
-                        (province) => new GhnProvinceDTO(province),
-                    ),
+                map(
+                    (response) =>
+                        (response.data.data as TGhnProvince[])?.map(
+                            (province) => new GhnProvinceDTO(province),
+                        ),
                 ),
             ),
         );
@@ -58,10 +62,11 @@ export class GhnCoreService {
                     catchError((error: AxiosError) => {
                         throw error;
                     }),
-                    map((response) =>
-                        (response.data.data as TGhnDistrict[])?.map(
-                            (district) => new GhnDistrictDTO(district),
-                        ),
+                    map(
+                        (response) =>
+                            (response.data.data as TGhnDistrict[])?.map(
+                                (district) => new GhnDistrictDTO(district),
+                            ),
                     ),
                 ),
         );
@@ -82,8 +87,9 @@ export class GhnCoreService {
                     catchError((error: AxiosError) => {
                         throw error;
                     }),
-                    map((response) =>
-                        (response.data.data as TGhnWard[])?.map((ward) => new GhnWardDTO(ward)),
+                    map(
+                        (response) =>
+                            (response.data.data as TGhnWard[])?.map((ward) => new GhnWardDTO(ward)),
                     ),
                 ),
         );

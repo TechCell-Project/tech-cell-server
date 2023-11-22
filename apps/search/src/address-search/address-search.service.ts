@@ -59,9 +59,8 @@ export class AddressSearchService {
             }
 
             const districtCacheKey = `${this.GET_DISTRICTS_CACHE_KEY}_${provinceId}`;
-            const listDistrictCache: GhnDistrictDTO[] = await this.cacheManager.get(
-                districtCacheKey,
-            );
+            const listDistrictCache: GhnDistrictDTO[] =
+                await this.cacheManager.get(districtCacheKey);
             if (listDistrictCache) {
                 return listDistrictCache;
             }

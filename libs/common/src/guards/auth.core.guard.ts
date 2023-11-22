@@ -34,7 +34,10 @@ export class AuthCoreGuard implements CanActivate {
     protected readonly _acceptRoles: string[];
     protected logger: Logger;
 
-    constructor(protected reflector: Reflector, guardName?: string) {
+    constructor(
+        protected reflector: Reflector,
+        guardName?: string,
+    ) {
         this._acceptRoles = [];
         this.logger = new Logger(guardName ?? AuthCoreGuard.name);
     }
