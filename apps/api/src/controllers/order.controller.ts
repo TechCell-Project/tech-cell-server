@@ -1,4 +1,14 @@
-import { Controller, Inject, UseGuards, Post, Body, HttpCode, Get, Query } from '@nestjs/common';
+import {
+    Controller,
+    Inject,
+    UseGuards,
+    Post,
+    Body,
+    HttpCode,
+    Get,
+    Query,
+    Ip,
+} from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import { ACCESS_TOKEN_NAME, ORDER_SERVICE } from '~libs/common/constants';
 import {
@@ -76,11 +86,12 @@ export class OrderController {
     @HttpCode(200)
     @Post('/')
     async createOrder(
+        @Ip() ip: string,
         @CurrentUser() user: TCurrentUser,
         @Body() data2CreateOrder: CreateOrderRequestDTO,
     ) {
         return this.orderService
-            .send(CheckoutMessagePattern.createOrder, { user, data2CreateOrder })
+            .send(CheckoutMessagePattern.createOrder, { user, data2CreateOrder, ip })
             .pipe(catchException());
     }
 

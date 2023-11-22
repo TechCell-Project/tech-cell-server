@@ -40,15 +40,18 @@ export class CheckoutController {
         {
             user,
             data2CreateOrder,
+            ip,
         }: {
             user: TCurrentUser;
             data2CreateOrder: CreateOrderRequestDTO;
+            ip: string;
         },
     ) {
         this.rabbitmqService.acknowledgeMessage(context);
         return this.checkoutService.createOrder({
             user,
             data2CreateOrder,
+            ip,
         });
     }
 

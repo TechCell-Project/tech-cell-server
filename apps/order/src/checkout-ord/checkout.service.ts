@@ -172,9 +172,11 @@ export class CheckoutService {
     public async createOrder({
         user,
         data2CreateOrder,
+        ip,
     }: {
         user: TCurrentUser;
         data2CreateOrder: CreateOrderRequestDTO;
+        ip: string;
     }) {
         const reviewedOrder = await this.reviewOrder({ user, dataReview: data2CreateOrder });
 
@@ -195,6 +197,7 @@ export class CheckoutService {
 
         // Build a new order data
         const newOrder = new CreateOrderDTO({
+            _id: new Types.ObjectId(),
             userId: userFound._id,
             shippingOrder: {
                 toAddress: userFound.address[reviewedOrder.addressSelected],
@@ -205,21 +208,31 @@ export class CheckoutService {
                 totalPrice:
                     reviewedOrder.totalProductPrice + reviewedOrder.shipping.giaohangnhanh.total,
             },
-            orderStatus: OrderStatusEnum.PENDING,
             products: reviewedOrder.productSelected,
             trackingCode: this.createTrackingCode(userFound.address[reviewedOrder.addressSelected]),
             paymentOrder: {
                 method: data2CreateOrder.paymentMethod,
-                status: PaymentStatusEnum.PROCESSING,
+                status:
+                    data2CreateOrder.paymentMethod === PaymentMethodEnum.COD
+                        ? PaymentStatusEnum.PROCESSING
+                        : PaymentStatusEnum.WAIT_FOR_PAYMENT,
             },
+            orderStatus:
+                data2CreateOrder.paymentMethod === PaymentMethodEnum.COD
+                    ? OrderStatusEnum.PENDING
+                    : OrderStatusEnum.PROCESSING,
         });
+        newOrder.paymentOrder.paymentUrl = await this.getPaymentUrl(
+            data2CreateOrder.paymentMethod,
+            newOrder,
+            ip,
+        );
 
         // Create a session to start transaction
         const session = await this.productService.startTransaction();
 
         // Create order to return
         let resultOrder: Order;
-        let paymentUrl: string | null = null;
         try {
             // Lock the `createOrder` for each user and product
             const lock = await this.redlockService.lock(resources, 5000);
@@ -233,7 +246,6 @@ export class CheckoutService {
                         session,
                     ),
                 ]);
-                paymentUrl = await this.getPaymentUrl(data2CreateOrder.paymentMethod, resultOrder);
                 await session.commitTransaction();
             } finally {
                 await this.redlockService.unlock(lock);
@@ -258,7 +270,6 @@ export class CheckoutService {
         return {
             ...resultOrder,
             customer: cleanUserBeforeResponse(userFound),
-            paymentUrl: paymentUrl ?? undefined,
         };
     }
 
@@ -316,11 +327,17 @@ export class CheckoutService {
             if (query.vnp_ResponseCode === '00' || query.vnp_TransactionStatus === '00') {
                 order.paymentOrder.status = PaymentStatusEnum.COMPLETED;
                 order.orderStatus = OrderStatusEnum.PROCESSING;
+                this.logger.debug('Payment success');
             } else {
                 order.paymentOrder.status = PaymentStatusEnum.CANCELLED;
                 order.orderStatus = OrderStatusEnum.CANCELLED;
+                this.logger.debug('Payment failed');
             }
 
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { vnp_SecureHash, ...vnpayQueryData } = query;
+            order.paymentOrder.orderData = vnpayQueryData;
+            this.logger.debug({ order });
             await this.orderService.updateOrderById(order._id, order);
             return {
                 RspCode: '00',
@@ -468,21 +485,22 @@ export class CheckoutService {
     /**
      * Get payment url
      * @param paymentMethod Enum of payment method
-     * @param resultOrder Order information
+     * @param newOrder Order information
      * @returns Payment url
      */
     private async getPaymentUrl(
         paymentMethod: CreateOrderRequestDTO['paymentMethod'],
-        resultOrder: Order,
+        newOrder: Order,
+        ip: string,
     ): Promise<string | null> {
         switch (paymentMethod) {
             case PaymentMethodEnum.VNPAY:
                 const vnpayUrl = await this.vnpayService.createPaymentUrl({
-                    vnp_IpAddr: '127.0.0.1',
-                    vnp_Amount: resultOrder.checkoutOrder.totalPrice,
-                    vnp_OrderInfo: `Thanh toan don hang TechCell ${resultOrder._id.toString()}`,
+                    vnp_IpAddr: ip,
+                    vnp_Amount: newOrder.checkoutOrder.totalPrice,
+                    vnp_OrderInfo: `Thanh toan don hang TechCell ${newOrder._id.toString()}`,
                     vnp_OrderType: ProductCode.Bill,
-                    vnp_TxnRef: resultOrder._id.toString(),
+                    vnp_TxnRef: newOrder._id.toString(),
                 });
 
                 if (!vnpayUrl) {

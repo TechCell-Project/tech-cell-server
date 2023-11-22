@@ -11,6 +11,7 @@ export enum PaymentStatusEnum {
     PENDING = 'pending',
     CANCELLED = 'cancelled',
     PROCESSING = 'processing',
+    WAIT_FOR_PAYMENT = 'wait_for_payment',
     COMPLETED = 'completed',
     REFUNDED = 'refunded',
 }

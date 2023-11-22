@@ -27,8 +27,8 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
         session?: ClientSession,
     ): Promise<TDocument> {
         const createdDocument = new this.model({
-            ...document,
             _id: new Types.ObjectId(),
+            ...document,
         });
         return (
             await createdDocument.save({ ...options, session })

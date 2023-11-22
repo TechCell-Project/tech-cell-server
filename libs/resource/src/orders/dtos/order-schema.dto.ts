@@ -54,11 +54,21 @@ export class ShippingOrderSchemaDTO implements ShippingOrderSchema {
 }
 
 export class PaymentOrderDTO implements PaymentOrder {
-    @ApiProperty({ type: String, enum: PaymentMethodEnum })
+    @ApiProperty({ type: String, enum: PaymentMethodEnum, example: PaymentMethodEnum.VNPAY })
     method: string;
 
-    @ApiProperty({ type: String, enum: PaymentStatusEnum })
+    @ApiProperty({
+        type: String,
+        enum: PaymentStatusEnum,
+        example: PaymentStatusEnum.WAIT_FOR_PAYMENT,
+    })
     status: string;
+
+    @ApiProperty({ type: String, required: false, example: 'https://vnpay.vn/' })
+    paymentUrl?: string;
+
+    @ApiProperty({ type: Object, required: false, default: {} })
+    orderData?: object;
 }
 
 export class OrderSchemaDTO implements Order {

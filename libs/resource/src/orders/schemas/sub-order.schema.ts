@@ -45,4 +45,10 @@ export class PaymentOrder {
 
     @Prop({ required: true, type: String, enum: PaymentStatusEnum })
     status: string;
+
+    @Prop({ required: false, type: String })
+    paymentUrl?: string;
+
+    @Prop({ required: false, type: Object, default: {} })
+    orderData?: any;
 }
