@@ -18,10 +18,12 @@ export class DatabaseTaskService {
     ) {}
 
     /**
-     * Auto copy all data on 3:00 AM every day
-     * @param next_cursor
+     * Auto copy all data on 4:00 AM every day from primary to backup database and backup2 database
      */
-    @Cron('0 3 * * *')
+    @Cron('0 4 * * *', {
+        name: 'copyPrimaryToBackup',
+        timeZone: process.env.TZ ?? 'Asia/Ho_Chi_Minh',
+    })
     async copyPrimaryToBackup() {
         this.logger.log('Start copy primary to backup');
         const currentDate = new Date();
@@ -35,7 +37,9 @@ export class DatabaseTaskService {
         // Iterate over each collection and copy its data to the backup databases
         for (const collection of collections) {
             // Log a message to indicate which collection is being copied
-            this.logger.log(`Copy collection ${collection.name} from primary to backup`);
+            this.logger.log(
+                `Copy collection ${collection.name} from primary to backup and backup2`,
+            );
 
             // Get references to the primary and backup collections
             const collectionName = collection.name;
@@ -51,14 +55,17 @@ export class DatabaseTaskService {
             const data = await primaryCollection.find().toArray();
             for (const doc of data) {
                 // Delete any existing documents with the same ID in the backup collections
-                await backupCollection.deleteMany({ _id: doc._id });
-                await backupCollection2.deleteMany({ _id: doc._id });
+                await Promise.all([
+                    backupCollection.deleteMany({ _id: doc._id }),
+                    backupCollection2.deleteMany({ _id: doc._id }),
+                ]);
 
                 // Insert the document into the backup collections
-                await backupCollection.insertOne(doc);
-                this.logger.log(`Copy document ${doc._id} from primary to backup`);
-                await backupCollection2.insertOne(doc);
-                this.logger.log(`Copy document ${doc._id} from primary to backup2`);
+                await Promise.all([
+                    backupCollection.insertOne(doc),
+                    backupCollection2.insertOne(doc),
+                ]);
+                this.logger.log(`Copy document ${doc._id} from primary to backup and backup2`);
             }
         }
     }

@@ -1,5 +1,7 @@
 declare namespace NodeJS {
     interface ProcessEnv {
+        TZ: string;
+
         /**
          * HTTP port of api gateway service
          */

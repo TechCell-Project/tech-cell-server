@@ -65,7 +65,7 @@ export class MorganMiddleware implements NestMiddleware {
         morgan.format('json', (tokens: JsonFormatTokens, req: Request, res: Response) => {
             return JSON.stringify({
                 date: new Date(Date.now()).toLocaleString('en-GB', {
-                    timeZone: 'Asia/Bangkok',
+                    timeZone: process.env.TZ ?? 'Asia/Ho_Chi_Minh',
                     hour12: false,
                     hour: 'numeric',
                     minute: 'numeric',
