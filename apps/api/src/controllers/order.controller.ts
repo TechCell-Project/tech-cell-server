@@ -17,6 +17,7 @@ import {
     ApiExcludeEndpoint,
     ApiInternalServerErrorResponse,
     ApiNotFoundResponse,
+    ApiOperation,
     ApiResponse,
     ApiTags,
     ApiTooManyRequestsResponse,
@@ -56,6 +57,7 @@ export class OrderController {
     constructor(@Inject(ORDER_SERVICE) private readonly orderService: ClientRMQ) {}
 
     @UseGuards(AuthGuard)
+    @ApiOperation({ summary: "Get all order's user" })
     @ApiResponse({ description: 'Get all user orders', type: [OrderSchemaDTO] })
     @Get('/')
     async getAllUserOrders(@CurrentUser() user: TCurrentUser) {
@@ -71,6 +73,7 @@ export class OrderController {
         type: ReviewedOrderResponseDTO,
     })
     @HttpCode(200)
+    @ApiOperation({ summary: 'Review a order' })
     @Post('/review')
     async reviewOrder(
         @CurrentUser() user: TCurrentUser,
@@ -82,6 +85,7 @@ export class OrderController {
     }
 
     @UseGuards(AuthGuard)
+    @ApiOperation({ summary: 'Create a order' })
     @ApiResponse({ status: 200, description: 'Review order', type: OrderSchemaDTO })
     @HttpCode(200)
     @Post('/')

@@ -52,7 +52,7 @@ export class OrdersManagementController {
             .pipe(catchException());
     }
 
-    @ApiOperation({ summary: 'Get order' })
+    @ApiOperation({ summary: 'Get order by id' })
     @ApiOkResponse({ description: 'Get order successfully!', type: GetOrderByIdResponseDTO })
     @Get('/:id')
     async getOrder(@Param() { id }: ObjectIdParamDTO) {

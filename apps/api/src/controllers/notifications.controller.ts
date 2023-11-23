@@ -11,6 +11,7 @@ import {
     ApiInternalServerErrorResponse,
     ApiNotFoundResponse,
     ApiOkResponse,
+    ApiOperation,
     ApiTags,
     ApiTooManyRequestsResponse,
     ApiUnauthorizedResponse,
@@ -41,6 +42,7 @@ export class NotificationsController {
         @Inject(COMMUNICATIONS_SERVICE) private readonly communicationsService: ClientRMQ,
     ) {}
 
+    @ApiOperation({ summary: "Get notifications's user" })
     @ApiOkResponse({ description: 'Get user notifications', type: ListNotificationsResponseDTO })
     @Get('/')
     async getUserNotifications(
