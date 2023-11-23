@@ -16,12 +16,12 @@ export class BotGateway {
     }
 
     @Once('ready')
-    private onReady() {
+    protected onReady() {
         this.logger.log(`Bot ${this.client.user.tag} was started!`);
     }
 
     @On('warn')
-    private onWarn(message: any) {
+    protected onWarn(message: any) {
         this.logger.warn(message);
     }
 
@@ -36,7 +36,11 @@ export class BotGateway {
         }
         const channel = this.client.channels.cache.get(this.serverLogsChannelId) as TextChannel;
         for (const msg of messages) {
-            await channel.send(msg);
+            try {
+                await channel.send(msg);
+            } catch (error) {
+                this.logger.error(error.message);
+            }
         }
     }
 }
