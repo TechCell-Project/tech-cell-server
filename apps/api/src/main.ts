@@ -40,7 +40,7 @@ async function bootstrap() {
     // Use swagger to generate documentations
     const swaggerDocument = new DocumentBuilder()
         .setTitle('TechCell RESTful API Documentations')
-        .setContact('TechCell Teams', 'https://techcell.cloud', 'admin@techcell.cloud')
+        .setContact('TechCell Teams', 'https://techcell.cloud', 'teams@techcell.cloud')
         .setDescription('The documentations of the TechCell RESTful API')
         .setVersion('0.0.1')
         .addServer('https://api.techcell.cloud')
@@ -63,7 +63,7 @@ async function bootstrap() {
     };
     const document = SwaggerModule.createDocument(app, swaggerDocument, swaggerDocumentOptions);
     const swaggerCustomOptions: SwaggerCustomOptions = {
-        customSiteTitle: 'TechCell documentations',
+        customSiteTitle: 'TechCell RESTful API documentations',
     };
     SwaggerModule.setup('/', app, document, swaggerCustomOptions);
 
@@ -75,6 +75,7 @@ async function bootstrap() {
             swaggerSpec: document,
             name: 'TechCell API statistics',
             hostname: 'api.techcell.cloud',
+            timelineBucketDuration: 180000,
             authentication: true,
             onAuthenticate: async function (req, username, password) {
                 const user = (await firstValueFrom(
@@ -88,8 +89,9 @@ async function bootstrap() {
                 }
 
                 if (
+                    user.role.toString().toLowerCase() !== 'superadmin' &&
                     user.role.toString().toLowerCase() !== 'admin' &&
-                    user.role.toString().toLowerCase() !== 'superadmin'
+                    user.role.toString().toLowerCase() !== 'mod'
                 ) {
                     throw new Error('You are not allowed to access this resource.');
                 }
