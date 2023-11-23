@@ -58,7 +58,7 @@ import { ACCESS_TOKEN_NAME } from '~libs/common/constants/api.constant';
 @ApiInternalServerErrorResponse({
     description: 'Internal server error, please try again later!',
 })
-@ApiTags('users managements (admin only)')
+@ApiTags('users management')
 @ApiBearerAuth(ACCESS_TOKEN_NAME)
 @Controller('users')
 export class UsersController {

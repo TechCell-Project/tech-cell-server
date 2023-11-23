@@ -35,7 +35,7 @@ import { GetOrderByIdResponseDTO } from '~apps/managements/orders-mnt/dtos/get-o
 })
 @ApiBearerAuth(ACCESS_TOKEN_NAME)
 @UseGuards(ModGuard)
-@ApiTags('Orders Management')
+@ApiTags('orders management')
 @Controller('/orders-mnt')
 export class OrdersManagementController {
     constructor(@Inject(MANAGEMENTS_SERVICE) private readonly managementsService: ClientRMQ) {}
