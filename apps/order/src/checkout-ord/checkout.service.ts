@@ -150,7 +150,7 @@ export class CheckoutService {
 
             productUserSelected.productId = new Types.ObjectId(productUserSelected.productId);
             const price = productWithSku.price.base;
-            return total + price;
+            return total + price * productUserSelected.quantity;
         }, 0);
 
         const { total, service_fee } = await this.ghnService.calculateShippingFee({
