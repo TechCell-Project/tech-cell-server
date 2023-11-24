@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { SelectType } from '../enums';
-import { IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsOptional } from 'class-validator';
+import { IsEnumI18n, IsStringI18n } from '~libs/common/i18n/class-validator-i18n';
 
 export class SelectTypeDTO {
     @ApiProperty({
@@ -11,7 +12,7 @@ export class SelectTypeDTO {
         required: false,
     })
     @IsOptional()
-    @IsString()
-    @IsEnum(SelectType)
+    @IsStringI18n()
+    @IsEnumI18n(SelectType)
     selectType?: string;
 }

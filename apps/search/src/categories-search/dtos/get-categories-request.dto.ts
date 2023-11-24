@@ -1,7 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
+import { IsOptional } from 'class-validator';
 import { MAX_CATEGORY_PER_PAGE } from '~libs/common/constants/category.constant';
+import {
+    IsNumberI18n,
+    IsStringI18n,
+    MaxI18n,
+    MinI18n,
+} from '~libs/common/i18n/class-validator-i18n';
 
 export class GetCategoriesRequestDTO {
     @ApiProperty({
@@ -10,10 +16,10 @@ export class GetCategoriesRequestDTO {
         default: 1,
     })
     @Type(() => Number)
-    @IsNumber()
+    @IsNumberI18n()
     @IsOptional()
-    @Min(1)
-    @Max(Number.MAX_SAFE_INTEGER)
+    @MinI18n(1)
+    @MaxI18n(Number.MAX_SAFE_INTEGER)
     page?: number;
 
     @ApiProperty({
@@ -22,10 +28,10 @@ export class GetCategoriesRequestDTO {
         default: 10,
     })
     @Type(() => Number)
-    @IsNumber()
+    @IsNumberI18n()
     @IsOptional()
-    @Min(1)
-    @Max(MAX_CATEGORY_PER_PAGE)
+    @MinI18n(1)
+    @MaxI18n(MAX_CATEGORY_PER_PAGE)
     pageSize?: number;
 
     @ApiProperty({
@@ -34,6 +40,6 @@ export class GetCategoriesRequestDTO {
         required: false,
     })
     @IsOptional()
-    @IsString()
+    @IsStringI18n()
     keyword?: string;
 }
