@@ -17,5 +17,11 @@
     "MIN": "{property} với giá trị: \"{value}\" cần ít nhất là {constraints.0}",
     "IS_EMAIL": "{property} phải là một email",
     "IS_BOOLEAN": "{property} phải là một giá trị boolean",
-    "IS_MONGO_ID": "{property} phải là một id mongodb hợp lệ"
+    "IS_MONGO_ID": "{property} phải là một id mongodb hợp lệ",
+    "ONLY_LOWER_CASE_OPTIONAL_UNDERSCORE": "{property} phải là một chuỗi viết thường hợp lệ có thể chứa dấu gạch dưới",
+    "IS_LOWERCASE": "{property} phải là một chuỗi viết thường hợp lệ",
+    "IS_UPPERCASE": "{property} phải là một chuỗi viết hoa hợp lệ",
+    "IS_NOT_EMPTY_OBJECT": "{property} không được là một đối tượng trống",
+    "ARRAY_MIN_SIZE": "{property} phải có ít nhất {constraints.0} phần tử",
+    "ARRAY_MAX_SIZE": "{property} phải có nhiều nhất {constraints.0} phần tử"
 }
