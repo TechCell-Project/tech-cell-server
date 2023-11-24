@@ -49,12 +49,15 @@ async function bootstrap() {
         .setContact('TechCell Teams', 'https://techcell.cloud', 'teams@techcell.cloud')
         .setDescription('The documentations of the TechCell RESTful API')
         .setVersion('0.0.1')
-        .addServer('https://api.techcell.cloud')
-        .addServer('http://localhost:8000')
+        .setDescription(
+            'The documentations of the TechCell RESTful API, you can set header (`x-lang`, `x-language`) or query (`lang`, `language`) to change the language.',
+        )
         .setLicense(
             'MIT LICENSE',
             'https://github.com/TechCell-Project/tech-cell-server/blob/stable/LICENSE',
         )
+        .addServer('https://api.techcell.cloud')
+        .addServer('http://localhost:8000')
         .addBearerAuth(
             {
                 description: `[just text field] Please enter your access token`,
