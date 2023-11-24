@@ -1,6 +1,6 @@
 import { ProductCartDTO } from '~libs/resource/carts/dtos/product-cart.dto';
 import { ApiProperty } from '@nestjs/swagger';
-import { Transform, Type } from 'class-transformer';
+import { Type } from 'class-transformer';
 import { ValidateNested } from 'class-validator';
 import {
     ArrayMaxSizeI18n,
@@ -35,12 +35,7 @@ export class ReviewOrderRequestDTO {
     @IsArrayI18n()
     @ArrayMinSizeI18n(1)
     @ArrayMaxSizeI18n(1000)
+    @Type(() => ProductCartDTO)
     @ValidateNested({ each: true })
-    @Transform(({ value }) => {
-        if (value && Array.isArray(value)) {
-            return value?.map((item) => new ProductCartDTO(item));
-        }
-        return [];
-    })
     productSelected: Array<ProductCartDTO>;
 }

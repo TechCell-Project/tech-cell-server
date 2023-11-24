@@ -125,14 +125,7 @@ class WardSchemaDTO implements WardSchema {
 
 export class AddressSchemaDTO implements AddressSchema {
     constructor(address: AddressSchemaDTO) {
-        this.addressName = address.addressName;
-        this.customerName = address?.customerName;
-        this.phoneNumbers = address.phoneNumbers;
-        this.provinceLevel = new ProvinceSchemaDTO(address.provinceLevel);
-        this.districtLevel = new DistrictSchemaDTO(address.districtLevel);
-        this.wardLevel = new WardSchemaDTO(address.wardLevel);
-        this.detail = address.detail;
-        this.isDefault = address.isDefault;
+        Object.assign(this, address);
     }
 
     @ApiProperty({ description: 'The name of address', example: 'Home' })
