@@ -51,6 +51,10 @@ async function bootstrap() {
         .setVersion('0.0.1')
         .addServer('https://api.techcell.cloud')
         .addServer('http://localhost:8000')
+        .setLicense(
+            'MIT LICENSE',
+            'https://github.com/TechCell-Project/tech-cell-server/blob/stable/LICENSE',
+        )
         .addBearerAuth(
             {
                 description: `[just text field] Please enter your access token`,
