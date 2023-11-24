@@ -1,0 +1,17 @@
+{
+    "page": {
+        "description": "Page number"
+    },
+    "pageSize": {
+        "description": "Page size"
+    },
+    "totalPage": {
+        "description": "Total page with page size"
+    },
+    "totalRecord": {
+        "description": "Total record with filter"
+    },
+    "data": {
+        "description": "Array of data response same as get one response but in array"
+    }
+}

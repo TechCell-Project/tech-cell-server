@@ -1,6 +1,7 @@
 import { UserRole } from '~libs/resource/users/enums';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsOptional } from 'class-validator';
+import { IsEmailI18n, IsEnumI18n, IsNotEmptyI18n, IsStringI18n } from '~libs/common/i18n';
 
 export class CreateUserRequestDto {
     @ApiProperty({
@@ -8,8 +9,8 @@ export class CreateUserRequestDto {
         example: 'example',
         required: true,
     })
-    @IsString()
-    @IsNotEmpty()
+    @IsStringI18n()
+    @IsNotEmptyI18n()
     userName: string;
 
     @ApiProperty({
@@ -17,8 +18,8 @@ export class CreateUserRequestDto {
         example: '123456',
         required: true,
     })
-    @IsString()
-    @IsNotEmpty()
+    @IsStringI18n()
+    @IsNotEmptyI18n()
     password: string;
 
     @ApiProperty({
@@ -26,9 +27,9 @@ export class CreateUserRequestDto {
         example: 'admin',
         required: false,
     })
-    @IsString()
+    @IsStringI18n()
     @IsOptional()
-    @IsEnum(UserRole)
+    @IsEnumI18n(UserRole)
     role: string;
 
     @ApiProperty({
@@ -36,7 +37,7 @@ export class CreateUserRequestDto {
         example: 'example@techcell.cloud',
         required: false,
     })
-    @IsEmail()
+    @IsEmailI18n()
     @IsOptional()
     email?: string;
 
@@ -45,7 +46,7 @@ export class CreateUserRequestDto {
         example: 'John',
         required: false,
     })
-    @IsString()
+    @IsStringI18n()
     @IsOptional()
     firstName?: string;
 
@@ -54,7 +55,7 @@ export class CreateUserRequestDto {
         example: 'Doe',
         required: false,
     })
-    @IsString()
+    @IsStringI18n()
     @IsOptional()
     lastName?: string;
 }

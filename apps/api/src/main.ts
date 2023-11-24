@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { Logger, ValidationPipe } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { RpcExceptionFilter } from '~libs/common/filters';
 import {
@@ -17,6 +17,7 @@ import { AuthMessagePattern } from '~apps/auth/auth.pattern';
 import { catchException } from '~libs/common';
 import { firstValueFrom } from 'rxjs';
 import { UserDataResponseDTO } from '~apps/auth/dtos';
+import { I18nValidationExceptionFilter, I18nValidationPipe } from 'nestjs-i18n';
 
 async function bootstrap() {
     const port = process.env.API_PORT || 8000;
@@ -32,8 +33,13 @@ async function bootstrap() {
 
     // Use to validate DTOs and throw exceptions if they are not valid
     app.useGlobalPipes(
-        new ValidationPipe({
+        new I18nValidationPipe({
             transform: true,
+        }),
+    );
+    app.useGlobalFilters(
+        new I18nValidationExceptionFilter({
+            detailedErrors: false,
         }),
     );
 
@@ -43,6 +49,16 @@ async function bootstrap() {
         .setContact('TechCell Teams', 'https://techcell.cloud', 'teams@techcell.cloud')
         .setDescription('The documentations of the TechCell RESTful API')
         .setVersion('0.0.1')
+        .setDescription(
+            'This is the documentation for the TechCell RESTful API.' +
+                '\n\n' +
+                'You can change the language by setting the header (`x-lang`, `x-language`) ' +
+                'or by using a query (`lang`, `language`).',
+        )
+        .setLicense(
+            'MIT LICENSE',
+            'https://github.com/TechCell-Project/tech-cell-server/blob/stable/LICENSE',
+        )
         .addServer('https://api.techcell.cloud')
         .addServer('http://localhost:8000')
         .addBearerAuth(

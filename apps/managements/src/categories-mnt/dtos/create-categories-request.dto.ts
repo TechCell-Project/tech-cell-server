@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsLowercase, IsNotEmpty, IsOptional, IsString, Matches } from 'class-validator';
+import { IsOptional, Matches } from 'class-validator';
+import { i18nValidationMessage } from 'nestjs-i18n';
+import { IsArrayI18n, IsLowercaseI18n, IsNotEmptyI18n, IsStringI18n } from '~libs/common/i18n';
 
 export class CreateCategoryRequestDTO {
     @ApiProperty({
@@ -8,8 +10,8 @@ export class CreateCategoryRequestDTO {
         required: true,
         example: 'iPhone',
     })
-    @IsString()
-    @IsNotEmpty()
+    @IsStringI18n()
+    @IsNotEmptyI18n()
     name: string;
 
     @ApiProperty({
@@ -20,11 +22,11 @@ export class CreateCategoryRequestDTO {
         uniqueItems: true,
         example: 'iphone',
     })
-    @IsString()
-    @IsNotEmpty()
-    @IsLowercase()
+    @IsStringI18n()
+    @IsNotEmptyI18n()
+    @IsLowercaseI18n()
     @Matches(/^[a-z_]*[a-z][a-z_]*$/, {
-        message: 'Label must only contain lowercase letters and optional underscores',
+        message: i18nValidationMessage('validation.ONLY_LOWER_CASE_OPTIONAL_UNDERSCORE'),
     })
     label: string;
 
@@ -34,8 +36,8 @@ export class CreateCategoryRequestDTO {
         required: true,
         example: 'This is description of category',
     })
-    @IsString()
-    @IsNotEmpty()
+    @IsStringI18n()
+    @IsNotEmptyI18n()
     description: string;
 
     @ApiProperty({
@@ -44,7 +46,7 @@ export class CreateCategoryRequestDTO {
         required: false,
         nullable: true,
     })
-    @IsString()
+    @IsStringI18n()
     @IsOptional()
     url: string;
 
@@ -54,8 +56,8 @@ export class CreateCategoryRequestDTO {
         required: false,
         example: ['name', 'email', 'phone'],
     })
-    @IsArray()
+    @IsArrayI18n()
     @IsOptional()
-    @IsString({ each: true })
+    @IsStringI18n({ each: true })
     requireAttributes: string[];
 }

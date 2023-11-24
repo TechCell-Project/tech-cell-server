@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString } from 'class-validator';
+import { IsOptional } from 'class-validator';
+import { IsStringI18n } from '~libs/common/i18n';
 
 export class UpdateAttributeRequestDTO {
     @ApiProperty({
@@ -7,8 +8,8 @@ export class UpdateAttributeRequestDTO {
         required: false,
         example: 'label_of_attribute',
     })
-    @IsString()
     @IsOptional()
+    @IsStringI18n()
     label?: string;
 
     @ApiProperty({
@@ -16,8 +17,8 @@ export class UpdateAttributeRequestDTO {
         required: false,
         example: 'name of attribute',
     })
-    @IsString()
     @IsOptional()
+    @IsStringI18n()
     name?: string;
 
     @ApiProperty({
@@ -25,7 +26,7 @@ export class UpdateAttributeRequestDTO {
         required: false,
         example: 'This is a description',
     })
-    @IsString()
     @IsOptional()
+    @IsStringI18n()
     description?: string;
 }

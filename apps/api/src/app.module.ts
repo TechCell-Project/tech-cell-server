@@ -27,6 +27,7 @@ import { ApiTaskService } from './services';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TerminusModule } from '@nestjs/terminus';
 import { HttpModule } from '@nestjs/axios';
+import { I18nModule } from '~libs/common/i18n';
 
 @Module({
     imports: [
@@ -71,6 +72,7 @@ import { HttpModule } from '@nestjs/axios';
                 index: false,
             },
         }),
+        I18nModule,
         ScheduleModule.forRoot(),
         RabbitMQModule.registerRmq(UTILITY_SERVICE, process.env.RABBITMQ_UTILITY_QUEUE),
         RabbitMQModule.registerRmq(SEARCH_SERVICE, process.env.RABBITMQ_SEARCH_QUEUE),

@@ -1,5 +1,5 @@
-import { IsNotEmpty, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmptyI18n, IsStringI18n } from '~libs/common/i18n';
 
 export class DeleteAttributeByIdRequestDTO {
     @ApiProperty({
@@ -7,7 +7,7 @@ export class DeleteAttributeByIdRequestDTO {
         description: 'Id of attribute to be delete',
         required: true,
     })
-    @IsString()
-    @IsNotEmpty()
+    @IsStringI18n()
+    @IsNotEmptyI18n()
     attributeId: string;
 }

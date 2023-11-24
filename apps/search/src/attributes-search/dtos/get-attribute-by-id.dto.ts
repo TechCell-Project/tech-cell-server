@@ -1,5 +1,9 @@
-import { IsNotEmpty, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import {
+    IsMongoIdI18n,
+    IsNotEmptyI18n,
+    IsStringI18n,
+} from '~libs/common/i18n/class-validator-i18n';
 
 export class GetAttributeByIdRequestDTO {
     @ApiProperty({
@@ -7,7 +11,8 @@ export class GetAttributeByIdRequestDTO {
         description: 'Id of attribute to be returned',
         required: true,
     })
-    @IsString()
-    @IsNotEmpty()
+    @IsStringI18n()
+    @IsNotEmptyI18n()
+    @IsMongoIdI18n()
     attributeId: string;
 }

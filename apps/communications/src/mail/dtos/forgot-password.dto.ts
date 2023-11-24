@@ -1,15 +1,15 @@
-import { IsString, IsNotEmpty, IsEmail } from 'class-validator';
+import { IsEmailI18n, IsNotEmptyI18n, IsStringI18n } from '~libs/common/i18n';
 
 export class ForgotPasswordEmailDTO {
-    @IsNotEmpty()
-    @IsString()
+    @IsNotEmptyI18n()
+    @IsStringI18n()
     firstName: string;
 
-    @IsNotEmpty()
-    @IsString()
+    @IsNotEmptyI18n()
+    @IsStringI18n()
     otpCode: string;
 
-    @IsNotEmpty()
-    @IsEmail()
+    @IsNotEmptyI18n()
+    @IsEmailI18n()
     userEmail: string;
 }

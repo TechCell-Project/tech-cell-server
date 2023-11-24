@@ -1,6 +1,7 @@
 import { PaginationQuery } from '~libs/common/dtos';
 import { ApiProperty, IntersectionType } from '@nestjs/swagger';
-import { IsEnum, IsOptional } from 'class-validator';
+import { IsOptional } from 'class-validator';
+import { IsEnumI18n } from '~libs/common/i18n';
 
 export enum ReadType {
     read = 'read',
@@ -29,7 +30,7 @@ export class GetUserNotificationsDTO extends IntersectionType(PaginationQuery) {
         type: String,
     })
     @IsOptional()
-    @IsEnum(ReadType)
+    @IsEnumI18n(ReadType)
     readType?: ReadType;
 
     @ApiProperty({
@@ -39,6 +40,6 @@ export class GetUserNotificationsDTO extends IntersectionType(PaginationQuery) {
         type: String,
     })
     @IsOptional()
-    @IsEnum(OrderBy)
+    @IsEnumI18n(OrderBy)
     orderBy?: OrderBy;
 }

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsOptional, Max, Min } from 'class-validator';
+import { IsOptional } from 'class-validator';
 import {
     UserSearchBlock,
     UserSearchEmailVerified,
@@ -9,6 +9,7 @@ import {
 } from '../enums';
 import { MAX_USERS_PER_PAGE } from '~libs/common/constants/user.constant';
 import { Type } from 'class-transformer';
+import { IsEnumI18n, MaxI18n, MinI18n } from '~libs/common/i18n/class-validator-i18n';
 
 export class GetUsersQueryDTO {
     @ApiProperty({
@@ -21,8 +22,8 @@ export class GetUsersQueryDTO {
     })
     @Type(() => Number)
     @IsOptional()
-    @Min(1)
-    @Max(Number.MAX_SAFE_INTEGER)
+    @MinI18n(1)
+    @MaxI18n(Number.MAX_SAFE_INTEGER)
     page?: number;
 
     @ApiProperty({
@@ -35,8 +36,8 @@ export class GetUsersQueryDTO {
     })
     @Type(() => Number)
     @IsOptional()
-    @Min(1)
-    @Max(MAX_USERS_PER_PAGE)
+    @MinI18n(1)
+    @MaxI18n(MAX_USERS_PER_PAGE)
     pageSize?: number;
 
     @ApiProperty({
@@ -46,7 +47,7 @@ export class GetUsersQueryDTO {
         enum: UserSearchSortField,
         default: UserSearchSortField.CREATED_AT,
     })
-    @IsEnum(UserSearchSortField)
+    @IsEnumI18n(UserSearchSortField)
     @IsOptional()
     order_field?: string;
 
@@ -57,7 +58,7 @@ export class GetUsersQueryDTO {
         enum: UserSearchSortOrder,
         default: UserSearchSortOrder.DESC,
     })
-    @IsEnum(UserSearchSortOrder)
+    @IsEnumI18n(UserSearchSortOrder)
     @IsOptional()
     sort_order?: string;
 
@@ -76,7 +77,7 @@ export class GetUsersQueryDTO {
         enum: UserSearchBlock,
         default: UserSearchBlock.ALL,
     })
-    @IsEnum(UserSearchBlock)
+    @IsEnumI18n(UserSearchBlock)
     @IsOptional()
     status?: string;
 
@@ -88,7 +89,7 @@ export class GetUsersQueryDTO {
         default: UserSearchRole.ALL,
     })
     @IsOptional()
-    @IsEnum(UserSearchRole)
+    @IsEnumI18n(UserSearchRole)
     role?: string;
 
     @ApiProperty({
@@ -99,6 +100,6 @@ export class GetUsersQueryDTO {
         default: UserSearchEmailVerified.ALL,
     })
     @IsOptional()
-    @IsEnum(UserSearchEmailVerified)
+    @IsEnumI18n(UserSearchEmailVerified)
     emailVerified?: string;
 }

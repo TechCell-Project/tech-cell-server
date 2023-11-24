@@ -1,8 +1,15 @@
-import { IsEnum, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { IsOptional } from 'class-validator';
 import { SelectType } from '../enums';
 import { Type } from 'class-transformer';
 import { MAX_ATTRIBUTES_PER_PAGE } from '~libs/common/constants/attribute.constant';
+import {
+    IsEnumI18n,
+    IsNumberI18n,
+    IsStringI18n,
+    MinI18n,
+    MaxI18n,
+} from '~libs/common/i18n/class-validator-i18n';
 
 export class GetAttributesRequestDTO {
     @ApiProperty({
@@ -13,8 +20,8 @@ export class GetAttributesRequestDTO {
         required: false,
     })
     @IsOptional()
-    @IsString()
-    @IsEnum(SelectType)
+    @IsStringI18n()
+    @IsEnumI18n(SelectType)
     select_type?: string;
 
     @ApiProperty({
@@ -24,9 +31,9 @@ export class GetAttributesRequestDTO {
     })
     @IsOptional()
     @Type(() => Number)
-    @IsNumber()
-    @Min(1)
-    @Max(Number.MAX_SAFE_INTEGER)
+    @IsNumberI18n()
+    @MinI18n(1)
+    @MaxI18n(Number.MAX_SAFE_INTEGER)
     page?: number;
 
     @ApiProperty({
@@ -36,9 +43,9 @@ export class GetAttributesRequestDTO {
     })
     @IsOptional()
     @Type(() => Number)
-    @IsNumber()
-    @Min(1)
-    @Max(MAX_ATTRIBUTES_PER_PAGE)
+    @IsNumberI18n()
+    @MinI18n(1)
+    @MaxI18n(MAX_ATTRIBUTES_PER_PAGE)
     pageSize?: number;
 
     @ApiProperty({
@@ -47,6 +54,6 @@ export class GetAttributesRequestDTO {
         required: false,
     })
     @IsOptional()
-    @IsString()
+    @IsStringI18n()
     keyword?: string;
 }

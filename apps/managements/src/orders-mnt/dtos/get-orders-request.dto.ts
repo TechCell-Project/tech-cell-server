@@ -3,8 +3,9 @@ import { PaginationQuery } from '~libs/common/dtos';
 import { OrderStatusEnum, PaymentMethodEnum, PaymentStatusEnum } from '~libs/resource/orders/enums';
 import { ApiProperty, IntersectionType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsEnum, IsMongoId, IsOptional, IsString } from 'class-validator';
+import { IsOptional } from 'class-validator';
 import { Types } from 'mongoose';
+import { IsEnumI18n, IsMongoIdI18n, IsStringI18n } from '~libs/common/i18n';
 
 export class GetOrdersRequestDTO extends IntersectionType(PaginationQuery) {
     @ApiProperty({
@@ -15,7 +16,7 @@ export class GetOrdersRequestDTO extends IntersectionType(PaginationQuery) {
         example: '64de47577d02235471fcedb2',
     })
     @IsOptional()
-    @IsMongoId()
+    @IsMongoIdI18n()
     @Type(() => Types.ObjectId)
     orderId: Types.ObjectId;
 
@@ -27,7 +28,7 @@ export class GetOrdersRequestDTO extends IntersectionType(PaginationQuery) {
         example: '64de47577d02235471fcedb2',
     })
     @IsOptional()
-    @IsMongoId()
+    @IsMongoIdI18n()
     @Type(() => Types.ObjectId)
     userId?: Types.ObjectId;
 
@@ -39,7 +40,7 @@ export class GetOrdersRequestDTO extends IntersectionType(PaginationQuery) {
         example: '650a8f68e3729aa77877d4f0',
     })
     @IsOptional()
-    @IsMongoId()
+    @IsMongoIdI18n()
     @Type(() => Types.ObjectId)
     productId?: Types.ObjectId;
 
@@ -49,7 +50,7 @@ export class GetOrdersRequestDTO extends IntersectionType(PaginationQuery) {
         example: '1490-1A0807-1698506531006',
     })
     @IsOptional()
-    @IsString()
+    @IsStringI18n()
     trackingCode?: string;
 
     @ApiProperty({
@@ -59,7 +60,7 @@ export class GetOrdersRequestDTO extends IntersectionType(PaginationQuery) {
         default: AllEnum.all,
     })
     @IsOptional()
-    @IsEnum({ ...AllEnum, ...PaymentMethodEnum })
+    @IsEnumI18n({ ...AllEnum, ...PaymentMethodEnum })
     paymentMethod?: string;
 
     @ApiProperty({
@@ -69,7 +70,7 @@ export class GetOrdersRequestDTO extends IntersectionType(PaginationQuery) {
         default: AllEnum.all,
     })
     @IsOptional()
-    @IsEnum({ ...AllEnum, ...PaymentStatusEnum })
+    @IsEnumI18n({ ...AllEnum, ...PaymentStatusEnum })
     paymentStatus?: string;
 
     @ApiProperty({
@@ -79,6 +80,6 @@ export class GetOrdersRequestDTO extends IntersectionType(PaginationQuery) {
         default: AllEnum.all,
     })
     @IsOptional()
-    @IsEnum({ ...AllEnum, ...OrderStatusEnum })
+    @IsEnumI18n({ ...AllEnum, ...OrderStatusEnum })
     orderStatus?: string;
 }

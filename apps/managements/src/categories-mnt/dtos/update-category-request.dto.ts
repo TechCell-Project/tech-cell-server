@@ -1,10 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString, IsArray } from 'class-validator';
+import { IsOptional } from 'class-validator';
+import { IsArrayI18n, IsStringI18n } from '~libs/common/i18n';
 
 export class UpdateCategoryRequestDTO {
     @ApiProperty({ required: false })
-    @IsString()
     @IsOptional()
+    @IsStringI18n()
     description: string;
 
     @ApiProperty({
@@ -13,8 +14,8 @@ export class UpdateCategoryRequestDTO {
         required: false,
         example: ['name', 'email', 'phone'],
     })
-    @IsArray()
     @IsOptional()
-    @IsString({ each: true })
+    @IsArrayI18n()
+    @IsStringI18n({ each: true })
     requireAttributes: string[];
 }

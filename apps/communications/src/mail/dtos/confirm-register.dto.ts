@@ -1,10 +1,11 @@
-import { IsString, IsNotEmpty } from 'class-validator';
+import { IsNotEmptyI18n, IsStringI18n } from '~libs/common/i18n';
+
 export class ConfirmEmailRegisterDTO {
     constructor(data: ConfirmEmailRegisterDTO) {
         this.otpCode = data.otpCode;
     }
 
-    @IsNotEmpty()
-    @IsString()
+    @IsNotEmptyI18n()
+    @IsStringI18n()
     otpCode: string;
 }

@@ -1,14 +1,14 @@
 import { ProductCartDTO } from '~libs/resource/carts/dtos/product-cart.dto';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
+import { ValidateNested } from 'class-validator';
 import {
-    ArrayMaxSize,
-    ArrayMinSize,
-    IsArray,
-    IsNotEmpty,
-    IsNumber,
-    ValidateNested,
-} from 'class-validator';
+    ArrayMaxSizeI18n,
+    ArrayMinSizeI18n,
+    IsArrayI18n,
+    IsNotEmptyI18n,
+    IsNumberI18n,
+} from '~libs/common/i18n';
 
 export class ReviewOrderRequestDTO {
     constructor(data: ReviewOrderRequestDTO) {
@@ -20,8 +20,8 @@ export class ReviewOrderRequestDTO {
         description: 'Index of address selected (index begin from 0)',
         example: 1,
     })
-    @IsNumber()
-    @IsNotEmpty()
+    @IsNumberI18n()
+    @IsNotEmptyI18n()
     @Type(() => Number)
     addressSelected: number;
 
@@ -31,10 +31,10 @@ export class ReviewOrderRequestDTO {
         minItems: 1,
         maxItems: 1000,
     })
-    @IsNotEmpty()
-    @IsArray()
-    @ArrayMinSize(1)
-    @ArrayMaxSize(1000)
+    @IsNotEmptyI18n()
+    @IsArrayI18n()
+    @ArrayMinSizeI18n(1)
+    @ArrayMaxSizeI18n(1000)
     @ValidateNested({ each: true })
     @Transform(({ value }) => {
         if (value && Array.isArray(value)) {
