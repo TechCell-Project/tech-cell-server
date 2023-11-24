@@ -50,7 +50,10 @@ async function bootstrap() {
         .setDescription('The documentations of the TechCell RESTful API')
         .setVersion('0.0.1')
         .setDescription(
-            'The documentations of the TechCell RESTful API, you can set header (`x-lang`, `x-language`) or query (`lang`, `language`) to change the language.',
+            'This is the documentation for the TechCell RESTful API.' +
+                '\n\n' +
+                'You can change the language by setting the header (`x-lang`, `x-language`) ' +
+                'or by using a query (`lang`, `language`).',
         )
         .setLicense(
             'MIT LICENSE',
