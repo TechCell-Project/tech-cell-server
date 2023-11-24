@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsOptional, IsString, Length } from 'class-validator';
+import { IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import {
     PASSWORD_MAX_LENGTH,
@@ -10,14 +10,15 @@ import {
     LASTNAME_MIN_LENGTH,
     LASTNAME_MAX_LENGTH,
 } from '~libs/common/constants/common.constant';
+import { IsEmailI18n, IsNotEmptyI18n, IsStringI18n, LengthI18n } from '~libs/common/i18n';
 
 export class RegisterRequestDTO {
     @ApiProperty({
         description: 'The email of user to register',
         example: 'example@techcell.com',
     })
-    @IsEmail()
-    @IsNotEmpty()
+    @IsEmailI18n()
+    @IsNotEmptyI18n()
     email: string;
 
     @ApiProperty({
@@ -27,9 +28,9 @@ export class RegisterRequestDTO {
         minLength: USERNAME_MIN_LENGTH,
         maxLength: USERNAME_MAX_LENGTH,
     })
-    @IsString()
+    @IsStringI18n()
     @IsOptional()
-    @Length(USERNAME_MIN_LENGTH, USERNAME_MAX_LENGTH)
+    @LengthI18n(USERNAME_MIN_LENGTH, USERNAME_MAX_LENGTH)
     userName?: string;
 
     @ApiProperty({
@@ -38,9 +39,9 @@ export class RegisterRequestDTO {
         minLength: PASSWORD_MIN_LENGTH,
         maxLength: PASSWORD_MAX_LENGTH,
     })
-    @IsString()
-    @IsNotEmpty()
-    @Length(PASSWORD_MIN_LENGTH, PASSWORD_MAX_LENGTH)
+    @IsStringI18n()
+    @IsNotEmptyI18n()
+    @LengthI18n(PASSWORD_MIN_LENGTH, PASSWORD_MAX_LENGTH)
     password: string;
 
     @ApiProperty({
@@ -49,9 +50,9 @@ export class RegisterRequestDTO {
         minLength: PASSWORD_MIN_LENGTH,
         maxLength: PASSWORD_MAX_LENGTH,
     })
-    @IsString()
-    @IsNotEmpty()
-    @Length(PASSWORD_MIN_LENGTH, PASSWORD_MAX_LENGTH)
+    @IsStringI18n()
+    @IsNotEmptyI18n()
+    @LengthI18n(PASSWORD_MIN_LENGTH, PASSWORD_MAX_LENGTH)
     re_password: string;
 
     @ApiProperty({
@@ -60,9 +61,9 @@ export class RegisterRequestDTO {
         minLength: FIRSTNAME_MIN_LENGTH,
         maxLength: FIRSTNAME_MAX_LENGTH,
     })
-    @IsString()
-    @IsNotEmpty()
-    @Length(FIRSTNAME_MIN_LENGTH, FIRSTNAME_MAX_LENGTH)
+    @IsStringI18n()
+    @IsNotEmptyI18n()
+    @LengthI18n(FIRSTNAME_MIN_LENGTH, FIRSTNAME_MAX_LENGTH)
     firstName: string;
 
     @ApiProperty({
@@ -71,8 +72,8 @@ export class RegisterRequestDTO {
         minLength: LASTNAME_MIN_LENGTH,
         maxLength: LASTNAME_MAX_LENGTH,
     })
-    @IsString()
-    @IsNotEmpty()
-    @Length(LASTNAME_MIN_LENGTH, LASTNAME_MAX_LENGTH)
+    @IsStringI18n()
+    @IsNotEmptyI18n()
+    @LengthI18n(LASTNAME_MIN_LENGTH, LASTNAME_MAX_LENGTH)
     lastName: string;
 }

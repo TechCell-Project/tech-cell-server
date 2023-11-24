@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmptyI18n, IsStringI18n } from '~libs/common/i18n';
 
 export class GoogleLoginRequestDTO {
     @ApiProperty({
@@ -7,7 +7,7 @@ export class GoogleLoginRequestDTO {
         description: 'Google id token',
         example: '1234567890abcdefg',
     })
-    @IsString()
-    @IsNotEmpty()
+    @IsStringI18n()
+    @IsNotEmptyI18n()
     idToken: string;
 }

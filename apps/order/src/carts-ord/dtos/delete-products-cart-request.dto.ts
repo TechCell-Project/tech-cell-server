@@ -1,15 +1,9 @@
 import { isTrueSet } from '~libs/common';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
-import {
-    IsBoolean,
-    IsMongoId,
-    IsNotEmpty,
-    IsOptional,
-    IsString,
-    ValidateNested,
-} from 'class-validator';
+import { IsOptional, ValidateNested } from 'class-validator';
 import { Types } from 'mongoose';
+import { IsBooleanI18n, IsMongoIdI18n, IsNotEmptyI18n, IsStringI18n } from '~libs/common/i18n';
 
 class SelectProduct {
     constructor(cartData: SelectProduct) {
@@ -22,8 +16,8 @@ class SelectProduct {
         description: 'Product ID',
         example: '5f9d5f3b9d6b2b0017b6d5a0',
     })
-    @IsNotEmpty()
-    @IsMongoId({ message: 'Invalid product id' })
+    @IsNotEmptyI18n()
+    @IsMongoIdI18n({ message: 'Invalid product id' })
     productId: Types.ObjectId;
 
     @ApiProperty({
@@ -31,8 +25,8 @@ class SelectProduct {
         description: "sku of product's variation",
         example: 'iphone_13-color.black-storage.128.gb',
     })
-    @IsNotEmpty()
-    @IsString()
+    @IsNotEmptyI18n()
+    @IsStringI18n()
     sku: string;
 }
 
@@ -65,6 +59,6 @@ export class DeleteProductsCartRequestDTO {
     })
     @IsOptional()
     @Transform(({ value }) => isTrueSet(value))
-    @IsBoolean()
+    @IsBooleanI18n()
     isAll: boolean;
 }

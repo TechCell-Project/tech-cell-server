@@ -1,18 +1,18 @@
-import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 import { Type } from 'class-transformer';
 import { Types } from 'mongoose';
+import { IsEmailI18n, IsNotEmptyI18n, IsStringI18n } from '~libs/common/i18n';
 
 export class JwtPayloadDto {
     @Type(() => String)
-    @IsNotEmpty()
-    @IsString()
+    @IsNotEmptyI18n()
+    @IsStringI18n()
     _id: string | Types.ObjectId;
 
-    @IsEmail()
-    @IsNotEmpty()
+    @IsEmailI18n()
+    @IsNotEmptyI18n()
     email: string;
 
-    @IsString()
-    @IsNotEmpty()
+    @IsStringI18n()
+    @IsNotEmptyI18n()
     role: string;
 }
