@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { Logger, ValidationPipe } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { RpcExceptionFilter } from '~libs/common/filters';
 import {
@@ -17,6 +17,7 @@ import { AuthMessagePattern } from '~apps/auth/auth.pattern';
 import { catchException } from '~libs/common';
 import { firstValueFrom } from 'rxjs';
 import { UserDataResponseDTO } from '~apps/auth/dtos';
+import { I18nValidationExceptionFilter, I18nValidationPipe } from 'nestjs-i18n';
 
 async function bootstrap() {
     const port = process.env.API_PORT || 8000;
@@ -32,8 +33,13 @@ async function bootstrap() {
 
     // Use to validate DTOs and throw exceptions if they are not valid
     app.useGlobalPipes(
-        new ValidationPipe({
+        new I18nValidationPipe({
             transform: true,
+        }),
+    );
+    app.useGlobalFilters(
+        new I18nValidationExceptionFilter({
+            detailedErrors: false,
         }),
     );
 

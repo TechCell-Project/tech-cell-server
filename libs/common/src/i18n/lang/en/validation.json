@@ -1,0 +1,21 @@
+{
+    "IS_NUMBER": "{property} must be a number",
+    "IS_STRING": "{property} must be a string",
+    "IS_INT": "{property} must be an integer",
+    "IS_ARRAY": "{property} must be an array",
+    "IS_DATE": "{property} must be a date",
+    "IS_ENUM": "{property} must be one of the following values: {constraints.1}",
+    "IS_NOT_EMPTY": "{property} must not be empty",
+    "LENGTH": "{property} must be between {constraints.0} and {constraints.1} characters",
+    "MIN_LENGTH": "{property} must be at least {constraints.0} characters",
+    "MAX_LENGTH": "{property} must not exceed {constraints.0} characters",
+    "IS_POSITIVE": "{property} must be a positive number",
+    "IS_NEGATIVE": "{property} must be a negative number",
+    "MIN_DATE": "{property} must not be before {constraints.0}",
+    "MAX_DATE": "{property} must not be after {constraints.0}",
+    "MAX": "{property} with value: \"{value}\" needs to be less than {constraints.0}",
+    "MIN": "{property} with value: \"{value}\" needs to be at least {constraints.0}",
+    "IS_EMAIL": "{property} must be an email",
+    "IS_BOOLEAN": "{property} must be a boolean",
+    "IS_MONGO_ID": "{property} must be a valid mongo id"
+}

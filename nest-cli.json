@@ -62,8 +62,7 @@
             "sourceRoot": "apps/communications/src",
             "compilerOptions": {
                 "tsConfigPath": "apps/communications/tsconfig.app.json",
-                "assets": ["mail/templates/**"],
-                "watchAssets": true
+                "assets": [{ "include": "mail/templates/**", "watchAssets": true }]
             }
         },
         "managements": {
