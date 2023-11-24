@@ -44,6 +44,12 @@ export type I18nTranslations = {
         "IS_EMAIL": string;
         "IS_BOOLEAN": string;
         "IS_MONGO_ID": string;
+        "ONLY_LOWER_CASE_OPTIONAL_UNDERSCORE": string;
+        "IS_LOWERCASE": string;
+        "IS_UPPERCASE": string;
+        "IS_NOT_EMPTY_OBJECT": string;
+        "ARRAY_MIN_SIZE": string;
+        "ARRAY_MAX_SIZE": string;
     };
 };
 export type I18nPath = Path<I18nTranslations>;

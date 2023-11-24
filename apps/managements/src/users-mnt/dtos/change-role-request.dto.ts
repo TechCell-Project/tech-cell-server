@@ -1,6 +1,6 @@
 import { UserRole } from '~libs/resource/users/enums';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import { IsEnumI18n, IsNotEmptyI18n, IsStringI18n } from '~libs/common/i18n';
 
 export class ChangeRoleRequestDTO {
     @ApiProperty({
@@ -9,8 +9,8 @@ export class ChangeRoleRequestDTO {
         type: 'string',
         enum: UserRole,
     })
-    @IsNotEmpty()
-    @IsString()
-    @IsEnum(UserRole)
+    @IsNotEmptyI18n()
+    @IsStringI18n()
+    @IsEnumI18n(UserRole)
     role: string;
 }

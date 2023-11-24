@@ -1,6 +1,7 @@
 import { ImageSchemaDTO } from '~libs/resource/users/dtos';
 import { ApiProperty, OmitType } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+import { IsOptional } from 'class-validator';
+import { IsNotEmptyI18n, IsStringI18n, MaxLengthI18n, MinLengthI18n } from '~libs/common/i18n';
 
 export class UpdateUserRequestDTO {
     constructor(data: Partial<UpdateUserRequestDTO>) {
@@ -29,9 +30,9 @@ export class UpdateUserRequestDTO {
         maxLength: 24,
     })
     @IsOptional()
-    @IsNotEmpty()
-    @MinLength(6)
-    @MaxLength(24)
+    @IsNotEmptyI18n()
+    @MinLengthI18n(6)
+    @MaxLengthI18n(24)
     userName?: string;
 
     @ApiProperty({
@@ -40,9 +41,9 @@ export class UpdateUserRequestDTO {
         required: false,
         minLength: 1,
     })
-    @IsString()
+    @IsStringI18n()
     @IsOptional()
-    @MinLength(1)
+    @MinLengthI18n(1)
     firstName?: string;
 
     @ApiProperty({
@@ -51,9 +52,9 @@ export class UpdateUserRequestDTO {
         required: false,
         minLength: 1,
     })
-    @IsString()
+    @IsStringI18n()
     @IsOptional()
-    @MinLength(1)
+    @MinLengthI18n(1)
     lastName?: string;
 
     @ApiProperty({
@@ -61,7 +62,7 @@ export class UpdateUserRequestDTO {
         example: 'example',
         required: false,
     })
-    @IsString()
+    @IsStringI18n()
     @IsOptional()
     avatarPublicId?: string;
 }

@@ -1,6 +1,6 @@
 import { CloudinaryResponse } from '~libs/third-party/cloudinary.com/cloudinary-response';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmptyI18n, IsStringI18n } from '~libs/common/i18n';
 
 export class ImageUploadedResponseDTO {
     constructor({ public_id, secure_url }: CloudinaryResponse) {
@@ -11,14 +11,14 @@ export class ImageUploadedResponseDTO {
     @ApiProperty({
         description: 'Image public id',
     })
-    @IsString()
-    @IsNotEmpty()
+    @IsStringI18n()
+    @IsNotEmptyI18n()
     publicId: string;
 
     @ApiProperty({
         description: 'Image url',
     })
-    @IsString()
-    @IsNotEmpty()
+    @IsStringI18n()
+    @IsNotEmptyI18n()
     url: string;
 }

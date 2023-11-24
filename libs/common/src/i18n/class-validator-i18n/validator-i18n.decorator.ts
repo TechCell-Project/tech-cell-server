@@ -21,6 +21,11 @@ import {
     IsEmail,
     IsBoolean,
     IsMongoId,
+    IsLowercase,
+    IsUppercase,
+    IsNotEmptyObject,
+    ArrayMinSize,
+    ArrayMaxSize,
 } from 'class-validator';
 import ValidatorJS from 'validator';
 
@@ -193,6 +198,56 @@ export const IsMongoIdI18n = (validationOptions?: ValidationOptions) => {
     return (target: object, key: string) => {
         IsMongoId({
             message: i18nValidationMessage('validation.IS_MONGO_ID'),
+            ...validationOptions,
+        })(target, key);
+    };
+};
+
+export const IsLowercaseI18n = (validationOptions?: ValidationOptions) => {
+    return (target: object, key: string) => {
+        IsLowercase({
+            message: i18nValidationMessage('validation.IS_LOWERCASE'),
+            ...validationOptions,
+        })(target, key);
+    };
+};
+
+export const IsUppercaseI18n = (validationOptions?: ValidationOptions) => {
+    return (target: object, key: string) => {
+        IsUppercase({
+            message: i18nValidationMessage('validation.IS_UPPERCASE'),
+            ...validationOptions,
+        })(target, key);
+    };
+};
+
+export const IsNotEmptyObjectI18n = (
+    options?: {
+        nullable?: boolean;
+    },
+    validationOptions?: ValidationOptions,
+) => {
+    return (target: object, key: string) => {
+        IsNotEmptyObject(options, {
+            message: i18nValidationMessage('validation.IS_NOT_EMPTY_OBJECT'),
+            ...validationOptions,
+        })(target, key);
+    };
+};
+
+export const ArrayMinSizeI18n = (min: number, validationOptions?: ValidationOptions) => {
+    return (target: object, key: string) => {
+        ArrayMinSize(min, {
+            message: i18nValidationMessage('validation.ARRAY_MIN_SIZE'),
+            ...validationOptions,
+        })(target, key);
+    };
+};
+
+export const ArrayMaxSizeI18n = (max: number, validationOptions?: ValidationOptions) => {
+    return (target: object, key: string) => {
+        ArrayMaxSize(max, {
+            message: i18nValidationMessage('validation.ARRAY_MAX_SIZE'),
             ...validationOptions,
         })(target, key);
     };

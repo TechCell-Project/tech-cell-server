@@ -1,24 +1,23 @@
-import {
-    IsNotEmpty,
-    IsString,
-    IsNumber,
-    IsArray,
-    IsEnum,
-    ArrayMinSize,
-    ValidateNested,
-    Min,
-    Max,
-    IsOptional,
-    IsBoolean,
-    IsMongoId,
-    IsNotEmptyObject,
-} from 'class-validator';
+import { ValidateNested, IsOptional } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 import { ProductStatus } from '~libs/resource/products/enums';
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { Types } from 'mongoose';
 import { replaceWhitespaceTo, sanitizeHtmlString } from '~libs/common/utils';
 import { AttributeSchema } from '~libs/resource/products/schemas';
+import {
+    ArrayMinSizeI18n,
+    IsArrayI18n,
+    IsBooleanI18n,
+    IsEnumI18n,
+    IsMongoIdI18n,
+    IsNotEmptyI18n,
+    IsNotEmptyObjectI18n,
+    IsNumberI18n,
+    IsStringI18n,
+    MaxI18n,
+    MinI18n,
+} from '~libs/common/i18n';
 
 export class PriceDTO {
     @ApiProperty({
@@ -30,15 +29,15 @@ export class PriceDTO {
         maximum: Number.MAX_SAFE_INTEGER,
     })
     @Transform(({ value }) => Number(String(value).replace(/,/g, '')))
-    @IsNumber(
+    @IsNumberI18n(
         { maxDecimalPlaces: 0 },
         {
             message: 'Base price must be number',
         },
     )
-    @Min(0)
-    @Max(Number.MAX_SAFE_INTEGER)
-    @IsNotEmpty()
+    @MinI18n(0)
+    @MaxI18n(Number.MAX_SAFE_INTEGER)
+    @IsNotEmptyI18n()
     base: number;
 
     @ApiProperty({
@@ -50,14 +49,14 @@ export class PriceDTO {
         maximum: Number.MAX_SAFE_INTEGER,
     })
     @Transform(({ value }) => Number(String(value).replace(/,/g, '')))
-    @IsNumber(
+    @IsNumberI18n(
         { maxDecimalPlaces: 0 },
         {
             message: 'Sale price must be number',
         },
     )
-    @Min(0)
-    @Max(Number.MAX_SAFE_INTEGER)
+    @MinI18n(0)
+    @MaxI18n(Number.MAX_SAFE_INTEGER)
     @IsOptional()
     sale?: number;
 
@@ -71,14 +70,14 @@ export class PriceDTO {
     })
     @IsOptional()
     @Transform(({ value }) => Number(String(value).replace(/,/g, '')))
-    @IsNumber(
+    @IsNumberI18n(
         { maxDecimalPlaces: 0 },
         {
             message: 'Special price must be number',
         },
     )
-    @Min(0)
-    @Max(Number.MAX_SAFE_INTEGER)
+    @MinI18n(0)
+    @MaxI18n(Number.MAX_SAFE_INTEGER)
     special?: number;
 }
 
@@ -89,8 +88,8 @@ export class ImageRequestDTO {
         description: 'Public id of image',
         example: 'publicId',
     })
-    @IsString()
-    @IsNotEmpty()
+    @IsStringI18n()
+    @IsNotEmptyI18n()
     publicId: string;
 
     @ApiProperty({
@@ -101,7 +100,7 @@ export class ImageRequestDTO {
         default: false,
     })
     @IsOptional()
-    @IsBoolean()
+    @IsBooleanI18n()
     isThumbnail?: boolean;
 }
 
@@ -113,8 +112,8 @@ export class AttributeDTO implements AttributeSchema {
         example: 'ram',
     })
     @Type(() => String)
-    @IsString()
-    @IsNotEmpty()
+    @IsStringI18n()
+    @IsNotEmptyI18n()
     k: string;
 
     @ApiProperty({
@@ -124,8 +123,8 @@ export class AttributeDTO implements AttributeSchema {
         example: '8',
     })
     @Type(() => String)
-    @IsString()
-    @IsNotEmpty()
+    @IsStringI18n()
+    @IsNotEmptyI18n()
     v: string;
 
     @ApiProperty({
@@ -135,7 +134,7 @@ export class AttributeDTO implements AttributeSchema {
         example: 'gb',
     })
     @Type(() => String)
-    @IsString()
+    @IsStringI18n()
     @IsOptional()
     u?: string;
 
@@ -165,9 +164,9 @@ export class VariationRequestDTO {
             },
         ],
     })
-    @IsArray()
-    @IsNotEmpty()
-    @ArrayMinSize(1)
+    @IsArrayI18n()
+    @IsNotEmptyI18n()
+    @ArrayMinSizeI18n(1)
     @ValidateNested({ each: true })
     @Type(() => AttributeDTO)
     attributes: AttributeDTO[];
@@ -178,10 +177,10 @@ export class VariationRequestDTO {
         description: 'Stock of product',
         example: 100,
     })
-    @IsNumber()
-    @IsNotEmpty()
-    @Min(0)
-    @Max(9000000)
+    @IsNumberI18n()
+    @IsNotEmptyI18n()
+    @MinI18n(0)
+    @MaxI18n(9000000)
     stock: number;
 
     @ApiProperty({
@@ -206,9 +205,9 @@ export class VariationRequestDTO {
         default: ProductStatus.Hide,
     })
     @Type(() => Number)
-    @IsNumber()
+    @IsNumberI18n()
     @IsOptional()
-    @IsEnum(ProductStatus)
+    @IsEnumI18n(ProductStatus)
     status?: number;
 
     @ApiProperty({
@@ -216,14 +215,14 @@ export class VariationRequestDTO {
         required: false,
         description: 'Images of product',
     })
-    @IsArray()
+    @IsArrayI18n()
     @IsOptional()
     @ValidateNested({ each: true })
     @Type(() => ImageRequestDTO)
     images?: ImageRequestDTO[];
 
     @ApiHideProperty()
-    @IsString()
+    @IsStringI18n()
     @IsOptional()
     sku: string;
 }
@@ -235,8 +234,8 @@ export class CategoryIdDTO {
         description: 'Id of category',
         example: '612f5e4c1f5c3d0012a0f0b4',
     })
-    @IsNotEmpty()
-    @IsMongoId({ message: 'Invalid product id' })
+    @IsNotEmptyI18n()
+    @IsMongoIdI18n({ message: 'Invalid product id' })
     _id: string | Types.ObjectId;
 }
 
@@ -297,8 +296,8 @@ export class CreateProductRequestDTO {
         description: 'Name of product',
         example: 'Iphone 13',
     })
-    @IsString()
-    @IsNotEmpty()
+    @IsStringI18n()
+    @IsNotEmptyI18n()
     name: string;
 
     @ApiProperty({
@@ -308,8 +307,8 @@ export class CreateProductRequestDTO {
         example:
             'The iPhone 13 and iPhone 13 mini are smartphones designed, developed, and marketed by Apple Inc.',
     })
-    @IsString()
-    @IsNotEmpty()
+    @IsStringI18n()
+    @IsNotEmptyI18n()
     description: string;
 
     @ApiProperty({
@@ -318,7 +317,7 @@ export class CreateProductRequestDTO {
         description: 'Category of product',
     })
     @ValidateNested()
-    @IsNotEmptyObject()
+    @IsNotEmptyObjectI18n()
     @Type(() => CategoryIdDTO)
     category: CategoryIdDTO;
 
@@ -327,9 +326,9 @@ export class CreateProductRequestDTO {
         required: true,
         description: 'Variations of product',
     })
-    @IsArray()
-    @IsNotEmpty()
-    @ArrayMinSize(1)
+    @IsArrayI18n()
+    @IsNotEmptyI18n()
+    @ArrayMinSizeI18n(1)
     @ValidateNested({ each: true })
     @Type(() => VariationRequestDTO)
     variations: VariationRequestDTO[];
@@ -342,9 +341,9 @@ export class CreateProductRequestDTO {
         default: ProductStatus.Hide,
     })
     @Type(() => Number)
-    @IsNumber()
+    @IsNumberI18n()
     @IsOptional()
-    @IsEnum(ProductStatus)
+    @IsEnumI18n(ProductStatus)
     status?: number;
 
     @ApiProperty({
@@ -352,7 +351,7 @@ export class CreateProductRequestDTO {
         required: false,
         description: 'General attributes of product',
     })
-    @IsArray()
+    @IsArrayI18n()
     @IsOptional()
     @ValidateNested({ each: true })
     @Type(() => AttributeDTO)
@@ -363,7 +362,7 @@ export class CreateProductRequestDTO {
         required: false,
         description: 'General images of product',
     })
-    @IsArray()
+    @IsArrayI18n()
     @IsOptional()
     @ValidateNested({ each: true })
     @Type(() => ImageRequestDTO)
@@ -374,7 +373,7 @@ export class CreateProductRequestDTO {
         required: false,
         description: 'Description images of product',
     })
-    @IsArray()
+    @IsArrayI18n()
     @IsOptional()
     @ValidateNested({ each: true })
     @Type(() => ImageRequestDTO)

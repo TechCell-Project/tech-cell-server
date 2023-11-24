@@ -17,5 +17,11 @@
     "MIN": "{property} with value: \"{value}\" needs to be at least {constraints.0}",
     "IS_EMAIL": "{property} must be an email",
     "IS_BOOLEAN": "{property} must be a boolean",
-    "IS_MONGO_ID": "{property} must be a valid mongo id"
+    "IS_MONGO_ID": "{property} must be a valid mongo id",
+    "ONLY_LOWER_CASE_OPTIONAL_UNDERSCORE": "{property} must be a valid lower case string with optional underscore",
+    "IS_LOWERCASE": "{property} must be a valid lower case string",
+    "IS_UPPERCASE": "{property} must be a valid upper case string",
+    "IS_NOT_EMPTY_OBJECT": "{property} must not be an empty object",
+    "ARRAY_MIN_SIZE": "{property} must have at least {constraints.0} elements",
+    "ARRAY_MAX_SIZE": "{property} must have at most {constraints.0} elements"
 }
