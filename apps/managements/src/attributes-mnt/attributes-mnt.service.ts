@@ -1,14 +1,13 @@
 import { AttributesService } from '~libs/resource/attributes';
-import { Inject, Injectable } from '@nestjs/common';
-import { Store } from 'cache-manager';
-import { REDIS_CACHE } from '~libs/common/constants';
+import { Injectable } from '@nestjs/common';
 import { CreateAttributeDTO, UpdateAttributeDTO } from '~libs/resource/attributes/dtos';
+import { RedisService } from '~libs/common/Redis';
 
 @Injectable()
 export class AttributesMntService {
     constructor(
         private readonly attributesService: AttributesService,
-        @Inject(REDIS_CACHE) private cacheManager: Store,
+        private redisService: RedisService,
     ) {}
 
     async createAttribute({ label, name, description }: CreateAttributeDTO) {

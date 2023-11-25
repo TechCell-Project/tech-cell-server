@@ -1,7 +1,5 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
-import { REDIS_CACHE } from '~libs/common/constants';
+import { Injectable, Logger } from '@nestjs/common';
 import { User, UsersService } from '~libs/resource/users';
-import { Store } from 'cache-manager';
 import { GetUsersQueryDTO } from './dtos';
 import { FilterQuery, QueryOptions } from 'mongoose';
 import {
@@ -12,12 +10,13 @@ import {
     UserSearchSortOrder,
 } from './enums';
 import { generateRegexQuery } from 'regex-vietnamese';
+import { RedisService } from '~libs/common/Redis/services';
 
 @Injectable()
 export class UsersSearchUtilService {
     constructor(
         protected readonly usersService: UsersService,
-        @Inject(REDIS_CACHE) protected cacheManager: Store,
+        protected redisService: RedisService,
         protected readonly logger: Logger,
     ) {
         this.logger = new Logger(UsersSearchUtilService.name);

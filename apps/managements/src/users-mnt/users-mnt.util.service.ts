@@ -4,10 +4,10 @@ import { isAdmin, isMod, isSuperAdmin, isUser } from '~libs/common/utils';
 import { RpcException } from '@nestjs/microservices';
 import { User } from '~libs/resource/users/schemas';
 import { REQUIRE_USER_REFRESH } from '~libs/common/constants';
-import { Store } from 'cache-manager';
 import { UserRole } from '~libs/resource/users/enums';
 import { convertTimeString } from 'convert-time-string';
 import { UsersMntExceptions } from './users-mnt.exception';
+import { RedisService } from '~libs/common/Redis/services';
 
 @Injectable()
 export class UsersMntUtilService {
@@ -15,7 +15,7 @@ export class UsersMntUtilService {
 
     constructor(
         protected readonly usersService: UsersService,
-        protected readonly cacheManager: Store,
+        protected redisService: RedisService,
     ) {
         this.logger = new Logger(UsersMntUtilService.name);
     }
@@ -29,7 +29,7 @@ export class UsersMntUtilService {
      *
      */
     protected async setUserRequiredRefresh({ user }: { user: User }) {
-        await this.cacheManager.set(
+        await this.redisService.set(
             `${REQUIRE_USER_REFRESH}_${user._id}`,
             true,
             convertTimeString(process.env.JWT_ACCESS_TOKEN_EXPIRE_TIME_STRING),

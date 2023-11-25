@@ -7,9 +7,8 @@ import { ConfigService } from '@nestjs/config';
 import { JwtPayloadDto, UserDataResponseDTO } from '~apps/auth/dtos';
 import * as bcrypt from 'bcrypt';
 import { RpcException, ClientRMQ } from '@nestjs/microservices';
-import { COMMUNICATIONS_SERVICE, REDIS_CACHE, REQUIRE_USER_REFRESH } from '~libs/common/constants';
+import { COMMUNICATIONS_SERVICE, REQUIRE_USER_REFRESH } from '~libs/common/constants';
 import { OtpService } from '~libs/resource/otp';
-import { Store } from 'cache-manager';
 import {
     buildRevokeAccessTokenKey,
     buildRevokeRefreshTokenKey,
@@ -19,6 +18,7 @@ import {
 import { convertTimeString, TimeUnitOutPut } from 'convert-time-string';
 import { cleanUserBeforeResponse } from '~libs/resource/users/utils';
 import { AuthExceptions } from './auth.exception';
+import { RedisService } from '~libs/common/Redis/services';
 
 @Injectable()
 export class AuthUtilService {
@@ -29,7 +29,7 @@ export class AuthUtilService {
         protected configService: ConfigService,
         @Inject(COMMUNICATIONS_SERVICE) protected communicationsService: ClientRMQ,
         protected readonly otpService: OtpService,
-        @Inject(REDIS_CACHE) protected cacheManager: Store,
+        protected redisService: RedisService,
     ) {}
 
     // Utils below
@@ -47,7 +47,7 @@ export class AuthUtilService {
 
     protected async checkIsRequiredRefresh(userId: string) {
         const cacheUserKey = `${REQUIRE_USER_REFRESH}_${userId}`;
-        const userFound = await this.cacheManager.get(cacheUserKey);
+        const userFound = await this.redisService.get(cacheUserKey);
         if (userFound) {
             return true;
         }
@@ -56,7 +56,7 @@ export class AuthUtilService {
 
     protected async removeRequireRefresh(userId: string) {
         const cacheUserKey = `${REQUIRE_USER_REFRESH}_${userId}`;
-        await this.cacheManager.del(cacheUserKey);
+        await this.redisService.del(cacheUserKey);
     }
 
     async buildUserTokenResponse(user: User): Promise<UserDataResponseDTO> {
@@ -97,7 +97,7 @@ export class AuthUtilService {
     protected async revokeAccessToken(accessToken: string): Promise<boolean> {
         try {
             const revokeAccessTokenKey = buildRevokeAccessTokenKey(accessToken);
-            await this.cacheManager.set(
+            await this.redisService.set(
                 revokeAccessTokenKey,
                 {
                     revoked: true,
@@ -118,7 +118,7 @@ export class AuthUtilService {
     protected async isAccessTokenRevoked(accessToken: string): Promise<boolean> {
         try {
             const revokeAccessTokenKey = buildRevokeAccessTokenKey(accessToken);
-            const isRevoked = await this.cacheManager.get(revokeAccessTokenKey);
+            const isRevoked = await this.redisService.get(revokeAccessTokenKey);
             if (isRevoked) return true;
             return false;
         } catch (error) {
@@ -130,7 +130,7 @@ export class AuthUtilService {
     protected async revokeRefreshToken(refreshToken: string): Promise<boolean> {
         try {
             const revokeRefreshTokenKey = buildRevokeRefreshTokenKey(refreshToken);
-            await this.cacheManager.set(
+            await this.redisService.set(
                 revokeRefreshTokenKey,
                 {
                     revoked: true,
@@ -148,7 +148,7 @@ export class AuthUtilService {
     protected async isRefreshTokenRevoked(refreshToken: string): Promise<boolean> {
         try {
             const revokeRefreshTokenKey = buildRevokeRefreshTokenKey(refreshToken);
-            const isRevoked = await this.cacheManager.get(revokeRefreshTokenKey);
+            const isRevoked = await this.redisService.get(revokeRefreshTokenKey);
             if (isRevoked) return true;
             return false;
         } catch (error) {
@@ -212,9 +212,9 @@ export class AuthUtilService {
 
     protected async limitEmailSent(email: string) {
         const cacheKey = `EMAIL_SENT_${email}`;
-        const isEmailSentTimes = await this.cacheManager.get(cacheKey);
+        const isEmailSentTimes = await this.redisService.get(cacheKey);
         if (!isEmailSentTimes) {
-            return await this.cacheManager.set(cacheKey, { times: 1 }, convertTimeString('30m'));
+            return await this.redisService.set(cacheKey, { times: 1 }, convertTimeString('30m'));
         }
 
         const times = Number(isEmailSentTimes['times']);
@@ -231,7 +231,7 @@ export class AuthUtilService {
             );
         }
 
-        return await this.cacheManager.set(
+        return await this.redisService.set(
             cacheKey,
             { times: times + 1 },
             convertTimeString('30m'),

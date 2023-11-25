@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { REDIS_CACHE } from '~libs/common/constants';
+import { REDIS_STORE } from '~libs/common/constants';
 import { Store } from 'cache-manager';
 import * as path from 'path';
 import * as fs from 'fs/promises';
@@ -10,7 +10,7 @@ import { dateToString } from '~libs/common/utils/shared.util';
 @Injectable()
 export class UtilityService {
     constructor(
-        @Inject(REDIS_CACHE) private cacheManager: Store,
+        @Inject(REDIS_STORE) private cacheManager: Store,
         private readonly botGateway: BotGateway,
     ) {}
 
