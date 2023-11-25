@@ -1,10 +1,9 @@
 import { DynamicModule, Module } from '@nestjs/common';
 import { Redis, RedisOptions } from 'ioredis';
-import { REDIS_CLIENT } from '../constants/provider.constant';
+import { REDIS_CLIENT, REDIS_STORE } from '../constants/provider.constant';
 import { RedlockService } from './services/redlock.service';
 import { ConfigService } from '@nestjs/config';
 import { RedisService } from './services/redis.service';
-import { REDIS_STORE } from '../constants/cache.constant';
 import { redisStore } from 'cache-manager-ioredis-yet';
 
 @Module({
