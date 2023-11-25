@@ -29,12 +29,15 @@ export class RedisService {
      * @param ttl time to live of redis to set (in milliseconds)
      * @returns ok if success
      */
-    public async set(key: string, value: string | object | boolean, ttl?: number): Promise<'OK'> {
-        const valueString = typeof value === 'string' ? value : JSON.stringify(value);
+    public async set(
+        key: string,
+        value: object | string | boolean | number,
+        ttl?: number,
+    ): Promise<'OK'> {
+        const valueString = typeof value === 'object' ? JSON.stringify(value) : String(value ?? '');
         if (ttl) {
             return this.redisClient.set(key, valueString, 'PX', ttl);
-        }
-        return this.redisClient.set(key, valueString);
+        } else return this.redisClient.set(key, valueString);
     }
 
     public async del(key: string): Promise<number> {
@@ -60,5 +63,9 @@ export class RedisService {
     public async delWithPrefix(prefix: string): Promise<number> {
         const keys = await this.redisClient.keys(prefix);
         return this.redisClient.del(...keys);
+    }
+
+    public async keys(pattern: string): Promise<string[]> {
+        return this.redisClient.keys(pattern);
     }
 }

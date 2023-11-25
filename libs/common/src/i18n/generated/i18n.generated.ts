@@ -50,6 +50,7 @@ export type I18nTranslations = {
         "IS_NOT_EMPTY_OBJECT": string;
         "ARRAY_MIN_SIZE": string;
         "ARRAY_MAX_SIZE": string;
+        "IS_DATE_STRING": string;
     };
 };
 export type I18nPath = Path<I18nTranslations>;

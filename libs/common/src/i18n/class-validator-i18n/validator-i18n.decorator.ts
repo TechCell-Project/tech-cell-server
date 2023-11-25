@@ -26,6 +26,7 @@ import {
     IsNotEmptyObject,
     ArrayMinSize,
     ArrayMaxSize,
+    IsDateString,
 } from 'class-validator';
 import ValidatorJS from 'validator';
 
@@ -248,6 +249,18 @@ export const ArrayMaxSizeI18n = (max: number, validationOptions?: ValidationOpti
     return (target: object, key: string) => {
         ArrayMaxSize(max, {
             message: i18nValidationMessage('validation.ARRAY_MAX_SIZE'),
+            ...validationOptions,
+        })(target, key);
+    };
+};
+
+export const IsDateStringI18n = (
+    options?: ValidatorJS.IsISO8601Options,
+    validationOptions?: ValidationOptions,
+) => {
+    return (target: object, key: string) => {
+        IsDateString(options, {
+            message: i18nValidationMessage('validation.IS_DATE_STRING'),
             ...validationOptions,
         })(target, key);
     };

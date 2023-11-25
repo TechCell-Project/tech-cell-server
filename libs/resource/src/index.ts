@@ -6,4 +6,5 @@ export * from './notifications';
 export * from './orders';
 export * from './otp';
 export * from './products';
+export * from './statistics';
 export * from './users';
