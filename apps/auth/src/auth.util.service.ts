@@ -1,4 +1,11 @@
-import { Injectable, Inject, Logger, HttpException, HttpStatus } from '@nestjs/common';
+import {
+    Injectable,
+    Inject,
+    Logger,
+    HttpException,
+    HttpStatus,
+    UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { TokenExpiredError } from 'jsonwebtoken';
 import { UsersService } from '~libs/resource/users';
@@ -17,8 +24,9 @@ import {
 } from '~libs/common';
 import { convertTimeString, TimeUnitOutPut } from 'convert-time-string';
 import { cleanUserBeforeResponse } from '~libs/resource/users/utils';
-import { AuthExceptions } from './auth.exception';
 import { RedisService } from '~libs/common/Redis/services';
+import { I18n, I18nService } from 'nestjs-i18n';
+import { I18nTranslations } from '~libs/common/i18n/generated/i18n.generated';
 
 @Injectable()
 export class AuthUtilService {
@@ -30,6 +38,7 @@ export class AuthUtilService {
         @Inject(COMMUNICATIONS_SERVICE) protected communicationsService: ClientRMQ,
         protected readonly otpService: OtpService,
         protected redisService: RedisService,
+        @I18n() protected readonly i18n: I18nService<I18nTranslations>,
     ) {}
 
     // Utils below
@@ -165,9 +174,25 @@ export class AuthUtilService {
             return dataVerified;
         } catch (error) {
             if (error instanceof TokenExpiredError) {
-                throw new RpcException(AuthExceptions.tokenIsExpired);
+                throw new RpcException(
+                    new UnauthorizedException(
+                        this.i18n.t('errorMessage.PROPERTY_IS_EXPIRED', {
+                            args: {
+                                property: 'Token',
+                            },
+                        }),
+                    ),
+                );
             }
-            throw new RpcException(AuthExceptions.tokenIsInvalid);
+            throw new RpcException(
+                new UnauthorizedException(
+                    this.i18n.t('errorMessage.PROPERTY_IS_INVALID', {
+                        args: {
+                            property: 'Token',
+                        },
+                    }),
+                ),
+            );
         }
     }
 
@@ -223,8 +248,7 @@ export class AuthUtilService {
                 new HttpException(
                     {
                         statusCode: HttpStatus.TOO_MANY_REQUESTS,
-                        message: 'You have sent too many emails, please try again later.',
-                        error: 'Too Many Requests',
+                        message: this.i18n.t('errorMessage.TOO_MANY_EMAIL_SENT'),
                     },
                     HttpStatus.TOO_MANY_REQUESTS,
                 ),

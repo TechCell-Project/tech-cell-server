@@ -12,6 +12,8 @@ import {
 } from 'mongoose';
 import { AbstractDocument } from './abstract.schema';
 import { RpcException } from '@nestjs/microservices';
+import { I18nService } from 'nestjs-i18n';
+import { I18nTranslations } from '~libs/common/i18n/generated/i18n.generated';
 
 export abstract class AbstractRepository<TDocument extends AbstractDocument> {
     protected abstract readonly logger: Logger;
@@ -19,6 +21,7 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
     constructor(
         protected readonly model: Model<TDocument>,
         private readonly connection: Connection,
+        private readonly i18n: I18nService<I18nTranslations>,
     ) {}
 
     async create(
@@ -48,7 +51,13 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
 
         if (!document) {
             this.logger.warn(`${this.model.modelName} not found with filterQuery`, filterQuery);
-            throw new RpcException(new NotFoundException(`${this.model.modelName} not found.`));
+            throw new RpcException(
+                new NotFoundException(
+                    this.i18n.t('errorMessage.MODEL_NOT_FOUND', {
+                        args: { modelName: this.model.modelName },
+                    }),
+                ),
+            );
         }
 
         return document as unknown as TDocument;
@@ -69,7 +78,13 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
             .session(session);
         if (!document) {
             this.logger.warn(`${this.model.modelName} not found with filterQuery:`, filterQuery);
-            throw new RpcException(new NotFoundException(`${this.model.modelName} not found.`));
+            throw new RpcException(
+                new NotFoundException(
+                    this.i18n.t('errorMessage.MODEL_NOT_FOUND', {
+                        args: { modelName: this.model.modelName },
+                    }),
+                ),
+            );
         }
         return document;
     }
@@ -105,7 +120,13 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
                     filterQuery,
                 );
             }
-            throw new RpcException(new NotFoundException(`${this.model.modelName}s not found.`));
+            throw new RpcException(
+                new NotFoundException(
+                    this.i18n.t('errorMessage.MODEL_NOT_FOUND', {
+                        args: { modelName: this.model.modelName },
+                    }),
+                ),
+            );
         }
 
         return document;

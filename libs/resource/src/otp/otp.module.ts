@@ -4,9 +4,14 @@ import { MongodbModule } from '~libs/common';
 import { OtpService } from './otp.service';
 import { OtpRepository } from './otp.repository';
 import { Otp, OtpSchema } from './otp.schema';
+import { I18nModule } from '~libs/common/i18n';
 
 @Module({
-    imports: [MongodbModule, MongooseModule.forFeature([{ name: Otp.name, schema: OtpSchema }])],
+    imports: [
+        I18nModule,
+        MongodbModule,
+        MongooseModule.forFeature([{ name: Otp.name, schema: OtpSchema }]),
+    ],
     controllers: [],
     providers: [OtpService, OtpRepository],
     exports: [OtpService],

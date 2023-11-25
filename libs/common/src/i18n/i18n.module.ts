@@ -5,6 +5,7 @@ import {
     AcceptLanguageResolver,
     HeaderResolver,
     QueryResolver,
+    I18nContext,
 } from 'nestjs-i18n';
 import { ConfigService } from '@nestjs/config';
 
@@ -30,5 +31,7 @@ import { ConfigService } from '@nestjs/config';
             inject: [ConfigService],
         }),
     ],
+    providers: [I18nContext],
+    exports: [I18nContext],
 })
 export class I18nModule {}

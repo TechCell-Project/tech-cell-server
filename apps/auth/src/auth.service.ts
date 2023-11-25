@@ -1,5 +1,14 @@
 import { AuthUtilService } from './auth.util.service';
-import { Injectable, ForbiddenException, BadRequestException, Logger } from '@nestjs/common';
+import {
+    Injectable,
+    ForbiddenException,
+    BadRequestException,
+    Logger,
+    UnprocessableEntityException,
+    ConflictException,
+    UnauthorizedException,
+    InternalServerErrorException,
+} from '@nestjs/common';
 import {
     EmailRequestDTO,
     ForgotPasswordDTO,
@@ -26,7 +35,6 @@ import { TCurrentUser } from '~libs/common/types';
 import { Types } from 'mongoose';
 import { LoginTicket, OAuth2Client, OAuth2ClientOptions } from 'google-auth-library';
 import { cleanUserBeforeResponse } from '~libs/resource/users/utils/user.util';
-import { AuthExceptions } from './auth.exception';
 
 @Injectable()
 export class AuthService extends AuthUtilService {
@@ -36,15 +44,23 @@ export class AuthService extends AuthUtilService {
         const user = await this.validateUserLogin(emailOrUsername, password);
 
         if (!user) {
-            throw new RpcException(AuthExceptions.emailOrUsernameIncorrect);
+            throw new RpcException(
+                new BadRequestException(this.i18n.t('errorMessage.AUTH_EMAIL_OR_USERNAME_INVALID')),
+            );
         }
 
         if (user.block && user?.block?.isBlocked) {
-            throw new RpcException(AuthExceptions.accountIsBlocked);
+            throw new RpcException(
+                new ForbiddenException(this.i18n.t('errorMessage.AUTH_ACCOUNT_IS_BLOCKED')),
+            );
         }
 
         if (!user.emailVerified) {
-            throw new RpcException(AuthExceptions.emailIsNotVerified);
+            throw new RpcException(
+                new UnprocessableEntityException(
+                    this.i18n.t('errorMessage.AUTH_EMAIL_IS_NOT_VERIFIED'),
+                ),
+            );
         }
 
         return await this.buildUserTokenResponse(user);
@@ -54,11 +70,13 @@ export class AuthService extends AuthUtilService {
         const userFound = await this.usersService.countUser({ email });
 
         if (userFound > 0) {
-            throw new RpcException(AuthExceptions.emailIsAlreadyExist);
+            throw new RpcException(
+                new ConflictException(this.i18n.t('errorMessage.AUTH_EMAIL_IS_ALREADY_EXIST')),
+            );
         }
 
         return {
-            message: 'Email is not in use',
+            message: this.i18n.t('errorMessage.AUTH_EMAIL_IS_NOT_EXIST'),
         };
     }
 
@@ -94,15 +112,21 @@ export class AuthService extends AuthUtilService {
         }
 
         if (userFound || userFound?.emailVerified) {
-            throw new RpcException(AuthExceptions.emailIsAlreadyExist);
+            throw new RpcException(
+                new ConflictException(this.i18n.t('errorMessage.AUTH_EMAIL_IS_ALREADY_EXIST')),
+            );
         }
 
         if (userFoundByUserName) {
-            throw new RpcException(AuthExceptions.userNameIsAlreadyExist);
+            throw new RpcException(
+                new ConflictException(this.i18n.t('errorMessage.AUTH_USERNAME_IS_ALREADY_EXIST')),
+            );
         }
 
         if (password !== re_password) {
-            throw new RpcException(AuthExceptions.passwordDoesNotMatch);
+            throw new RpcException(
+                new BadRequestException(this.i18n.t('errorMessage.AUTH_PASSWORD_DOES_NOT_MATCH')),
+            );
         }
 
         const [userCreated] = await Promise.all([
@@ -129,7 +153,7 @@ export class AuthService extends AuthUtilService {
         });
 
         return {
-            message: 'Register successfully, please check your email to verify it',
+            message: this.i18n.t('errorMessage.AUTH_REGISTER_SUCCESSFULLY'),
         };
     }
 
@@ -137,7 +161,11 @@ export class AuthService extends AuthUtilService {
         const userFound = await this.usersService.getUser({ email });
 
         if (userFound.emailVerified) {
-            throw new RpcException(AuthExceptions.emailIsAlreadyVerified);
+            throw new RpcException(
+                new UnprocessableEntityException(
+                    this.i18n.t('errorMessage.AUTH_EMAIL_IS_ALREADY_VERIFIED'),
+                ),
+            );
         }
 
         const isVerified = await this.otpService.verifyOtp({
@@ -147,20 +175,26 @@ export class AuthService extends AuthUtilService {
         });
 
         if (!isVerified) {
-            throw new RpcException(AuthExceptions.emailVerifyFailedWrongOtp);
+            throw new RpcException(
+                new UnprocessableEntityException(this.i18n.t('errorMessage.AUTH_WRONG_OTP_CODE')),
+            );
         }
 
         await this.usersService.findOneAndUpdateUser({ email }, { emailVerified: isVerified });
 
         return {
-            message: 'Email is verified, update your information now',
+            message: this.i18n.t('errorMessage.AUTH_VERIFY_EMAIL_SUCCESSFULLY'),
         };
     }
 
     async resendVerifyEmailOtp({ email }: EmailRequestDTO) {
         const user = await this.usersService.getUser({ email });
         if (user.emailVerified) {
-            throw new RpcException(AuthExceptions.emailIsAlreadyVerified);
+            throw new RpcException(
+                new UnprocessableEntityException(
+                    this.i18n.t('errorMessage.AUTH_EMAIL_IS_ALREADY_VERIFIED'),
+                ),
+            );
         }
 
         const otp = await this.otpService.createOrRenewOtp({
@@ -178,7 +212,7 @@ export class AuthService extends AuthUtilService {
         });
 
         return {
-            message: 'An email has already been sent to you email address, please check your email',
+            message: this.i18n.t('errorMessage.AUTH_RESEND_VERIFY_EMAIL_SUCCESSFULLY'),
         };
     }
 
@@ -187,7 +221,11 @@ export class AuthService extends AuthUtilService {
     }: NewTokenRequestDTO): Promise<UserDataResponseDTO> {
         try {
             if (!oldRefreshToken) {
-                throw new RpcException(AuthExceptions.refreshTokenIsInvalid);
+                throw new RpcException(
+                    new BadRequestException(
+                        this.i18n.t('errorMessage.AUTH_REFRESH_TOKEN_IS_INVALID'),
+                    ),
+                );
             }
 
             const { email } = await this.verifyRefreshToken(oldRefreshToken);
@@ -228,7 +266,7 @@ export class AuthService extends AuthUtilService {
         });
 
         return {
-            message: 'An email has already been sent to you email address, please check your email',
+            message: this.i18n.t('errorMessage.AUTH_FORGOT_PASSWORD_SUCCESSFULLY'),
         };
     }
 
@@ -244,13 +282,19 @@ export class AuthService extends AuthUtilService {
         );
 
         if (newPassword !== reNewPassword) {
-            throw new RpcException(AuthExceptions.passwordDoesNotMatch);
+            throw new RpcException(
+                new BadRequestException(this.i18n.t('errorMessage.AUTH_PASSWORD_DOES_NOT_MATCH')),
+            );
         }
 
         const userFound = await this.usersService.getUser({ _id: new Types.ObjectId(user._id) });
         const validateLogin = await this.validateUserLogin(userFound.email, oldPassword);
         if (!validateLogin) {
-            throw new RpcException(AuthExceptions.accountIncorrect);
+            throw new RpcException(
+                new UnauthorizedException({
+                    message: this.i18n.t('errorMessage.AUTH_ACCOUNT_INCORRECT'),
+                }),
+            );
         }
 
         const userUpdated = await this.usersService.changeUserPassword({
@@ -260,12 +304,12 @@ export class AuthService extends AuthUtilService {
 
         if (!userUpdated) {
             throw new RpcException(
-                new BadRequestException('Something went wrong, please try again'),
+                new InternalServerErrorException(this.i18n.t('errorMessage.INTERNAL_SERVER_ERROR')),
             );
         }
 
         return {
-            message: 'Password changed successfully',
+            message: this.i18n.t('errorMessage.AUTH_CHANGE_PASSWORD_SUCCESSFULLY'),
         };
     }
 
@@ -273,7 +317,9 @@ export class AuthService extends AuthUtilService {
         await this.usersService.getUser({ email });
 
         if (password !== re_password) {
-            throw new RpcException(AuthExceptions.passwordDoesNotMatch);
+            throw new RpcException(
+                new BadRequestException(this.i18n.t('errorMessage.AUTH_PASSWORD_DOES_NOT_MATCH')),
+            );
         }
 
         const isVerified = await this.otpService.verifyOtp({
@@ -282,28 +328,34 @@ export class AuthService extends AuthUtilService {
             otpType: OtpType.ForgotPassword,
         });
         if (!isVerified) {
-            throw new RpcException(AuthExceptions.wrongOtpCode);
+            throw new RpcException(
+                new BadRequestException(this.i18n.t('errorMessage.AUTH_WRONG_OTP_CODE')),
+            );
         }
 
         const userUpdated = await this.usersService.changeUserPassword({ email, password });
         if (!userUpdated) {
             throw new RpcException(
-                new BadRequestException('Something went wrong, please try again'),
+                new InternalServerErrorException(this.i18n.t('errorMessage.INTERNAL_SERVER_ERROR')),
             );
         }
 
         return {
-            message: 'Password changed successfully',
+            message: this.i18n.t('errorMessage.AUTH_CHANGE_PASSWORD_SUCCESSFULLY'),
         };
     }
 
     async verifyAccessToken(accessToken: string): Promise<ITokenVerifiedResponse> {
         if (!accessToken) {
-            throw new RpcException(AuthExceptions.accessTokenIsMissing);
+            throw new RpcException(
+                new BadRequestException(this.i18n.t('errorMessage.AUTH_ACCESS_TOKEN_IS_MISSING')),
+            );
         }
 
         if (await this.isAccessTokenRevoked(accessToken)) {
-            throw new RpcException(AuthExceptions.accessTokenIsRevoked);
+            throw new RpcException(
+                new ForbiddenException(this.i18n.t('errorMessage.AUTH_ACCESS_TOKEN_IS_REVOKED')),
+            );
         }
 
         const dataVerified = (await this.verifyToken(
@@ -312,7 +364,9 @@ export class AuthService extends AuthUtilService {
         )) as ITokenVerifiedResponse;
 
         if (await this.checkIsRequiredRefresh(dataVerified._id)) {
-            throw new RpcException(AuthExceptions.accessTokenIsExpired);
+            throw new RpcException(
+                new UnauthorizedException(this.i18n.t('errorMessage.AUTH_TOKEN_IS_EXPIRED')),
+            );
         }
 
         return dataVerified;
@@ -320,11 +374,15 @@ export class AuthService extends AuthUtilService {
 
     async verifyRefreshToken(refreshToken: string): Promise<ITokenVerifiedResponse> {
         if (!refreshToken) {
-            throw new RpcException(AuthExceptions.refreshTokenIsMissing);
+            throw new RpcException(
+                new BadRequestException(this.i18n.t('errorMessage.AUTH_REFRESH_TOKEN_IS_MISSING')),
+            );
         }
 
         if (await this.isRefreshTokenRevoked(refreshToken)) {
-            throw new RpcException(AuthExceptions.refreshTokenIsRevoked);
+            throw new RpcException(
+                new ForbiddenException(this.i18n.t('errorMessage.AUTH_REFRESH_TOKEN_IS_REVOKED')),
+            );
         }
 
         return (await this.verifyToken(
@@ -348,12 +406,18 @@ export class AuthService extends AuthUtilService {
             });
         } catch (error) {
             this.logger.error(error.message);
-            throw new RpcException(AuthExceptions.googleFailed);
+            throw new RpcException(
+                new UnauthorizedException(this.i18n.t('errorMessage.AUTH_GOOGLE_FAILED')),
+            );
         }
         const user = ticket.getPayload();
 
         if (user.email_verified !== true) {
-            throw new RpcException(AuthExceptions.googleEmailNotVerified);
+            throw new RpcException(
+                new UnauthorizedException(
+                    this.i18n.t('errorMessage.AUTH_GOOGLE_EMAIL_NOT_VERIFIED'),
+                ),
+            );
         }
 
         try {
@@ -377,7 +441,9 @@ export class AuthService extends AuthUtilService {
 
     async googleLogin({ user }: { user: IUserGoogleResponse }) {
         if (!user) {
-            throw new RpcException(AuthExceptions.googleFailed);
+            throw new RpcException(
+                new UnauthorizedException(this.i18n.t('errorMessage.AUTH_GOOGLE_FAILED')),
+            );
         }
 
         let userFound: User | undefined;
@@ -398,7 +464,9 @@ export class AuthService extends AuthUtilService {
         }
 
         if (!userFound) {
-            throw new RpcException(AuthExceptions.googleFailed);
+            throw new RpcException(
+                new UnauthorizedException(this.i18n.t('errorMessage.AUTH_GOOGLE_FAILED')),
+            );
         }
 
         return this.buildUserTokenResponse(userFound);
@@ -406,7 +474,11 @@ export class AuthService extends AuthUtilService {
 
     async facebookLogin({ user }: { user: IUserFacebookResponse }) {
         if (!user) {
-            throw new RpcException(new BadRequestException('Login with Facebook failed'));
+            throw new RpcException(
+                new BadRequestException(
+                    this.i18n.t('errorMessage.AUTH_LOGIN_WITH_FACEBOOK_FAILED'),
+                ),
+            );
         }
 
         let userFound: User | undefined = undefined;
@@ -428,7 +500,11 @@ export class AuthService extends AuthUtilService {
         }
 
         if (!userFound && !newUser) {
-            throw new RpcException(new BadRequestException('Login with Facebook failed'));
+            throw new RpcException(
+                new BadRequestException(
+                    this.i18n.t('errorMessage.AUTH_LOGIN_WITH_FACEBOOK_FAILED'),
+                ),
+            );
         }
 
         if (userFound) {

@@ -4,9 +4,11 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Discount, DiscountSchema } from './schemas';
 import { DiscountsService } from './discounts.service';
 import { DiscountsRepository } from './discounts.repository';
+import { I18nModule } from '~libs/common/i18n';
 
 @Module({
     imports: [
+        I18nModule,
         MongodbModule,
         MongooseModule.forFeature([
             {
