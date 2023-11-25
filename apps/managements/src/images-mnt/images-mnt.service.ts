@@ -8,6 +8,8 @@ import { CloudinaryService } from '~libs/third-party/cloudinary.com';
 import { ImageUploadedResponseDTO } from './dtos/image-uploaded-response.dto';
 import { RpcException } from '@nestjs/microservices';
 import { HttpService } from '@nestjs/axios';
+import { I18n, I18nService } from 'nestjs-i18n';
+import { I18nTranslations } from '~libs/common/i18n/generated/i18n.generated';
 
 @Injectable()
 export class ImagesMntService {
@@ -15,6 +17,7 @@ export class ImagesMntService {
     constructor(
         private readonly cloudinaryService: CloudinaryService,
         private readonly httpService: HttpService,
+        @I18n() private readonly i18n: I18nService<I18nTranslations>,
     ) {}
 
     async getImages() {
@@ -28,7 +31,7 @@ export class ImagesMntService {
         } catch (error) {
             this.logger.error(error);
             throw new RpcException(
-                new InternalServerErrorException('Get image failed, try again later'),
+                new InternalServerErrorException(this.i18n.t('errorMessage.GET_IMAGES_FAILED')),
             );
         }
     }
@@ -40,10 +43,18 @@ export class ImagesMntService {
         } catch (error) {
             this.logger.error(error);
             if (error.http_code === 404) {
-                throw new RpcException(new NotFoundException('Image not found'));
+                throw new RpcException(
+                    new NotFoundException(
+                        this.i18n.t('errorMessage.PROPERTY_IS_NOT_FOUND', {
+                            args: {
+                                property: 'Image',
+                            },
+                        }),
+                    ),
+                );
             }
             throw new RpcException(
-                new InternalServerErrorException('Get image failed, try again later'),
+                new InternalServerErrorException(this.i18n.t('errorMessage.GET_IMAGES_FAILED')),
             );
         }
     }
@@ -64,7 +75,7 @@ export class ImagesMntService {
         } catch (error) {
             this.logger.error(error);
             throw new RpcException(
-                new InternalServerErrorException('Upload image failed, try again later'),
+                new InternalServerErrorException(this.i18n.t('errorMessage.UPLOAD_IMAGES_FAILED')),
             );
         }
     }

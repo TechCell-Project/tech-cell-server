@@ -5,9 +5,11 @@ import { Order, OrderSchema } from './schemas/order.schema';
 import { OrderRepository } from './orders.repository';
 import { OrdersService } from './orders.service';
 import { RedisModule } from '~libs/common/Redis';
+import { I18nModule } from '~libs/common/i18n';
 
 @Module({
     imports: [
+        I18nModule,
         MongodbModule,
         MongooseModule.forFeature([
             {

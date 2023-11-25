@@ -5,6 +5,7 @@ import { Cart, CartSchema } from './schemas';
 import { CartsRepository } from './carts.repository';
 import { CartsService } from './carts.service';
 import { RedisModule } from '~libs/common/Redis';
+import { I18nModule } from '~libs/common/i18n';
 
 @Module({
     imports: [
@@ -16,6 +17,7 @@ import { RedisModule } from '~libs/common/Redis';
             },
         ]),
         RedisModule,
+        I18nModule,
     ],
     providers: [CartsRepository, CartsService],
     exports: [CartsService],
