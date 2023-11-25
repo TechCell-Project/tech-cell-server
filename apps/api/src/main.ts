@@ -72,6 +72,19 @@ async function bootstrap() {
             },
             ACCESS_TOKEN_NAME, // This name here is important for matching up with @ApiBearerAuth() in controller!
         )
+        .addGlobalParameters({
+            in: 'header',
+            name: 'x-lang',
+            schema: {
+                type: 'string',
+                default: 'en',
+                description: 'The language of the response',
+                enum: ['en', 'vi_VN'],
+            },
+            required: false,
+            example: 'en',
+            description: 'The language of the response',
+        })
         .build();
     const swaggerDocumentOptions: SwaggerDocumentOptions = {
         // re-define the url for each method in controller
