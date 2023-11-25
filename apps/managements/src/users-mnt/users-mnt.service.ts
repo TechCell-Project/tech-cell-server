@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { Types } from 'mongoose';
 import {
     BlockUnblockRequestDTO,
@@ -11,25 +11,25 @@ import {
 import { RpcException } from '@nestjs/microservices';
 import { BlockActivity, UserRole } from '~libs/resource/users/enums';
 import { UsersMntUtilService } from './users-mnt.util.service';
-import { delStartWith, generateRandomString } from '~libs/common';
+import { generateRandomString } from '~libs/common';
 import { AddressSchemaDTO, CreateUserDTO, ImageSchemaDTO } from '~libs/resource/users/dtos';
-import { REDIS_CACHE, USERS_CACHE_PREFIX } from '~libs/common/constants';
-import { cleanUserBeforeResponse, delCacheUsers } from '~libs/resource/users/utils';
+import { USERS_CACHE_PREFIX } from '~libs/common/constants';
+import { cleanUserBeforeResponse } from '~libs/resource/users/utils';
 import { TCurrentUser } from '~libs/common/types';
 import { UsersService } from '~libs/resource/users';
-import { Store } from 'cache-manager';
 import { CloudinaryService } from '~libs/third-party/cloudinary.com';
 import { UsersMntExceptions } from './users-mnt.exception';
+import { RedisService } from '~libs/common/Redis/services';
 
 @Injectable()
 export class UsersMntService extends UsersMntUtilService {
     protected readonly logger = new Logger(UsersMntService.name);
     constructor(
         protected readonly usersService: UsersService,
-        @Inject(REDIS_CACHE) protected cacheManager: Store,
+        protected redisService: RedisService,
         private readonly cloudinaryService: CloudinaryService,
     ) {
-        super(usersService, cacheManager);
+        super(usersService, redisService);
         this.logger = new Logger(UsersMntService.name);
     }
 
@@ -42,7 +42,7 @@ export class UsersMntService extends UsersMntUtilService {
 
         const [userCreated] = await Promise.all([
             this.usersService.createUser(newUser),
-            delStartWith(USERS_CACHE_PREFIX, this.cacheManager), // remove users cache
+            this.redisService.delWithPrefix(USERS_CACHE_PREFIX), // remove users cache
         ]);
 
         return userCreated;
@@ -93,7 +93,7 @@ export class UsersMntService extends UsersMntUtilService {
                 },
             ),
             this.setUserRequiredRefresh({ user: victimUser }),
-            delCacheUsers(this.cacheManager),
+            this.redisService.delWithPrefix(USERS_CACHE_PREFIX),
         ]);
 
         return userReturn;
@@ -144,7 +144,7 @@ export class UsersMntService extends UsersMntUtilService {
                 },
             ),
             this.setUserRequiredRefresh({ user: victimUser }),
-            delCacheUsers(this.cacheManager),
+            this.redisService.delWithPrefix(USERS_CACHE_PREFIX),
         ]);
 
         return userReturn;
@@ -172,7 +172,7 @@ export class UsersMntService extends UsersMntUtilService {
         const [changeRole] = await Promise.all([
             this.usersService.findOneAndUpdateUser({ _id: victimId }, { role: role }),
             this.setUserRequiredRefresh({ user }),
-            delCacheUsers(this.cacheManager),
+            this.redisService.delWithPrefix(USERS_CACHE_PREFIX),
         ]);
 
         return changeRole;

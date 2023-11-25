@@ -23,5 +23,6 @@
     "IS_UPPERCASE": "{property} must be a valid upper case string",
     "IS_NOT_EMPTY_OBJECT": "{property} must not be an empty object",
     "ARRAY_MIN_SIZE": "{property} must have at least {constraints.0} elements",
-    "ARRAY_MAX_SIZE": "{property} must have at most {constraints.0} elements"
+    "ARRAY_MAX_SIZE": "{property} must have at most {constraints.0} elements",
+    "IS_DATE_STRING": "{property} must be a valid date string"
 }

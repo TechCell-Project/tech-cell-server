@@ -51,6 +51,23 @@ export class OrdersService {
         });
     }
 
+    async getOrdersOrNull(
+        filter: FilterQuery<Order>,
+        queryOptions?: QueryOptions<Order>,
+        projection?: ProjectionType<Order>,
+    ): Promise<Order[] | null> {
+        try {
+            const result = await this.orderRepository.find({
+                filterQuery: filter,
+                queryOptions: queryOptions,
+                projection: projection,
+            });
+            return result;
+        } catch (error) {
+            return null;
+        }
+    }
+
     async countOrders(filter: FilterQuery<Order>) {
         return this.orderRepository.count(filter);
     }

@@ -20,7 +20,7 @@ import {
 } from '~apps/communications/mail';
 import { OtpType } from '~libs/resource/otp';
 import { IUserFacebookResponse, IUserGoogleResponse, ITokenVerifiedResponse } from './interfaces';
-import { buildUniqueUserNameFromEmail, delStartWith, generateRandomString } from '~libs/common';
+import { buildUniqueUserNameFromEmail, generateRandomString } from '~libs/common';
 import { PASSWORD_MAX_LENGTH, USERS_CACHE_PREFIX } from '~libs/common/constants';
 import { TCurrentUser } from '~libs/common/types';
 import { Types } from 'mongoose';
@@ -113,7 +113,7 @@ export class AuthService extends AuthUtilService {
                 lastName,
                 password,
             }),
-            delStartWith(USERS_CACHE_PREFIX, this.cacheManager), // remove users cache
+            this.redisService.delWithPrefix(USERS_CACHE_PREFIX),
         ]);
 
         const otp = await this.otpService.createOrRenewOtp({

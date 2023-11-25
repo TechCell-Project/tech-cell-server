@@ -1,7 +1,6 @@
 import { GhnService } from '~libs/third-party';
 import { GhnWardDTO, GhnProvinceDTO, GhnDistrictDTO } from '~libs/third-party/giaohangnhanh/dtos';
 import {
-    Inject,
     Injectable,
     HttpException,
     NotFoundException,
@@ -9,16 +8,15 @@ import {
     InternalServerErrorException,
 } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
-import { Store } from 'cache-manager';
 import { convertTimeString } from 'convert-time-string';
-import { REDIS_CACHE } from '~libs/common/constants/cache.constant';
 import { AxiosError } from 'axios';
+import { RedisService } from '~libs/common/Redis/services';
 
 @Injectable()
 export class AddressSearchService {
     constructor(
         private readonly ghnService: GhnService,
-        @Inject(REDIS_CACHE) private readonly cacheManager: Store,
+        private redisService: RedisService,
     ) {}
 
     private readonly GET_PROVINCES_CACHE_KEY = 'address_search_get_provinces';
@@ -27,7 +25,7 @@ export class AddressSearchService {
 
     async getProvinces(): Promise<GhnProvinceDTO[]> {
         try {
-            const listProvinceCache: GhnProvinceDTO[] = await this.cacheManager.get(
+            const listProvinceCache = await this.redisService.get<GhnProvinceDTO[]>(
                 this.GET_PROVINCES_CACHE_KEY,
             );
             if (listProvinceCache) {
@@ -60,7 +58,7 @@ export class AddressSearchService {
 
             const districtCacheKey = `${this.GET_DISTRICTS_CACHE_KEY}_${provinceId}`;
             const listDistrictCache: GhnDistrictDTO[] =
-                await this.cacheManager.get(districtCacheKey);
+                await this.redisService.get(districtCacheKey);
             if (listDistrictCache) {
                 return listDistrictCache;
             }
@@ -90,7 +88,7 @@ export class AddressSearchService {
             }
 
             const wardCacheKey = `${this.GET_WARDS_CACHE_KEY}_${districtId}`;
-            const listWardCache: GhnWardDTO[] = await this.cacheManager.get(wardCacheKey);
+            const listWardCache: GhnWardDTO[] = await this.redisService.get(wardCacheKey);
             if (listWardCache) {
                 return listWardCache;
             }
@@ -114,6 +112,6 @@ export class AddressSearchService {
     }
 
     private async setCache(key: string, value: any, ttl?: number) {
-        return this.cacheManager.set(key, value, ttl ?? convertTimeString('1h'));
+        return this.redisService.set(key, value, ttl ?? convertTimeString('1h'));
     }
 }

@@ -1,20 +1,18 @@
 import { AttributesService, CategoriesService, Product, ProductsService } from '~libs/resource';
-import { Inject, Injectable } from '@nestjs/common';
-import { delStartWith } from '~libs/common/utils';
+import { Injectable } from '@nestjs/common';
 import {
-    REDIS_CACHE,
     PRODUCTS_CACHE_PREFIX,
     PRODUCTS_ALL,
     PRODUCTS_PAGESIZE,
     PRODUCTS_PAGE,
 } from '~libs/common/constants';
-import { Store } from 'cache-manager';
+import { RedisService } from '~libs/common/Redis/services';
 
 @Injectable()
 export class ProductsSearchUtilService {
     constructor(
         protected readonly productsService: ProductsService,
-        @Inject(REDIS_CACHE) protected cacheManager: Store,
+        protected redisService: RedisService,
         protected readonly attributesService: AttributesService,
         protected readonly categoriesService: CategoriesService,
     ) {}
@@ -50,7 +48,7 @@ export class ProductsSearchUtilService {
      * @returns remove all products cache
      */
     protected async delCacheProducts() {
-        return await delStartWith(PRODUCTS_CACHE_PREFIX, this.cacheManager);
+        return await this.redisService.delWithPrefix(PRODUCTS_CACHE_PREFIX);
     }
 
     protected async assignDetailToProductLists(productsFromDb: Product[]) {
@@ -104,34 +102,6 @@ export class ProductsSearchUtilService {
     }
 
     private async assignCategoriesToProducts(productsFromDb: Product[]) {
-        // const categoriesSet = new Set(
-        //     ...productsFromDb.map((product) => {
-        //         return product.categories;
-        //     }),
-        // );
-        // const categories = await Promise.all(
-        //     Array.from(categoriesSet).map((category) =>
-        //         this.categoriesService.getCategory({
-        //             filterQueries: {
-        //                 label: category,
-        //             },
-        //         }),
-        //     ),
-        // );
-
-        // productsFromDb.forEach((product) => {
-        //     const { categories } = product;
-        //     categories.forEach((category) => {
-        //         const categoryInfo = categories.find((c) => c === category);
-        //         if (categoryInfo) {
-        //             Object.assign(category, {
-        //                 name: categoryInfo.name,
-        //                 description: categoryInfo.description,
-        //             });
-        //         }
-        //     });
-        // }
-
         return productsFromDb;
     }
 

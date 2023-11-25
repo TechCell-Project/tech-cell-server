@@ -8,21 +8,20 @@ import {
     ProductsService,
     VariationDTO,
 } from '~libs/resource';
-import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import {
     allowToAction,
     compareTwoObjectAndGetDifferent,
-    delStartWith,
     findDuplicates,
     replaceWhitespaceTo,
 } from '~libs/common/utils';
-import { REDIS_CACHE, PRODUCTS_CACHE_PREFIX } from '~libs/common/constants';
-import { Store } from 'cache-manager';
+import { PRODUCTS_CACHE_PREFIX } from '~libs/common/constants';
 import { AttributeDTO, CreateProductRequestDTO } from './dtos';
 import { RpcException } from '@nestjs/microservices';
 import { CloudinaryService } from '~libs/third-party/cloudinary.com';
 import { UpdateProductRequestDTO } from './dtos/update-product-request.dto';
 import { ProductStatus } from '~libs/resource/products/enums';
+import { RedisService } from '~libs/common/Redis/services';
 
 @Injectable()
 export class ProductsMntUtilService {
@@ -32,7 +31,7 @@ export class ProductsMntUtilService {
         protected readonly productsService: ProductsService,
         protected readonly categoriesService: CategoriesService,
         protected readonly attributesService: AttributesService,
-        @Inject(REDIS_CACHE) protected cacheManager: Store,
+        protected redisService: RedisService,
         private readonly cloudinaryService: CloudinaryService,
     ) {}
 
@@ -161,7 +160,7 @@ export class ProductsMntUtilService {
      * @returns remove all products cache
      */
     protected async delCacheProducts() {
-        return await delStartWith(PRODUCTS_CACHE_PREFIX, this.cacheManager);
+        return this.redisService.delWithPrefix(PRODUCTS_CACHE_PREFIX);
     }
 
     /**

@@ -1,15 +1,14 @@
 import { CategoriesService } from '~libs/resource/categories';
 import { AttributesService } from '~libs/resource/attributes';
-import { Inject, Injectable } from '@nestjs/common';
-import { Store } from 'cache-manager';
-import { REDIS_CACHE } from '~libs/common/constants';
+import { Injectable } from '@nestjs/common';
+import { RedisService } from '~libs/common/Redis/services';
 
 @Injectable()
 export class CategoriesMntUtilService {
     constructor(
         protected readonly categoriesService: CategoriesService,
         protected readonly attributesService: AttributesService,
-        @Inject(REDIS_CACHE) protected cacheManager: Store,
+        private redisService: RedisService,
     ) {}
 
     public readonly MUST_HAVE_ATTRIBUTES = ['height', 'weight', 'length', 'width'];

@@ -11,6 +11,7 @@ import { DiscountsMntModule } from './discounts-mnt';
 import { ManagementsHealthIndicator } from './managements.health';
 import { ManagementsController } from './managements.controller';
 import { OrdersMntModule } from './orders-mnt';
+import { StatsMntModule } from './stats-mnt/stats-mnt.module';
 
 @Module({
     imports: [
@@ -23,6 +24,7 @@ import { OrdersMntModule } from './orders-mnt';
         ImagesMntModule,
         DiscountsMntModule,
         OrdersMntModule,
+        StatsMntModule,
     ],
     controllers: [ManagementsController],
     providers: [RabbitMQService, ManagementsHealthIndicator],
