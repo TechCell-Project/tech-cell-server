@@ -1,4 +1,4 @@
-import { Controller, Get, Inject, Query } from '@nestjs/common';
+import { Controller, Get, Inject, Query, UseGuards } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import { ACCESS_TOKEN_NAME, MANAGEMENTS_SERVICE } from '~libs/common/constants';
 import {
@@ -14,7 +14,7 @@ import {
     ApiTooManyRequestsResponse,
     ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { catchException } from '~libs/common';
+import { ModGuard, catchException } from '~libs/common';
 import { StatsMntMessagePattern } from '~apps/managements/stats-mnt/stats-mnt.pattern';
 import { GetStatsRequestDTO, GetStatsResponseDTO } from '~apps/managements/stats-mnt/dtos';
 
@@ -37,6 +37,7 @@ import { GetStatsRequestDTO, GetStatsResponseDTO } from '~apps/managements/stats
     description: 'Internal server error, please try again later!',
 })
 @ApiBearerAuth(ACCESS_TOKEN_NAME)
+@UseGuards(ModGuard)
 @ApiTags('stats')
 @Controller('stats')
 export class StatsController {
