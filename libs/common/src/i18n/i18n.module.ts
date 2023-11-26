@@ -8,6 +8,7 @@ import {
     I18nContext,
 } from 'nestjs-i18n';
 import { ConfigService } from '@nestjs/config';
+import { RabbitMQHeaderResolver } from './resolvers';
 
 @Module({
     imports: [
@@ -24,6 +25,7 @@ import { ConfigService } from '@nestjs/config';
                 ),
             }),
             resolvers: [
+                new RabbitMQHeaderResolver(['x-lang', 'lang', 'x-language']),
                 { use: QueryResolver, options: ['lang', 'language'] },
                 new HeaderResolver(['x-lang', 'lang', 'x-language']),
                 AcceptLanguageResolver, // must be the last one

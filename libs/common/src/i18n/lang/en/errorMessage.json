@@ -8,6 +8,7 @@
     "PROPERTY_IS_NOT_FOUND": "{property} is not found.",
     "PROPERTY_IS_EXPIRED": "{property} is expired.",
     "PROPERTY_IS_INVALID": "{property} is invalid.",
+    "PROPERTY_IS_REQUIRED": "{property} is required.",
     "INTERNAL_SERVER_ERROR": "Something went wrong, please try again later.",
     "TOO_MANY_EMAIL_SENT": "You have sent too many emails, please try again later.",
     "AUTH_EMAIL_OR_USERNAME_INVALID": "Email or username invalid.",
@@ -45,5 +46,9 @@
     "DUPLICATE_ATTRIBUTE_IN_VARIATIONS": "Duplicate attributes in variation {index}: {duplicateAttributes}",
     "DUPLICATE_ATTRIBUTE": "Duplicate attributes: ${duplicateAttributes}",
     "MISSING_REQUIRED_ATTRIBUTE": "Missing required attributes: ${missingAttributes}",
-    "DUPLICATE_SKUS": "Duplicate skus: ${duplicateSkus}"
+    "DUPLICATE_SKUS": "Duplicate skus: ${duplicateSkus}",
+    "FORBIDDEN_ROLE": "You don't have permission to access this resource.",
+    "ONLY_IMAGE_FILE_IS_ACCEPTED": "Only image files is accepted.",
+    "FILE_IS_TOO_LARGE": "File is too large.",
+    "FILE_IS_TOO_LARGE_PROPERTY": "File is too large, max file size is {maxSize}MB and max file count is {maxCount} files."
 }

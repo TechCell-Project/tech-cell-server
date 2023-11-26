@@ -5,7 +5,7 @@ import * as otpGenerator from 'otp-generator';
 import * as bcrypt from 'bcrypt';
 import { RpcException } from '@nestjs/microservices';
 import { Otp } from './otp.schema';
-import { I18n, I18nService } from 'nestjs-i18n';
+import { I18nContext } from 'nestjs-i18n';
 import { I18nTranslations } from '~libs/common/i18n/generated/i18n.generated';
 
 const OTP_LENGTH = 6;
@@ -13,10 +13,7 @@ const SALT_ROUNDS = 10;
 
 @Injectable()
 export class OtpService {
-    constructor(
-        private readonly otpRepository: OtpRepository,
-        @I18n() private readonly i18n: I18nService<I18nTranslations>,
-    ) {}
+    constructor(private readonly otpRepository: OtpRepository) {}
 
     async generateOtp() {
         const bcryptSalt = await bcrypt.genSalt(SALT_ROUNDS);
@@ -32,7 +29,9 @@ export class OtpService {
         } catch (err) {
             Logger.error(err.message);
             throw new RpcException(
-                new InternalServerErrorException(this.i18n.t('errorMessage.FAIL_TO_HASH_OTP')),
+                new InternalServerErrorException(
+                    I18nContext.current<I18nTranslations>().t('errorMessage.FAIL_TO_HASH_OTP'),
+                ),
             );
         }
 

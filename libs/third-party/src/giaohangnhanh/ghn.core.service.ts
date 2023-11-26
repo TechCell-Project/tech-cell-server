@@ -1,6 +1,6 @@
 import { HttpService } from '@nestjs/axios';
 import { Logger } from '@nestjs/common';
-import { AxiosError } from 'axios';
+import { AxiosError, AxiosResponse } from 'axios';
 import { catchError, firstValueFrom, map } from 'rxjs';
 import { GhnProvinceDTO } from './dtos/province.dto';
 import { GhnDistrictDTO } from './dtos/district.dto';
@@ -88,7 +88,7 @@ export class GhnCoreService {
                         throw error;
                     }),
                     map(
-                        (response) =>
+                        (response: AxiosResponse) =>
                             (response.data.data as TGhnWard[])?.map((ward) => new GhnWardDTO(ward)),
                     ),
                 ),

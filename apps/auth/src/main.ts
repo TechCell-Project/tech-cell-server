@@ -8,7 +8,7 @@ async function bootstrap() {
     const logger = new Logger('auth');
     const app = await NestFactory.create(AuthModule);
     app.useGlobalFilters(new RpcExceptionFilter());
-    useRabbitMQ(app, 'RABBITMQ_AUTH_QUEUE');
+    useRabbitMQ(app, 'RABBITMQ_AUTH_QUEUE', false);
     await app.startAllMicroservices();
     logger.log(`⚡️ service is ready`);
 }

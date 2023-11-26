@@ -44,6 +44,8 @@ import {
 } from '~libs/common/constants/api.constant';
 import { MANAGEMENTS_SERVICE } from '~libs/common/constants/services.constant';
 import { Request } from 'express';
+import { I18nContext } from 'nestjs-i18n';
+import { I18nTranslations } from '~libs/common/i18n/generated/i18n.generated';
 
 @ApiBadRequestResponse({
     description: 'Invalid request, please check your request data!',
@@ -103,10 +105,30 @@ export class ImagesController {
             },
             fileFilter: (req, file, cb) => {
                 if (!RegExp(/\.(jpg|jpeg|png|gif|webp)$/).exec(file.originalname)) {
-                    return cb(new BadRequestException('Only image files are allowed!'), false);
+                    return cb(
+                        new BadRequestException(
+                            I18nContext.current<I18nTranslations>().t(
+                                'errorMessage.ONLY_IMAGE_FILE_IS_ACCEPTED',
+                            ),
+                        ),
+                        false,
+                    );
                 }
                 if (file.size > IMAGE_FILE_MAX_SIZE_IN_BYTES) {
-                    return cb(new PayloadTooLargeException('Image size too large'), false);
+                    return cb(
+                        new PayloadTooLargeException(
+                            I18nContext.current<I18nTranslations>().t(
+                                'errorMessage.FILE_IS_TOO_LARGE_PROPERTY',
+                                {
+                                    args: {
+                                        maxSize: IMAGE_FILE_MAX_SIZE_IN_MB,
+                                        maxCount: SINGLE_IMAGE_FILE_MAX_COUNT,
+                                    },
+                                },
+                            ),
+                        ),
+                        false,
+                    );
                 }
                 cb(null, true);
             },
@@ -183,10 +205,30 @@ export class ImagesController {
             },
             fileFilter: (req, file, cb) => {
                 if (!RegExp(/\.(jpg|jpeg|png|gif|webp)$/).exec(file.originalname)) {
-                    return cb(new BadRequestException('Only image files are allowed!'), false);
+                    return cb(
+                        new BadRequestException(
+                            I18nContext.current<I18nTranslations>().t(
+                                'errorMessage.ONLY_IMAGE_FILE_IS_ACCEPTED',
+                            ),
+                        ),
+                        false,
+                    );
                 }
                 if (file.size > IMAGE_FILE_MAX_SIZE_IN_BYTES) {
-                    return cb(new PayloadTooLargeException('Image size too large'), false);
+                    return cb(
+                        new PayloadTooLargeException(
+                            I18nContext.current<I18nTranslations>().t(
+                                'errorMessage.FILE_IS_TOO_LARGE_PROPERTY',
+                                {
+                                    args: {
+                                        maxSize: IMAGE_FILE_MAX_SIZE_IN_MB,
+                                        maxCount: ARRAY_IMAGE_FILE_MAX_COUNT,
+                                    },
+                                },
+                            ),
+                        ),
+                        false,
+                    );
                 }
                 cb(null, true);
             },

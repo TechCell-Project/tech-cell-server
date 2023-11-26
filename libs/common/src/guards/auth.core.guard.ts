@@ -6,6 +6,7 @@ import {
     UnauthorizedException,
     ForbiddenException,
     Logger,
+    HttpStatus,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ClientRMQ, RmqContext, RpcException } from '@nestjs/microservices';
@@ -24,6 +25,8 @@ import { Socket } from 'socket.io';
 import { Request } from 'express';
 import { WsException } from '@nestjs/websockets';
 import { RequestType } from '../types/current-request-type';
+import { I18nContext } from 'nestjs-i18n';
+import { I18nTranslations } from '../i18n/generated/i18n.generated';
 
 /**
  * @description Base Auth Guard, verify jwt token from request and add user to request if login success
@@ -43,15 +46,25 @@ export class AuthCoreGuard implements CanActivate {
     }
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
+        const i18n = I18nContext.current<I18nTranslations>();
         if (this.resolveSkipAuth(context)) {
             return true;
         }
 
-        const { authHeader, requestType } = this.getAccessToken(context);
+        const { authHeader, requestType } = this.getAccessToken(context, i18n);
 
         const authHeaderParts = authHeader?.split(' ');
         if (authHeaderParts && authHeaderParts?.length !== 2) {
-            this.throwException(new UnauthorizedException(), requestType);
+            this.throwException(
+                new UnauthorizedException(
+                    i18n.translate('errorMessage.PROPERTY_IS_INVALID', {
+                        args: {
+                            property: 'Token',
+                        },
+                    }),
+                ),
+                requestType,
+            );
             return false;
         }
         const [, jwt] = authHeaderParts;
@@ -59,6 +72,17 @@ export class AuthCoreGuard implements CanActivate {
         const dataVerified: ITokenVerifiedResponse = await firstValueFrom(
             this.authService.send(AuthMessagePattern.verifyJwt, { jwt }).pipe(
                 catchError((error) => {
+                    if (
+                        error?.status === HttpStatus.UNAUTHORIZED ||
+                        error?.statusCode === HttpStatus.UNAUTHORIZED
+                    ) {
+                        this.throwException(
+                            new UnauthorizedException(
+                                i18n.t('errorMessage.AUTH_ACCESS_TOKEN_IS_EXPIRED'),
+                            ),
+                            requestType,
+                        );
+                    }
                     this.throwException(error, requestType);
                     return of(null);
                 }),
@@ -66,17 +90,26 @@ export class AuthCoreGuard implements CanActivate {
         );
 
         if (!dataVerified.role || !this._acceptRoles.includes(dataVerified.role)) {
-            this.throwException(new ForbiddenException('Forbidden permission'), requestType);
+            this.throwException(
+                new ForbiddenException(i18n.t('errorMessage.FORBIDDEN_ROLE')),
+                requestType,
+            );
         }
 
         // Check if token is expired
         if (!dataVerified.exp) {
-            this.throwException(new UnauthorizedException(), requestType);
+            this.throwException(
+                new UnauthorizedException(i18n.t('errorMessage.AUTH_ACCESS_TOKEN_IS_EXPIRED')),
+                requestType,
+            );
         }
         const TOKEN_EXP_MS = dataVerified.exp * 1000;
         const isJwtValid = Date.now() < TOKEN_EXP_MS;
         if (!isJwtValid) {
-            this.throwException(new UnauthorizedException('Token expired'), requestType);
+            this.throwException(
+                new UnauthorizedException(i18n.t('errorMessage.AUTH_ACCESS_TOKEN_IS_EXPIRED')),
+                requestType,
+            );
         }
         this.addUserToRequest(dataVerified, context);
         return isJwtValid;
@@ -168,33 +201,40 @@ export class AuthCoreGuard implements CanActivate {
      * @param context The execution context of the current call
      * @returns The authorization header and the type of request
      */
-    private getAccessToken(context: ExecutionContext): {
+    private getAccessToken(
+        context: ExecutionContext,
+        i18n: I18nContext<I18nTranslations>,
+    ): {
         authHeader: string | undefined;
         requestType: RequestType;
     } {
         let authHeader: string | undefined = undefined;
         let requestType: undefined | RequestType = undefined;
 
+        const accessTokenMissingException = new UnauthorizedException(
+            i18n.t('errorMessage.AUTH_ACCESS_TOKEN_IS_MISSING'),
+        );
+
         if (context.getType() === RequestType.Http) {
             const request: Request = context.switchToHttp().getRequest();
             authHeader = request.headers?.authorization;
             requestType = RequestType.Http;
             if (!authHeader) {
-                throw new UnauthorizedException();
+                throw accessTokenMissingException;
             }
         } else if (context.getType() === RequestType.Ws) {
             const client: Socket = context.switchToWs().getClient();
             authHeader = client.handshake?.headers?.authorization;
             requestType = RequestType.Ws;
             if (!authHeader) {
-                throw new WsException(new UnauthorizedException());
+                throw new WsException(accessTokenMissingException);
             }
         } else if (context.getType() === RequestType.Rpc) {
             const ctx: RmqContext = context.switchToRpc().getContext();
             authHeader = ctx?.['headers']?.['authorization'];
             requestType = RequestType.Rpc;
             if (!authHeader) {
-                throw new RpcException(new UnauthorizedException());
+                throw new RpcException(accessTokenMissingException);
             }
         }
 
@@ -217,6 +257,7 @@ export class AuthCoreGuard implements CanActivate {
                 throw new RpcException(error);
             case RequestType.Http:
             default:
+                delete error?.response;
                 throw new RpcException(error);
         }
     }

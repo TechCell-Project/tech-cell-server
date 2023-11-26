@@ -5,15 +5,12 @@ import { CreateUserDTO } from './dtos';
 import { User } from './schemas/user.schema';
 import { RpcException } from '@nestjs/microservices';
 import { FilterQuery, ProjectionType, QueryOptions } from 'mongoose';
-import { I18n, I18nService } from 'nestjs-i18n';
+import { I18nContext } from 'nestjs-i18n';
 import { I18nTranslations } from '~libs/common/i18n/generated/i18n.generated';
 
 @Injectable()
 export class UsersService {
-    constructor(
-        private readonly usersRepository: UsersRepository,
-        @I18n() private readonly i18n: I18nService<I18nTranslations>,
-    ) {}
+    constructor(private readonly usersRepository: UsersRepository) {}
 
     /**
      * create a new user, password will be hashed here before saving to database
@@ -41,7 +38,7 @@ export class UsersService {
         if (emailCount > 0) {
             throw new RpcException(
                 new UnprocessableEntityException(
-                    this.i18n.t('errorMessage.PROPERTY_IS_EXISTS', {
+                    I18nContext.current<I18nTranslations>().t('errorMessage.PROPERTY_IS_EXISTS', {
                         args: {
                             property: 'Email',
                         },
@@ -53,7 +50,7 @@ export class UsersService {
         if (userNameCount > 0) {
             throw new RpcException(
                 new UnprocessableEntityException(
-                    this.i18n.t('errorMessage.PROPERTY_IS_EXISTS', {
+                    I18nContext.current<I18nTranslations>().t('errorMessage.PROPERTY_IS_EXISTS', {
                         args: {
                             property: 'Username',
                         },

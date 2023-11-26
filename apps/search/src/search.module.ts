@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { AppConfigModule } from '~libs/common/appConfig';
-import { I18nModule } from '~libs/common/i18n';
 import { ProductsSearchModule } from './products-search/products-search.module';
 import { AttributesSearchModule } from './attributes-search/attributes-search.module';
 import { CategoriesSearchModule } from './categories-search/categories-search.module';
@@ -13,7 +12,6 @@ import { RabbitMQService } from '~libs/common/RabbitMQ/services';
 @Module({
     imports: [
         AppConfigModule,
-        I18nModule,
         UsersSearchModule,
         ProductsSearchModule,
         AttributesSearchModule,
