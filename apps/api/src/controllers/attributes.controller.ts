@@ -3,6 +3,7 @@ import {
     Controller,
     Get,
     Inject,
+    Headers,
     Param,
     Post,
     Query,
@@ -10,7 +11,7 @@ import {
     UseGuards,
     Delete,
 } from '@nestjs/common';
-import { ClientRMQ } from '@nestjs/microservices';
+import { ClientRMQ, RmqRecord, RmqRecordBuilder } from '@nestjs/microservices';
 import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~libs/common/constants';
 import { AdminGuard, catchException } from '~libs/common';
 import {
@@ -68,9 +69,16 @@ export class AttributesController {
     })
     @ApiNotFoundResponse({ description: 'Attributes not found!' })
     @Get('/')
-    async getAttributes(@Query() requestQuery: GetAttributesRequestDTO) {
+    async getAttributes(
+        @Headers() headers: Record<string, string>,
+        @Query() requestQuery: GetAttributesRequestDTO,
+    ) {
+        const record: RmqRecord = new RmqRecordBuilder()
+            .setOptions({ headers: headers })
+            .setData(requestQuery)
+            .build();
         return this.searchService
-            .send(AttributesSearchMessagePattern.getAttributes, { ...requestQuery })
+            .send(AttributesSearchMessagePattern.getAttributes, record)
             .pipe(catchException());
     }
 
@@ -81,9 +89,16 @@ export class AttributesController {
     @ApiOkResponse({ description: 'Get attribute by id successfully!', type: AttributeDTO })
     @ApiNotFoundResponse({ description: 'Attribute not found!' })
     @Get('/:attributeId')
-    async getAttributeById(@Param() { attributeId }: GetAttributeByIdRequestDTO) {
+    async getAttributeById(
+        @Headers() headers: Record<string, string>,
+        @Param() { attributeId }: GetAttributeByIdRequestDTO,
+    ) {
+        const record: RmqRecord = new RmqRecordBuilder()
+            .setOptions({ headers: headers })
+            .setData({ attributeId })
+            .build();
         return this.searchService
-            .send(AttributesSearchMessagePattern.getAttributeById, { attributeId })
+            .send(AttributesSearchMessagePattern.getAttributeById, record)
             .pipe(catchException());
     }
 
@@ -94,9 +109,16 @@ export class AttributesController {
     @ApiOkResponse({ description: 'Get attribute by label successfully!' })
     @ApiNotFoundResponse({ description: 'Attribute not found!' })
     @Get('/label/:label')
-    async getAttributesByLabel(@Param() { label }: GetAttributeByLabelRequestDTO) {
+    async getAttributesByLabel(
+        @Headers() headers: Record<string, string>,
+        @Param() { label }: GetAttributeByLabelRequestDTO,
+    ) {
+        const record: RmqRecord = new RmqRecordBuilder()
+            .setOptions({ headers: headers })
+            .setData({ label })
+            .build();
         return this.searchService
-            .send(AttributesSearchMessagePattern.getAttributeByLabel, { label })
+            .send(AttributesSearchMessagePattern.getAttributeByLabel, record)
             .pipe(catchException());
     }
 
@@ -108,9 +130,16 @@ export class AttributesController {
     @ApiBadRequestResponse({ description: 'Something wrong, re-check your input.' })
     @UseGuards(AdminGuard)
     @Post('/')
-    async createAttribute(@Body() { label, name, description }: CreateAttributeRequestDTO) {
+    async createAttribute(
+        @Headers() headers: Record<string, string>,
+        @Body() { label, name, description }: CreateAttributeRequestDTO,
+    ) {
+        const record: RmqRecord = new RmqRecordBuilder()
+            .setOptions({ headers: headers })
+            .setData({ label, name, description })
+            .build();
         return this.managementsService
-            .send(AttributesMntMessagePattern.createAttribute, { label, name, description })
+            .send(AttributesMntMessagePattern.createAttribute, record)
             .pipe(catchException());
     }
 
@@ -123,16 +152,16 @@ export class AttributesController {
     @UseGuards(AdminGuard)
     @Patch('/:attributeId')
     async updateAttributeInfo(
+        @Headers() headers: Record<string, string>,
         @Param('attributeId') attributeId: string,
         @Body() { label, name, description }: UpdateAttributeRequestDTO,
     ) {
+        const record: RmqRecord = new RmqRecordBuilder()
+            .setOptions({ headers: headers })
+            .setData({ attributeId, label, name, description })
+            .build();
         return this.managementsService
-            .send(AttributesMntMessagePattern.updateAttributeInfo, {
-                attributeId,
-                label,
-                name,
-                description,
-            })
+            .send(AttributesMntMessagePattern.updateAttributeInfo, record)
             .pipe(catchException());
     }
 
@@ -144,9 +173,16 @@ export class AttributesController {
     @ApiBadRequestResponse({ description: 'Something wrong, re-check your input.' })
     @UseGuards(AdminGuard)
     @Delete('/:attributeId')
-    async deleteAttribute(@Param() { attributeId }: DeleteAttributeByIdRequestDTO) {
+    async deleteAttribute(
+        @Headers() headers: Record<string, string>,
+        @Param() { attributeId }: DeleteAttributeByIdRequestDTO,
+    ) {
+        const record: RmqRecord = new RmqRecordBuilder()
+            .setOptions({ headers: headers })
+            .setData({ attributeId })
+            .build();
         return this.managementsService
-            .send(AttributesMntMessagePattern.deleteAttribute, { attributeId })
+            .send(AttributesMntMessagePattern.deleteAttribute, record)
             .pipe(catchException());
     }
 }

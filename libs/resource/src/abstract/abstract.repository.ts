@@ -12,7 +12,7 @@ import {
 } from 'mongoose';
 import { AbstractDocument } from './abstract.schema';
 import { RpcException } from '@nestjs/microservices';
-import { I18nService } from 'nestjs-i18n';
+import { I18nContext } from 'nestjs-i18n';
 import { I18nTranslations } from '~libs/common/i18n/generated/i18n.generated';
 
 export abstract class AbstractRepository<TDocument extends AbstractDocument> {
@@ -21,7 +21,6 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
     constructor(
         protected readonly model: Model<TDocument>,
         private readonly connection: Connection,
-        private readonly i18n: I18nService<I18nTranslations>,
     ) {}
 
     async create(
@@ -53,7 +52,7 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
             this.logger.warn(`${this.model.modelName} not found with filterQuery`, filterQuery);
             throw new RpcException(
                 new NotFoundException(
-                    this.i18n.t('errorMessage.MODEL_NOT_FOUND', {
+                    I18nContext.current<I18nTranslations>().t('errorMessage.MODEL_NOT_FOUND', {
                         args: { modelName: this.model.modelName },
                     }),
                 ),
@@ -80,7 +79,7 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
             this.logger.warn(`${this.model.modelName} not found with filterQuery:`, filterQuery);
             throw new RpcException(
                 new NotFoundException(
-                    this.i18n.t('errorMessage.MODEL_NOT_FOUND', {
+                    I18nContext.current<I18nTranslations>().t('errorMessage.MODEL_NOT_FOUND', {
                         args: { modelName: this.model.modelName },
                     }),
                 ),
@@ -122,7 +121,7 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
             }
             throw new RpcException(
                 new NotFoundException(
-                    this.i18n.t('errorMessage.MODEL_NOT_FOUND', {
+                    I18nContext.current<I18nTranslations>().t('errorMessage.MODEL_NOT_FOUND', {
                         args: { modelName: this.model.modelName },
                     }),
                 ),

@@ -11,10 +11,12 @@ import { JwtGuard } from './guards';
 import { OtpModule } from '~libs/resource/otp';
 import { COMMUNICATIONS_SERVICE } from '~libs/common/constants';
 import { AuthHealthIndicator } from './auth.health';
+import { I18nModule } from '~libs/common/i18n';
 
 @Module({
     imports: [
         AppConfigModule,
+        I18nModule,
         UsersModule,
         OtpModule,
         JwtModule.register({}),

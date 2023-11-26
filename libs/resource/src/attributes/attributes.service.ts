@@ -10,15 +10,12 @@ import { CreateAttributeDTO, UpdateAttributeDTO } from './dtos';
 import { IBaseQuery } from '../interfaces';
 import { RpcException } from '@nestjs/microservices';
 import { Attribute } from './schemas';
-import { I18n, I18nService } from 'nestjs-i18n';
+import { I18nContext } from 'nestjs-i18n';
 import { I18nTranslations } from '~libs/common/i18n/generated/i18n.generated';
 
 @Injectable()
 export class AttributesService {
-    constructor(
-        private readonly attributesRepository: AttributesRepository,
-        @I18n() private readonly i18n: I18nService<I18nTranslations>,
-    ) {}
+    constructor(private readonly attributesRepository: AttributesRepository) {}
 
     async getAttributes({ filterQueries, queryOptions, projectionArgs }: IBaseQuery<Attribute>) {
         return this.attributesRepository.find({
@@ -35,7 +32,7 @@ export class AttributesService {
         } catch (error) {
             throw new RpcException(
                 new BadRequestException(
-                    this.i18n.t('errorMessage.PROPERTY_ID_INVALID', {
+                    I18nContext.current<I18nTranslations>().t('errorMessage.PROPERTY_ID_INVALID', {
                         args: {
                             modelName: Attribute.name,
                         },
@@ -52,12 +49,15 @@ export class AttributesService {
         } catch (error) {
             throw new RpcException(
                 new NotFoundException(
-                    this.i18n.t('errorMessage.PROPERTY_LABEL_NOT_FOUND', {
-                        args: {
-                            property: Attribute.name,
-                            label: label,
+                    I18nContext.current<I18nTranslations>().t(
+                        'errorMessage.PROPERTY_LABEL_NOT_FOUND',
+                        {
+                            args: {
+                                property: Attribute.name,
+                                label: label,
+                            },
                         },
-                    }),
+                    ),
                 ),
             );
         }
@@ -72,12 +72,15 @@ export class AttributesService {
         if (await this.isExistAttributeLabel(label)) {
             throw new RpcException(
                 new ConflictException(
-                    this.i18n.t('errorMessage.PROPERTY_LABEL_IS_EXISTS', {
-                        args: {
-                            property: Attribute.name,
-                            label: label,
+                    I18nContext.current<I18nTranslations>().t(
+                        'errorMessage.PROPERTY_LABEL_IS_EXISTS',
+                        {
+                            args: {
+                                property: Attribute.name,
+                                label: label,
+                            },
                         },
-                    }),
+                    ),
                 ),
             );
         }

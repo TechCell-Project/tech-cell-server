@@ -9,6 +9,7 @@ import { I18nModule } from '~libs/common/i18n';
 
 @Module({
     imports: [
+        I18nModule,
         MongodbModule,
         MongooseModule.forFeature([
             {
@@ -17,7 +18,6 @@ import { I18nModule } from '~libs/common/i18n';
             },
         ]),
         RedisModule,
-        I18nModule,
     ],
     providers: [CartsRepository, CartsService],
     exports: [CartsService],

@@ -12,7 +12,6 @@ import { I18nModule } from '~libs/common/i18n';
         MongodbModule,
         MongooseModule.forFeature([{ name: Otp.name, schema: OtpSchema }]),
     ],
-    controllers: [],
     providers: [OtpService, OtpRepository],
     exports: [OtpService],
 })

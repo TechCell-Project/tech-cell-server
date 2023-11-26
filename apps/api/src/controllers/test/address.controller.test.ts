@@ -36,7 +36,7 @@ describe(AddressController, () => {
         test(`should called searchService.send with ${JSON.stringify(
             AddressSearchMessagePattern.getProvinces,
         )}`, async () => {
-            await addressController.getProvinces();
+            await addressController.getProvinces({});
             expect(searchService.send).toBeCalledWith(AddressSearchMessagePattern.getProvinces, {});
         });
     });
@@ -46,7 +46,7 @@ describe(AddressController, () => {
         test(`should called searchService.send with ${JSON.stringify(
             AddressSearchMessagePattern.getDistricts,
         )}`, async () => {
-            await addressController.getDistricts({ province_id: provinceId });
+            await addressController.getDistricts({}, { province_id: provinceId });
             expect(searchService.send).toBeCalledWith(AddressSearchMessagePattern.getDistricts, {
                 province_id: provinceId,
             });
@@ -58,7 +58,7 @@ describe(AddressController, () => {
         test(`should called searchService.send with ${JSON.stringify(
             AddressSearchMessagePattern.getWards,
         )}`, async () => {
-            await addressController.getWards({ district_id: districtId });
+            await addressController.getWards({}, { district_id: districtId });
             expect(searchService.send).toBeCalledWith(AddressSearchMessagePattern.getWards, {
                 district_id: districtId,
             });

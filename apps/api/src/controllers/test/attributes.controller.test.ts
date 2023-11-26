@@ -52,7 +52,7 @@ describe(AttributesController, () => {
         const message = AttributesSearchMessagePattern.getAttributeById;
         test(`should called searchService.send with ${JSON.stringify(message)}`, async () => {
             const attributeId = '1';
-            await attributesController.getAttributeById({ attributeId });
+            await attributesController.getAttributeById({}, { attributeId });
             expect(searchService.send).toBeCalledWith(message, { attributeId });
         });
     });

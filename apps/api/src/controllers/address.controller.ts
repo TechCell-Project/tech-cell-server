@@ -2,8 +2,8 @@ import { catchException } from '~libs/common';
 import { GhnDistrictDTO } from '~libs/third-party/giaohangnhanh/dtos/district.dto';
 import { GhnProvinceDTO } from '~libs/third-party/giaohangnhanh/dtos/province.dto';
 import { GhnWardDTO } from '~libs/third-party/giaohangnhanh/dtos/ward.dto';
-import { Controller, Get, Inject, Param } from '@nestjs/common';
-import { ClientRMQ } from '@nestjs/microservices';
+import { Controller, Get, Inject, Param, Headers } from '@nestjs/common';
+import { ClientRMQ, RmqRecordBuilder } from '@nestjs/microservices';
 import {
     ApiBadRequestResponse,
     ApiInternalServerErrorResponse,
@@ -37,27 +37,36 @@ export class AddressController {
     @Get('/provinces')
     @ApiOperation({ summary: 'Get provinces' })
     @ApiOkResponse({ description: 'Lấy danh sách tỉnh thành công.', type: [GhnProvinceDTO] })
-    async getProvinces() {
+    async getProvinces(@Headers() headers) {
+        const record = new RmqRecordBuilder().setOptions({ headers }).build();
         return this.searchService
-            .send(AddressSearchMessagePattern.getProvinces, {})
+            .send(AddressSearchMessagePattern.getProvinces, record)
             .pipe(catchException());
     }
 
     @Get('/districts/:province_id')
     @ApiOperation({ summary: 'Get districts' })
     @ApiOkResponse({ description: 'Lấy danh sách quận/huyện thành công.', type: [GhnDistrictDTO] })
-    async getDistricts(@Param() { province_id }: QueryDistrictsDTO) {
+    async getDistricts(@Headers() headers, @Param() { province_id }: QueryDistrictsDTO) {
+        const record = new RmqRecordBuilder()
+            .setOptions({ headers })
+            .setData({ province_id })
+            .build();
         return this.searchService
-            .send(AddressSearchMessagePattern.getDistricts, { province_id })
+            .send(AddressSearchMessagePattern.getDistricts, record)
             .pipe(catchException());
     }
 
     @Get('/wards/:district_id')
     @ApiOperation({ summary: 'Get wards' })
     @ApiOkResponse({ description: 'Lấy danh sách phường/xã thành công.', type: [GhnWardDTO] })
-    async getWards(@Param() { district_id }: QueryWardsDTO) {
+    async getWards(@Headers() headers, @Param() { district_id }: QueryWardsDTO) {
+        const record = new RmqRecordBuilder()
+            .setOptions({ headers })
+            .setData({ district_id })
+            .build();
         return this.searchService
-            .send(AddressSearchMessagePattern.getWards, { district_id })
+            .send(AddressSearchMessagePattern.getWards, record)
             .pipe(catchException());
     }
 }

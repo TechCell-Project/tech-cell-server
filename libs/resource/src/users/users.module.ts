@@ -13,7 +13,6 @@ import { I18nModule } from '~libs/common/i18n';
         MongodbModule,
         MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     ],
-    controllers: [],
     providers: [UsersService, UsersRepository],
     exports: [UsersService],
 })

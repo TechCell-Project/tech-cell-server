@@ -29,6 +29,7 @@ export type I18nTranslations = {
         "PROPERTY_IS_NOT_FOUND": string;
         "PROPERTY_IS_EXPIRED": string;
         "PROPERTY_IS_INVALID": string;
+        "PROPERTY_IS_REQUIRED": string;
         "INTERNAL_SERVER_ERROR": string;
         "TOO_MANY_EMAIL_SENT": string;
         "AUTH_EMAIL_OR_USERNAME_INVALID": string;
@@ -67,6 +68,10 @@ export type I18nTranslations = {
         "DUPLICATE_ATTRIBUTE": string;
         "MISSING_REQUIRED_ATTRIBUTE": string;
         "DUPLICATE_SKUS": string;
+        "FORBIDDEN_ROLE": string;
+        "ONLY_IMAGE_FILE_IS_ACCEPTED": string;
+        "FILE_IS_TOO_LARGE": string;
+        "FILE_IS_TOO_LARGE_PROPERTY": string;
     };
     "exception": {
         "InternalServerException": {
