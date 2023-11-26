@@ -13,7 +13,17 @@ export class RabbitMQService implements RabbitMQServiceInterface {
      * @param inheritAppConfig A boolean value that indicates whether the microservice should inherit the application configuration
      * @returns A promise that resolves when the application is initialized
      */
-    static connectRabbitMQ(app: INestApplication, queueNameEnv: string, inheritAppConfig = false) {
+    static connectRabbitMQ({
+        app,
+        queueNameEnv,
+        inheritAppConfig = false,
+        logger = new Logger(RabbitMQService.name),
+    }: {
+        app: INestApplication;
+        queueNameEnv: string;
+        inheritAppConfig?: boolean;
+        logger?: Logger;
+    }) {
         try {
             const configService = app.get(ConfigService);
             const rmqService = app.get<RabbitMQService>(RabbitMQService);
@@ -26,9 +36,9 @@ export class RabbitMQService implements RabbitMQServiceInterface {
             app.connectMicroservice<RmqOptions>(rmqService.getRmqOptions(queue), {
                 inheritAppConfig,
             });
-            Logger.log(`⚡️ Config microservice successfully, listen on: ${queue}`);
+            logger.log(`⚡️ Config microservice successfully, listen on: ${queue}`);
         } catch (error) {
-            Logger.error(`⚡️ Config failed: ${error});`);
+            logger.error(`⚡️ Config failed: ${error});`);
         }
     }
 
