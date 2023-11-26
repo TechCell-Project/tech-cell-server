@@ -8,6 +8,7 @@ import { AddressSearchMessagePattern } from '~apps/search/address-search/address
 describe(AddressController, () => {
     let addressController: AddressController;
     let searchService: jest.Mocked<ClientRMQ>;
+    let mockHeaders: jest.Mocked<Record<string, any>>;
     let mockRmqRecord: (data: Record<string, any>) => jest.Mocked<RmqRecord>;
 
     beforeAll(async () => {
@@ -22,8 +23,11 @@ describe(AddressController, () => {
 
         addressController = unit;
         searchService = unitRef.get<ClientRMQ>(SEARCH_SERVICE);
+        mockHeaders = {
+            lang: 'en',
+        };
         mockRmqRecord = (data: Record<string, any>) =>
-            new RmqRecordBuilder().setOptions({ headers: {} }).setData(data).build();
+            new RmqRecordBuilder().setOptions({ headers: mockHeaders }).setData(data).build();
     });
 
     afterAll(() => {
@@ -39,10 +43,10 @@ describe(AddressController, () => {
         test(`should called searchService.send with ${JSON.stringify(
             AddressSearchMessagePattern.getProvinces,
         )}`, async () => {
-            await addressController.getProvinces({});
+            await addressController.getProvinces(mockHeaders);
             expect(searchService.send).toHaveBeenCalledWith(
                 AddressSearchMessagePattern.getProvinces,
-                mockRmqRecord(undefined),
+                mockRmqRecord({}),
             );
         });
     });
@@ -52,7 +56,7 @@ describe(AddressController, () => {
         test(`should called searchService.send with ${JSON.stringify(
             AddressSearchMessagePattern.getDistricts,
         )}`, async () => {
-            await addressController.getDistricts({}, { province_id: provinceId });
+            await addressController.getDistricts(mockHeaders, { province_id: provinceId });
             expect(searchService.send).toHaveBeenCalledWith(
                 AddressSearchMessagePattern.getDistricts,
                 mockRmqRecord({
@@ -67,7 +71,7 @@ describe(AddressController, () => {
         test(`should called searchService.send with ${JSON.stringify(
             AddressSearchMessagePattern.getWards,
         )}`, async () => {
-            await addressController.getWards({}, { district_id: districtId });
+            await addressController.getWards(mockHeaders, { district_id: districtId });
             expect(searchService.send).toHaveBeenCalledWith(
                 AddressSearchMessagePattern.getWards,
                 mockRmqRecord({

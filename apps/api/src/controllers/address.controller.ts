@@ -1,9 +1,8 @@
-import { catchException } from '~libs/common';
 import { GhnDistrictDTO } from '~libs/third-party/giaohangnhanh/dtos/district.dto';
 import { GhnProvinceDTO } from '~libs/third-party/giaohangnhanh/dtos/province.dto';
 import { GhnWardDTO } from '~libs/third-party/giaohangnhanh/dtos/ward.dto';
 import { Controller, Get, Inject, Param, Headers } from '@nestjs/common';
-import { ClientRMQ, RmqRecordBuilder } from '@nestjs/microservices';
+import { ClientRMQ } from '@nestjs/microservices';
 import {
     ApiBadRequestResponse,
     ApiInternalServerErrorResponse,
@@ -16,6 +15,7 @@ import {
 import { AddressSearchMessagePattern } from '~apps/search/address-search';
 import { QueryDistrictsDTO, QueryWardsDTO } from '~apps/search/address-search/dtos';
 import { SEARCH_SERVICE } from '~libs/common/constants/services.constant';
+import { sendMessagePipeException } from '~libs/common/RabbitMQ/rmq.util';
 
 @ApiBadRequestResponse({
     description: 'Invalid request, please check your request data!',
@@ -37,36 +37,42 @@ export class AddressController {
     @Get('/provinces')
     @ApiOperation({ summary: 'Get provinces' })
     @ApiOkResponse({ description: 'Lấy danh sách tỉnh thành công.', type: [GhnProvinceDTO] })
-    async getProvinces(@Headers() headers) {
-        const record = new RmqRecordBuilder().setOptions({ headers }).build();
-        return this.searchService
-            .send(AddressSearchMessagePattern.getProvinces, record)
-            .pipe(catchException());
+    async getProvinces(@Headers() headers: Record<string, any>) {
+        return sendMessagePipeException({
+            client: this.searchService,
+            pattern: AddressSearchMessagePattern.getProvinces,
+            data: {},
+            headers,
+        });
     }
 
     @Get('/districts/:province_id')
     @ApiOperation({ summary: 'Get districts' })
     @ApiOkResponse({ description: 'Lấy danh sách quận/huyện thành công.', type: [GhnDistrictDTO] })
-    async getDistricts(@Headers() headers, @Param() { province_id }: QueryDistrictsDTO) {
-        const record = new RmqRecordBuilder()
-            .setOptions({ headers })
-            .setData({ province_id })
-            .build();
-        return this.searchService
-            .send(AddressSearchMessagePattern.getDistricts, record)
-            .pipe(catchException());
+    async getDistricts(
+        @Headers() headers: Record<string, any>,
+        @Param() { province_id }: QueryDistrictsDTO,
+    ) {
+        return sendMessagePipeException({
+            client: this.searchService,
+            pattern: AddressSearchMessagePattern.getDistricts,
+            data: { province_id },
+            headers,
+        });
     }
 
     @Get('/wards/:district_id')
     @ApiOperation({ summary: 'Get wards' })
     @ApiOkResponse({ description: 'Lấy danh sách phường/xã thành công.', type: [GhnWardDTO] })
-    async getWards(@Headers() headers, @Param() { district_id }: QueryWardsDTO) {
-        const record = new RmqRecordBuilder()
-            .setOptions({ headers })
-            .setData({ district_id })
-            .build();
-        return this.searchService
-            .send(AddressSearchMessagePattern.getWards, record)
-            .pipe(catchException());
+    async getWards(
+        @Headers() headers: Record<string, any>,
+        @Param() { district_id }: QueryWardsDTO,
+    ) {
+        return sendMessagePipeException({
+            client: this.searchService,
+            pattern: AddressSearchMessagePattern.getWards,
+            data: { district_id },
+            headers,
+        });
     }
 }
