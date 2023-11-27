@@ -1,7 +1,7 @@
 import { TCurrentUser } from '~libs/common/types';
 import { Notification, NotificationService } from '~libs/resource/notifications';
 import { Injectable } from '@nestjs/common';
-import { QueryOptions, Types } from 'mongoose';
+import { FilterQuery, QueryOptions } from 'mongoose';
 import { GetUserNotificationsDTO, OrderBy, ReadType } from '../dtos/get-user-notifications.dto';
 import { ListDataResponseDTO } from '~libs/common/dtos';
 
@@ -13,8 +13,8 @@ export class NotificationsService {
         user: TCurrentUser,
         { page, pageSize, readType, orderBy }: GetUserNotificationsDTO,
     ) {
-        const query = {
-            recipientId: new Types.ObjectId(user._id),
+        const query: FilterQuery<Notification> = {
+            recipientId: user._id.toString(),
             ...(readType === ReadType.read && { readAt: { $ne: null } }),
             ...(readType === ReadType.unread && { readAt: null }),
         };
