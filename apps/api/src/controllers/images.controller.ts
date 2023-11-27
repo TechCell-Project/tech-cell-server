@@ -1,4 +1,4 @@
-import { AdminGuard, catchException } from '~libs/common';
+import { AdminGuard } from '~libs/common';
 import {
     BadRequestException,
     Controller,
@@ -15,6 +15,7 @@ import {
     UseInterceptors,
     UploadedFiles,
     Req,
+    Headers,
 } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
@@ -46,6 +47,8 @@ import { MANAGEMENTS_SERVICE } from '~libs/common/constants/services.constant';
 import { Request } from 'express';
 import { I18nContext } from 'nestjs-i18n';
 import { I18nTranslations } from '~libs/common/i18n/generated/i18n.generated';
+import { sendMessagePipeException } from '~libs/common/RabbitMQ/rmq.util';
+import { THeaders } from '~libs/common/types/common.type';
 
 @ApiBadRequestResponse({
     description: 'Invalid request, please check your request data!',
@@ -80,10 +83,13 @@ export class ImagesController {
         description: 'Image not found',
     })
     @Get('/:publicId')
-    async getImageByPublicId(@Param() { publicId }: PublicIdDTO) {
-        return this.managementsService
-            .send(ImagesMntMessagePattern.getImageByPublicId, { publicId })
-            .pipe(catchException());
+    async getImageByPublicId(@Headers() headers: THeaders, @Param() { publicId }: PublicIdDTO) {
+        return sendMessagePipeException({
+            client: this.managementsService,
+            pattern: ImagesMntMessagePattern.getImageByPublicId,
+            data: { publicId },
+            headers,
+        });
     }
 
     @ApiOperation({
@@ -150,6 +156,7 @@ export class ImagesController {
     @Post('/')
     @UseGuards(AdminGuard)
     async uploadSingleImage(
+        @Headers() headers: THeaders,
         @UploadedFile(
             new ParseFilePipe({
                 validators: [
@@ -165,9 +172,12 @@ export class ImagesController {
         @Req() req: Request,
     ) {
         const imageUrl = ImagesController.buildUploadImageUrl(req, image.filename);
-        return this.managementsService
-            .send(ImagesMntMessagePattern.uploadSingleImage, { image, imageUrl })
-            .pipe(catchException());
+        return sendMessagePipeException({
+            client: this.managementsService,
+            pattern: ImagesMntMessagePattern.uploadSingleImage,
+            data: { image, imageUrl },
+            headers,
+        });
     }
 
     @ApiOperation({
@@ -237,6 +247,7 @@ export class ImagesController {
     @Post('/array')
     @UseGuards(AdminGuard)
     async uploadArrayImages(
+        @Headers() headers: THeaders,
         @UploadedFiles(
             new ParseFilePipe({
                 validators: [
@@ -254,8 +265,11 @@ export class ImagesController {
         const imageUrls = images.map((image) =>
             ImagesController.buildUploadImageUrl(req, image.filename),
         );
-        return this.managementsService
-            .send(ImagesMntMessagePattern.uploadArrayImage, { images, imageUrls })
-            .pipe(catchException());
+        return sendMessagePipeException({
+            client: this.managementsService,
+            pattern: ImagesMntMessagePattern.uploadArrayImage,
+            data: { images, imageUrls },
+            headers,
+        });
     }
 }

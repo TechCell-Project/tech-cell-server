@@ -1,11 +1,12 @@
 import { of } from 'rxjs';
 import { TestBed } from '@automock/jest';
-import { ClientRMQ } from '@nestjs/microservices';
+import { ClientRMQ, RmqRecord, RmqRecordBuilder } from '@nestjs/microservices';
 import { ImagesController } from '../images.controller';
 import { MANAGEMENTS_SERVICE } from '~libs/common/constants';
 import { PublicIdDTO } from '~apps/managements/images-mnt/dtos/publicId.dto';
 import { ImagesMntMessagePattern } from '~apps/managements/images-mnt/images-mnt.pattern';
 import { Request } from 'express';
+import { THeaders } from '~libs/common/types/common.type';
 
 describe(ImagesController, () => {
     let imagesController: ImagesController;
@@ -13,6 +14,8 @@ describe(ImagesController, () => {
     let imageMock: Express.Multer.File;
     let imageMockArray: Express.Multer.File[];
     let requestMock: Request;
+    let mockHeaders: jest.Mocked<THeaders>;
+    let mockRmqRecord: (data: Record<string, any>) => jest.Mocked<RmqRecord>;
 
     beforeAll(async () => {
         const { unit, unitRef } = TestBed.create(ImagesController)
@@ -45,6 +48,11 @@ describe(ImagesController, () => {
                 host: 'any_host',
             },
         } as any;
+        mockHeaders = {
+            lang: 'en',
+        };
+        mockRmqRecord = (data: Record<string, any>) =>
+            new RmqRecordBuilder().setOptions({ headers: mockHeaders }).setData(data).build();
     });
 
     afterAll(() => {
@@ -70,8 +78,8 @@ describe(ImagesController, () => {
             const data: PublicIdDTO = {
                 publicId: 'publicId',
             };
-            await imagesController.getImageByPublicId(data);
-            expect(managementsService.send).toBeCalledWith(message, data);
+            await imagesController.getImageByPublicId(mockHeaders, data);
+            expect(managementsService.send).toHaveBeenCalledWith(message, mockRmqRecord(data));
         });
     });
 
@@ -83,11 +91,14 @@ describe(ImagesController, () => {
         });
 
         test(`should called managementsService.send with ${JSON.stringify(message)}`, async () => {
-            await imagesController.uploadSingleImage(imageMock, requestMock);
-            expect(managementsService.send).toBeCalledWith(message, {
-                image: imageMock,
-                imageUrl: ImagesController.buildUploadImageUrl(requestMock, imageMock.filename),
-            });
+            await imagesController.uploadSingleImage(mockHeaders, imageMock, requestMock);
+            expect(managementsService.send).toHaveBeenCalledWith(
+                message,
+                mockRmqRecord({
+                    image: imageMock,
+                    imageUrl: ImagesController.buildUploadImageUrl(requestMock, imageMock.filename),
+                }),
+            );
         });
     });
 
@@ -99,13 +110,16 @@ describe(ImagesController, () => {
         });
 
         test(`should called managementsService.send with ${JSON.stringify(message)}`, async () => {
-            await imagesController.uploadArrayImages(imageMockArray, requestMock);
-            expect(managementsService.send).toBeCalledWith(message, {
-                images: imageMockArray,
-                imageUrls: imageMockArray.map((image) =>
-                    ImagesController.buildUploadImageUrl(requestMock, image.filename),
-                ),
-            });
+            await imagesController.uploadArrayImages(mockHeaders, imageMockArray, requestMock);
+            expect(managementsService.send).toHaveBeenCalledWith(
+                message,
+                mockRmqRecord({
+                    images: imageMockArray,
+                    imageUrls: imageMockArray.map((image) =>
+                        ImagesController.buildUploadImageUrl(requestMock, image.filename),
+                    ),
+                }),
+            );
         });
     });
 });

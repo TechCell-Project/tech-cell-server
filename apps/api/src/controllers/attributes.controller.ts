@@ -39,6 +39,7 @@ import {
 } from '@nestjs/swagger';
 import { AttributeDTO } from '~libs/resource/attributes/dtos';
 import { sendMessagePipeException } from '~libs/common/RabbitMQ/rmq.util';
+import { THeaders } from '~libs/common/types/common.type';
 
 @ApiBadRequestResponse({
     description: 'Invalid request, please check your request data!',
@@ -71,7 +72,7 @@ export class AttributesController {
     @ApiNotFoundResponse({ description: 'Attributes not found!' })
     @Get('/')
     async getAttributes(
-        @Headers() headers: Record<string, string>,
+        @Headers() headers: THeaders,
         @Query() requestQuery: GetAttributesRequestDTO,
     ) {
         return sendMessagePipeException<GetAttributesRequestDTO>({
@@ -90,7 +91,7 @@ export class AttributesController {
     @ApiNotFoundResponse({ description: 'Attribute not found!' })
     @Get('/:attributeId')
     async getAttributeById(
-        @Headers() headers: Record<string, string>,
+        @Headers() headers: THeaders,
         @Param() { attributeId }: GetAttributeByIdRequestDTO,
     ) {
         return sendMessagePipeException<GetAttributeByIdRequestDTO>({
@@ -109,7 +110,7 @@ export class AttributesController {
     @ApiNotFoundResponse({ description: 'Attribute not found!' })
     @Get('/label/:label')
     async getAttributesByLabel(
-        @Headers() headers: Record<string, string>,
+        @Headers() headers: THeaders,
         @Param() { label }: GetAttributeByLabelRequestDTO,
     ) {
         return sendMessagePipeException<GetAttributeByLabelRequestDTO>({
@@ -129,7 +130,7 @@ export class AttributesController {
     @UseGuards(AdminGuard)
     @Post('/')
     async createAttribute(
-        @Headers() headers: Record<string, string>,
+        @Headers() headers: THeaders,
         @Body() { label, name, description }: CreateAttributeRequestDTO,
     ) {
         return sendMessagePipeException<CreateAttributeRequestDTO>({
@@ -149,7 +150,7 @@ export class AttributesController {
     @UseGuards(AdminGuard)
     @Patch('/:attributeId')
     async updateAttributeInfo(
-        @Headers() headers: Record<string, string>,
+        @Headers() headers: THeaders,
         @Param('attributeId') attributeId: string,
         @Body() { label, name, description }: UpdateAttributeRequestDTO,
     ) {
@@ -170,7 +171,7 @@ export class AttributesController {
     @UseGuards(AdminGuard)
     @Delete('/:attributeId')
     async deleteAttribute(
-        @Headers() headers: Record<string, string>,
+        @Headers() headers: THeaders,
         @Param() { attributeId }: DeleteAttributeByIdRequestDTO,
     ) {
         return sendMessagePipeException<DeleteAttributeByIdRequestDTO>({

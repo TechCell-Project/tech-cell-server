@@ -16,6 +16,7 @@ import { AddressSearchMessagePattern } from '~apps/search/address-search';
 import { QueryDistrictsDTO, QueryWardsDTO } from '~apps/search/address-search/dtos';
 import { SEARCH_SERVICE } from '~libs/common/constants/services.constant';
 import { sendMessagePipeException } from '~libs/common/RabbitMQ/rmq.util';
+import { THeaders } from '~libs/common/types/common.type';
 
 @ApiBadRequestResponse({
     description: 'Invalid request, please check your request data!',
@@ -37,7 +38,7 @@ export class AddressController {
     @Get('/provinces')
     @ApiOperation({ summary: 'Get provinces' })
     @ApiOkResponse({ description: 'Lấy danh sách tỉnh thành công.', type: [GhnProvinceDTO] })
-    async getProvinces(@Headers() headers: Record<string, any>) {
+    async getProvinces(@Headers() headers: THeaders) {
         return sendMessagePipeException({
             client: this.searchService,
             pattern: AddressSearchMessagePattern.getProvinces,
@@ -49,10 +50,7 @@ export class AddressController {
     @Get('/districts/:province_id')
     @ApiOperation({ summary: 'Get districts' })
     @ApiOkResponse({ description: 'Lấy danh sách quận/huyện thành công.', type: [GhnDistrictDTO] })
-    async getDistricts(
-        @Headers() headers: Record<string, any>,
-        @Param() { province_id }: QueryDistrictsDTO,
-    ) {
+    async getDistricts(@Headers() headers: THeaders, @Param() { province_id }: QueryDistrictsDTO) {
         return sendMessagePipeException({
             client: this.searchService,
             pattern: AddressSearchMessagePattern.getDistricts,
@@ -64,10 +62,7 @@ export class AddressController {
     @Get('/wards/:district_id')
     @ApiOperation({ summary: 'Get wards' })
     @ApiOkResponse({ description: 'Lấy danh sách phường/xã thành công.', type: [GhnWardDTO] })
-    async getWards(
-        @Headers() headers: Record<string, any>,
-        @Param() { district_id }: QueryWardsDTO,
-    ) {
+    async getWards(@Headers() headers: THeaders, @Param() { district_id }: QueryWardsDTO) {
         return sendMessagePipeException({
             client: this.searchService,
             pattern: AddressSearchMessagePattern.getWards,

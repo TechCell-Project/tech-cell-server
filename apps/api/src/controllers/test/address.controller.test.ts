@@ -4,11 +4,12 @@ import { AddressController } from '../address.controller';
 import { SEARCH_SERVICE } from '~libs/common/constants';
 import { of } from 'rxjs';
 import { AddressSearchMessagePattern } from '~apps/search/address-search/address-search.pattern';
+import { THeaders } from '~libs/common/types';
 
 describe(AddressController, () => {
     let addressController: AddressController;
     let searchService: jest.Mocked<ClientRMQ>;
-    let mockHeaders: jest.Mocked<Record<string, any>>;
+    let mockHeaders: jest.Mocked<THeaders>;
     let mockRmqRecord: (data: Record<string, any>) => jest.Mocked<RmqRecord>;
 
     beforeAll(async () => {

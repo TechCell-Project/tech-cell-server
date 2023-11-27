@@ -1,5 +1,6 @@
 import { ClientRMQ, RmqRecordBuilder } from '@nestjs/microservices';
 import { catchException } from '~libs/common/utils/shared.util';
+import { THeaders } from '../types/common.type';
 
 export function sendMessagePipeException<T>({
     client,
@@ -10,7 +11,7 @@ export function sendMessagePipeException<T>({
     client: ClientRMQ;
     pattern: any;
     data?: T;
-    headers?: Record<string, any>;
+    headers?: THeaders;
 }) {
     const record = new RmqRecordBuilder()
         .setData(data ?? {})

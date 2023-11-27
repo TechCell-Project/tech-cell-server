@@ -8,6 +8,7 @@ import {
     Get,
     UseGuards,
     Request,
+    Headers,
 } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import { AUTH_SERVICE } from '~libs/common/constants';
@@ -50,11 +51,11 @@ import {
     IUserGoogleResponse,
     AuthMessagePattern,
 } from '~apps/auth';
-import { catchException } from '~libs/common';
 import { CurrentUser } from '~libs/common/decorators';
-import { TCurrentUser } from '~libs/common/types';
+import { TCurrentUser, THeaders } from '~libs/common/types';
 import { AuthGuard } from '~libs/common/guards';
 import { ACCESS_TOKEN_NAME } from '~libs/common/constants/api.constant';
+import { sendMessagePipeException } from '~libs/common/RabbitMQ/rmq.util';
 
 @ApiBadRequestResponse({
     description: 'Invalid request, please check your request data!',
@@ -98,10 +99,16 @@ export class AuthController {
     })
     @HttpCode(HttpStatus.OK)
     @Post('login')
-    async login(@Body() { emailOrUsername, password }: LoginRequestDTO) {
-        return this.authService
-            .send(AuthMessagePattern.login, { emailOrUsername, password })
-            .pipe(catchException());
+    async login(
+        @Headers() headers: THeaders,
+        @Body() { emailOrUsername, password }: LoginRequestDTO,
+    ) {
+        return sendMessagePipeException({
+            client: this.authService,
+            pattern: AuthMessagePattern.login,
+            data: { emailOrUsername, password },
+            headers,
+        });
     }
 
     @ApiOperation({
@@ -115,10 +122,13 @@ export class AuthController {
     })
     @HttpCode(HttpStatus.OK)
     @Post('check-email')
-    async checkEmail(@Body() { email }: EmailRequestDTO) {
-        return this.authService
-            .send(AuthMessagePattern.checkEmail, { email })
-            .pipe(catchException());
+    async checkEmail(@Headers() headers: THeaders, @Body() { email }: EmailRequestDTO) {
+        return sendMessagePipeException({
+            client: this.authService,
+            pattern: AuthMessagePattern.checkEmail,
+            data: { email },
+            headers,
+        });
     }
 
     @ApiOperation({
@@ -138,18 +148,15 @@ export class AuthController {
     })
     @Post('register')
     async register(
+        @Headers() headers: THeaders,
         @Body() { email, userName, firstName, lastName, password, re_password }: RegisterRequestDTO,
     ) {
-        return this.authService
-            .send(AuthMessagePattern.register, {
-                email,
-                userName,
-                firstName,
-                lastName,
-                password,
-                re_password,
-            })
-            .pipe(catchException());
+        return sendMessagePipeException({
+            client: this.authService,
+            pattern: AuthMessagePattern.register,
+            data: { email, userName, firstName, lastName, password, re_password },
+            headers,
+        });
     }
 
     @ApiOperation({
@@ -164,10 +171,16 @@ export class AuthController {
     @Throttle(5, 60) // limit 5 requests per 60 seconds
     @HttpCode(HttpStatus.OK)
     @Post('verify-email')
-    async verifyEmail(@Body() { email, otpCode }: VerifyEmailRequestDTO) {
-        return this.authService
-            .send(AuthMessagePattern.verifyEmail, { email, otpCode })
-            .pipe(catchException());
+    async verifyEmail(
+        @Headers() headers: THeaders,
+        @Body() { email, otpCode }: VerifyEmailRequestDTO,
+    ) {
+        return sendMessagePipeException({
+            client: this.authService,
+            pattern: AuthMessagePattern.verifyEmail,
+            data: { email, otpCode },
+            headers,
+        });
     }
 
     @ApiOperation({
@@ -183,10 +196,13 @@ export class AuthController {
     @Throttle(5, 60) // limit 5 requests per 60 seconds
     @HttpCode(HttpStatus.OK)
     @Post('resend-verify-email-otp')
-    async resendVerifyEmailOtp(@Body() { email }: EmailRequestDTO) {
-        return this.authService
-            .send(AuthMessagePattern.resendVerifyEmailOtp, { email })
-            .pipe(catchException());
+    async resendVerifyEmailOtp(@Headers() headers: THeaders, @Body() { email }: EmailRequestDTO) {
+        return sendMessagePipeException({
+            client: this.authService,
+            pattern: AuthMessagePattern.resendVerifyEmailOtp,
+            data: { email },
+            headers,
+        });
     }
 
     @ApiOperation({
@@ -206,10 +222,13 @@ export class AuthController {
     })
     @Throttle(50, 60)
     @Post('refresh-token')
-    async getNewToken(@Body() { refreshToken }: NewTokenRequestDTO) {
-        return this.authService
-            .send(AuthMessagePattern.getNewToken, { refreshToken })
-            .pipe(catchException());
+    async getNewToken(@Headers() headers: THeaders, @Body() { refreshToken }: NewTokenRequestDTO) {
+        return sendMessagePipeException({
+            client: this.authService,
+            pattern: AuthMessagePattern.getNewToken,
+            data: { refreshToken },
+            headers,
+        });
     }
 
     @ApiOperation({
@@ -222,10 +241,13 @@ export class AuthController {
     @ApiNotFoundResponse({ description: 'User not found' })
     @HttpCode(HttpStatus.OK)
     @Post('forgot-password')
-    async forgotPassword(@Body() { email }: ForgotPasswordDTO) {
-        return this.authService
-            .send(AuthMessagePattern.forgotPassword, { email })
-            .pipe(catchException());
+    async forgotPassword(@Headers() headers: THeaders, @Body() { email }: ForgotPasswordDTO) {
+        return sendMessagePipeException({
+            client: this.authService,
+            pattern: AuthMessagePattern.forgotPassword,
+            data: { email },
+            headers,
+        });
     }
 
     @ApiOperation({
@@ -239,16 +261,15 @@ export class AuthController {
     @HttpCode(HttpStatus.OK)
     @Post('verify-forgot-password')
     async verifyForgotPassword(
+        @Headers() headers: THeaders,
         @Body() { email, otpCode, password, re_password }: VerifyForgotPasswordDTO,
     ) {
-        return this.authService
-            .send(AuthMessagePattern.verifyForgotPassword, {
-                email,
-                otpCode,
-                password,
-                re_password,
-            })
-            .pipe(catchException());
+        return sendMessagePipeException({
+            client: this.authService,
+            pattern: AuthMessagePattern.verifyForgotPassword,
+            data: { email, otpCode, password, re_password },
+            headers,
+        });
     }
 
     @ApiOperation({
@@ -264,12 +285,16 @@ export class AuthController {
     @HttpCode(HttpStatus.OK)
     @Post('change-password')
     async changePassword(
+        @Headers() headers: THeaders,
         @Body() changePwData: ChangePasswordRequestDTO,
         @CurrentUser() user: TCurrentUser,
     ) {
-        return this.authService
-            .send(AuthMessagePattern.changePassword, { changePwData, user })
-            .pipe(catchException());
+        return sendMessagePipeException({
+            client: this.authService,
+            pattern: AuthMessagePattern.changePassword,
+            data: { changePwData, user },
+            headers,
+        });
     }
 
     @ApiOperation({
@@ -282,8 +307,13 @@ export class AuthController {
     @ApiUnauthorizedResponse({ description: 'Your information is invalid' })
     @HttpCode(HttpStatus.OK)
     @Post('/google')
-    async google(@Body() { idToken }: GoogleLoginRequestDTO) {
-        return this.authService.send(AuthMessagePattern.google, { idToken }).pipe(catchException());
+    async google(@Headers() headers: THeaders, @Body() { idToken }: GoogleLoginRequestDTO) {
+        return sendMessagePipeException({
+            client: this.authService,
+            pattern: AuthMessagePattern.google,
+            data: { idToken },
+            headers,
+        });
     }
 
     @ApiExcludeEndpoint()
@@ -292,10 +322,16 @@ export class AuthController {
     })
     @Get('google')
     @UseGuards(GoogleOAuthGuard)
-    async googleAuth(@Request() { user }: { user: IUserGoogleResponse }) {
-        return this.authService
-            .send(AuthMessagePattern.googleAuth, { user })
-            .pipe(catchException());
+    async googleAuth(
+        @Headers() headers: THeaders,
+        @Request() { user }: { user: IUserGoogleResponse },
+    ) {
+        return sendMessagePipeException({
+            client: this.authService,
+            pattern: AuthMessagePattern.googleAuth,
+            data: { user },
+            headers,
+        });
     }
 
     @ApiExcludeEndpoint()
@@ -306,8 +342,10 @@ export class AuthController {
     @Get('facebook')
     @UseGuards(FacebookOAuthGuard)
     async facebookAuth(@Request() { user }: { user: IUserFacebookResponse }) {
-        return this.authService
-            .send(AuthMessagePattern.facebookAuth, { user })
-            .pipe(catchException());
+        return sendMessagePipeException({
+            client: this.authService,
+            pattern: AuthMessagePattern.facebookAuth,
+            data: { user },
+        });
     }
 }

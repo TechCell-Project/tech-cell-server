@@ -1,4 +1,4 @@
-import { Controller, Get, Inject, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Inject, Query, UseGuards, Headers } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import { ACCESS_TOKEN_NAME, MANAGEMENTS_SERVICE } from '~libs/common/constants';
 import {
@@ -14,9 +14,11 @@ import {
     ApiTooManyRequestsResponse,
     ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { ModGuard, catchException } from '~libs/common';
+import { ModGuard } from '~libs/common';
 import { StatsMntMessagePattern } from '~apps/managements/stats-mnt/stats-mnt.pattern';
 import { GetStatsRequestDTO, GetStatsResponseDTO } from '~apps/managements/stats-mnt/dtos';
+import { sendMessagePipeException } from '~libs/common/RabbitMQ/rmq.util';
+import { THeaders } from '~libs/common/types/common.type';
 
 @ApiBadRequestResponse({
     description: 'Invalid request, please check your request data!',
@@ -57,9 +59,12 @@ export class StatsController {
         description: 'Get stats successfully!',
     })
     @Get('/')
-    async getStats(@Query() requestQuery: GetStatsRequestDTO) {
-        return this.managementsService
-            .send(StatsMntMessagePattern.getStats, { ...requestQuery })
-            .pipe(catchException());
+    async getStats(@Headers() headers: THeaders, @Query() requestQuery: GetStatsRequestDTO) {
+        return sendMessagePipeException<GetStatsRequestDTO>({
+            client: this.managementsService,
+            pattern: StatsMntMessagePattern.getStats,
+            data: { ...requestQuery },
+            headers,
+        });
     }
 }
