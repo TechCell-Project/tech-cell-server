@@ -51,8 +51,9 @@ This application is built using a microservices architecture with [Nest](https:/
   - Storage with [Cloudinary](https://cloudinary.com/)
   - Custom domain emails with [Sendgrid](https://sendgrid.com/), [Resend](https://resend.com/), and [Gmail](https://mail.google.com/)
   - Notifications with [Socket.io](https://socket.io/), using job queue to send notifications
-  - Payment integration with [VNPay](https://vnpay.vn/)
   - Cron jobs to clean unused data
+  - Payment integration with [VNPay](https://vnpay.vn/)
+  - Shipping integration with [GiaoHangNhanh](https://ghn.vn/)
 
 
 # 📦 Installation
