@@ -12,7 +12,7 @@ async function bootstrap() {
         inheritAppConfig: true,
         logger,
     });
-    await app.startAllMicroservices();
-    logger.log(`⚡️ service is ready`);
+
+    app.startAllMicroservices().then(() => logger.log(`⚡️ service is ready`));
 }
 bootstrap();

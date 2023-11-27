@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { CommunicationsModule } from './communications.module';
-import { useRabbitMQ } from '~libs/common/RabbitMQ';
+import { RabbitMQService } from '~libs/common/RabbitMQ';
 import { Logger } from '@nestjs/common';
 import { RpcExceptionFilter } from '~libs/common/filters/';
 import helmet from 'helmet';
@@ -15,7 +15,12 @@ async function bootstrap() {
     app.use(helmet());
 
     app.useGlobalFilters(new RpcExceptionFilter());
-    useRabbitMQ(app, 'RABBITMQ_COMMUNICATIONS_QUEUE');
+    RabbitMQService.connectRabbitMQ({
+        app,
+        queueNameEnv: 'RABBITMQ_COMMUNICATIONS_QUEUE',
+        inheritAppConfig: false,
+        logger,
+    });
 
     const redisIoAdapter = new RedisIoAdapter(app);
     await redisIoAdapter.connectToRedis();
