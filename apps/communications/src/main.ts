@@ -2,7 +2,6 @@ import { NestFactory } from '@nestjs/core';
 import { CommunicationsModule } from './communications.module';
 import { RabbitMQService } from '~libs/common/RabbitMQ';
 import { Logger } from '@nestjs/common';
-import { RpcExceptionFilter } from '~libs/common/filters/';
 import helmet from 'helmet';
 import { RedisIoAdapter } from '~libs/common/socket.io';
 
@@ -14,11 +13,10 @@ async function bootstrap() {
     app.enableCors();
     app.use(helmet());
 
-    app.useGlobalFilters(new RpcExceptionFilter());
     RabbitMQService.connectRabbitMQ({
         app,
         queueNameEnv: 'RABBITMQ_COMMUNICATIONS_QUEUE',
-        inheritAppConfig: false,
+        inheritAppConfig: true,
         logger,
     });
 

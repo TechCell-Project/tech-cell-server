@@ -1,17 +1,15 @@
 import { NestFactory } from '@nestjs/core';
 import { TaskModule } from './task.module';
 import { Logger } from '@nestjs/common';
-import { RpcExceptionFilter } from '~libs/common';
 import { RabbitMQService } from '~libs/common/RabbitMQ';
 
 async function bootstrap(port: number) {
     const logger = new Logger('task');
     const app = await NestFactory.create(TaskModule);
-    app.useGlobalFilters(new RpcExceptionFilter());
     RabbitMQService.connectRabbitMQ({
         app,
         queueNameEnv: 'RABBITMQ_TASK_QUEUE',
-        inheritAppConfig: false,
+        inheritAppConfig: true,
         logger,
     });
 
