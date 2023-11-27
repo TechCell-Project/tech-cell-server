@@ -1,5 +1,12 @@
 import { Type } from 'class-transformer';
-import { IsDate, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+    IsDate,
+    IsNotEmpty,
+    IsNumber,
+    IsOptional,
+    IsString,
+    ValidateNested,
+} from 'class-validator';
 import { Types } from 'mongoose';
 
 class ProductCartDTO {
@@ -31,6 +38,7 @@ export class CreateCartDTO {
     userId: Types.ObjectId;
 
     @IsNotEmpty()
-    @Type(() => Array<ProductCartDTO>)
+    @ValidateNested({ each: true })
+    @Type(() => ProductCartDTO)
     products: Array<ProductCartDTO>;
 }

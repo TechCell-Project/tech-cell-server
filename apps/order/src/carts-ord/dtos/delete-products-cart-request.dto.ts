@@ -7,8 +7,7 @@ import { IsBooleanI18n, IsMongoIdI18n, IsNotEmptyI18n, IsStringI18n } from '~lib
 
 class SelectProduct {
     constructor(cartData: SelectProduct) {
-        this.productId = new Types.ObjectId(cartData?.productId);
-        this.sku = cartData?.sku;
+        Object.assign(this, cartData);
     }
 
     @ApiProperty({

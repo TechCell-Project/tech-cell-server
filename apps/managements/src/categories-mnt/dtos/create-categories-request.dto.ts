@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional, Matches } from 'class-validator';
 import { i18nValidationMessage } from 'nestjs-i18n';
 import { IsArrayI18n, IsLowercaseI18n, IsNotEmptyI18n, IsStringI18n } from '~libs/common/i18n';
+import { I18nTranslations } from '~libs/common/i18n/generated/i18n.generated';
 
 export class CreateCategoryRequestDTO {
     @ApiProperty({
@@ -25,8 +26,10 @@ export class CreateCategoryRequestDTO {
     @IsStringI18n()
     @IsNotEmptyI18n()
     @IsLowercaseI18n()
-    @Matches(/^[a-z_]*[a-z][a-z_]*$/, {
-        message: i18nValidationMessage('validation.ONLY_LOWER_CASE_OPTIONAL_UNDERSCORE'),
+    @Matches(/^[a-z0-9_]*[a-z0-9][a-z0-9_]*$/, {
+        message: i18nValidationMessage<I18nTranslations>(
+            'validation.ONLY_LOWER_CASE_OPTIONAL_UNDERSCORE',
+        ),
     })
     label: string;
 

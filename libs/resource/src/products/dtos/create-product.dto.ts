@@ -87,9 +87,7 @@ class PriceDTO {
 
 export class ImageDTO implements ImageSchema {
     constructor(data: ImageSchema) {
-        this.url = data.url;
-        this.publicId = data.publicId;
-        this.isThumbnail = data.isThumbnail ?? false;
+        Object.assign(this, data);
     }
 
     @ApiProperty({
@@ -169,6 +167,7 @@ export class VariationDTO implements VariationSchema {
     })
     @IsArray()
     @Type(() => ImageDTO)
+    @ValidateNested({ each: true })
     images: ImageDTO[];
 
     @IsNumber()
