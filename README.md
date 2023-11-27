@@ -45,6 +45,7 @@ This application is built using a microservices architecture with [Nest](https:/
 
 - **Features:**
   - User, Profile, Product, Order, Category, Notification, Attribute, Cart, Otp management ...
+  - Transaction order with [Mongodb transaction](https://docs.mongodb.com/manual/core/transactions/) and distributed lock with [Redlock](https://redis.io/topics/distlock)
   - I18n with [i18n](https://www.npmjs.com/package/i18n)
   - Authentication with [JWT](https://jwt.io/)
   - Login, sign up with Credentials (email verified), Google
