@@ -27,19 +27,7 @@ import { AuthCoreGuard } from '~libs/common/guards/auth.core.guard';
 
 @WebSocketGateway({
     cors: {
-        origin: [
-            'http://localhost:3000',
-            'http://localhost:3001',
-            'http://localhost:4200',
-            'http://localhost:5500',
-            'http://localhost:8000',
-            'http://localhost:8001',
-            'http://localhost:*',
-            'http://127.0.0.1:*',
-            'https://admin.socket.io',
-            'https://techcell.cloud',
-            'https://admin.techcell.cloud',
-        ],
+        origin: process.env.SOCKET_CORS_HOST?.split(',')?.map((host) => host?.trim()),
         credentials: true,
     },
 })
@@ -78,7 +66,8 @@ export class NotificationsGateway
     async handleConnection(client: Socket) {
         const userVerified: ITokenVerifiedResponse | null = await this.authenticateClient(client);
         if (!userVerified) {
-            return client.disconnect(true);
+            this.logger.debug(`Client ${client.id} connected to server as guest`);
+            return;
         }
 
         const rooms = [NotifyRoom.AllUserRoom, `user_id_${userVerified._id}`];
