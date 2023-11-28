@@ -47,7 +47,7 @@ export class NotificationsGateway
     readonly server: Server;
 
     async afterInit() {
-        this.logger.log('Notification gateway initialized');
+        this.logger.debug('Notification gateway initialized');
         this.connectedClients = new Map<string, Socket>();
         instrument(this.server, {
             mode: 'development',
@@ -56,7 +56,6 @@ export class NotificationsGateway
                 username: process.env.SOCKET_ADMIN_USER,
                 password: process.env.SOCKET_ADMIN_PASSWORD,
             },
-            namespaceName: 'notifications',
             store: new RedisStore(this.redisService.getClient()),
         });
     }
@@ -87,7 +86,7 @@ export class NotificationsGateway
             rooms.push(NotifyRoom.UserRoom);
         }
 
-        this.logger.log(`Client ${client.id} connected to ${rooms.join(', ')}`);
+        this.logger.debug(`Client ${client.id} connected to ${rooms.join(', ')}`);
         this.connectedClients.set(client.id, client);
         return client.join(rooms);
     }
@@ -96,7 +95,7 @@ export class NotificationsGateway
      * @description Handle disconnect from client
      */
     async handleDisconnect(client: Socket) {
-        this.logger.log(`Client ${client.id} disconnected`);
+        this.logger.debug(`Client ${client.id} disconnected`);
         this.connectedClients.delete(client.id);
     }
 
