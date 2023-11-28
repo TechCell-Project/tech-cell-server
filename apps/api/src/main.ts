@@ -12,7 +12,7 @@ import helmet from 'helmet';
 import { ACCESS_TOKEN_NAME } from '~libs/common/constants/api.constant';
 import * as swaggerStats from 'swagger-stats';
 import { AUTH_SERVICE } from '~libs/common/constants';
-import { ClientRMQ } from '@nestjs/microservices';
+import { ClientRMQ, RmqRecordBuilder } from '@nestjs/microservices';
 import { AuthMessagePattern } from '~apps/auth/auth.pattern';
 import { catchException } from '~libs/common';
 import { firstValueFrom } from 'rxjs';
@@ -107,10 +107,16 @@ async function bootstrap() {
             timelineBucketDuration: 180000,
             authentication: true,
             onAuthenticate: async function (req, username, password) {
+                const record = new RmqRecordBuilder()
+                    .setOptions({
+                        headers: {
+                            'x-lang': 'en',
+                        },
+                    })
+                    .setData({ emailOrUsername: username, password })
+                    .build();
                 const user = (await firstValueFrom(
-                    authService
-                        .send(AuthMessagePattern.login, { emailOrUsername: username, password })
-                        .pipe(catchException()),
+                    authService.send(AuthMessagePattern.login, record).pipe(catchException()),
                 )) as UserDataResponseDTO;
 
                 if (!user) {
