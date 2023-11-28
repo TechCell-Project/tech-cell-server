@@ -9,8 +9,6 @@ async function bootstrap() {
     const port = process.env.COMMUNICATIONS_PORT || 8001;
     const logger = new Logger('communications');
     const app = await NestFactory.create(CommunicationsModule);
-
-    app.enableCors();
     app.use(helmet());
 
     RabbitMQService.connectRabbitMQ({

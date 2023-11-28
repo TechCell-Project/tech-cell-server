@@ -5,9 +5,10 @@ import { NotificationsModule } from './notifications';
 import { CommunicationsController } from './communications.controller';
 import { CommunicationsHealthIndicator } from './communications.health';
 import { RabbitMQModule } from '~libs/common/RabbitMQ';
+import { I18nModule } from '~libs/common/i18n';
 
 @Module({
-    imports: [AppConfigModule, MailModule, NotificationsModule, RabbitMQModule],
+    imports: [AppConfigModule, I18nModule, MailModule, NotificationsModule, RabbitMQModule],
     controllers: [CommunicationsController],
     providers: [CommunicationsHealthIndicator],
 })

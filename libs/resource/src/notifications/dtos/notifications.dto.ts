@@ -26,7 +26,7 @@ export class NotificationsDTO implements Notification {
         format: 'ObjectId',
         example: '5f9d4e9d8e5a2b1f3c916d0a',
     })
-    recipientId?: string;
+    recipientId?: Types.ObjectId;
 
     @ApiProperty({
         type: String,

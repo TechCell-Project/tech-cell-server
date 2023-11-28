@@ -13,7 +13,7 @@ import { catchError } from 'rxjs/operators';
 import { Server, Socket } from 'socket.io';
 import { NotificationsMessageSubscribe } from '../constants/notifications.message';
 import { Logger, UseGuards } from '@nestjs/common';
-import { ClientRMQ } from '@nestjs/microservices';
+import { ClientRMQ, RmqRecordBuilder } from '@nestjs/microservices';
 import { ITokenVerifiedResponse } from '~apps/auth/interfaces';
 import { AuthMessagePattern } from '~apps/auth/auth.pattern';
 import { AuthGuard } from '~libs/common';
@@ -181,8 +181,16 @@ export class NotificationsGateway
             return null;
         }
         const [, jwt] = authHeaderParts;
+        const record = new RmqRecordBuilder()
+            .setOptions({
+                headers: {
+                    'x-lang': 'en',
+                },
+            })
+            .setData({ jwt })
+            .build();
         const userVerified: ITokenVerifiedResponse = await firstValueFrom(
-            this.authService.send(AuthMessagePattern.verifyJwt, { jwt }).pipe(
+            this.authService.send(AuthMessagePattern.verifyJwt, record).pipe(
                 catchError(() => {
                     return of(null);
                 }),

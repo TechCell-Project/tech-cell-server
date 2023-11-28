@@ -8,10 +8,12 @@ import { AddressSearchModule } from './address-search';
 import { SearchController } from './search.controller';
 import { SearchHealthIndicator } from './search.health';
 import { RabbitMQService } from '~libs/common/RabbitMQ/services';
+import { I18nModule } from '~libs/common/i18n/i18n.module';
 
 @Module({
     imports: [
         AppConfigModule,
+        I18nModule,
         UsersSearchModule,
         ProductsSearchModule,
         AttributesSearchModule,
