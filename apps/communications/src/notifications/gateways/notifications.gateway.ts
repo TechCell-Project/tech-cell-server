@@ -7,24 +7,23 @@ import {
     MessageBody,
     SubscribeMessage,
     WsResponse,
+    ConnectedSocket,
 } from '@nestjs/websockets';
 import { firstValueFrom, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Server, Socket } from 'socket.io';
 import { NotificationsMessageSubscribe } from '../constants/notifications.message';
-import { Logger, UseGuards } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { ClientRMQ, RmqRecordBuilder } from '@nestjs/microservices';
 import { ITokenVerifiedResponse } from '~apps/auth/interfaces';
 import { AuthMessagePattern } from '~apps/auth/auth.pattern';
-import { AuthGuard } from '~libs/common';
 import { UserRole } from '~libs/resource/users/enums';
 import { NotifyRoom } from '../constants/notifications.constant';
 import { NotificationService } from '~libs/resource';
 import { Types } from 'mongoose';
-import { CurrentUser } from '~libs/common/decorators';
-import { TCurrentUser } from '~libs/common/types';
 import { instrument, RedisStore } from '@socket.io/admin-ui';
 import { RedisService } from '~libs/common/Redis/services/redis.service';
+import { AuthCoreGuard } from '~libs/common/guards/auth.core.guard';
 
 @WebSocketGateway({
     cors: {
@@ -101,18 +100,30 @@ export class NotificationsGateway
         this.connectedClients.delete(client.id);
     }
 
-    @UseGuards(AuthGuard)
     @SubscribeMessage(NotificationsMessageSubscribe.MarkNotificationAsRead)
     async markNotificationAsRead(
+        @ConnectedSocket() client: Socket,
         @MessageBody() { notificationId }: { notificationId: string },
-        @CurrentUser() user: TCurrentUser,
     ): Promise<
         WsResponse<{
             isSuccess: boolean;
             message: string;
         }>
     > {
+        this.logger.debug(`Client ${client.id} called mark notification as read`);
+        if (!client.handshake.auth.user) {
+            this.logger.debug(`Client ${client.id} is not authenticated`);
+            return {
+                event: NotificationsMessageSubscribe.MarkNotificationAsRead,
+                data: {
+                    isSuccess: false,
+                    message: 'Unauthorized',
+                },
+            };
+        }
+
         if (!notificationId) {
+            this.logger.debug(`Client ${client.id} notification id is required`);
             return {
                 event: NotificationsMessageSubscribe.MarkNotificationAsRead,
                 data: {
@@ -123,6 +134,7 @@ export class NotificationsGateway
         }
 
         if (!Types.ObjectId.isValid(notificationId)) {
+            this.logger.debug(`Client ${client.id} notification id is invalid`);
             return {
                 event: NotificationsMessageSubscribe.MarkNotificationAsRead,
                 data: {
@@ -134,9 +146,10 @@ export class NotificationsGateway
 
         const notification = await this.notificationService.markNotificationAsRead({
             _id: new Types.ObjectId(notificationId),
-            recipientId: new Types.ObjectId(user._id),
+            recipientId: new Types.ObjectId(client.handshake.auth.user._id),
         });
         if (notification === null) {
+            this.logger.debug(`Client ${client.id} notification not found`);
             return {
                 event: NotificationsMessageSubscribe.MarkNotificationAsRead,
                 data: {
@@ -147,6 +160,7 @@ export class NotificationsGateway
         }
 
         if (notification === false) {
+            this.logger.debug(`Client ${client.id} notification already read`);
             return {
                 event: NotificationsMessageSubscribe.MarkNotificationAsRead,
                 data: {
@@ -156,6 +170,7 @@ export class NotificationsGateway
             };
         }
 
+        this.logger.debug(`Client ${client.id} mark notification as read successfully`);
         return {
             event: NotificationsMessageSubscribe.MarkNotificationAsRead,
             data: {
@@ -172,7 +187,10 @@ export class NotificationsGateway
      * @param client Socket client
      * @returns ITokenVerifiedResponse | null
      */
-    private async authenticateClient(client: Socket): Promise<ITokenVerifiedResponse> | null {
+    private async authenticateClient(
+        client: Socket,
+        guard?: AuthCoreGuard,
+    ): Promise<ITokenVerifiedResponse> | null {
         let authHeaderParts = client.handshake?.headers?.authorization?.split(' ');
         if (!authHeaderParts) {
             authHeaderParts = client.handshake?.auth?.token?.split(' ');
@@ -198,6 +216,10 @@ export class NotificationsGateway
         );
 
         if (!userVerified) {
+            return null;
+        }
+
+        if (guard && !guard._acceptRoles.includes(userVerified.role)) {
             return null;
         }
 

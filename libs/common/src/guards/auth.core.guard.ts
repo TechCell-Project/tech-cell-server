@@ -34,7 +34,7 @@ import { I18nTranslations } from '../i18n/generated/i18n.generated';
 @Injectable()
 export class AuthCoreGuard implements CanActivate {
     @Inject(AUTH_SERVICE) protected readonly authService: ClientRMQ;
-    protected readonly _acceptRoles: string[];
+    public readonly _acceptRoles: string[];
     protected logger: Logger;
 
     constructor(
