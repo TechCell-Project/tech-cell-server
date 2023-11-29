@@ -176,8 +176,8 @@ services:
         hostname: redis-insight
         image: redislabs/redisinsight:latest
         environment:
-            - RIPROXYENABLE=true
-            - RITRUSTEDORIGINS = http://localhost:443
+            - RIPORT=8001
+            - RITRUSTEDORIGINS = http://localhost:80,http://localhost:443
         ports:
             - 8001
         volumes:
