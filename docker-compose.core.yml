@@ -47,11 +47,7 @@ services:
             - mongodb-primary
             - mongodb-secondary
             - mongodb-arbiter
-            - redis-node-0
-            - redis-node-1
-            - redis-node-2
-            - redis-node-3
-            - redis-node-4
+            - redis
         ports:
             - 1936:1936
             - 5672:5672
@@ -191,6 +187,8 @@ services:
             retries: 3
 
     redis:
+        container_name: redis
+        hostname: redis
         image: docker.io/bitnami/redis:7.2
         environment:
             - REDIS_PASSWORD=${REDIS_PASSWORD}
@@ -201,6 +199,8 @@ services:
             - 'redis_data:/bitnami/redis/data'
 
     redis-insight:
+        container_name: redis-insight
+        hostname: redis-insight
         image: redislabs/redisinsight:latest
         ports:
             - 8001
