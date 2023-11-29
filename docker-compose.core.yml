@@ -175,6 +175,8 @@ services:
         container_name: redis-insight
         hostname: redis-insight
         image: redislabs/redisinsight:latest
+        environment:
+            - RIPROXYENABLE=true
         ports:
             - 8001
         volumes:
