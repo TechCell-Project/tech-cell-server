@@ -1,11 +1,11 @@
 import { InjectQueue } from '@nestjs/bullmq';
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { Queue } from 'bullmq';
 import { BULLMQ_REDIS_STATE_QUEUE } from '../bullmq.constant';
 import { RedisStatus } from '../bullmq.type';
 
 @Injectable()
-export class BullRedisState implements OnModuleInit {
+export class BullRedisState implements OnModuleInit, OnModuleDestroy {
     private readonly logger = new Logger(BullRedisState.name);
     constructor(@InjectQueue(BULLMQ_REDIS_STATE_QUEUE) private stateQueue: Queue) {}
 
@@ -16,6 +16,10 @@ export class BullRedisState implements OnModuleInit {
         } catch (e) {
             this.logger.error(e);
         }
+    }
+
+    async onModuleDestroy() {
+        await this.stateQueue.close();
     }
 
     async getQueueStatus(): Promise<RedisStatus> {

@@ -1,11 +1,11 @@
 import { REDIS_CLIENT, REDIS_STORE } from '~libs/common/constants';
-import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { Redis } from 'ioredis';
 import { Store } from 'cache-manager';
 import { v4 as uuid } from 'uuid';
 
 @Injectable()
-export class RedisStateService implements OnModuleInit {
+export class RedisStateService implements OnModuleInit, OnModuleDestroy {
     private readonly logger = new Logger(RedisStateService.name);
     constructor(
         @Inject(REDIS_CLIENT) private readonly redisClient: Redis,
@@ -15,6 +15,11 @@ export class RedisStateService implements OnModuleInit {
     async onModuleInit() {
         await this.checkRedisConnection();
         await this.checkCacheManagerConnection();
+    }
+
+    async onModuleDestroy() {
+        await this.redisClient.quit();
+        await this.cacheManager.reset();
     }
 
     private async checkRedisConnection() {
