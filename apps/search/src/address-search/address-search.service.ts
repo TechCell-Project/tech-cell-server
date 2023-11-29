@@ -1,6 +1,6 @@
 import { GhnService } from '~libs/third-party';
 import { GhnWardDTO, GhnProvinceDTO, GhnDistrictDTO } from '~libs/third-party/giaohangnhanh/dtos';
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { convertTimeString } from 'convert-time-string';
 import { RedisService } from '~libs/common/Redis/services';
@@ -9,6 +9,7 @@ import { I18nTranslations } from '~libs/common/i18n/generated/i18n.generated';
 
 @Injectable()
 export class AddressSearchService {
+    private readonly logger = new Logger(AddressSearchService.name);
     constructor(
         private readonly ghnService: GhnService,
         private redisService: RedisService,
@@ -41,6 +42,7 @@ export class AddressSearchService {
             await this.setCache(this.GET_PROVINCES_CACHE_KEY, listProvince);
             return listProvince;
         } catch (error) {
+            this.logger.error(error);
             throw new RpcException(
                 new BadRequestException(
                     i18n.t('errorMessage.PROPERTY_IS_NOT_FOUND', {
@@ -81,6 +83,7 @@ export class AddressSearchService {
             await this.setCache(districtCacheKey, listDistrict);
             return listDistrict;
         } catch (error) {
+            this.logger.error(error);
             throw new RpcException(
                 new NotFoundException(
                     i18n.t('errorMessage.PROPERTY_IS_NOT_FOUND', {
@@ -127,6 +130,7 @@ export class AddressSearchService {
             await this.setCache(wardCacheKey, listWard);
             return listWard;
         } catch (error) {
+            this.logger.error(error);
             throw new RpcException(
                 new NotFoundException(
                     i18n.t('errorMessage.PROPERTY_IS_NOT_FOUND', {

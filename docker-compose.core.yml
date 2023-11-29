@@ -190,116 +190,25 @@ services:
             timeout: 10s
             retries: 3
 
-    redis-node-0:
-        container_name: redis-node-0
-        image: docker.io/bitnami/redis-cluster:7.2
-        volumes:
-            - redis-cluster_data-0:/bitnami/redis/data
+    redis:
+        image: docker.io/bitnami/redis:7.2
         environment:
             - REDIS_PASSWORD=${REDIS_PASSWORD}
-            - 'REDIS_NODES=redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5'
-        restart: unless-stopped
-        networks:
-            - techcell_backend
-        healthcheck:
-            test: ['CMD', 'redis-cli', 'ping']
-            interval: 30s
-            timeout: 10s
-            retries: 3
+            - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
+        ports:
+            - 6379
+        volumes:
+            - 'redis_data:/bitnami/redis/data'
 
-    redis-node-1:
-        container_name: redis-node-1
-        image: docker.io/bitnami/redis-cluster:7.2
+    redis-insight:
+        image: redislabs/redisinsight:latest
+        ports:
+            - 8001
         volumes:
-            - redis-cluster_data-1:/bitnami/redis/data
-        environment:
-            - REDIS_PASSWORD=${REDIS_PASSWORD}
-            - 'REDIS_NODES=redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5'
+            - redis-insight_data:/db
         restart: unless-stopped
         networks:
-            - techcell_backend
-        healthcheck:
-            test: ['CMD', 'redis-cli', 'ping']
-            interval: 30s
-            timeout: 10s
-            retries: 3
-
-    redis-node-2:
-        container_name: redis-node-2
-        image: docker.io/bitnami/redis-cluster:7.2
-        volumes:
-            - redis-cluster_data-2:/bitnami/redis/data
-        environment:
-            - REDIS_PASSWORD=${REDIS_PASSWORD}
-            - 'REDIS_NODES=redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5'
-        restart: unless-stopped
-        networks:
-            - techcell_backend
-        healthcheck:
-            test: ['CMD', 'redis-cli', 'ping']
-            interval: 30s
-            timeout: 10s
-            retries: 3
-
-    redis-node-3:
-        container_name: redis-node-3
-        image: docker.io/bitnami/redis-cluster:7.2
-        volumes:
-            - redis-cluster_data-3:/bitnami/redis/data
-        environment:
-            - REDIS_PASSWORD=${REDIS_PASSWORD}
-            - 'REDIS_NODES=redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5'
-        restart: unless-stopped
-        networks:
-            - techcell_backend
-        healthcheck:
-            test: ['CMD', 'redis-cli', 'ping']
-            interval: 30s
-            timeout: 10s
-            retries: 3
-
-    redis-node-4:
-        container_name: redis-node-4
-        image: docker.io/bitnami/redis-cluster:7.2
-        volumes:
-            - redis-cluster_data-4:/bitnami/redis/data
-        environment:
-            - REDIS_PASSWORD=${REDIS_PASSWORD}
-            - 'REDIS_NODES=redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5'
-        restart: unless-stopped
-        networks:
-            - techcell_backend
-        healthcheck:
-            test: ['CMD', 'redis-cli', 'ping']
-            interval: 30s
-            timeout: 10s
-            retries: 3
-
-    redis-node-5:
-        container_name: redis-node-5
-        image: docker.io/bitnami/redis-cluster:7.2
-        volumes:
-            - redis-cluster_data-5:/bitnami/redis/data
-        depends_on:
-            - redis-node-0
-            - redis-node-1
-            - redis-node-2
-            - redis-node-3
-            - redis-node-4
-        environment:
-            - REDIS_PASSWORD=${REDIS_PASSWORD}
-            - 'REDISCLI_AUTH=bitnami'
-            - 'REDIS_CLUSTER_REPLICAS=1'
-            - 'REDIS_NODES=redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5'
-            - 'REDIS_CLUSTER_CREATOR=yes'
-        restart: unless-stopped
-        networks:
-            - techcell_backend
-        healthcheck:
-            test: ['CMD', 'redis-cli', 'ping']
-            interval: 30s
-            timeout: 10s
-            retries: 3
+            techcell_backend:
 
 networks:
     techcell_backend:
@@ -309,15 +218,7 @@ volumes:
         driver: local
     rabbitmq_data:
         driver: local
-    redis-cluster_data-0:
+    redis_data:
         driver: local
-    redis-cluster_data-1:
-        driver: local
-    redis-cluster_data-2:
-        driver: local
-    redis-cluster_data-3:
-        driver: local
-    redis-cluster_data-4:
-        driver: local
-    redis-cluster_data-5:
+    redis-insight_data:
         driver: local
