@@ -75,11 +75,6 @@ services:
         networks:
             - techcell_backend
         restart: unless-stopped
-        healthcheck:
-            test: rabbitmq-diagnostics -q ping
-            interval: 30s
-            timeout: 30s
-            retries: 3
 
     rabbitmq2:
         container_name: rabbitmq2
@@ -95,11 +90,6 @@ services:
         networks:
             - techcell_backend
         restart: unless-stopped
-        healthcheck:
-            test: rabbitmq-diagnostics -q ping
-            interval: 30s
-            timeout: 30s
-            retries: 3
 
     rabbitmq3:
         container_name: rabbitmq3
@@ -115,11 +105,6 @@ services:
         networks:
             - techcell_backend
         restart: unless-stopped
-        healthcheck:
-            test: rabbitmq-diagnostics -q ping
-            interval: 30s
-            timeout: 30s
-            retries: 3
 
     mongodb-primary:
         container_name: mongodb-primary
@@ -136,11 +121,6 @@ services:
         networks:
             - techcell_backend
         restart: unless-stopped
-        healthcheck:
-            test: ['CMD', 'mongo', '--eval', "db.adminCommand('ping')"]
-            interval: 30s
-            timeout: 10s
-            retries: 3
 
     mongodb-secondary:
         container_name: mongodb-secondary
@@ -158,11 +138,6 @@ services:
         networks:
             - techcell_backend
         restart: unless-stopped
-        healthcheck:
-            test: ['CMD', 'mongo', '--eval', "db.adminCommand('ping')"]
-            interval: 30s
-            timeout: 10s
-            retries: 3
 
     mongodb-arbiter:
         container_name: mongodb-arbiter
@@ -180,11 +155,6 @@ services:
         networks:
             - techcell_backend
         restart: unless-stopped
-        healthcheck:
-            test: ['CMD', 'mongo', '--eval', "db.adminCommand('ping')"]
-            interval: 30s
-            timeout: 10s
-            retries: 3
 
     redis:
         container_name: redis
