@@ -13,7 +13,7 @@ services:
             - PGID=${PGID:-1002}
             - TZ=Etc/UTC
             - URL=techcell.cloud
-            - SUBDOMAINS=api, socket, docs, server, design
+            - SUBDOMAINS=api, socket, docs, server, design, redis, amqp
             - VALIDATION=http
             - CERTPROVIDER=zerossl #optional
             - DNSPLUGIN=cloudflare #optional
