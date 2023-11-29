@@ -15,7 +15,7 @@ export class RabbitMQService implements RabbitMQServiceInterface {
      * @property {Logger} logger - Logger instance
      * @returns {void}
      */
-    static connectRabbitMQ({
+    public static connectRabbitMQ({
         app,
         queueNameEnv,
         inheritAppConfig = false,

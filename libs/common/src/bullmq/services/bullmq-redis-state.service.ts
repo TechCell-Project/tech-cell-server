@@ -6,8 +6,7 @@ import { RedisStatus } from '../bullmq.type';
 
 @Injectable()
 export class BullRedisState implements OnModuleInit {
-    logger = new Logger(BullRedisState.name);
-
+    private readonly logger = new Logger(BullRedisState.name);
     constructor(@InjectQueue(BULLMQ_REDIS_STATE_QUEUE) private stateQueue: Queue) {}
 
     async onModuleInit() {
