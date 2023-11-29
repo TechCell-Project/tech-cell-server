@@ -177,6 +177,7 @@ services:
         image: redislabs/redisinsight:latest
         environment:
             - RIPROXYENABLE=true
+            - RITRUSTEDORIGINS = http://localhost:443
         ports:
             - 8001
         volumes:
