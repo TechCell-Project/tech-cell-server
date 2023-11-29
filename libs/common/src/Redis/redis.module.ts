@@ -5,6 +5,7 @@ import { RedlockService } from './services/redlock.service';
 import { ConfigService } from '@nestjs/config';
 import { RedisService } from './services/redis.service';
 import { redisStore } from 'cache-manager-ioredis-yet';
+import { RedisStateService } from './services';
 
 @Module({
     providers: [
@@ -16,6 +17,7 @@ import { redisStore } from 'cache-manager-ioredis-yet';
                     host: config.get<string>('REDIS_HOST'),
                     port: config.get<number>('REDIS_PORT'),
                     password: config.get<string>('REDIS_PASSWORD'),
+                    reconnectOnError: () => true,
                 } as RedisOptions);
             },
         },
@@ -27,12 +29,14 @@ import { redisStore } from 'cache-manager-ioredis-yet';
                     port: +process.env.REDIS_PORT, // '+' means convert string to number
                     password: process.env.REDIS_PASSWORD,
                     ttl: 5000, // 5 secs
+                    reconnectOnError: () => true,
                 }),
         },
         RedisService,
         RedlockService,
+        RedisStateService,
     ],
-    exports: [REDIS_CLIENT, REDIS_STORE, RedisService, RedlockService],
+    exports: [REDIS_CLIENT, REDIS_STORE, RedisService, RedlockService, RedisStateService],
 })
 export class RedisModule {
     static register(options: RedisOptions): DynamicModule {

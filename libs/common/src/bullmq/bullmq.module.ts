@@ -1,5 +1,7 @@
 import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
+import { BULLMQ_REDIS_STATE_QUEUE } from './bullmq.constant';
+import { BullRedisState } from './services/bullmq-redis-state.service';
 
 @Module({
     imports: [
@@ -10,7 +12,11 @@ import { Module } from '@nestjs/common';
                 password: process.env.REDIS_PASSWORD,
             },
         }),
+        BullModule.registerQueue({
+            name: BULLMQ_REDIS_STATE_QUEUE,
+        }),
     ],
-    exports: [BullModule],
+    providers: [BullRedisState],
+    exports: [BullModule, BullRedisState],
 })
 export class BullMqModule {}
