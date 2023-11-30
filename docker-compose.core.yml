@@ -13,7 +13,7 @@ services:
             - PGID=${PGID:-1002}
             - TZ=Etc/UTC
             - URL=techcell.cloud
-            - SUBDOMAINS=api, socket, docs, server, design, redis, amqp
+            - SUBDOMAINS=${SSL_SUBDOMAINS}
             - VALIDATION=http
             - CERTPROVIDER=zerossl #optional
             - DNSPLUGIN=cloudflare #optional
@@ -177,7 +177,7 @@ services:
         image: redislabs/redisinsight:latest
         environment:
             - RIPORT=8001
-            - RITRUSTEDORIGINS = http://localhost:80,http://localhost:443
+            - RITRUSTEDORIGINS = http://localhost:80,http://localhost:443,http://swag:80,http://swag:443
         ports:
             - 8001
         volumes:

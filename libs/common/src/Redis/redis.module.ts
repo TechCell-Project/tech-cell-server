@@ -1,4 +1,4 @@
-import { DynamicModule, Module } from '@nestjs/common';
+import { DynamicModule, Logger, Module } from '@nestjs/common';
 import { Redis, RedisOptions } from 'ioredis';
 import { REDIS_CLIENT, REDIS_STORE } from '../constants/provider.constant';
 import { RedlockService } from './services/redlock.service';
@@ -17,7 +17,10 @@ import { RedisStateService } from './services';
                     host: config.get<string>('REDIS_HOST'),
                     port: config.get<number>('REDIS_PORT'),
                     password: config.get<string>('REDIS_PASSWORD'),
-                    reconnectOnError: () => true,
+                    reconnectOnError: (err) => {
+                        Logger.error(err);
+                        return true;
+                    },
                 } as RedisOptions);
             },
         },
@@ -29,7 +32,10 @@ import { RedisStateService } from './services';
                     port: +process.env.REDIS_PORT, // '+' means convert string to number
                     password: process.env.REDIS_PASSWORD,
                     ttl: 5000, // 5 secs
-                    reconnectOnError: () => true,
+                    reconnectOnError: (err) => {
+                        Logger.error(err);
+                        return true;
+                    },
                 }),
         },
         RedisService,
