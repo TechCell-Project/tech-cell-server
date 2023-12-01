@@ -26,6 +26,7 @@
         "test:e2e": "jest --config ./apps/back-end/test/jest-e2e.json",
         "compodoc": "node ./scripts/run-compodoc.js",
         "tc-cli": "node ./scripts/deploy-docker.js",
+        "quick:start": "./scripts/quick-start-local.ps1",
         "quick:dev": "./scripts/quick-dev-local.ps1",
         "up:core": "yarn tc-cli core --up",
         "down:core": "yarn tc-cli core --down",

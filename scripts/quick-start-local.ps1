@@ -16,5 +16,5 @@ foreach ($dir in $directories) {
     }
 
     # Open a new PowerShell window and run the command with a unique identifier in the process title
-    Start-Process powershell -ArgumentList "-NoExit", "-Command yarn start:dev $folder_name"
+    Start-Process powershell -ArgumentList "-NoExit", "-Command yarn start $folder_name"
 }
