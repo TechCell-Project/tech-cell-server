@@ -1,4 +1,4 @@
-import { i18nValidationMessage } from 'nestjs-i18n';
+import { i18nValidationMessage as i18nValidationMessageCore } from 'nestjs-i18n';
 import {
     ValidationOptions,
     IsNumber,
@@ -29,6 +29,9 @@ import {
     IsDateString,
 } from 'class-validator';
 import ValidatorJS from 'validator';
+import { I18nTranslations } from '~libs/common/i18n/generated';
+
+const i18nValidationMessage = i18nValidationMessageCore<I18nTranslations>;
 
 export const IsNumberI18n = (options?: IsNumberOptions, validationOptions?: ValidationOptions) => {
     return (target: object, key: string) => {

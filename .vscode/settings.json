@@ -53,6 +53,8 @@
         "redoc",
         "replicaset",
         "rimraf",
+        "RIPORT",
+        "RITRUSTEDORIGINS",
         "roundrobin",
         "sendgrid",
         "setnx",

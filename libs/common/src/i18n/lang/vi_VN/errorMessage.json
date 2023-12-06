@@ -49,5 +49,6 @@
     "DUPLICATE_SKUS": "SKU trùng lặp: ${duplicateSkus}",
     "FORBIDDEN_ROLE": "Bạn không có quyền truy cập.",
     "ONLY_IMAGE_FILE_IS_ACCEPTED": "Chỉ chấp nhận tệp hình ảnh.",
-    "FILE_IS_TOO_LARGE": "Tệp quá lớn."
+    "FILE_IS_TOO_LARGE": "Tệp quá lớn.",
+    "FILE_IS_TOO_LARGE_PROPERTY": "Tệp quá lớn, kích thước tối đa cho phép là {maxSize}MB và tối đa là {maxCount} tệp."
 }
