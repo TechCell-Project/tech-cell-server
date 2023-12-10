@@ -3654,6 +3654,15 @@ axios@^1.4.0, axios@^1.6.0:
     form-data "^4.0.0"
     proxy-from-env "^1.1.0"
 
+axios@^1.6.2:
+  version "1.6.2"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-1.6.2.tgz#de67d42c755b571d3e698df1b6504cde9b0ee9f2"
+  integrity sha512-7i24Ri4pmDRfJTR7LDBhsOTtcm+9kjX5WiY1X3wIisx6G9So3pfMkEiU7emUBe46oceVImccTEM3k6C5dbVW8A==
+  dependencies:
+    follow-redirects "^1.15.0"
+    form-data "^4.0.0"
+    proxy-from-env "^1.1.0"
+
 babel-jest@^29.7.0:
   version "29.7.0"
   resolved "https://registry.yarnpkg.com/babel-jest/-/babel-jest-29.7.0.tgz#f4369919225b684c56085998ac63dbd05be020d5"
@@ -10862,13 +10871,14 @@ vm2@^3.9.17:
     acorn "^8.7.0"
     acorn-walk "^8.2.0"
 
-vnpay@^0.2.1:
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/vnpay/-/vnpay-0.2.1.tgz#ea17707a06778278e137e2b7a2bb990cc3ac0378"
-  integrity sha512-ojtR2mbVA2wHHK8QETzX806jLaNLLKxIMJ63Tb1hZNXcv0KsHe7HE7/1R++HPAXV0P8DL+5Z46JWybhxVokttg==
+vnpay@^0.5.1:
+  version "0.5.1"
+  resolved "https://registry.yarnpkg.com/vnpay/-/vnpay-0.5.1.tgz#8e0a5ffa3613136b6b748eecd239d2e4e4e1b28f"
+  integrity sha512-6Lse/x2Qe00TXakAwTHcArFFxuY7h+lB4ZF8uKX/ktjM7yaSJYp4AoqFCm1RSnyba4K4SKxYoetcF/2sHvXxKg==
   dependencies:
-    class-validator "^0.14.0"
+    axios "^1.6.2"
     moment-timezone "^0.5.43"
+    zod "^3.22.4"
 
 void-elements@^3.1.0:
   version "3.1.0"
@@ -11170,3 +11180,8 @@ yocto-queue@^0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/yocto-queue/-/yocto-queue-0.1.0.tgz#0294eb3dee05028d31ee1a5fa2c556a6aaf10a1b"
   integrity sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==
+
+zod@^3.22.4:
+  version "3.22.4"
+  resolved "https://registry.yarnpkg.com/zod/-/zod-3.22.4.tgz#f31c3a9386f61b1f228af56faa9255e845cf3fff"
+  integrity sha512-iC+8Io04lddc+mVqQ9AZ7OQ2MrUKGN+oIQyq1vemgt46jwCwLfhq7/pwnBnNXXXZb8VTVLKwp9EDkx+ryxIWmg==
