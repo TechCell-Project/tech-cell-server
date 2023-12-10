@@ -29,6 +29,7 @@ import {
     CartsOrdMessagePattern,
     AddCartRequestDTO,
     DeleteProductsCartRequestDTO,
+    GetCartResponseDTO,
 } from '~apps/order/carts-ord';
 import { ACCESS_TOKEN_NAME } from '~libs/common/constants/api.constant';
 import { ORDER_SERVICE } from '~libs/common/constants/services.constant';
@@ -57,7 +58,7 @@ export class CartsController {
         summary: 'Get list of carts',
         description: 'Get list of carts',
     })
-    @ApiOkResponse({ description: 'Carts found!' })
+    @ApiOkResponse({ description: 'Carts found!', type: GetCartResponseDTO })
     @Get('/')
     async getCarts(
         @Headers() headers: THeaders,
