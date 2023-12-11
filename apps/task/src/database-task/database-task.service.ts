@@ -3,6 +3,7 @@ import { InjectConnection } from '@nestjs/mongoose';
 import { Cron } from '@nestjs/schedule';
 import { Connection } from 'mongoose';
 import { DB_TASK_CONSTANT } from './database-task.constant';
+import { isTrueSet } from '~libs/common';
 
 @Injectable()
 export class DatabaseTaskService {
@@ -26,6 +27,10 @@ export class DatabaseTaskService {
     })
     async copyPrimaryToBackup() {
         this.logger.log('Start copy primary to backup');
+        if (!isTrueSet(process.env.IS_ENABLE_BACKUP_MONGODB)) {
+            this.logger.log('Skip copy primary to backup because IS_BACKUP_MONGODB is false');
+            return;
+        }
         const currentDate = new Date();
         const backupDbName = `backup_${currentDate.getFullYear()}_${
             currentDate.getMonth() + 1
