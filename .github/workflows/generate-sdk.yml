@@ -97,7 +97,6 @@ jobs:
             - name: Publish to GitHub Packages
               run: |
                   cd ./generated/javascript
-                  npm ci
                   npm publish
               env:
                   NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
