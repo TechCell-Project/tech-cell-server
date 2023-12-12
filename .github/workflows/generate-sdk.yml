@@ -52,10 +52,6 @@ jobs:
                   echo REDIS_PASSWORD= '${{secrets.REDIS_PASSWORD}}' >> .env
                   cat .env
 
-            - name: Debug .env
-              run: |
-                  cat .env | sed 's/=.*//'
-
             - name: Install dependencies
               run: yarn install
 
@@ -81,20 +77,25 @@ jobs:
                   --release-note "Github integration generated" \
                   -o ./generated/javascript
 
+            - name: Update package.json
+              run: |
+                  echo Adding publishConfig to package.json...
+                  node -e "let pkg=require('./generated/javascript/package.json'); pkg.publishConfig={registry:'https://npm.pkg.github.com/'}; require('fs').writeFileSync('./generated/javascript/package.json', JSON.stringify(pkg, null, 2));"
+
+            - name: Increment version number
+              run: |
+                  cd ./generated/javascript
+                  npm version patch
+
             - name: Archive production artifacts
               uses: actions/upload-artifact@v3
               with:
                   name: sdk-artifact
                   path: ./generated/javascript
 
-            # - name: Publish to GitHub Packages
-            #   run: |
-            #       cd ./generated/javascript
-            #       npm publish
-            #       env:
-            #       NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-
-            - name: Push to Github
+            - name: Publish to GitHub Packages
               run: |
                   cd ./generated/javascript
-                  /bin/sh ./git_push.sh
+                  npm publish
+              env:
+                  NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
