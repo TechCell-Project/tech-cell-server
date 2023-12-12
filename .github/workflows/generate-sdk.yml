@@ -31,6 +31,7 @@ jobs:
             - name: 'Create .env file'
               run: |
                   touch .env
+                  echo API_PORT= '8000' >> .env 
                   echo GOOGLE_CLIENT_ID= 'google_sample' >> .env
                   echo GOOGLE_CLIENT_SECRET= 'google_sample' >> .env
                   echo GOOGLE_REDIRECT_URL= 'google_sample' >> .env
@@ -59,7 +60,7 @@ jobs:
             - name: Run the web server and generate the OpenAPI YAML
               run: |
                   yarn start api &
-                  sleep 15 &&
+                  sleep 20 &&
                   curl http://localhost:8000 &&
                   yarn generate:swagger-yaml
 
