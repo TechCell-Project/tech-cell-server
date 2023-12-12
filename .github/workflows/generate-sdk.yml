@@ -41,6 +41,13 @@ jobs:
                   echo JWT_ACCESS_TOKEN_EXPIRE_TIME_STRING= '1h' >> .env
                   echo JWT_REFRESH_TOKEN_EXPIRE_TIME_STRING= '1h' >> .env
                   echo FALLBACK_LANGUAGE= 'en' >> .env
+                  echo RABBITMQ_UTILITY_QUEUE= 'utility_queue' >> .env
+                  echo RABBITMQ_SEARCH_QUEUE= 'search_queue' >> .env
+                  echo RABBITMQ_AUTH_QUEUE= 'auth_queue' >> .env
+                  echo RABBITMQ_COMMUNICATIONS_QUEUE= 'communications_queue' >> .env
+                  echo RABBITMQ_MANAGEMENTS_QUEUE= 'managements_queue' >> .env
+                  echo RABBITMQ_ORDER_QUEUE= 'order_queue' >> .env
+                  echo RABBITMQ_TASK_QUEUE= 'task_queue' >> .env
                   echo MONGODB_URI= ${{secrets.MONGODB_URI}} >> .env
                   echo RABBITMQ_URLS= ${{secrets.RABBITMQ_URLS}} >> .env
                   echo REDIS_HOST= ${{secrets.REDIS_HOST}} >> .env
@@ -48,9 +55,13 @@ jobs:
                   echo REDIS_PASSWORD= ${{secrets.REDIS_PASSWORD}} >> .env
                   cat .env
 
+            - name: Debug .env
+              run: |
+                  cat .env | sed 's/=.*//'
+
             - name: Run the web server and generate the OpenAPI YAML
               run: |
-                  yarn start:dev &
+                  yarn start:dev api &
                   sleep 15 &&
                   curl http://localhost:8000 &&
                   yarn generate:swagger-yaml
