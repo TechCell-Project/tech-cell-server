@@ -41,6 +41,11 @@ jobs:
                   echo JWT_ACCESS_TOKEN_EXPIRE_TIME_STRING= '1h' >> .env
                   echo JWT_REFRESH_TOKEN_EXPIRE_TIME_STRING= '1h' >> .env
                   echo FALLBACK_LANGUAGE= 'en' >> .env
+                  echo MONGODB_URI= $secrets.MONGODB_URI >> .env
+                  echo RABBITMQ_URLS= $secrets.RABBITMQ_URLS >> .env
+                  echo REDIS_HOST= $secrets.REDIS_HOST >> .env
+                  echo REDIS_PORT= $secrets.REDIS_PORT >> .env
+                  echo REDIS_PASSWORD= $secrets.REDIS_PASSWORD >> .env
                   cat .env
 
             - name: Run the web server and generate the OpenAPI YAML
