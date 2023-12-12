@@ -58,10 +58,13 @@ jobs:
 
             - name: Run the web server and generate the OpenAPI YAML
               run: |
-                  yarn start:dev api &
+                  yarn start api &
                   sleep 15 &&
                   curl http://localhost:8000 &&
                   yarn generate:swagger-yaml
+
+            - name: Remove dist directory
+              run: rm -rf dist
 
             - name: Download Swagger Codegen Generator
               run: |
