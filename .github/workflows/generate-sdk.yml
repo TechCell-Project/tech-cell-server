@@ -137,11 +137,11 @@ jobs:
                   git config --global user.name "lehuygiang28"
 
                   cd ./generated/typescript-axios
-                  /bin/sh ./generate-sdk-git-push.sh
+                  /bin/sh ./generate-sdk-git-push.sh "TechCell-Project" "tech-cell-server-node-sdk" "Github integration generated"
 
                   cd ../../
                   cd ./generated/dart
-                  /bin/sh ./generate-sdk-git-push.sh
+                  /bin/sh ./generate-sdk-git-push.sh "TechCell-Project" "tech-cell-server-dart-sdk" "Github integration generated"
               env:
                   GIT_TOKEN: ${{secrets.GIAANG_SDK_REPO_SECRET}}
 
