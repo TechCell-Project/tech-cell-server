@@ -79,8 +79,8 @@ jobs:
 
             - name: Update package.json
               run: |
-                  echo Adding publishConfig to package.json...
-                  node -e "let pkg=require('./generated/javascript/package.json'); pkg.publishConfig={registry:'https://npm.pkg.github.com/'}; require('fs').writeFileSync('./generated/javascript/package.json', JSON.stringify(pkg, null, 2));"
+                  echo Adding publishConfig and updating name in package.json...
+                  node -e "let pkg=require('./generated/javascript/package.json'); pkg.name='@lehuygiang28/tech-cell-server-node-sdk'; pkg.publishConfig={registry:'https://npm.pkg.github.com/'}; require('fs').writeFileSync('./generated/javascript/package.json', JSON.stringify(pkg, null, 2));"
 
             - name: Increment version number
               run: |
