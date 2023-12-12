@@ -146,7 +146,7 @@ jobs:
                   version=$(node -p "require('./package.json').version")
                   if npm view --registry https://npm.pkg.github.com/ @techcell-project/tech-cell-server-node-sdk@$version version; then
                     echo "Version $version already exists, skipping publish..."
-                    echo "::set-output name=skip::true"
+                    echo "skip=true" >> $GITHUB_ENV
                   else
                     echo "Version $version does not exist, proceeding with publish..."
                   fi
