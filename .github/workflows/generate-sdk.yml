@@ -82,7 +82,8 @@ jobs:
               run: |
                   echo Adding publishConfig, updating name and version in package.json...
                   techcell_version=$(node -p "require('./package.json').version")
-                  node -e "let pkg=require('./generated/javascript/package.json'); pkg.name='@lehuygiang28/tech-cell-server-node-sdk'; pkg.version='${techcell_version}'; pkg.author='Lê Huy Giang <lehuygiang28@gmail.com>'; require('fs').writeFileSync('./generated/javascript/package.json', JSON.stringify(pkg, null, 2));"
+                  commit_hash=$(git rev-parse --short HEAD)
+                  node -e "let pkg=require('./generated/javascript/package.json'); pkg.name='@lehuygiang28/tech-cell-server-node-sdk'; pkg.version='${techcell_version}-${commit_hash}'; pkg.publishConfig={registry:'https://npm.pkg.github.com/'}; pkg.author='Lê Huy Giang <lehuygiang28@gmail.com>'; require('fs').writeFileSync('./generated/javascript/package.json', JSON.stringify(pkg, null, 2));"
 
             - name: Archive production artifacts
               uses: actions/upload-artifact@v3
@@ -96,3 +97,8 @@ jobs:
                   npm publish
               env:
                   NODE_AUTH_TOKEN: ${{secrets.GIAANG_PACKAGE_TOKEN}}
+
+            - name: Push to GitHub
+              run: |
+                  cd ./generated/javascript
+                  /bin/sh ./git_push.sh
