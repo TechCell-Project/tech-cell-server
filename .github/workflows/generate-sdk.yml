@@ -139,14 +139,16 @@ jobs:
               env:
                   GIT_TOKEN: ${{secrets.GIAANG_SDK_REPO_SECRET}}
 
-            - name: Check if version already exists
+            - name: Check sdk-node if version already exists
               id: check_version
               run: |
                   cd ./generated/typescript-axios
                   version=$(node -p "require('./package.json').version")
-                  if npm show @TechCell-Project/tech-cell-server-node-sdk@$version version; then
+                  if npm view --registry https://npm.pkg.github.com/ @techcell-project/tech-cell-server-node-sdk@$version version; then
                     echo "Version $version already exists, skipping publish..."
                     echo "::set-output name=skip::true"
+                  else
+                    echo "Version $version does not exist, proceeding with publish..."
                   fi
               env:
                   NODE_AUTH_TOKEN: ${{secrets.GIAANG_PACKAGE_TOKEN}}
