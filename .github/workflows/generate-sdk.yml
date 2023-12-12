@@ -87,7 +87,7 @@ jobs:
                   --release-note "Github integration generated" \
                   -o ./generated/typescript-axios
 
-            - name: Generate Dart SDK
+            - name: Generate Dart SDK stable
               run: |
                   java -jar swagger-codegen-cli.jar generate \
                   -i swagger.yaml \
@@ -114,7 +114,7 @@ jobs:
                   echo 'repository: https://github.com/TechCell-Project/tech-cell-server-dart-sdk' >> ./generated/dart/pubspec.yaml
                   echo 'publish_to: https://maven.pkg.github.com/TechCell-Project/tech-cell-server-dart-sdk' >> ./generated/dart/pubspec.yaml
                   echo 'environment:' >> ./generated/dart/pubspec.yaml
-                  echo '  sdk: "^3.2.0"' >> ./generated/dart/pubspec.yaml
+                  echo '  sdk: ">=2.12.0 <3.2.0"' >> ./generated/dart/pubspec.yaml
 
             - name: Authenticate with GitHub Package Registry
               run: |
