@@ -16,7 +16,7 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerStorageRedisService } from 'nestjs-throttler-storage-redis';
 import { MorganMiddleware } from './middlewares';
-import { GoogleStrategy, AccessTokenStrategy, FacebookStrategy } from '~apps/auth/strategies';
+import { GoogleStrategy, AccessTokenStrategy } from '~apps/auth/strategies';
 import { CloudinaryModule } from '~libs/third-party/cloudinary.com';
 import { MulterModule } from '@nestjs/platform-express/multer';
 import { diskStorage } from 'multer';
@@ -93,7 +93,6 @@ import { I18nModule } from '~libs/common/i18n';
         },
         GoogleStrategy,
         AccessTokenStrategy,
-        FacebookStrategy,
         ApiTaskService,
     ],
 })
