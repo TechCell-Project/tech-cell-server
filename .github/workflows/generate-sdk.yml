@@ -101,4 +101,8 @@ jobs:
             - name: Push to GitHub
               run: |
                   cd ./generated/javascript
+                  git config --global user.email "lehuygiang28@gmail.com"
+                  git config --global user.name "lehuygiang28"
                   /bin/sh ./git_push.sh
+              env:
+                  GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
