@@ -104,26 +104,26 @@ jobs:
                   commit_hash=$(git rev-parse --short HEAD)
                   node -e "let pkg=require('./generated/typescript-axios/package.json'); pkg.name='@TechCell-Project/tech-cell-server-node-sdk'; pkg.version='${techcell_version}-${commit_hash}'; pkg.publishConfig={registry:'https://npm.pkg.github.com/'}; pkg.author='TechCell Teams <teams@techcell.cloud>'; require('fs').writeFileSync('./generated/typescript-axios/package.json', JSON.stringify(pkg, null, 2));"
 
-            - name: Update pubspec.yaml
-              run: |
-                  echo Updating version and repository in pubspec.yaml...
-                  techcell_version=$(node -p "require('./package.json').version")
-                  commit_hash=$(git rev-parse --short HEAD)
-                  sed -i 's/version: .*/version: '${techcell_version}-${commit_hash}'/g' ./generated/dart/pubspec.yaml
-                  echo 'homepage: https://github.com/TechCell-Project/tech-cell-server-dart-sdk' >> ./generated/dart/pubspec.yaml
-                  echo 'repository: https://github.com/TechCell-Project/tech-cell-server-dart-sdk' >> ./generated/dart/pubspec.yaml
-                  echo 'publish_to: https://maven.pkg.github.com/TechCell-Project/tech-cell-server-dart-sdk' >> ./generated/dart/pubspec.yaml
-                  echo 'environment:' >> ./generated/dart/pubspec.yaml
-                  echo '  sdk: ">=2.12.0 <=3.2.3"' >> ./generated/dart/pubspec.yaml
+            # - name: Update pubspec.yaml
+            #   run: |
+            #       echo Updating version and repository in pubspec.yaml...
+            #       techcell_version=$(node -p "require('./package.json').version")
+            #       commit_hash=$(git rev-parse --short HEAD)
+            #       sed -i 's/version: .*/version: '${techcell_version}-${commit_hash}'/g' ./generated/dart/pubspec.yaml
+            #       echo 'homepage: https://github.com/TechCell-Project/tech-cell-server-dart-sdk' >> ./generated/dart/pubspec.yaml
+            #       echo 'repository: https://github.com/TechCell-Project/tech-cell-server-dart-sdk' >> ./generated/dart/pubspec.yaml
+            #       echo 'publish_to: https://maven.pkg.github.com/TechCell-Project/tech-cell-server-dart-sdk' >> ./generated/dart/pubspec.yaml
+            #       echo 'environment:' >> ./generated/dart/pubspec.yaml
+            #       echo '  sdk: ">=2.12.0 <=3.2.3"' >> ./generated/dart/pubspec.yaml
 
-            - name: Authenticate with GitHub Package Registry
-              run: |
-                  echo "machine maven.pkg.github.com login TechCell-Project password ${{secrets.GIAANG_PACKAGE_TOKEN}}" > ~/.netrc
+            # - name: Authenticate with GitHub Package Registry
+            #   run: |
+            #       echo "machine maven.pkg.github.com login TechCell-Project password ${{secrets.GIAANG_PACKAGE_TOKEN}}" > ~/.netrc
 
-            - name: Publish dart-sdk package to GitHub Packages
-              run: |
-                  cd ./generated/dart
-                  dart pub publish --force
+            # - name: Publish dart-sdk package to GitHub Packages
+            #   run: |
+            #       cd ./generated/dart
+            #       dart pub publish --force
 
             - name: Push to GitHub repository
               run: |
