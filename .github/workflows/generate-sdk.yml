@@ -48,11 +48,11 @@ jobs:
                   echo RABBITMQ_MANAGEMENTS_QUEUE= 'managements_queue' >> .env
                   echo RABBITMQ_ORDER_QUEUE= 'order_queue' >> .env
                   echo RABBITMQ_TASK_QUEUE= 'task_queue' >> .env
-                  echo MONGODB_URI= ${{secrets.MONGODB_URI}} >> .env
-                  echo RABBITMQ_URLS= ${{secrets.RABBITMQ_URLS}} >> .env
-                  echo REDIS_HOST= ${{secrets.REDIS_HOST}} >> .env
-                  echo REDIS_PORT= ${{secrets.REDIS_PORT}} >> .env
-                  echo REDIS_PASSWORD= ${{secrets.REDIS_PASSWORD}} >> .env
+                  echo MONGODB_URI= '${{secrets.MONGODB_URI}}' >> .env
+                  echo RABBITMQ_URLS= '${{secrets.RABBITMQ_URLS}}' >> .env
+                  echo REDIS_HOST= '${{secrets.REDIS_HOST}}' >> .env
+                  echo REDIS_PORT= '${{secrets.REDIS_PORT}}' >> .env
+                  echo REDIS_PASSWORD= '${{secrets.REDIS_PASSWORD}}' >> .env
                   cat .env
 
             - name: Debug .env
