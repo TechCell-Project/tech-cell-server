@@ -1,0 +1,71 @@
+name: Generate SDK
+
+on:
+    push:
+        branches:
+            - development
+    pull_request:
+        branches: ['*']
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+
+            - name: Set up JDK 11
+              uses: actions/setup-java@v3
+              with:
+                  java-version: '11'
+                  distribution: 'adopt'
+
+            - name: Use Node.js 18.x
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 18.x
+                  registry-url: 'https://npm.pkg.github.com'
+
+            - name: Install dependencies
+              run: yarn install
+
+            - name: Run the web server and generate the OpenAPI YAML
+              run: |
+                  yarn start:dev &
+                  sleep 15 &&
+                  curl http://localhost:8000 &&
+                  yarn generate:swagger-yaml
+
+            - name: Download Swagger Codegen Generator
+              run: |
+                  wget https://repo1.maven.org/maven2/io/swagger/codegen/v3/swagger-codegen-cli/3.0.51/swagger-codegen-cli-3.0.51.jar -O swagger-codegen-cli.jar
+                  java -jar swagger-codegen-cli.jar --help
+
+            - name: Generate SDK
+              run: |
+                  java -jar swagger-codegen-cli.jar generate \
+                  -i swagger.yaml \
+                  -l javascript \
+                  --git-user-id "lehuygiang28" \
+                  --git-repo-id "tech-cell-server-node-sdk" \
+                  --release-note "Github integration generated" \
+                  -o ./generated/javascript
+
+            - name: Archive production artifacts
+              uses: actions/upload-artifact@v3
+              with:
+                  name: sdk-artifact
+                  path: ./generated/javascript
+
+            - name: Publish to GitHub Packages
+              run: |
+                  cd ./generated/javascript
+                  npm publish
+                  env:
+                  NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+            - name: Push to Github
+              run: |
+                  cd ./generated/javascript
+                  /bin/sh ./git_push.sh

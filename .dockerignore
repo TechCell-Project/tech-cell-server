@@ -11,3 +11,5 @@ logs/
 compodoc/
 uploads/
 ssl/
+generated/
+swagger.yaml
