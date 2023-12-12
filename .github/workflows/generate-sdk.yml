@@ -27,9 +27,6 @@ jobs:
                   node-version: 18.x
                   registry-url: 'https://npm.pkg.github.com'
 
-            - name: Install dependencies
-              run: yarn install
-
             - name: 'Create .env file'
               run: |
                   touch .env
@@ -59,6 +56,9 @@ jobs:
               run: |
                   cat .env | sed 's/=.*//'
 
+            - name: Install dependencies
+              run: yarn install
+
             - name: Run the web server and generate the OpenAPI YAML
               run: |
                   yarn start:dev api &
@@ -87,12 +87,12 @@ jobs:
                   name: sdk-artifact
                   path: ./generated/javascript
 
-            - name: Publish to GitHub Packages
-              run: |
-                  cd ./generated/javascript
-                  npm publish
-                  env:
-                  NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+            # - name: Publish to GitHub Packages
+            #   run: |
+            #       cd ./generated/javascript
+            #       npm publish
+            #       env:
+            #       NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
             - name: Push to Github
               run: |
