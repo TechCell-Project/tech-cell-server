@@ -85,6 +85,9 @@ jobs:
                   --release-note "Github integration generated" \
                   -o ./generated/typescript-axios
 
+            - name: Copy git push script to 'node-sdk' output directory
+              run: cp ./scripts/generate-sdk-git-push.sh ./generated/typescript-axios/
+
             - name: Generate Dart SDK
               run: |
                   java -jar swagger-codegen-cli.jar generate \
@@ -94,6 +97,9 @@ jobs:
                   --git-repo-id "tech-cell-server-dart-sdk" \
                   --release-note "Github integration generated" \
                   -o ./generated/dart
+
+            - name: Copy git push script to 'dart-sdk' output directory
+              run: cp ./scripts/generate-sdk-git-push.sh ./generated/dart/
 
             - name: Update package.json
               run: |
@@ -129,11 +135,11 @@ jobs:
                   git config --global user.name "lehuygiang28"
 
                   cd ./generated/typescript-axios
-                  /bin/sh ./git_push.sh
+                  /bin/sh ./generate-sdk-git-push.sh "TechCell-Project" "tech-cell-server-node-sdk" "Github integration generated"
 
                   cd ../../
                   cd ./generated/dart
-                  /bin/sh ./git_push.sh
+                  /bin/sh ./generate-sdk-git-push.sh "TechCell-Project" "tech-cell-server-dart-sdk" "Github integration generated"
               env:
                   GIT_TOKEN: ${{secrets.GIAANG_SDK_REPO_SECRET}}
 
