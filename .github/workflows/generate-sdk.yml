@@ -30,6 +30,14 @@ jobs:
             - name: Install dependencies
               run: yarn install
 
+            - name: 'Create .env file'
+              run: |
+                  touch .env
+                  echo GOOGLE_CLIENT_ID= 'google_sample' >> .env
+                  echo GOOGLE_CLIENT_SECRET= 'google_sample' >> .env
+                  echo GOOGLE_REDIRECT_URL= 'google_sample' >> .env
+                  cat .env
+
             - name: Run the web server and generate the OpenAPI YAML
               run: |
                   yarn start:dev &
