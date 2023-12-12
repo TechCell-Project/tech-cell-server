@@ -77,7 +77,7 @@ jobs:
                   java -jar swagger-codegen-cli.jar generate \
                   -i swagger.yaml \
                   -l typescript-axios \
-                  --git-user-id "lehuygiang28" \
+                  --git-user-id "TechCell-Project" \
                   --git-repo-id "tech-cell-server-node-sdk" \
                   --release-note "Github integration generated" \
                   -o ./generated/typescript-axios
@@ -87,16 +87,15 @@ jobs:
                   echo Adding publishConfig, updating name and version in package.json...
                   techcell_version=$(node -p "require('./package.json').version")
                   commit_hash=$(git rev-parse --short HEAD)
-                  node -e "let pkg=require('./generated/typescript-axios/package.json'); pkg.name='@lehuygiang28/tech-cell-server-node-sdk'; pkg.version='${techcell_version}-${commit_hash}'; pkg.publishConfig={registry:'https://npm.pkg.github.com/'}; pkg.author='Lê Huy Giang <lehuygiang28@gmail.com>'; require('fs').writeFileSync('./generated/typescript-axios/package.json', JSON.stringify(pkg, null, 2));"
+                  node -e "let pkg=require('./generated/typescript-axios/package.json'); pkg.name='@TechCell-Project/tech-cell-server-node-sdk'; pkg.version='${techcell_version}-${commit_hash}'; pkg.publishConfig={registry:'https://npm.pkg.github.com/'}; pkg.author='TechCell Teams <teams@techcell.cloud>'; require('fs').writeFileSync('./generated/typescript-axios/package.json', JSON.stringify(pkg, null, 2));"
 
             - name: Push to GitHub
               run: |
-                  git config --global user.email "lehuygiang28@gmail.com"
-                  git config --global user.name "lehuygiang28"
+                  git config --global user.email "teams@techcell.cloud"
+                  git config --global user.name "techcell-teams"
                   cd ./generated/typescript-axios
                   /bin/sh ./git_push.sh
               env:
-                  GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
                   GIT_TOKEN: ${{secrets.GIAANG_SDK_REPO_SECRET}}
 
             - name: Publish to GitHub Packages
