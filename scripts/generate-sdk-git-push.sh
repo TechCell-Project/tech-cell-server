@@ -44,12 +44,11 @@ if [ "$git_remote" = "" ]; then # git remote not defined
 
 fi
 
-# Pull the latest changes from the remote repository
+# Fetch the latest changes from the remote repository
 git fetch origin
-if git show-ref --quiet refs/remotes/origin/$branch; then
-    git reset --hard origin/$branch
-fi
-git pull --rebase origin $branch
+
+# Rebase the local changes on top of the changes from the remote repository
+git rebase origin/$branch
 
 # Adds the files in the local repository and stages them for commit.
 git add .
