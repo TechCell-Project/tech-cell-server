@@ -85,19 +85,6 @@ jobs:
                   commit_hash=$(git rev-parse --short HEAD)
                   node -e "let pkg=require('./generated/javascript/package.json'); pkg.name='@lehuygiang28/tech-cell-server-node-sdk'; pkg.version='${techcell_version}-${commit_hash}'; pkg.publishConfig={registry:'https://npm.pkg.github.com/'}; pkg.author='Lê Huy Giang <lehuygiang28@gmail.com>'; require('fs').writeFileSync('./generated/javascript/package.json', JSON.stringify(pkg, null, 2));"
 
-            - name: Archive production artifacts
-              uses: actions/upload-artifact@v3
-              with:
-                  name: sdk-artifact
-                  path: ./generated/javascript
-
-            - name: Publish to GitHub Packages
-              run: |
-                  cd ./generated/javascript
-                  npm publish
-              env:
-                  NODE_AUTH_TOKEN: ${{secrets.GIAANG_PACKAGE_TOKEN}}
-
             - name: Push to GitHub
               run: |
                   cd ./generated/javascript
@@ -107,3 +94,10 @@ jobs:
               env:
                   GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
                   GIT_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+            - name: Publish to GitHub Packages
+              run: |
+                  cd ./generated/javascript
+                  npm publish
+              env:
+                  NODE_AUTH_TOKEN: ${{secrets.GIAANG_PACKAGE_TOKEN}}
