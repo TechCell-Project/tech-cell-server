@@ -69,7 +69,7 @@ jobs:
 
             - name: Download Swagger Codegen Generator
               run: |
-                  wget https://repo1.maven.org/maven2/io/swagger/codegen/v3/swagger-codegen-cli/3.0.51/swagger-codegen-cli-3.0.51.jar -O swagger-codegen-cli.jar
+                  wget https://repo1.maven.org/maven2/io/swagger/codegen/v3/swagger-codegen-cli/3.0.50/swagger-codegen-cli-3.0.50.jar -O swagger-codegen-cli.jar
                   java -jar swagger-codegen-cli.jar --help
 
             - name: Generate SDK
