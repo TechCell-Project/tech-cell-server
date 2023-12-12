@@ -72,22 +72,22 @@ jobs:
               run: |
                   java -jar swagger-codegen-cli.jar generate \
                   -i swagger.yaml \
-                  -l javascript \
+                  -l typescript-axios \
                   --git-user-id "lehuygiang28" \
                   --git-repo-id "tech-cell-server-node-sdk" \
                   --release-note "Github integration generated" \
-                  -o ./generated/javascript
+                  -o ./generated/typescript-axios
 
             - name: Update package.json
               run: |
                   echo Adding publishConfig, updating name and version in package.json...
                   techcell_version=$(node -p "require('./package.json').version")
                   commit_hash=$(git rev-parse --short HEAD)
-                  node -e "let pkg=require('./generated/javascript/package.json'); pkg.name='@lehuygiang28/tech-cell-server-node-sdk'; pkg.version='${techcell_version}-${commit_hash}'; pkg.publishConfig={registry:'https://npm.pkg.github.com/'}; pkg.author='Lê Huy Giang <lehuygiang28@gmail.com>'; require('fs').writeFileSync('./generated/javascript/package.json', JSON.stringify(pkg, null, 2));"
+                  node -e "let pkg=require('./generated/typescript-axios/package.json'); pkg.name='@lehuygiang28/tech-cell-server-node-sdk'; pkg.version='${techcell_version}-${commit_hash}'; pkg.publishConfig={registry:'https://npm.pkg.github.com/'}; pkg.author='Lê Huy Giang <lehuygiang28@gmail.com>'; require('fs').writeFileSync('./generated/typescript-axios/package.json', JSON.stringify(pkg, null, 2));"
 
             - name: Push to GitHub
               run: |
-                  cd ./generated/javascript
+                  cd ./generated/typescript-axios
                   git config --global user.email "lehuygiang28@gmail.com"
                   git config --global user.name "lehuygiang28"
                   /bin/sh ./git_push.sh
@@ -97,7 +97,7 @@ jobs:
 
             - name: Publish to GitHub Packages
               run: |
-                  cd ./generated/javascript
+                  cd ./generated/typescript-axios
                   npm publish
               env:
                   NODE_AUTH_TOKEN: ${{secrets.GIAANG_PACKAGE_TOKEN}}
