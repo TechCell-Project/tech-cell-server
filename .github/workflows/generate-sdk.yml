@@ -93,7 +93,7 @@ jobs:
                   /bin/sh ./git_push.sh
               env:
                   GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-                  GIT_TOKEN: ${{secrets.GITHUB_TOKEN}}
+                  GIT_TOKEN: ${{secrets.GIAANG_SDK_REPO_SECRET}}
 
             - name: Publish to GitHub Packages
               run: |
