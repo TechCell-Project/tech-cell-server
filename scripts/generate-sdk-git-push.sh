@@ -31,12 +31,6 @@ fi
 # Initialize the local directory as a Git repository
 git init
 
-# Adds the files in the local repository and stages them for commit.
-git add .
-
-# Commits the tracked changes and prepares them to be pushed to a remote repository.
-git commit -m "$release_note"
-
 # Sets the new remote
 git_remote=`git remote`
 if [ "$git_remote" = "" ]; then # git remote not defined
@@ -50,10 +44,18 @@ if [ "$git_remote" = "" ]; then # git remote not defined
 
 fi
 
+# Pull the latest changes from the remote repository
 git fetch origin
 if git show-ref --quiet refs/remotes/origin/$branch; then
     git reset --hard origin/$branch
 fi
+git pull --rebase origin $branch
+
+# Adds the files in the local repository and stages them for commit.
+git add .
+
+# Commits the tracked changes and prepares them to be pushed to a remote repository.
+git commit -m "$release_note"
 
 # Pushes (Forces) the changes in the local repository up to the remote repository
 echo "Git pushing to https://github.com/${git_user_id}/${git_repo_id}.git"
