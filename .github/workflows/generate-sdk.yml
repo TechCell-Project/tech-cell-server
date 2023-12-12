@@ -81,8 +81,8 @@ jobs:
             - name: Update package.json
               run: |
                   echo Adding publishConfig, updating name and version in package.json...
-                  version=$(git describe --tags `git rev-list --tags --max-count=1`)
-                  node -e "let pkg=require('./generated/javascript/package.json'); pkg.name='@lehuygiang28/tech-cell-server-node-sdk'; pkg.version='${version}'; pkg.publishConfig={registry:'https://npm.pkg.github.com/'}; pkg.author='Lê Huy Giang <lehuygiang28@gmail.com>'; require('fs').writeFileSync('./generated/javascript/package.json', JSON.stringify(pkg, null, 2));"
+                  techcell_version=$(node -p "require('./package.json').version")
+                  node -e "let pkg=require('./generated/javascript/package.json'); pkg.name='@lehuygiang28/tech-cell-server-node-sdk'; pkg.version='${techcell_version}'; pkg.publishConfig={registry:'https://npm.pkg.github.com/'}; pkg.author='Lê Huy Giang <lehuygiang28@gmail.com>'; require('fs').writeFileSync('./generated/javascript/package.json', JSON.stringify(pkg, null, 2));"
 
             - name: Archive production artifacts
               uses: actions/upload-artifact@v3
