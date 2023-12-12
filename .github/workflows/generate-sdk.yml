@@ -83,6 +83,7 @@ jobs:
                   --git-user-id "TechCell-Project" \
                   --git-repo-id "tech-cell-server-node-sdk" \
                   --release-note "Github integration generated" \
+                  --additional-properties modelPropertyNaming=original \
                   -o ./generated/typescript-axios
 
             - name: Copy git push script to 'node-sdk' output directory
@@ -96,6 +97,7 @@ jobs:
                   --git-user-id "TechCell-Project" \
                   --git-repo-id "tech-cell-server-dart-sdk" \
                   --release-note "Github integration generated" \
+                  --additional-properties modelPropertyNaming=original \
                   -o ./generated/dart
 
             - name: Copy git push script to 'dart-sdk' output directory
