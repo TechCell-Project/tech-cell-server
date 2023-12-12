@@ -1,11 +1,9 @@
-name: Generate SDK
+name: Generate SDK and publish to GitHub Packages, Github Repository
 
 on:
     push:
         branches:
             - development
-    pull_request:
-        branches: ['*']
 
 jobs:
     build:
