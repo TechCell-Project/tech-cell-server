@@ -113,6 +113,8 @@ jobs:
                   echo 'homepage: https://github.com/TechCell-Project/tech-cell-server-dart-sdk' >> ./generated/dart/pubspec.yaml
                   echo 'repository: https://github.com/TechCell-Project/tech-cell-server-dart-sdk' >> ./generated/dart/pubspec.yaml
                   echo 'publish_to: https://maven.pkg.github.com/TechCell-Project/tech-cell-server-dart-sdk' >> ./generated/dart/pubspec.yaml
+                  echo 'environment:' >> ./generated/dart/pubspec.yaml
+                  echo '  sdk: "^3.2.0"' >> ./generated/dart/pubspec.yaml
 
             - name: Authenticate with GitHub Package Registry
               run: |
