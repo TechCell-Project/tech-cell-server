@@ -71,10 +71,23 @@ jobs:
 
             - name: Generate Node SDK
               run: |
-                  npx @openapitools/openapi-generator-cli generate -i swagger.yaml -o ./generated/typescript-axios -g typescript-axios
+                  npx @openapitools/openapi-generator-cli generate -i swagger.yaml \
+                  -g typescript-axios \
+                  -o ./generated/typescript-axios \
+                  --additional-properties modelPropertyNaming=original \
+
+            - name: Generate Dart SDK
+              run: |
+                  npx @openapitools/openapi-generator-cli generate -i swagger.yaml \
+                  -g dart \
+                  -o ./generated/dart \
+                  --additional-properties modelPropertyNaming=original \
 
             - name: Copy git push script to 'node-sdk' output directory
               run: cp ./scripts/generate-sdk-git-push.sh ./generated/typescript-axios/
+
+            - name: Copy git push script to 'dart-sdk' output directory
+              run: cp ./scripts/generate-sdk-git-push.sh ./generated/dart/
 
             - name: Update package.json
               run: |
@@ -114,6 +127,9 @@ jobs:
 
                   cd ./generated/typescript-axios
                   /bin/sh ./generate-sdk-git-push.sh "TechCell-Project" "tech-cell-server-node-sdk" "Github integration generated"
+
+                  cd ../dart
+                  /bin/sh ./generate-sdk-git-push.sh "TechCell-Project" "tech-cell-server-dart-sdk" "Github integration generated"
               env:
                   GIT_TOKEN: ${{secrets.GIAANG_SDK_REPO_SECRET}}
 
