@@ -28,7 +28,7 @@ jobs:
                   registry-url: 'https://npm.pkg.github.com'
                   scope: '@lehuygiang28'
 
-            - name: Set up Dart SDK
+            - name: Set up Dart SDK stable
               uses: dart-lang/setup-dart@v1
               with:
                   sdk: stable # or any other version like '2.10.5', 'beta', 'dev'
@@ -87,7 +87,7 @@ jobs:
                   --release-note "Github integration generated" \
                   -o ./generated/typescript-axios
 
-            - name: Generate Dart SDK stable
+            - name: Generate Dart SDK
               run: |
                   java -jar swagger-codegen-cli.jar generate \
                   -i swagger.yaml \
@@ -114,7 +114,7 @@ jobs:
                   echo 'repository: https://github.com/TechCell-Project/tech-cell-server-dart-sdk' >> ./generated/dart/pubspec.yaml
                   echo 'publish_to: https://maven.pkg.github.com/TechCell-Project/tech-cell-server-dart-sdk' >> ./generated/dart/pubspec.yaml
                   echo 'environment:' >> ./generated/dart/pubspec.yaml
-                  echo '  sdk: ">=2.12.0 <3.2.0"' >> ./generated/dart/pubspec.yaml
+                  echo '  sdk: ">=2.12.0 <=3.2.3"' >> ./generated/dart/pubspec.yaml
 
             - name: Authenticate with GitHub Package Registry
               run: |
