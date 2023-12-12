@@ -80,13 +80,9 @@ jobs:
 
             - name: Update package.json
               run: |
-                  echo Adding publishConfig and updating name in package.json...
-                  node -e "let pkg=require('./generated/javascript/package.json'); pkg.name='@lehuygiang28/tech-cell-server-node-sdk'; pkg.publishConfig={registry:'https://npm.pkg.github.com/'}; require('fs').writeFileSync('./generated/javascript/package.json', JSON.stringify(pkg, null, 2));"
-
-            - name: Increment version number
-              run: |
-                  cd ./generated/javascript
-                  npm version patch
+                  echo Adding publishConfig, updating name and version in package.json...
+                  version=$(git describe --tags `git rev-list --tags --max-count=1`)
+                  node -e "let pkg=require('./generated/javascript/package.json'); pkg.name='@lehuygiang28/tech-cell-server-node-sdk'; pkg.version='${version}'; pkg.publishConfig={registry:'https://npm.pkg.github.com/'}; pkg.author='Lê Huy Giang <lehuygiang28@gmail.com>'; require('fs').writeFileSync('./generated/javascript/package.json', JSON.stringify(pkg, null, 2));"
 
             - name: Archive production artifacts
               uses: actions/upload-artifact@v3
@@ -99,4 +95,4 @@ jobs:
                   cd ./generated/javascript
                   npm publish
               env:
-                  NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+                  NODE_AUTH_TOKEN: ${{secrets.GIAANG_PACKAGE_TOKEN}}
