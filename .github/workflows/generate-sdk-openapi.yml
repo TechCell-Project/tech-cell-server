@@ -4,6 +4,8 @@ on:
     push:
         branches:
             - development
+    pull_request:
+        branches: ['*']
 
 jobs:
     build:
@@ -67,69 +69,43 @@ jobs:
                   curl http://localhost:8000 &&
                   yarn generate:swagger-yaml
 
-            - name: Remove dist directory
-              run: rm -rf dist
-
-            - name: Download Swagger Codegen Generator
-              run: |
-                  wget https://repo1.maven.org/maven2/io/swagger/codegen/v3/swagger-codegen-cli/3.0.50/swagger-codegen-cli-3.0.50.jar -O swagger-codegen-cli.jar
-                  java -jar swagger-codegen-cli.jar --help
-
             - name: Generate Node SDK
               run: |
-                  java -jar swagger-codegen-cli.jar generate \
-                  -i swagger.yaml \
-                  -l typescript-axios \
-                  --git-user-id "TechCell-Project" \
-                  --git-repo-id "tech-cell-server-node-sdk" \
-                  --release-note "Github integration generated" \
-                  --additional-properties modelPropertyNaming=original \
-                  -o ./generated/typescript-axios
+                  npx @openapitools/openapi-generator-cli generate -i swagger.yaml -o ./generated/typescript-axios -g typescript-axios
 
             - name: Copy git push script to 'node-sdk' output directory
               run: cp ./scripts/generate-sdk-git-push.sh ./generated/typescript-axios/
-
-            - name: Generate Dart SDK
-              run: |
-                  java -jar swagger-codegen-cli.jar generate \
-                  -i swagger.yaml \
-                  -l dart \
-                  --git-user-id "TechCell-Project" \
-                  --git-repo-id "tech-cell-server-dart-sdk" \
-                  --release-note "Github integration generated" \
-                  --additional-properties modelPropertyNaming=original \
-                  -o ./generated/dart
-
-            - name: Copy git push script to 'dart-sdk' output directory
-              run: cp ./scripts/generate-sdk-git-push.sh ./generated/dart/
 
             - name: Update package.json
               run: |
                   echo Adding publishConfig, updating name and version in package.json...
                   techcell_version=$(node -p "require('./package.json').version")
                   commit_hash=$(git rev-parse --short HEAD)
-                  node -e "let pkg=require('./generated/typescript-axios/package.json'); pkg.name='@TechCell-Project/tech-cell-server-node-sdk'; pkg.version='${techcell_version}-${commit_hash}'; pkg.publishConfig={registry:'https://npm.pkg.github.com/'}; pkg.author='TechCell Teams <teams@techcell.cloud>'; require('fs').writeFileSync('./generated/typescript-axios/package.json', JSON.stringify(pkg, null, 2));"
-
-            # - name: Update pubspec.yaml
-            #   run: |
-            #       echo Updating version and repository in pubspec.yaml...
-            #       techcell_version=$(node -p "require('./package.json').version")
-            #       commit_hash=$(git rev-parse --short HEAD)
-            #       sed -i 's/version: .*/version: '${techcell_version}-${commit_hash}'/g' ./generated/dart/pubspec.yaml
-            #       echo 'homepage: https://github.com/TechCell-Project/tech-cell-server-dart-sdk' >> ./generated/dart/pubspec.yaml
-            #       echo 'repository: https://github.com/TechCell-Project/tech-cell-server-dart-sdk' >> ./generated/dart/pubspec.yaml
-            #       echo 'publish_to: https://maven.pkg.github.com/TechCell-Project/tech-cell-server-dart-sdk' >> ./generated/dart/pubspec.yaml
-            #       echo 'environment:' >> ./generated/dart/pubspec.yaml
-            #       echo '  sdk: ">=2.12.0 <=3.2.3"' >> ./generated/dart/pubspec.yaml
-
-            # - name: Authenticate with GitHub Package Registry
-            #   run: |
-            #       echo "machine maven.pkg.github.com login TechCell-Project password ${{secrets.GIAANG_PACKAGE_TOKEN}}" > ~/.netrc
-
-            # - name: Publish dart-sdk package to GitHub Packages
-            #   run: |
-            #       cd ./generated/dart
-            #       dart pub publish --force
+                  node -e "
+                  const fs = require('fs');
+                  const path = './generated/typescript-axios/package.json';
+                  let pkg;
+                  if (fs.existsSync(path)) {
+                    pkg = require(path);
+                  } else {
+                    pkg = {
+                      name: '',
+                      version: '',
+                      description: '',
+                      main: 'index.js',
+                      scripts: {
+                        test: 'echo \"Error: no test specified\" && exit 1'
+                      },
+                      author: '',
+                      license: 'ISC'
+                    };
+                  }
+                  pkg.name='@TechCell-Project/tech-cell-server-node-sdk';
+                  pkg.version='${techcell_version}-${commit_hash}';
+                  pkg.publishConfig={registry:'https://npm.pkg.github.com/'};
+                  pkg.author='TechCell Teams <teams@techcell.cloud>';
+                  fs.writeFileSync(path, JSON.stringify(pkg, null, 2));
+                  "
 
             - name: Push to GitHub repository
               run: |
@@ -138,10 +114,6 @@ jobs:
 
                   cd ./generated/typescript-axios
                   /bin/sh ./generate-sdk-git-push.sh "TechCell-Project" "tech-cell-server-node-sdk" "Github integration generated"
-
-                  cd ../../
-                  cd ./generated/dart
-                  /bin/sh ./generate-sdk-git-push.sh "TechCell-Project" "tech-cell-server-dart-sdk" "Github integration generated"
               env:
                   GIT_TOKEN: ${{secrets.GIAANG_SDK_REPO_SECRET}}
 

@@ -7,6 +7,8 @@ export class ObjectIdParamDTO {
     @ApiProperty({
         description: 'A valid mongodb id',
         example: '5f7c5b3c7e7f7f0012b6b8f5',
+        type: String,
+        format: 'ObjectId',
     })
     @IsNotEmpty()
     @IsMongoId()
