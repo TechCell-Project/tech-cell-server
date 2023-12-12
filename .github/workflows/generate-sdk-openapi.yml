@@ -1,0 +1,154 @@
+name: Generate SDK and publish to GitHub Packages, Github Repository
+
+on:
+    push:
+        branches:
+            - development
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+
+            - name: Set up JDK 11
+              uses: actions/setup-java@v3
+              with:
+                  java-version: '11'
+                  distribution: 'adopt'
+
+            - name: Use Node.js 18.x
+              uses: actions/setup-node@v3
+              with:
+                  node-version: '18.x'
+                  registry-url: 'https://npm.pkg.github.com'
+                  scope: '@lehuygiang28'
+
+            - name: Set up Dart SDK 2.19.6
+              uses: dart-lang/setup-dart@v1
+              with:
+                  sdk: 2.19.6 # or any other version like '2.10.5', 'beta', 'dev'
+
+            - name: 'Create .env file'
+              run: |
+                  touch .env
+                  echo API_PORT= '8000' >> .env 
+                  echo GOOGLE_CLIENT_ID= 'google_sample' >> .env
+                  echo GOOGLE_CLIENT_SECRET= 'google_sample' >> .env
+                  echo GOOGLE_REDIRECT_URL= 'google_sample' >> .env
+                  echo JWT_ACCESS_TOKEN_SECRET= 'jwt_sample' >> .env
+                  echo JWT_REFRESH_TOKEN_SECRET= 'jwt_sample' >> .env
+                  echo JWT_ACCESS_TOKEN_EXPIRE_TIME_STRING= '1h' >> .env
+                  echo JWT_REFRESH_TOKEN_EXPIRE_TIME_STRING= '1h' >> .env
+                  echo FALLBACK_LANGUAGE= 'en' >> .env
+                  echo RABBITMQ_UTILITY_QUEUE= 'utility_queue' >> .env
+                  echo RABBITMQ_SEARCH_QUEUE= 'search_queue' >> .env
+                  echo RABBITMQ_AUTH_QUEUE= 'auth_queue' >> .env
+                  echo RABBITMQ_COMMUNICATIONS_QUEUE= 'communications_queue' >> .env
+                  echo RABBITMQ_MANAGEMENTS_QUEUE= 'managements_queue' >> .env
+                  echo RABBITMQ_ORDER_QUEUE= 'order_queue' >> .env
+                  echo RABBITMQ_TASK_QUEUE= 'task_queue' >> .env
+                  echo MONGODB_URI= '${{secrets.MONGODB_URI}}' >> .env
+                  echo RABBITMQ_URLS= '${{secrets.RABBITMQ_URLS}}' >> .env
+                  echo REDIS_HOST= '${{secrets.REDIS_HOST}}' >> .env
+                  echo REDIS_PORT= '${{secrets.REDIS_PORT}}' >> .env
+                  echo REDIS_PASSWORD= '${{secrets.REDIS_PASSWORD}}' >> .env
+                  cat .env
+
+            - name: Install dependencies
+              run: yarn install
+
+            - name: Run the web server and generate the OpenAPI YAML
+              run: |
+                  yarn start api &
+                  sleep 20 &&
+                  curl http://localhost:8000 &&
+                  yarn generate:swagger-yaml
+
+            - name: Generate Node SDK
+              run: |
+                  npx @openapitools/openapi-generator-cli generate -i swagger.yaml \
+                  -g typescript-axios \
+                  -o ./generated/typescript-axios \
+                  --additional-properties modelPropertyNaming=original \
+
+            - name: Generate Dart SDK
+              run: |
+                  npx @openapitools/openapi-generator-cli generate -i swagger.yaml \
+                  -g dart \
+                  -o ./generated/dart \
+                  --additional-properties modelPropertyNaming=original \
+
+            - name: Copy git push script to 'node-sdk' output directory
+              run: cp ./scripts/generate-sdk-git-push.sh ./generated/typescript-axios/
+
+            - name: Copy git push script to 'dart-sdk' output directory
+              run: cp ./scripts/generate-sdk-git-push.sh ./generated/dart/
+
+            - name: Update package.json
+              run: |
+                  echo Adding publishConfig, updating name and version in package.json...
+                  techcell_version=$(node -p "require('./package.json').version")
+                  commit_hash=$(git rev-parse --short HEAD)
+                  node -e "
+                  const fs = require('fs');
+                  const path = './generated/typescript-axios/package.json';
+                  let pkg;
+                  if (fs.existsSync(path)) {
+                    pkg = require(path);
+                  } else {
+                    pkg = {
+                      name: '',
+                      version: '',
+                      description: '',
+                      main: 'index.js',
+                      scripts: {
+                        test: 'echo \"Error: no test specified\" && exit 1'
+                      },
+                      author: '',
+                      license: 'ISC'
+                    };
+                  }
+                  pkg.name='@TechCell-Project/tech-cell-server-node-sdk';
+                  pkg.version='${techcell_version}-${commit_hash}';
+                  pkg.publishConfig={registry:'https://npm.pkg.github.com/'};
+                  pkg.author='TechCell Teams <teams@techcell.cloud>';
+                  fs.writeFileSync(path, JSON.stringify(pkg, null, 2));
+                  "
+
+            - name: Push to GitHub repository
+              run: |
+                  git config --global user.email "lehuygiang28@gmail.com"
+                  git config --global user.name "lehuygiang28"
+
+                  cd ./generated/typescript-axios
+                  /bin/sh ./generate-sdk-git-push.sh "TechCell-Project" "tech-cell-server-node-sdk" "Github integration generated"
+
+                  cd ../dart
+                  /bin/sh ./generate-sdk-git-push.sh "TechCell-Project" "tech-cell-server-dart-sdk" "Github integration generated"
+              env:
+                  GIT_TOKEN: ${{secrets.GIAANG_SDK_REPO_SECRET}}
+
+            - name: Check sdk-node if version already exists
+              id: check_version
+              run: |
+                  cd ./generated/typescript-axios
+                  version=$(node -p "require('./package.json').version")
+                  if npm view --registry https://npm.pkg.github.com/ @techcell-project/tech-cell-server-node-sdk@$version version; then
+                    echo "Version $version already exists, skipping publish..."
+                    echo "skip_publish_node_sdk=true" >> $GITHUB_ENV
+                  else
+                    echo "Version $version does not exist, proceeding with publish..."
+                  fi
+              env:
+                  NODE_AUTH_TOKEN: ${{secrets.GIAANG_PACKAGE_TOKEN}}
+
+            - name: Publish node-sdk package to GitHub Packages
+              if: ${{ env.skip_publish_node_sdk != 'true' }}
+              run: |
+                  cd ./generated/typescript-axios
+                  npm publish
+              env:
+                  NODE_AUTH_TOKEN: ${{secrets.GIAANG_PACKAGE_TOKEN}}

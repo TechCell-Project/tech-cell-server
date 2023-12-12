@@ -20,6 +20,7 @@ export class PaginationQuery {
         default: 1,
         minimum: 1,
         maximum: Number.MAX_SAFE_INTEGER,
+        required: false,
     })
     @IsOptional()
     @IsNumber()
@@ -34,6 +35,7 @@ export class PaginationQuery {
         default: 10,
         minimum: 1,
         maximum: 500,
+        required: false,
     })
     @IsOptional()
     @IsNumber()
