@@ -14,9 +14,14 @@ env:
     DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
     DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
     COMPOSE_PROJECT_NAME: tech-cell-server
-    REPO_DIR_ON_SERVER: /home/tech-cell/tech-cell-server
 
 jobs:
+    setup:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Set REPO_DIR_ON_SERVER
+              run: echo "REPO_DIR_ON_SERVER=${{ secrets.SERVER_SSH_APP_DIR != '' && secrets.SERVER_SSH_APP_DIR || '/home/tech-cell/tech-cell-server' }}" >> $GITHUB_ENV
+
     select-runner:
         runs-on: ubuntu-latest
         outputs:
@@ -93,9 +98,9 @@ jobs:
             - name: Execute remote ssh commands
               uses: appleboy/ssh-action@master
               with:
-                  host: ${{ env.SERVER_SSH_HOST }}
-                  username: ${{ env.SERVER_SSH_USERNAME }}
-                  key: ${{ env.SERVER_SSH_KEY }}
+                  host: ${{ secrets.SERVER_SSH_HOST }}
+                  username: ${{ secrets.SERVER_SSH_USERNAME }}
+                  key: ${{ secrets.SERVER_SSH_KEY }}
                   script: |
                       if [ ! -d "${{ env.REPO_DIR_ON_SERVER }}" ]; then
                           git clone https://github.com/${{ github.repository }}.git ${{ env.REPO_DIR_ON_SERVER }} || { echo "Failed to clone repository"; exit 1; }
