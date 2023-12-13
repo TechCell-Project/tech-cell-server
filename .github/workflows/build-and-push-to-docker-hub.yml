@@ -14,15 +14,8 @@ env:
     DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
     DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
     COMPOSE_PROJECT_NAME: tech-cell-server
-    REPO_DIR_ON_SERVER: /home/tech-cell/tech-cell-server
 
 jobs:
-    setup:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Set REPO_DIR_ON_SERVER
-              run: echo "REPO_DIR_ON_SERVER=/home/${{ secrets.SERVER_SSH_USERNAME }}/tech-cell-server" >> $GITHUB_ENV
-
     select-runner:
         runs-on: ubuntu-latest
         outputs:
@@ -92,10 +85,13 @@ jobs:
                   rm .env
 
     deploy-to-server:
-        needs: [select-runner, setup]
+        needs: [select-runner]
         runs-on: ${{ needs.select-runner.outputs.runner-label }}
 
         steps:
+            - name: Set REPO_DIR_ON_SERVER
+              run: echo "REPO_DIR_ON_SERVER=/home/${{ secrets.SERVER_SSH_USERNAME }}/tech-cell-server" >> $GITHUB_ENV
+
             - name: Execute remote ssh commands
               uses: appleboy/ssh-action@master
               with:
