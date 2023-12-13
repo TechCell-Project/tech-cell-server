@@ -26,7 +26,7 @@ fi
 # Fetch the latest changes from the remote repository
 git fetch origin $branch
 
-git checkout genrated/$branch || git checkout -b genrated/$branch || { echo "Error: Unable to create or switch to branch $branch"; exit 1; }
+git checkout generated/$branch || git checkout -b generated/$branch || { echo "Error: Unable to create or switch to branch $branch"; exit 1; }
 
 # Adds the files in the local repository and stages them for commit.
 git add . || { echo "Error: Unable to add files to the staging area"; exit 1; }
@@ -38,7 +38,7 @@ git commit -a -m "$release_note" || { echo "Error: Unable to commit changes"; ex
 git checkout $branch || { echo "Error: Unable to switch to branch $branch"; exit 1; }
 
 # Merges the changes from the local branch into the remote branch
-git merge genrated/$branch -X theirs --allow-unrelated-histories -m "Merge genrated/$branch into $branch" || { echo "Error: Unable to merge branch $branch"; exit 1; }
+git merge generated/$branch -X theirs --allow-unrelated-histories -m "Merge generated/$branch into $branch" || { echo "Error: Unable to merge branch $branch"; exit 1; }
 
 # Pushes the changes in the local repository up to the remote repository
 echo "Git pushing to https://github.com/${git_user_id}/${git_repo_id}.git"
