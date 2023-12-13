@@ -14,6 +14,7 @@ env:
     DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
     DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
     COMPOSE_PROJECT_NAME: tech-cell-server
+    CURRENT_BRANCH: ${{ github.ref }}
 
 jobs:
     select-runner:
@@ -46,7 +47,6 @@ jobs:
                   fi
 
     build-and-push-to-dockerhub:
-        if: false
         needs: select-runner
         runs-on: ${{ needs.select-runner.outputs.runner-label }}
 
@@ -85,7 +85,7 @@ jobs:
                   rm .env
 
     deploy-to-server:
-        needs: [select-runner]
+        needs: [select-runner, build-and-push-to-dockerhub]
         runs-on: ${{ needs.select-runner.outputs.runner-label }}
 
         steps:
@@ -115,8 +115,10 @@ jobs:
                       fi
                       cd ${{ env.REPO_DIR_ON_SERVER }} || { echo "Failed to change to directory"; exit 1; }
                       echo "${{ secrets.SERVER_SSH_ENV_FILE }}" > .env || { echo "Failed to create .env file"; exit 1; }
-                      git pull origin update-ci-cd || { echo "Failed to pull latest changes"; exit 1; }
+                      git pull origin ${{ env.CURRENT_BRANCH }} || { echo "Failed to pull latest changes"; exit 1; }
+                      git switch ${{ env.CURRENT_BRANCH }} || { echo "Failed to switch to branch"; exit 1; }
                       yarn install || { echo "Failed to install dependencies"; exit 1; }
                       yarn get-logs || { echo "Failed to get logs"; }
                       docker compose -f ./docker-compose.prod.yml pull || { echo "Failed to pull production"; exit 1; }
                       docker compose -f ./docker-compose.prod.yml up -d || { echo "Failed to up production"; exit 1; }
+                      docker system prune -a -f || { echo "Failed to prune docker system"; exit 1; }
