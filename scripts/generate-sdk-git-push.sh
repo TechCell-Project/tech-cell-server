@@ -60,6 +60,9 @@ git add .
 # Commits the tracked changes and prepares them to be pushed to a remote repository.
 git commit -m "$release_note"
 
+# Pull the latest changes from the remote repository, rebasing your changes on top of them
+git pull --rebase origin $branch
+
 # Pushes the changes in the local repository up to the remote repository
 echo "Git pushing to https://github.com/${git_user_id}/${git_repo_id}.git"
 git push origin $branch
