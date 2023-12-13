@@ -46,6 +46,9 @@ fi
 # Checkout the remote branch
 git checkout -b $branch origin/$branch
 
+# Pull the latest changes from the remote repository, rebasing your changes on top of them
+git pull --rebase origin $branch
+
 # Apply the stash and keep it in case of conflicts
 git stash apply
 
@@ -59,9 +62,6 @@ fi
 
 git add .
 git commit -m "$release_note"
-
-# Pull the latest changes from the remote repository, rebasing your changes on top of them
-git pull --rebase origin $branch
 
 # Remove the applied stash
 git stash drop
