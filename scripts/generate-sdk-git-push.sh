@@ -3,59 +3,43 @@
 #
 # Usage example: /bin/sh ./generate-sdk-git-push.sh "lehuygiang28" "tech-cell-server-sdk" "minor update" main
 
-
-git_user_id=$1
-git_repo_id=$2
-release_note=$3
-branch=$4
-
-# Set default values if not provided
-git_user_id=${git_user_id:-"GIT_USER_ID"}
-git_repo_id=${git_repo_id:-"GIT_REPO_ID"}
-release_note=${release_note:-"Minor update"}
-branch=${branch:-"master"}
+git_user_id=${1:-"GIT_USER_ID"}
+git_repo_id=${2:-"GIT_REPO_ID"}
+release_note=${3:-"Minor update"}
+branch=${4:-"master"}
 
 # Initialize the local directory as a Git repository
-git init
-
-# Sets the new remote
-git_remote=`git remote`
-if [ "$git_remote" = "" ]; then # git remote not defined
-    if [ "$GIT_TOKEN" = "" ]; then
-        echo "[INFO] \$GIT_TOKEN (environment variable) is not set. Using the git credential in your environment."
-        git remote add origin https://github.com/${git_user_id}/${git_repo_id}.git
-    else
-        git remote add origin https://${git_user_id}:${GIT_TOKEN}@github.com/${git_user_id}/${git_repo_id}.git
-    fi
+if [ ! -d ".git" ]; then
+    git init || { echo "Error: Unable to initialize the Git repository"; exit 1; }
 fi
 
-git checkout -b $branch
-
-# Adds the files in the local repository and stages them for commit.
-git add .
-
-# Commits the tracked changes and prepares them to be pushed to a remote repository.
-git commit -m "$release_note"
+# Sets the new remote if not defined
+if [ -z "$(git remote)" ]; then
+    if [ -z "$GIT_TOKEN" ]; then
+        echo "[INFO] \$GIT_TOKEN (environment variable) is not set. Using the git credential in your environment."
+        git remote add origin "https://github.com/${git_user_id}/${git_repo_id}.git" || { echo "Error: Unable to add remote"; exit 1; }
+    else
+        git remote add origin "https://${git_user_id}:${GIT_TOKEN}@github.com/${git_user_id}/${git_repo_id}.git" || { echo "Error: Unable to add remote"; exit 1; }
+    fi
+fi
 
 # Fetch the latest changes from the remote repository
 git fetch origin $branch
 
-# Start the rebase
-git rebase origin/$branch || {
-    # Rebase started but conflicts occurred
-    echo "Conflicts occurred during rebase. Resolving conflicts in favor of local changes."
+git checkout local/$branch || git checkout -b local/$branch || { echo "Error: Unable to create or switch to branch $branch"; exit 1; }
 
-    # Check out the local version for all files
-    git checkout --theirs .
+# Adds the files in the local repository and stages them for commit.
+git add . || { echo "Error: Unable to add files to the staging area"; exit 1; }
 
-    # Add all files to the staging area
-    git add .
+# Commits the tracked changes and prepares them to be pushed to a remote repository.
+git commit -a --allow-empty-message -m "" || { echo "Error: Unable to commit changes"; exit 1; }
 
-    # Disables the git editor to prevent the rebase from pausing
-    # Continue the rebase
-    git -c core.editor=true rebase --continue
-}
+# Switches to the branch to merge in
+git checkout $branch || { echo "Error: Unable to switch to branch $branch"; exit 1; }
+
+# Merges the changes from the local branch into the remote branch
+git merge local/$branch -X theirs --allow-unrelated-histories -m "$release_note" || { echo "Error: Unable to merge branch $branch"; exit 1; }
 
 # Pushes the changes in the local repository up to the remote repository
 echo "Git pushing to https://github.com/${git_user_id}/${git_repo_id}.git"
-git push origin $branch
+git push origin $branch || { echo "Error: Unable to push changes to the remote repository"; exit 1; }
