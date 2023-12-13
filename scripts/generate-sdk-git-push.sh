@@ -3,7 +3,6 @@
 #
 # Usage example: /bin/sh ./generate-sdk-git-push.sh "lehuygiang28" "tech-cell-server-sdk" "minor update" main
 
-
 git_user_id=$1
 git_repo_id=$2
 release_note=$3
@@ -29,11 +28,23 @@ if [ "$git_remote" = "" ]; then # git remote not defined
     fi
 fi
 
+# Stash all local changes
+git stash push -m "local changes"
+
 # Fetch the latest changes from the remote repository
 git fetch origin $branch
 
 # Checkout the remote branch
 git checkout -b $branch origin/$branch
+
+# Create a new branch with the stashed changes
+git stash branch temp-branch
+
+# Merge the temporary branch into the current branch, resolving conflicts in favor of the temporary branch
+git merge temp-branch --strategy-option theirs
+
+# Delete the temporary branch
+git branch -d temp-branch
 
 # Adds the files in the local repository and stages them for commit.
 git add .
