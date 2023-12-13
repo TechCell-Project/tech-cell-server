@@ -43,4 +43,4 @@ git commit -m "$release_note"
 
 # Pushes the changes in the local repository up to the remote repository
 echo "Git pushing to https://github.com/${git_user_id}/${git_repo_id}.git"
-git push origin $branch
+git push -f -u origin $branch
