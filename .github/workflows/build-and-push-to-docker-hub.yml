@@ -20,7 +20,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Set REPO_DIR_ON_SERVER
-              run: echo "REPO_DIR_ON_SERVER=${{ secrets.SERVER_SSH_APP_DIR || '/home/tech-cell/tech-cell-server' }}" >> $GITHUB_ENV
+              run: echo "REPO_DIR_ON_SERVER=${{ secrets.SERVER_SSH_APP_DIR || '~/home/tech-cell/tech-cell-server' }}" >> $GITHUB_ENV
 
     select-runner:
         runs-on: ubuntu-latest
