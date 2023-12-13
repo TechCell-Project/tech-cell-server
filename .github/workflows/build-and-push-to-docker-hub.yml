@@ -99,6 +99,9 @@ jobs:
                   username: ${{ secrets.SERVER_SSH_USERNAME }}
                   key: ${{ secrets.SERVER_SSH_KEY }}
                   script: |
+                      export NVM_DIR=~/.nvm
+                      source ~/.nvm/nvm.sh
+                      npm --help
                       echo "REPO_DIR_ON_SERVER: ${{ env.REPO_DIR_ON_SERVER }}"
                       pwd
                       if [ -d "${{ env.REPO_DIR_ON_SERVER }}" ]; then
@@ -112,5 +115,4 @@ jobs:
                       cd ${{ env.REPO_DIR_ON_SERVER }} || { echo "Failed to change to directory"; exit 1; }
                       echo "${{ secrets.SERVER_SSH_ENV_FILE }}" > .env || { echo "Failed to create .env file"; exit 1; }
                       git pull origin development || { echo "Failed to pull latest changes"; exit 1; }
-                      export PATH=$PATH:/usr/local/share/npm/bin:/usr/local/bin
                       yarn update:prod || { echo "Failed to update production"; exit 1; }
