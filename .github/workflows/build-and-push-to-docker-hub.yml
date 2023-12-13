@@ -90,7 +90,7 @@ jobs:
 
         steps:
             - name: Set REPO_DIR_ON_SERVER
-              run: echo "REPO_DIR_ON_SERVER=/home/${{ secrets.SERVER_SSH_USERNAME }}/tech-cell-server-ci/cd" >> $GITHUB_ENV
+              run: echo "REPO_DIR_ON_SERVER=/home/${{ secrets.SERVER_SSH_USERNAME }}/tech-cell-server-ci-cd" >> $GITHUB_ENV
 
             - name: Execute remote ssh commands
               uses: appleboy/ssh-action@master
@@ -101,7 +101,7 @@ jobs:
                   script: |
                       export NVM_DIR=~/.nvm
                       source ~/.nvm/nvm.sh
-                      npm --help
+                      npm --version
                       echo "REPO_DIR_ON_SERVER: ${{ env.REPO_DIR_ON_SERVER }}"
                       pwd
                       if [ -d "${{ env.REPO_DIR_ON_SERVER }}" ]; then
@@ -115,5 +115,5 @@ jobs:
                       cd ${{ env.REPO_DIR_ON_SERVER }} || { echo "Failed to change to directory"; exit 1; }
                       echo "${{ secrets.SERVER_SSH_ENV_FILE }}" > .env || { echo "Failed to create .env file"; exit 1; }
                       git pull origin development || { echo "Failed to pull latest changes"; exit 1; }
-                      yarn get-logs || { echo "Failed to get logs"; }
-                      yarn update:prod || { echo "Failed to update production"; exit 1; }
+                      npm run get-logs || { echo "Failed to get logs"; }
+                      npm run update:prod || { echo "Failed to update production"; exit 1; }
