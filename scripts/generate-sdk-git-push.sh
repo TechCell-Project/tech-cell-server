@@ -46,8 +46,8 @@ fi
 # Checkout the remote branch
 git checkout -b $branch origin/$branch
 
-# Apply the stash and automatically merge any conflicts
-git stash pop --merge
+# Apply the stash and keep it in case of conflicts
+git stash apply
 
 # Check if there are any stash entries
 stash_entries=$(git stash list)
@@ -62,6 +62,9 @@ git commit -m "$release_note"
 
 # Pull the latest changes from the remote repository, rebasing your changes on top of them
 git pull --rebase origin $branch
+
+# Remove the applied stash
+git stash drop
 
 # Pushes the changes in the local repository up to the remote repository
 echo "Git pushing to https://github.com/${git_user_id}/${git_repo_id}.git"
