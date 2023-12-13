@@ -104,7 +104,12 @@ jobs:
                   script: |
                       echo "REPO_DIR_ON_SERVER: ${{ env.REPO_DIR_ON_SERVER }}"
                       pwd
-                      if [ ! -d "${{ env.REPO_DIR_ON_SERVER }}/.git" ]; then
+                      if [ -d "${{ env.REPO_DIR_ON_SERVER }}" ]; then
+                          if [ ! -d "${{ env.REPO_DIR_ON_SERVER }}/.git" ]; then
+                              rm -rf ${{ env.REPO_DIR_ON_SERVER }}
+                              git clone https://github.com/${{ github.repository }}.git ${{ env.REPO_DIR_ON_SERVER }} || { echo "Failed to clone repository"; exit 1; }
+                          fi
+                      else
                           git clone https://github.com/${{ github.repository }}.git ${{ env.REPO_DIR_ON_SERVER }} || { echo "Failed to clone repository"; exit 1; }
                       fi
                       cd ${{ env.REPO_DIR_ON_SERVER }} || { echo "Failed to change to directory"; exit 1; }
