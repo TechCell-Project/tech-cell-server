@@ -17,7 +17,7 @@ export class GetStatsRequestDTO {
     fromDate: string;
 
     @ApiProperty({
-        required: true,
+        required: false,
         description: 'To date to calculate revenue, default is today',
         default: new Date(),
         format: 'date-time',
