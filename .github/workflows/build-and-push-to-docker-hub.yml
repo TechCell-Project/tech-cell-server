@@ -47,6 +47,7 @@ jobs:
                   fi
 
     build-and-push-to-dockerhub:
+        if: false
         needs: select-runner
         runs-on: ${{ needs.select-runner.outputs.runner-label }}
 
@@ -85,7 +86,7 @@ jobs:
                   rm .env
 
     deploy-to-server:
-        needs: build-and-push-to-dockerhub
+        needs: select-runner
         runs-on: ${{ needs.select-runner.outputs.runner-label }}
 
         steps:
