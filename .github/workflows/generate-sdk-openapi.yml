@@ -4,6 +4,10 @@ on:
     push:
         branches:
             - development
+    pull_request:
+        branches:
+            - fix_push_repo
+            - '*'
 
 jobs:
     build:

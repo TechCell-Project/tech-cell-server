@@ -3,6 +3,7 @@
 #
 # Usage example: /bin/sh ./generate-sdk-git-push.sh "lehuygiang28" "tech-cell-server-sdk" "minor update" main
 
+
 git_user_id=$1
 git_repo_id=$2
 release_note=$3
@@ -28,44 +29,18 @@ if [ "$git_remote" = "" ]; then # git remote not defined
     fi
 fi
 
-git add .
-
-# Stash all local changes
-git stash push -m "local changes"
-
 # Fetch the latest changes from the remote repository
 git fetch origin $branch
-
-# Check if there are any untracked files
-untracked_files=$(git ls-files --others --exclude-standard)
-if [ -n "$untracked_files" ]; then
-    # Stash or remove the untracked files
-    git stash push -u
-fi
 
 # Checkout the remote branch
 git checkout -b $branch origin/$branch
 
-# Apply the stash and keep it in case of conflicts
-git stash apply
-
-# Check if there are any stash entries
-stash_entries=$(git stash list)
-if [ -n "$stash_entries" ]; then
-    git stash branch temp-branch
-    git merge temp-branch --strategy-option theirs
-    git branch -d temp-branch
-fi
-
+# Adds the files in the local repository and stages them for commit.
 git add .
+
+# Commits the tracked changes and prepares them to be pushed to a remote repository.
 git commit -m "$release_note"
-
-# Pull the latest changes from the remote repository, rebasing your changes on top of them
-git pull --rebase origin $branch
-
-# Remove the applied stash
-git stash drop
 
 # Pushes the changes in the local repository up to the remote repository
 echo "Git pushing to https://github.com/${git_user_id}/${git_repo_id}.git"
-git push origin $branch
+git push -f -u origin $branch
