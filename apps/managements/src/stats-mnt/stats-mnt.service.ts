@@ -15,7 +15,7 @@ export class StatsMntService {
 
     async getStats({
         fromDate,
-        toDate,
+        toDate = new Date().toString(),
         splitBy,
         refreshCache,
     }: GetStatsRequestDTO): Promise<GetStatsResponseDTO> {

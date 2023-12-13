@@ -1,30 +1,31 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsOptional } from 'class-validator';
-import { IsBooleanI18n, IsDateI18n, IsEnumI18n } from '~libs/common/i18n';
+import { IsBooleanI18n, IsEnumI18n, IsNotEmptyI18n, IsDateStringI18n } from '~libs/common/i18n';
 import { StatsSplitBy } from '../stats-mnt.enum';
 import { isTrueSet } from '~libs/common';
 
 export class GetStatsRequestDTO {
     @ApiProperty({
-        required: false,
+        required: true,
         description: 'From date to calculate revenue',
         format: 'date-time',
+        type: String,
     })
-    @IsOptional()
-    @Transform(({ value }: { value: string }) => new Date(value))
-    @IsDateI18n()
-    fromDate?: Date;
+    @IsNotEmptyI18n()
+    @IsDateStringI18n()
+    fromDate: string;
 
     @ApiProperty({
-        required: false,
-        description: 'To date to calculate revenue',
+        required: true,
+        description: 'To date to calculate revenue, default is today',
+        default: new Date(),
         format: 'date-time',
+        type: String,
     })
     @IsOptional()
-    @Transform(({ value }: { value: string }) => new Date(value))
-    @IsDateI18n()
-    toDate?: Date;
+    @IsDateStringI18n()
+    toDate?: string;
 
     @ApiProperty({
         required: false,
