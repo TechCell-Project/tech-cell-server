@@ -103,6 +103,7 @@ jobs:
                   username: ${{ secrets.SERVER_SSH_USERNAME }}
                   key: ${{ secrets.SERVER_SSH_KEY }}
                   script: |
+                      sudo su
                       echo "REPO_DIR_ON_SERVER: ${{ env.REPO_DIR_ON_SERVER }}"
                       pwd
                       if [ -d "${{ env.REPO_DIR_ON_SERVER }}" ]; then
