@@ -28,23 +28,31 @@ if [ "$git_remote" = "" ]; then # git remote not defined
     fi
 fi
 
+git add .
+
 # Stash all local changes
 git stash push -m "local changes"
 
 # Fetch the latest changes from the remote repository
 git fetch origin $branch
 
+# Check if there are any untracked files
+untracked_files=$(git ls-files --others --exclude-standard)
+if [ -n "$untracked_files" ]; then
+    # Stash or remove the untracked files
+    git stash push -u
+fi
+
 # Checkout the remote branch
 git checkout -b $branch origin/$branch
 
-# Create a new branch with the stashed changes
-git stash branch temp-branch
-
-# Merge the temporary branch into the current branch, resolving conflicts in favor of the temporary branch
-git merge temp-branch --strategy-option theirs
-
-# Delete the temporary branch
-git branch -d temp-branch
+# Check if there are any stash entries
+stash_entries=$(git stash list)
+if [ -n "$stash_entries" ]; then
+    git stash branch temp-branch
+    git merge temp-branch --strategy-option theirs
+    git branch -d temp-branch
+fi
 
 # Adds the files in the local repository and stages them for commit.
 git add .
