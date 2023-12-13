@@ -31,6 +31,11 @@ jobs:
               with:
                   sdk: 2.19.6 # or any other version like '2.10.5', 'beta', 'dev'
 
+            - name: Get and set git commit hash
+              run: |
+                  commit_hash=$(git rev-parse --short HEAD)
+                  echo "commit_hash=$commit_hash" >> $GITHUB_ENV
+
             - name: 'Create .env file'
               run: |
                   touch .env
@@ -91,7 +96,6 @@ jobs:
               run: |
                   echo Adding publishConfig, updating name and version in package.json...
                   techcell_version=$(node -p "require('./package.json').version")
-                  commit_hash=$(git rev-parse --short HEAD)
                   node -e "
                   const fs = require('fs');
                   const path = './generated/typescript-axios/package.json';
@@ -112,7 +116,7 @@ jobs:
                     };
                   }
                   pkg.name='@TechCell-Project/tech-cell-server-node-sdk';
-                  pkg.version='${techcell_version}-${commit_hash}';
+                  pkg.version='${techcell_version}-${{env.commit_hash}}';
                   pkg.publishConfig={registry:'https://npm.pkg.github.com/'};
                   pkg.author='TechCell Teams <teams@techcell.cloud>';
                   fs.writeFileSync(path, JSON.stringify(pkg, null, 2));
@@ -124,10 +128,10 @@ jobs:
                   git config --global user.name "lehuygiang28"
 
                   cd ./generated/typescript-axios
-                  /bin/sh ./generate-sdk-git-push.sh "TechCell-Project" "tech-cell-server-node-sdk" "Github integration generated"
+                  /bin/sh ./generate-sdk-git-push.sh "TechCell-Project" "tech-cell-server-node-sdk" "Auto generate SDK by https://github.com/TechCell-Project/tech-cell-server/commit/${{env.commit_hash}}"
 
                   cd ../dart
-                  /bin/sh ./generate-sdk-git-push.sh "TechCell-Project" "tech-cell-server-dart-sdk" "Github integration generated"
+                  /bin/sh ./generate-sdk-git-push.sh "TechCell-Project" "tech-cell-server-dart-sdk" "Auto generate SDK by https://github.com/TechCell-Project/tech-cell-server/commit/${{env.commit_hash}}"
               env:
                   GIT_TOKEN: ${{secrets.GIAANG_SDK_REPO_SECRET}}
 

@@ -44,11 +44,21 @@ if [ "$git_remote" = "" ]; then # git remote not defined
 
 fi
 
+# Create a new local branch
+local_branch="${branch}_local"
+git checkout -b $local_branch
+
 # Fetch the latest changes from the remote repository
 git fetch origin
 
-# Rebase the local changes on top of the changes from the remote repository
-git rebase origin/$branch
+# Checkout the remote branch
+git checkout $branch
+
+# Pull the latest changes from the remote branch
+git pull origin $branch
+
+# Merge the changes from the local branch
+git merge $local_branch --allow-unrelated-histories -X theirs
 
 # Adds the files in the local repository and stages them for commit.
 git add .
@@ -56,6 +66,6 @@ git add .
 # Commits the tracked changes and prepares them to be pushed to a remote repository.
 git commit -m "$release_note"
 
-# Pushes (Forces) the changes in the local repository up to the remote repository
+# Pushes the changes in the local repository up to the remote repository
 echo "Git pushing to https://github.com/${git_user_id}/${git_repo_id}.git"
-git push -f origin $branch 2>&1 | grep -v 'To https'
+git push origin $branch 2>&1 | grep -v 'To https'
