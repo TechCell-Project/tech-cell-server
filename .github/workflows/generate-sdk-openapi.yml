@@ -4,10 +4,6 @@ on:
     push:
         branches:
             - development
-    pull_request:
-        branches:
-            - refactor_push_sdk
-            - '*'
 
 jobs:
     build:
