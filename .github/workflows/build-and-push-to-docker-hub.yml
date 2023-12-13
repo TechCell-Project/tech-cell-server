@@ -116,5 +116,6 @@ jobs:
                       cd ${{ env.REPO_DIR_ON_SERVER }} || { echo "Failed to change to directory"; exit 1; }
                       echo "${{ secrets.SERVER_SSH_ENV_FILE }}" > .env || { echo "Failed to create .env file"; exit 1; }
                       git pull origin update-ci-cd || { echo "Failed to pull latest changes"; exit 1; }
+                      yarn install || { echo "Failed to install dependencies"; exit 1; }
                       yarn get-logs || { echo "Failed to get logs"; }
                       yarn update:prod || { echo "Failed to update production"; exit 1; }
