@@ -1,16 +1,19 @@
-name: Build and Push Docker Images to Docker Hub
+name: Tech Cell Server CI/CD
+run-name: Tech Cell Server CI/CD
 
 on:
     push:
         branches:
             - development
+    pull_request:
+        branches:
+            - update-ci-cd
 
 env:
     DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
     DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
     COMPOSE_PROJECT_NAME: tech-cell-server
-    CURRENT_USER: 0:0
-    DOCKER_GROUP: 0
+    REPO_DIR_ON_SERVER: /home/tech-cell/tech-cell-server
 
 jobs:
     select-runner:
@@ -42,7 +45,7 @@ jobs:
                     echo "runner-label=ubuntu-latest" >> $GITHUB_OUTPUT
                   fi
 
-    build-and-push:
+    build-and-push-to-dockerhub:
         needs: select-runner
         runs-on: ${{ needs.select-runner.outputs.runner-label }}
 
@@ -79,3 +82,23 @@ jobs:
             - name: Remove .env file
               run: |
                   rm .env
+
+    deploy-to-server:
+        needs: build-and-push-to-dockerhub
+        runs-on: ${{ needs.select-runner.outputs.runner-label }}
+
+        steps:
+            - name: Execute remote ssh commands
+              uses: appleboy/ssh-action@master
+              with:
+                  host: ${{ env.SERVER_SSH_HOST }}
+                  username: ${{ env.SERVER_SSH_USERNAME }}
+                  key: ${{ env.SERVER_SSH_KEY }}
+                  script: |
+                      if [ ! -d "${{ env.REPO_DIR_ON_SERVER }}" ]; then
+                          git clone https://github.com/${{ github.repository }}.git ${{ env.REPO_DIR_ON_SERVER }} || { echo "Failed to clone repository"; exit 1; }
+                      fi
+                      cd ${{ env.REPO_DIR_ON_SERVER }} || { echo "Failed to change to directory"; exit 1; }
+                      echo "${{ secrets.SERVER_SSH_ENV_FILE }}" > .env || { echo "Failed to create .env file"; exit 1; }
+                      git pull origin development || { echo "Failed to pull latest changes"; exit 1; }
+                      yarn update:prod || { echo "Failed to update production"; exit 1; }
