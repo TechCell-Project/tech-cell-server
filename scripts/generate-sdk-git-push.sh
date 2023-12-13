@@ -32,13 +32,13 @@ git checkout local/$branch || git checkout -b local/$branch || { echo "Error: Un
 git add . || { echo "Error: Unable to add files to the staging area"; exit 1; }
 
 # Commits the tracked changes and prepares them to be pushed to a remote repository.
-git commit -a --allow-empty-message -m "" || { echo "Error: Unable to commit changes"; exit 1; }
+git commit -a -m "$release_note" || { echo "Error: Unable to commit changes"; exit 1; }
 
 # Switches to the branch to merge in
 git checkout $branch || { echo "Error: Unable to switch to branch $branch"; exit 1; }
 
 # Merges the changes from the local branch into the remote branch
-git merge local/$branch -X theirs --allow-unrelated-histories -m "$release_note" || { echo "Error: Unable to merge branch $branch"; exit 1; }
+git merge local/$branch -X theirs --allow-unrelated-histories -m "Merge remote into `$branch`" || { echo "Error: Unable to merge branch $branch"; exit 1; }
 
 # Pushes the changes in the local repository up to the remote repository
 echo "Git pushing to https://github.com/${git_user_id}/${git_repo_id}.git"
