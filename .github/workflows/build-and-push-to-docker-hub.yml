@@ -21,7 +21,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - name: Set REPO_DIR_ON_SERVER
-              run: echo "REPO_DIR_ON_SERVER=/home/tech-cell/tech-cell-server" >> $GITHUB_ENV
+              run: echo "REPO_DIR_ON_SERVER=/home/${{ secrets.SERVER_SSH_USERNAME }}/tech-cell-server" >> $GITHUB_ENV
 
     select-runner:
         runs-on: ubuntu-latest
@@ -103,7 +103,6 @@ jobs:
                   username: ${{ secrets.SERVER_SSH_USERNAME }}
                   key: ${{ secrets.SERVER_SSH_KEY }}
                   script: |
-                      sudo su
                       echo "REPO_DIR_ON_SERVER: ${{ env.REPO_DIR_ON_SERVER }}"
                       pwd
                       if [ -d "${{ env.REPO_DIR_ON_SERVER }}" ]; then
