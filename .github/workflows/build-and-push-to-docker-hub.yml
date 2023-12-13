@@ -91,7 +91,7 @@ jobs:
                   rm .env
 
     deploy-to-server:
-        needs: select-runner
+        needs: [select-runner, setup]
         runs-on: ${{ needs.select-runner.outputs.runner-label }}
 
         steps:
@@ -102,7 +102,9 @@ jobs:
                   username: ${{ secrets.SERVER_SSH_USERNAME }}
                   key: ${{ secrets.SERVER_SSH_KEY }}
                   script: |
-                      if [ ! -d "${{ env.REPO_DIR_ON_SERVER }}" ]; then
+                      echo "REPO_DIR_ON_SERVER: ${{ env.REPO_DIR_ON_SERVER }}"
+                      pwd
+                      if [ ! -d "${{ env.REPO_DIR_ON_SERVER }}/.git" ]; then
                           git clone https://github.com/${{ github.repository }}.git ${{ env.REPO_DIR_ON_SERVER }} || { echo "Failed to clone repository"; exit 1; }
                       fi
                       cd ${{ env.REPO_DIR_ON_SERVER }} || { echo "Failed to change to directory"; exit 1; }
