@@ -46,6 +46,9 @@ fi
 # Checkout the remote branch
 git checkout -b $branch origin/$branch
 
+# Apply the stash and automatically merge any conflicts
+git stash pop --merge
+
 # Check if there are any stash entries
 stash_entries=$(git stash list)
 if [ -n "$stash_entries" ]; then
@@ -54,10 +57,7 @@ if [ -n "$stash_entries" ]; then
     git branch -d temp-branch
 fi
 
-# Adds the files in the local repository and stages them for commit.
 git add .
-
-# Commits the tracked changes and prepares them to be pushed to a remote repository.
 git commit -m "$release_note"
 
 # Pull the latest changes from the remote repository, rebasing your changes on top of them
