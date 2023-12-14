@@ -1,5 +1,4 @@
 name: Tech Cell Server CI/CD
-run-name: Tech Cell Server CI/CD
 
 on:
     push:
@@ -12,7 +11,7 @@ env:
     COMPOSE_PROJECT_NAME: tech-cell-server
 
 jobs:
-    is-skip-ci:
+    check-skip-ci:
         runs-on: ubuntu-latest
         outputs:
             skip_ci: ${{ steps.check_skip_ci.outputs.skip_ci }}
@@ -64,8 +63,8 @@ jobs:
                   fi
 
     automation-tests:
-        needs: [is-skip-ci]
-        if: ${{ needs.is-skip-ci.outputs.skip_ci != 'true' }}
+        needs: [check-skip-ci]
+        if: ${{ needs.check-skip-ci.outputs.skip_ci != 'true' }}
         runs-on: ubuntu-latest
 
         steps:
@@ -87,8 +86,8 @@ jobs:
               run: yarn test
 
     generate-sdk:
-        needs: [is-skip-ci, automation-tests]
-        if: ${{ needs.is-skip-ci.outputs.skip_sdk != 'true' }}
+        needs: [check-skip-ci, automation-tests]
+        if: ${{ needs.check-skip-ci.outputs.skip_sdk != 'true' }}
         runs-on: ubuntu-latest
 
         steps:
@@ -241,8 +240,8 @@ jobs:
                   NODE_AUTH_TOKEN: ${{secrets.GIAANG_PACKAGE_TOKEN}}
 
     build-and-push-to-dockerhub:
-        needs: [is-skip-ci, automation-tests]
-        if: ${{ needs.is-skip-ci.outputs.skip_docker != 'true' }}
+        needs: [check-skip-ci, automation-tests]
+        if: ${{ needs.check-skip-ci.outputs.skip_docker != 'true' }}
         runs-on: ubuntu-latest
 
         steps:
@@ -275,8 +274,8 @@ jobs:
                   rm .env
 
     deploy-to-server:
-        needs: [is-skip-ci, automation-tests, build-and-push-to-dockerhub]
-        if: ${{ needs.is-skip-ci.outputs.skip_deploy != 'true' }}
+        needs: [check-skip-ci, automation-tests, build-and-push-to-dockerhub]
+        if: ${{ needs.check-skip-ci.outputs.skip_deploy != 'true' }}
         runs-on: ubuntu-latest
 
         steps:
