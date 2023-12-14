@@ -8,6 +8,15 @@ git_repo_id=${2:-"GIT_REPO_ID"}
 release_note=${3:-"Minor update"}
 branch=${4:-"master"}
 script_generate_sdk=${5:-""}
+directory_generated_sdk=${6:-""}
+
+if [ ! -d "$directory_generated_sdk" ]; then
+    echo "Error: $directory_generated_sdk does not exist"
+    exit 1
+fi
+
+# Change to the directory
+cd $directory_generated_sdk || { echo "Error: Unable to change to the directory $directory_generated_sdk"; exit 1; }
 
 # Initialize the local directory as a Git repository
 if [ ! -d ".git" ]; then
