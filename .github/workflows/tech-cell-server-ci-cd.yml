@@ -134,8 +134,6 @@ jobs:
 
                       if docker compose -f ./docker-compose.prod.yml up -d; then
                           echo "Deployment successful saving new version to artifact: ${{ github.sha }}"
-                          echo "deployed_sha=${{ github.sha }}" >> $GITHUB_OUTPUT
-                          echo "::set-output name=deployed_sha::${{ github.sha }}"
                       else
                           echo "Deployment failed, rolling back to previous version"
                           if [ -f deployment-artifact.txt ]; then
@@ -154,12 +152,15 @@ jobs:
             - name: Save deployment artifact
               id: save_artifact
               run: |
-                  if [[ -n "${{ steps.exec_ssh_deploy.outputs.deployed_sha }}" ]]; then
-                      echo "${{ steps.exec_ssh_deploy.outputs.deployed_sha }}" > deployment-artifact.txt
-                      echo "status=success" >> $GITHUB_OUTPUT
+                  DEPLOYED_SHA=$(ssh -i ${{ secrets.SERVER_SSH_KEY }} -o StrictHostKeyChecking=no ${{ secrets.SERVER_SSH_USERNAME }}@${{ secrets.SERVER_SSH_HOST }} "docker compose -f ./docker-compose.prod.yml images | grep tech-cell-server | awk '{print $3}'")
+                  echo "DEPLOYED_SHA=$DEPLOYED_SHA" >> $GITHUB_OUTPUT
+
+                  if [[ -n "$DEPLOYED_SHA" ]]; then
+                    echo "$DEPLOYED_SHA" > deployment-artifact.txt
+                    echo "status=success" >> $GITHUB_OUTPUT
                   else
-                      echo "No deployed SHA found, not saving artifact."
-                      echo "status=failure" >> $GITHUB_OUTPUT
+                    echo "No deployed SHA found, not saving artifact."
+                    echo "status=failure" >> $GITHUB_OUTPUT
                   fi
 
             - name: Upload deployment artifact
