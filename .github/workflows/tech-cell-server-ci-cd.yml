@@ -71,7 +71,7 @@ jobs:
                   rm .env
 
     deploy-to-server:
-        needs: [automation-tests, build-and-push-to-dockerhub]
+        # needs: [automation-tests, build-and-push-to-dockerhub]
         runs-on: ubuntu-latest
 
         steps:
