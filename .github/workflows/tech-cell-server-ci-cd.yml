@@ -153,7 +153,7 @@ jobs:
                   npx @openapitools/openapi-generator-cli generate -i swagger.yaml \
                   -g typescript-axios \
                   -o ./generated/typescript-axios \
-                  --additional-properties modelPropertyNaming=original \
+                  --additional-properties="supportsES6=true,useSingleRequestParameter=true,stringEnums=true,withSeparateModelsAndApi=true,apiPackage=services,modelPackage=models" \
 
             - name: Generate Dart SDK
               run: |
