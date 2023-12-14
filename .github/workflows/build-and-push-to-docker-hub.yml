@@ -10,7 +10,6 @@ env:
     DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
     DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
     COMPOSE_PROJECT_NAME: tech-cell-server
-    CURRENT_BRANCH: ${{ github.ref }}
 
 jobs:
     select-runner:
@@ -85,8 +84,15 @@ jobs:
         runs-on: ${{ needs.select-runner.outputs.runner-label }}
 
         steps:
-            - name: Set REPO_DIR_ON_SERVER
-              run: echo "REPO_DIR_ON_SERVER=/home/${{ secrets.SERVER_SSH_USERNAME }}/app/tech-cell-server" >> $GITHUB_ENV
+            - name: Setup repository directory
+              shell: bash
+              run: echo "repo_dir_on_server=/home/${{ secrets.SERVER_SSH_USERNAME }}/tech-cell-server" >> $GITHUB_OUTPUT
+              id: set_repo_dir
+
+            - name: Extract branch name
+              shell: bash
+              run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+              id: extract_branch
 
             - name: Execute remote ssh commands
               uses: appleboy/ssh-action@master
@@ -97,27 +103,25 @@ jobs:
                   script: |
                       export NVM_DIR=~/.nvm
                       source ~/.nvm/nvm.sh
-                      npm --version
-                      yarn --version
-                      echo "REPO_DIR_ON_SERVER: ${{ env.REPO_DIR_ON_SERVER }}"
-                      pwd
-                      if [ -d "${{ env.REPO_DIR_ON_SERVER }}" ]; then
-                          if [ ! -d "${{ env.REPO_DIR_ON_SERVER }}/.git" ]; then
-                              rm -rf ${{ env.REPO_DIR_ON_SERVER }}
-                              git clone https://github.com/${{ github.repository }}.git ${{ env.REPO_DIR_ON_SERVER }} || { echo "Failed to clone repository"; exit 1; }
+
+                      if [ -d "${{ steps.set_repo_dir.outputs.repo_dir_on_server }}" ]; then
+                          if [ ! -d "${{ steps.set_repo_dir.outputs.repo_dir_on_server }}/.git" ]; then
+                              rm -rf ${{ steps.set_repo_dir.outputs.repo_dir_on_server }}
+                              git clone https://github.com/${{ github.repository }}.git ${{ steps.set_repo_dir.outputs.repo_dir_on_server }} || { echo "Failed to clone repository"; exit 1; }
                           fi
                       else
-                          git clone https://github.com/${{ github.repository }}.git ${{ env.REPO_DIR_ON_SERVER }} || { echo "Failed to clone repository"; exit 1; }
+                          git clone https://github.com/${{ github.repository }}.git ${{ steps.set_repo_dir.outputs.repo_dir_on_server }} || { echo "Failed to clone repository"; exit 1; }
                       fi
-                      cd ${{ env.REPO_DIR_ON_SERVER }} || { echo "Failed to change to directory"; exit 1; }
+
+                      cd ${{ steps.set_repo_dir.outputs.repo_dir_on_server }} || { echo "Failed to change to directory"; exit 1; }
                       echo "${{ secrets.SERVER_SSH_ENV_FILE }}" > .env || { echo "Failed to create .env file"; exit 1; }
 
-                      if [ "$(git rev-parse --abbrev-ref HEAD)" != "${{ env.CURRENT_BRANCH }}" ]; then
-                        git switch ${{ env.CURRENT_BRANCH }} || { echo "Failed to switch to branch"; exit 1; }
+                      if [ "$(git rev-parse --abbrev-ref HEAD)" != "${{ steps.extract_branch.outputs.branch }}" ]; then
+                        git switch ${{ steps.extract_branch.outputs.branch }} || { echo "Failed to switch to branch"; exit 1; }
                       fi    
 
                       git reset --hard || { echo "Failed to reset hard"; exit 1; }
-                      git pull origin ${{ env.CURRENT_BRANCH }} || { echo "Failed to pull latest changes"; exit 1; }
+                      git pull origin ${{ steps.extract_branch.outputs.branch }} || { echo "Failed to pull latest changes"; exit 1; }
                       yarn install || { echo "Failed to install dependencies"; exit 1; }
                       yarn get-logs || { echo "Failed to get logs"; }
                       docker compose -f ./docker-compose.prod.yml pull || { echo "Failed to pull production"; exit 1; }
