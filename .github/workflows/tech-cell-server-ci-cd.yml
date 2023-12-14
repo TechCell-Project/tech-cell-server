@@ -4,8 +4,6 @@ on:
     push:
         branches:
             - development
-    pull_request:
-        branches: ['*']
 
 env:
     DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -66,7 +64,7 @@ jobs:
 
     automation-tests:
         needs: [check-skip-ci]
-        if: ${{ needs.check-skip-ci.outputs.skip_ci != 'false' }}
+        if: ${{ needs.check-skip-ci.outputs.skip_ci != 'true' }}
         runs-on: ubuntu-latest
 
         steps:
@@ -88,9 +86,8 @@ jobs:
               run: yarn test
 
     generate-sdk:
-        needs: [check-skip-ci]
-        # needs: [check-skip-ci, automation-tests]
-        # if: ${{ needs.check-skip-ci.outputs.skip_sdk != 'true' }}
+        needs: [check-skip-ci, automation-tests]
+        if: ${{ needs.check-skip-ci.outputs.skip_sdk != 'true' }}
         runs-on: ubuntu-latest
 
         steps:
@@ -148,7 +145,7 @@ jobs:
             - name: Run the web server and generate the OpenAPI YAML
               run: |
                   yarn start api &
-                  sleep 20 &&
+                  sleep 25 &&
                   yarn generate:swagger-yaml
 
             - name: Config git global
