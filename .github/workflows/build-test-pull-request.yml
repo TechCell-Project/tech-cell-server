@@ -1,8 +1,6 @@
-name: Run tests on all services
+name: Build and test on pull request
 
 on:
-    push:
-        branches: [stable, development]
     pull_request:
         branches: ['*']
 
@@ -36,7 +34,7 @@ jobs:
                     echo "runner-label=ubuntu-latest" >> $GITHUB_OUTPUT
                   fi
 
-    run-tests:
+    automation-tests:
         needs: select-runner
         runs-on: ${{ needs.select-runner.outputs.runner-label }}
 
@@ -55,5 +53,8 @@ jobs:
             - name: Install dependencies
               run: yarn install
 
-            - name: Run tests
+            - name: Build all services
+              run: yarn build:all
+
+            - name: Run unit tests
               run: yarn test
