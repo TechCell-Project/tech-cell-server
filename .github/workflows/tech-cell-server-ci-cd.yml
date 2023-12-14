@@ -161,10 +161,12 @@ jobs:
 
             - name: Generate Node SDK and push to GitHub
               run: |
-                  /bin/sh ./scripts/generate-sdk-git-push.sh "TechCell-Project" "tech-cell-server-node-sdk" "Auto generate SDK by https://github.com/TechCell-Project/tech-cell-server/commit/${{ steps.get_commit_hash.outputs.commit_hash }}" "npx @openapitools/openapi-generator-cli generate -i swagger.yaml \
-                  -g typescript-axios \
-                  -o ./generated/typescript-axios \
-                  --additional-properties="supportsES6=true,useSingleRequestParameter=true,stringEnums=true,withSeparateModelsAndApi=true,apiPackage=services,modelPackage=models" \"
+                  /bin/sh \ 
+                  ./scripts/generate-sdk-git-push.sh "TechCell-Project" "tech-cell-server-node-sdk" \
+                  "Auto generate SDK by https://github.com/TechCell-Project/tech-cell-server/commit/${{ steps.get_commit_hash.outputs.commit_hash }}" \ 
+                  "npx @openapitools/openapi-generator-cli generate -i swagger.yaml \
+                  -g typescript-axios -o ./generated/typescript-axios \
+                  --additional-properties='supportsES6=true,useSingleRequestParameter=true,stringEnums=true,withSeparateModelsAndApi=true,apiPackage=services,modelPackage=models' \"
               env:
                   GIT_TOKEN: ${{secrets.GIAANG_SDK_REPO_SECRET}}
 
