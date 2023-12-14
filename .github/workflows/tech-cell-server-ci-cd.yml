@@ -6,6 +6,7 @@ on:
         branches:
             - development
             - refactor_skip
+            - '*'
     pull_request:
         branches: ['*']
 
@@ -19,9 +20,9 @@ jobs:
         runs-on: ubuntu-latest
         outputs:
             skip_ci: ${{ steps.check_skip_ci.outputs.skip_ci }}
-            skip_sdk: ${{ steps.check_skip_sdk.outputs.skip }}
-            skip_docker: ${{ steps.check_skip_docker.outputs.skip }}
-            skip_deploy: ${{ steps.check_skip_deploy.outputs.skip }}
+            skip_sdk: ${{ steps.check_skip_sdk.outputs.skip_sdk }}
+            skip_docker: ${{ steps.check_skip_docker.outputs.skip_docker }}
+            skip_deploy: ${{ steps.check_skip_deploy.outputs.skip_deploy }}
         steps:
             - name: Checkout code
               uses: actions/checkout@v3
