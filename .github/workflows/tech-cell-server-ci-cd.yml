@@ -162,12 +162,6 @@ jobs:
                   -o ./generated/dart \
                   --additional-properties modelPropertyNaming=original \
 
-            - name: Copy git push script to 'node-sdk' output directory
-              run: cp ./scripts/generate-sdk-git-push.sh ./generated/typescript-axios/
-
-            - name: Copy git push script to 'dart-sdk' output directory
-              run: cp ./scripts/generate-sdk-git-push.sh ./generated/dart/
-
             - name: Get and set git commit hash
               id: get_commit_hash
               run: |
@@ -210,10 +204,10 @@ jobs:
                   git config --global user.name "lehuygiang28"
 
                   cd ./generated/typescript-axios
-                  /bin/sh ./generate-sdk-git-push.sh "TechCell-Project" "tech-cell-server-node-sdk" "Auto generate SDK by https://github.com/TechCell-Project/tech-cell-server/commit/${{ steps.get_commit_hash.outputs.commit_hash }}"
+                  /bin/sh ./git-push.sh "TechCell-Project" "tech-cell-server-node-sdk" "Auto generate SDK by https://github.com/TechCell-Project/tech-cell-server/commit/${{ steps.get_commit_hash.outputs.commit_hash }}"
 
                   cd ../dart
-                  /bin/sh ./generate-sdk-git-push.sh "TechCell-Project" "tech-cell-server-dart-sdk" "Auto generate SDK by https://github.com/TechCell-Project/tech-cell-server/commit/${{ steps.get_commit_hash.outputs.commit_hash }}"
+                  /bin/sh ./git-push.sh "TechCell-Project" "tech-cell-server-dart-sdk" "Auto generate SDK by https://github.com/TechCell-Project/tech-cell-server/commit/${{ steps.get_commit_hash.outputs.commit_hash }}"
               env:
                   GIT_TOKEN: ${{secrets.GIAANG_SDK_REPO_SECRET}}
 
