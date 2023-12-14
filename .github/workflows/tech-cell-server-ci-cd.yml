@@ -134,7 +134,7 @@ jobs:
 
                       if docker compose -f ./docker-compose.prod.yml up -d; then
                           echo "Deployment successful saving new version to artifact: ${{ github.sha }}"
-                          echo "DEPLOYED_SHA=${{ github.sha }}"
+                          echo "DEPLOYED_SHA=${{ github.sha }}" > deployed_sha.txt
                       else
                           echo "Deployment failed, rolling back to previous version"
                           if [ -f deployment-artifact.txt ]; then
@@ -150,18 +150,25 @@ jobs:
 
                       docker system prune -a -f || { echo "Failed to prune docker system"; exit 1; }
 
+            - name: Download deployed_sha.txt
+              uses: appleboy/scp-action@master
+              with:
+                  host: ${{ secrets.SERVER_SSH_HOST }}
+                  username: ${{ secrets.SERVER_SSH_USERNAME }}
+                  key: ${{ secrets.SERVER_SSH_KEY }}
+                  source: '${{ steps.set_repo_dir.outputs.repo_dir_on_server }}/deployed_sha.txt'
+                  target: '.'
+
             - name: Save deployment artifact
               id: save_artifact
               run: |
-                  echo "${{ steps.exec_ssh_deploy.outputs.stderr }}"
-
-                  DEPLOYED_SHA=$(echo "${{ steps.exec_ssh_deploy.outputs.stderr }}" | grep ^DEPLOYED_SHA | cut -d= -f2)
-                  if [[ -n "$DEPLOYED_SHA" ]]; then
-                    echo "$DEPLOYED_SHA" > deployment-artifact.txt
-                    echo "status=success" >> $GITHUB_OUTPUT
+                  if [[ -f deployed_sha.txt ]]; then
+                      DEPLOYED_SHA=$(cat deployed_sha.txt)
+                      echo "$DEPLOYED_SHA" > deployment-artifact.txt
+                      echo "status=success" >> $GITHUB_ENV
                   else
-                    echo "DEPLOYED_SHA not found or is empty, not saving artifact"
-                    echo "status=failure" >> $GITHUB_OUTPUT
+                      echo "DEPLOYED_SHA not found or is empty, not saving artifact"
+                      echo "status=failure" >> $GITHUB_ENV
                   fi
 
             - name: Upload deployment artifact
