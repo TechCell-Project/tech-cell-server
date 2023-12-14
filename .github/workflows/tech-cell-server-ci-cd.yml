@@ -83,6 +83,9 @@ jobs:
                   path: .
               continue-on-error: true
 
+            - name: Print artifact content
+              run: cat deployment-artifact.txt
+
             - name: Setup repository directory
               shell: bash
               run: echo "repo_dir_on_server=/home/${{ secrets.SERVER_SSH_USERNAME }}/tech-cell-server" >> $GITHUB_OUTPUT
