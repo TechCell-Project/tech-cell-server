@@ -12,8 +12,60 @@ env:
     COMPOSE_PROJECT_NAME: tech-cell-server
 
 jobs:
+    is-skip-ci:
+        runs-on: ubuntu-latest
+        outputs:
+            skip_ci: ${{ steps.check_skip_ci.outputs.skip_ci }}
+            skip_sdk: ${{ steps.check_skip_sdk.outputs.skip_sdk }}
+            skip_docker: ${{ steps.check_skip_docker.outputs.skip_docker }}
+            skip_deploy: ${{ steps.check_skip_deploy.outputs.skip_deploy }}
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+
+            - name: Check if commit message contains [skip ci]
+              id: check_skip_ci
+              run: |
+                  if [[ $(git log -1 --pretty=%B) =~ "[skip ci]" ]]; then
+                    echo "skip_ci=true" >> $GITHUB_OUTPUT
+                    echo "skip ci found, skipping CI/CD..."
+                  else
+                    echo "skip_ci=false" >> $GITHUB_OUTPUT
+                  fi
+
+            - name: Check if commit message contains [skip sdk]
+              id: check_skip_sdk
+              run: |
+                  if [[ $(git log -1 --pretty=%B) =~ "[skip sdk]" ]]; then
+                    echo "skip_sdk=true" >> $GITHUB_OUTPUT
+                    echo "skip sdk found, skipping SDK generation..."
+                  else
+                    echo "skip_sdk=false" >> $GITHUB_OUTPUT
+                  fi
+
+            - name: Check if commit message contains [skip docker]
+              id: check_skip_docker
+              run: |
+                  if [[ $(git log -1 --pretty=%B) =~ "[skip docker]" ]]; then
+                    echo "skip_docker=true" >> $GITHUB_OUTPUT
+                    echo "skip docker found, skipping docker build and push..."
+                  else
+                    echo "skip_docker=false" >> $GITHUB_OUTPUT
+                  fi
+
+            - name: Check if commit message contains [skip deploy]
+              id: check_skip_deploy
+              run: |
+                  if [[ $(git log -1 --pretty=%B) =~ "[skip deploy]" ]]; then
+                    echo "skip_deploy=true" >> $GITHUB_OUTPUT
+                    echo "skip deploy found, skipping deployment..."
+                  else
+                    echo "skip_deploy=false" >> $GITHUB_OUTPUT
+                  fi
+
     automation-tests:
-        if: ${{ !contains(github.event.commits[0].message, '[skip ci]') }}
+        needs: [is-skip-ci]
+        if: ${{ needs.is-skip-ci.outputs.skip_ci != 'true' }}
         runs-on: ubuntu-latest
 
         steps:
@@ -35,8 +87,8 @@ jobs:
               run: yarn test
 
     generate-sdk:
-        if: ${{ !contains(github.event.commits[0].message, '[skip sdk]') }}
-        needs: [automation-tests]
+        needs: [is-skip-ci, automation-tests]
+        if: ${{ needs.is-skip-ci.outputs.skip_sdk != 'true' }}
         runs-on: ubuntu-latest
 
         steps:
@@ -60,11 +112,6 @@ jobs:
               uses: dart-lang/setup-dart@v1
               with:
                   sdk: 2.19.6 # or any other version like '2.10.5', 'beta', 'dev'
-
-            - name: Get and set git commit hash
-              run: |
-                  commit_hash=$(git rev-parse --short HEAD)
-                  echo "commit_hash=$commit_hash" >> $GITHUB_ENV
 
             - name: 'Create .env file'
               run: |
@@ -122,6 +169,12 @@ jobs:
             - name: Copy git push script to 'dart-sdk' output directory
               run: cp ./scripts/generate-sdk-git-push.sh ./generated/dart/
 
+            - name: Get and set git commit hash
+              id: get_commit_hash
+              run: |
+                  commit_hash=$(git rev-parse --short HEAD)
+                  echo "commit_hash=$commit_hash" >> $GITHUB_OUTPUT
+
             - name: Update package.json
               run: |
                   echo Adding publishConfig, updating name and version in package.json...
@@ -146,7 +199,7 @@ jobs:
                     };
                   }
                   pkg.name='@TechCell-Project/tech-cell-server-node-sdk';
-                  pkg.version='${techcell_version}-${{env.commit_hash}}';
+                  pkg.version='${techcell_version}-${{ steps.get_commit_hash.outputs.commit_hash }}';
                   pkg.publishConfig={registry:'https://npm.pkg.github.com/'};
                   pkg.author='TechCell Teams <teams@techcell.cloud>';
                   fs.writeFileSync(path, JSON.stringify(pkg, null, 2));
@@ -158,10 +211,10 @@ jobs:
                   git config --global user.name "lehuygiang28"
 
                   cd ./generated/typescript-axios
-                  /bin/sh ./generate-sdk-git-push.sh "TechCell-Project" "tech-cell-server-node-sdk" "Auto generate SDK by https://github.com/TechCell-Project/tech-cell-server/commit/${{env.commit_hash}}"
+                  /bin/sh ./generate-sdk-git-push.sh "TechCell-Project" "tech-cell-server-node-sdk" "Auto generate SDK by https://github.com/TechCell-Project/tech-cell-server/commit/${{ steps.get_commit_hash.outputs.commit_hash }}"
 
                   cd ../dart
-                  /bin/sh ./generate-sdk-git-push.sh "TechCell-Project" "tech-cell-server-dart-sdk" "Auto generate SDK by https://github.com/TechCell-Project/tech-cell-server/commit/${{env.commit_hash}}"
+                  /bin/sh ./generate-sdk-git-push.sh "TechCell-Project" "tech-cell-server-dart-sdk" "Auto generate SDK by https://github.com/TechCell-Project/tech-cell-server/commit/${{ steps.get_commit_hash.outputs.commit_hash }}"
               env:
                   GIT_TOKEN: ${{secrets.GIAANG_SDK_REPO_SECRET}}
 
@@ -172,7 +225,7 @@ jobs:
                   version=$(node -p "require('./package.json').version")
                   if npm view --registry https://npm.pkg.github.com/ @techcell-project/tech-cell-server-node-sdk@$version version; then
                     echo "Version $version already exists, skipping publish..."
-                    echo "skip_publish_node_sdk=true" >> $GITHUB_ENV
+                    echo "skip_publish_node_sdk=true" >> $GITHUB_OUTPUT
                   else
                     echo "Version $version does not exist, proceeding with publish..."
                   fi
@@ -180,7 +233,7 @@ jobs:
                   NODE_AUTH_TOKEN: ${{secrets.GIAANG_PACKAGE_TOKEN}}
 
             - name: Publish node-sdk package to GitHub Packages
-              if: ${{ env.skip_publish_node_sdk != 'true' }}
+              if: ${{ steps.check_version.outputs.skip_publish_node_sdk != 'true' }}
               run: |
                   cd ./generated/typescript-axios
                   npm publish
@@ -188,8 +241,8 @@ jobs:
                   NODE_AUTH_TOKEN: ${{secrets.GIAANG_PACKAGE_TOKEN}}
 
     build-and-push-to-dockerhub:
-        if: ${{ !contains(github.event.commits[0].message, '[skip docker]') }}
-        needs: [automation-tests]
+        needs: [is-skip-ci, automation-tests]
+        if: ${{ needs.is-skip-ci.outputs.skip_docker != 'true' }}
         runs-on: ubuntu-latest
 
         steps:
@@ -222,8 +275,8 @@ jobs:
                   rm .env
 
     deploy-to-server:
-        if: ${{ !contains(github.event.commits[0].message, '[skip deploy]') }}
-        needs: [automation-tests, build-and-push-to-dockerhub]
+        needs: [is-skip-ci, automation-tests, build-and-push-to-dockerhub]
+        if: ${{ needs.is-skip-ci.outputs.skip_deploy != 'true' }}
         runs-on: ubuntu-latest
 
         steps:
