@@ -37,9 +37,10 @@ git commit -a -m "$release_note" || { echo "Error: Unable to commit changes"; ex
 # Switches to the branch to merge in
 git checkout $branch || { echo "Error: Unable to switch to branch $branch"; exit 1; }
 
-# Merges the changes from the local branch into the remote branch
-git merge generated/$branch -X theirs --allow-unrelated-histories -m "Merge generated/$branch into $branch" || { echo "Error: Unable to merge branch $branch"; exit 1; }
+# Update the $branch to match exactly with generated/$branch
+git checkout generated/$branch -- . || { echo "Error: Unable to update $branch to match with generated/$branch"; exit 1; }
 
-# Pushes the changes in the local repository up to the remote repository
+git commit -a -m "Update $branch to match with generated/$branch" || { echo "Error: Unable to commit changes"; exit 1; }
+
 echo "Git pushing to https://github.com/${git_user_id}/${git_repo_id}.git"
 git push origin $branch || { echo "Error: Unable to push changes to the remote repository"; exit 1; }
