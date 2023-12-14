@@ -6,7 +6,7 @@ services:
         build:
             context: ./
             dockerfile: ./containers/compodoc-techcell/Dockerfile
-        image: lehuygiang28/compodoc-techcell
+        image: lehuygiang28/compodoc-techcell:${COMPOSE_TAG:-latest}
         ports:
             - 9001:${COMPODOC_PORT:-9001}
         networks:
@@ -18,7 +18,7 @@ services:
         build:
             context: ./
             dockerfile: ./apps/api/Dockerfile
-        image: lehuygiang28/techcell_api
+        image: lehuygiang28/techcell_api:${COMPOSE_TAG:-latest}
         env_file:
             - .env
         ports:
@@ -32,7 +32,7 @@ services:
         build:
             context: ./
             dockerfile: ./apps/auth/Dockerfile
-        image: lehuygiang28/techcell_auth
+        image: lehuygiang28/techcell_auth:${COMPOSE_TAG:-latest}
         env_file:
             - .env
         networks:
@@ -44,7 +44,7 @@ services:
         build:
             context: ./
             dockerfile: ./apps/communications/Dockerfile
-        image: lehuygiang28/techcell_communications
+        image: lehuygiang28/techcell_communications:${COMPOSE_TAG:-latest}
         env_file:
             - .env
         ports:
@@ -58,7 +58,7 @@ services:
         build:
             context: ./
             dockerfile: ./apps/search/Dockerfile
-        image: lehuygiang28/techcell_search
+        image: lehuygiang28/techcell_search:${COMPOSE_TAG:-latest}
         env_file:
             - .env
         networks:
@@ -70,7 +70,7 @@ services:
         build:
             context: ./
             dockerfile: ./apps/utility/Dockerfile
-        image: lehuygiang28/techcell_utility
+        image: lehuygiang28/techcell_utility:${COMPOSE_TAG:-latest}
         env_file:
             - .env
         networks:
@@ -82,7 +82,7 @@ services:
         build:
             context: ./
             dockerfile: ./apps/managements/Dockerfile
-        image: lehuygiang28/techcell_managements
+        image: lehuygiang28/techcell_managements:${COMPOSE_TAG:-latest}
         env_file:
             - .env
         networks:
@@ -94,7 +94,7 @@ services:
         build:
             context: ./
             dockerfile: ./apps/order/Dockerfile
-        image: lehuygiang28/techcell_order
+        image: lehuygiang28/techcell_order:${COMPOSE_TAG:-latest}
         env_file:
             - .env
         networks:
@@ -106,7 +106,7 @@ services:
         build:
             context: ./
             dockerfile: ./apps/task/Dockerfile
-        image: lehuygiang28/techcell_task
+        image: lehuygiang28/techcell_task:${COMPOSE_TAG:-latest}
         env_file:
             - .env
         networks:
