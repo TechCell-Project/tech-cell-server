@@ -158,12 +158,12 @@ jobs:
               run: |
                   npx @openapitools/openapi-generator-cli generate -i swagger.yaml \
                   -g typescript-axios -o ./generated/typescript-axios \
-                  --additional-properties='supportsES6=true,useSingleRequestParameter=true,stringEnums=true,withSeparateModelsAndApi=true,apiPackage=services,modelPackage=models'"
+                  --additional-properties='supportsES6=true,useSingleRequestParameter=true,stringEnums=true,withSeparateModelsAndApi=true,apiPackage=services,modelPackage=models'
 
             - name: Generate Dart SDK
               run: |
                   npx @openapitools/openapi-generator-cli generate -i swagger.yaml \
-                  -g dart -o ./generated/dart"
+                  -g dart -o ./generated/dart
 
             - name: Update package.json of Node SDK
               run: |
