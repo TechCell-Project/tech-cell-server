@@ -143,13 +143,14 @@ jobs:
                               docker compose -f ./docker-compose.prod.yml up -d || { echo "Failed to up previous production"; exit 1; }
                           else
                               echo "No previous version found, rollback failed"
+                              exit 1
                           fi
                       fi
 
                       docker system prune -a -f || { echo "Failed to prune docker system"; exit 1; }
 
             - name: Upload deployment artifact
-              uses: actions/upload-artifact@v2
+              uses: actions/upload-artifact@v3
               with:
                   name: deployment-artifact
                   path: deployment-artifact.txt
