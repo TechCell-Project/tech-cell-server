@@ -154,7 +154,7 @@ jobs:
               run: |
                   echo "${{ secrets.SERVER_SSH_KEY }}" > ssh_key
                   chmod 600 ssh_key
-                  DEPLOYED_SHA=$(ssh -i ssh_key -o StrictHostKeyChecking=no ${{ secrets.SERVER_SSH_USERNAME }}@${{ secrets.SERVER_SSH_HOST }} "docker compose -f ${{ steps.set_repo_dir.outputs.repo_dir_on_server}}/docker-compose.prod.yml images | grep tech-cell-server | awk '{print $3}'")
+                  DEPLOYED_SHA=$(ssh -i ssh_key -o StrictHostKeyChecking=no ${{ secrets.SERVER_SSH_USERNAME }}@${{ secrets.SERVER_SSH_HOST }} "docker compose -f ${{ steps.set_repo_dir.outputs.repo_dir_on_server}}/docker-compose.prod.yml images | grep tech-cell-server-api | awk '{print $3}'")
                   echo "DEPLOYED_SHA=$DEPLOYED_SHA" >> $GITHUB_OUTPUT
 
                   if [[ -n "$DEPLOYED_SHA" ]]; then
