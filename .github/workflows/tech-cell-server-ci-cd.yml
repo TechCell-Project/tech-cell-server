@@ -142,6 +142,7 @@ jobs:
                           if [ -f deployment-artifact.txt ]; then
                               previous_sha=$(cat deployment-artifact.txt)
                               echo "COMPOSE_TAG=$previous_sha" >> .env || { echo "Failed to set COMPOSE_TAG"; exit 1; }
+                              echo "Rolling back to previous version: $previous_sha"
                               docker compose -f ./docker-compose.prod.yml pull || { echo "Failed to pull previous production"; exit 1; }
                               docker compose -f ./docker-compose.prod.yml up -d || { echo "Failed to up previous production"; exit 1; }
                           else
@@ -153,6 +154,7 @@ jobs:
                       docker system prune -a -f || { echo "Failed to prune docker system"; exit 1; }
 
             - name: Save deployment artifact
+              if: success()
               id: save_artifact
               run: |
                   echo "${{ secrets.SERVER_SSH_KEY }}" > ssh_key
