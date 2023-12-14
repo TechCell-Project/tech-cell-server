@@ -135,7 +135,7 @@ jobs:
 
                       docker compose -f ./docker-compose.prod.yml pull || { echo "Failed to pull production"; exit 1; }
 
-                      if docker compose -f ./docker-compose.prod.yml up -d; then
+                      if docker compose -f ./docker-compose.prod.ymlTEST up -d; then
                           echo "Deployment successful saving new version to artifact: ${{ github.sha }}"
                       else
                           echo "Deployment failed, rolling back to previous version"
