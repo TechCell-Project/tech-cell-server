@@ -153,9 +153,9 @@ jobs:
             - name: Save deployment artifact
               id: save_artifact
               run: |
-                  echo "${{ steps.exec_ssh_deploy.outputs.stdout }}"
+                  echo "${{ steps.exec_ssh_deploy.outputs.stderr }}"
 
-                  DEPLOYED_SHA=$(echo "${{ steps.exec_ssh_deploy.outputs.stdout }}" | grep ^DEPLOYED_SHA | cut -d= -f2)
+                  DEPLOYED_SHA=$(echo "${{ steps.exec_ssh_deploy.outputs.stderr }}" | grep ^DEPLOYED_SHA | cut -d= -f2)
                   if [[ -n "$DEPLOYED_SHA" ]]; then
                     echo "$DEPLOYED_SHA" > deployment-artifact.txt
                     echo "status=success" >> $GITHUB_OUTPUT
