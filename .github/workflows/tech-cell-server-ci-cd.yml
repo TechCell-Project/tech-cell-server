@@ -154,11 +154,10 @@ jobs:
               run: |
                   echo "${{ secrets.SERVER_SSH_KEY }}" > ssh_key
                   chmod 600 ssh_key
-                  DEPLOYED_SHA=$(ssh -i ssh_key -o StrictHostKeyChecking=no ${{ secrets.SERVER_SSH_USERNAME }}@${{ secrets.SERVER_SSH_HOST }} "docker compose -f ${{ steps.set_repo_dir.outputs.repo_dir_on_server}}/docker-compose.prod.yml images | grep tech-cell-server-api | awk '{print $3}'")
-                  echo "DEPLOYED_SHA=$DEPLOYED_SHA" >> $GITHUB_OUTPUT
+                  echo ::set-env name=DEPLOYED_SHA::$(ssh -i ssh_key -o StrictHostKeyChecking=no ***@*** "docker compose -f /home/***/tech-cell-server/docker-compose.prod.yml images | grep tech-cell-server-api | awk '{print $3}'")
 
-                  if [[ -n "$DEPLOYED_SHA" ]]; then
-                    echo "$DEPLOYED_SHA" > deployment-artifact.txt
+                  if [[ -n "${{env.DEPLOYED_SHA}}" ]]; then
+                    echo "${{env.DEPLOYED_SHA}}" > deployment-artifact.txt
                     echo "status=success" >> $GITHUB_OUTPUT
                   else
                     echo "No deployed SHA found, not saving artifact."
