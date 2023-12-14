@@ -204,10 +204,10 @@ jobs:
                   git config --global user.name "lehuygiang28"
 
                   cd ./generated/typescript-axios
-                  /bin/sh ./git-push.sh "TechCell-Project" "tech-cell-server-node-sdk" "Auto generate SDK by https://github.com/TechCell-Project/tech-cell-server/commit/${{ steps.get_commit_hash.outputs.commit_hash }}"
+                  /bin/sh ./git_push.sh "TechCell-Project" "tech-cell-server-node-sdk" "Auto generate SDK by https://github.com/TechCell-Project/tech-cell-server/commit/${{ steps.get_commit_hash.outputs.commit_hash }}"
 
                   cd ../dart
-                  /bin/sh ./git-push.sh "TechCell-Project" "tech-cell-server-dart-sdk" "Auto generate SDK by https://github.com/TechCell-Project/tech-cell-server/commit/${{ steps.get_commit_hash.outputs.commit_hash }}"
+                  /bin/sh ./git_push.sh "TechCell-Project" "tech-cell-server-dart-sdk" "Auto generate SDK by https://github.com/TechCell-Project/tech-cell-server/commit/${{ steps.get_commit_hash.outputs.commit_hash }}"
               env:
                   GIT_TOKEN: ${{secrets.GIAANG_SDK_REPO_SECRET}}
 
