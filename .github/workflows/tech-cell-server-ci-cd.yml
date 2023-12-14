@@ -157,6 +157,7 @@ jobs:
 
                   DEPLOYED_SHA=$(ssh -i ssh_key -o StrictHostKeyChecking=no ${{ secrets.SERVER_SSH_USERNAME }}@${{ secrets.SERVER_SSH_HOST }} "docker compose -f ${{ steps.set_repo_dir.outputs.repo_dir_on_server}}/docker-compose.prod.yml images | grep lehuygiang28/techcell_api | awk '{print $3}'")
                   echo "DEPLOYED_SHA=$DEPLOYED_SHA" >> $GITHUB_ENV
+                  echo "$DEPLOYED_SHA"
 
                   if [[ -n "${{env.DEPLOYED_SHA}}" ]]; then
                     echo "${{env.DEPLOYED_SHA}}" > deployment-artifact.txt
