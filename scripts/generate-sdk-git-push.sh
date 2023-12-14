@@ -7,6 +7,7 @@ git_user_id=${1:-"GIT_USER_ID"}
 git_repo_id=${2:-"GIT_REPO_ID"}
 release_note=${3:-"Minor update"}
 branch=${4:-"master"}
+script_generate_sdk=${5:-""}
 
 # Initialize the local directory as a Git repository
 if [ ! -d ".git" ]; then
@@ -23,24 +24,25 @@ if [ -z "$(git remote)" ]; then
     fi
 fi
 
-# Fetch the latest changes from the remote repository
-git fetch origin $branch
+git pull
 
-git checkout generated/$branch || git checkout -b generated/$branch || { echo "Error: Unable to create or switch to branch $branch"; exit 1; }
-
-# Adds the files in the local repository and stages them for commit.
-git add . || { echo "Error: Unable to add files to the staging area"; exit 1; }
-
-# Commits the tracked changes and prepares them to be pushed to a remote repository.
-git commit -a -m "$release_note" || { echo "Error: Unable to commit changes"; exit 1; }
-
-# Switches to the branch to merge in
 git checkout $branch || { echo "Error: Unable to switch to branch $branch"; exit 1; }
 
-# Update the $branch to match exactly with generated/$branch
-git checkout generated/$branch -- . || { echo "Error: Unable to update $branch to match with generated/$branch"; exit 1; }
+rm -rf ./* ./.??* || { echo "Error: Unable to remove files in the current directory"; exit 1; }
 
-git commit -a -m "Update $branch to match with generated/$branch" || { echo "Error: Unable to commit changes"; exit 1; }
+if [ -z "$script_generate_sdk" ]; then
+    echo "Error: script_generate_sdk is not defined"
+    exit 1
+fi
 
+$script_generate_sdk || { echo "Error: Unable to generate SDK"; exit 1; }
+
+# Add the generated files
+git add . || { echo "Error: Unable to add files to the staging area"; exit 1; }
+
+# Commit the changes
+git commit -a -m "$release_note" || { echo "Error: Unable to commit changes"; exit 1; }
+
+# Push the changes
 echo "Git pushing to https://github.com/${git_user_id}/${git_repo_id}.git"
 git push origin $branch || { echo "Error: Unable to push changes to the remote repository"; exit 1; }
