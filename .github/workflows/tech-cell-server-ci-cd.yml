@@ -8,7 +8,9 @@ on:
             - refactor_skip
             - '*'
     pull_request:
-        branches: ['*']
+        branches:
+            - development
+            - refactor_skip
 
 env:
     DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
