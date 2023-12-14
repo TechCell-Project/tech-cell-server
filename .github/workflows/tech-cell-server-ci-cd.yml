@@ -83,8 +83,11 @@ jobs:
                   path: .
               continue-on-error: true
 
-            - name: Print artifact content
-              run: cat deployment-artifact.txt
+            - name: Extract last deployed SHA
+              id: extract_artifact
+              run: |
+                  cat deployment-artifact.txt
+                  echo "last_deployed_sha=$(cat deployment-artifact.txt)" >> $GITHUB_OUTPUT
 
             - name: Setup repository directory
               shell: bash
@@ -139,10 +142,9 @@ jobs:
                           echo "Deployment successful saving new version to artifact: ${{ github.sha }}"
                       else
                           echo "Deployment failed, rolling back to previous version"
-                          if [ -f deployment-artifact.txt ]; then
-                              previous_sha=$(cat deployment-artifact.txt)
-                              echo "COMPOSE_TAG=$previous_sha" >> .env || { echo "Failed to set COMPOSE_TAG"; exit 1; }
-                              echo "Rolling back to previous version: $previous_sha"
+                          if [ -n "${{steps.extract_artifact.outputs.last_deployed_sha}}" ]; then
+                              echo "COMPOSE_TAG=${{steps.extract_artifact.outputs.last_deployed_sha}}" >> .env || { echo "Failed to set COMPOSE_TAG"; exit 1; }
+                              echo "Rolling back to previous version: ${{steps.extract_artifact.outputs.last_deployed_sha}}"
                               docker compose -f ./docker-compose.prod.yml pull || { echo "Failed to pull previous production"; exit 1; }
                               docker compose -f ./docker-compose.prod.yml up -d || { echo "Failed to up previous production"; exit 1; }
                           else
