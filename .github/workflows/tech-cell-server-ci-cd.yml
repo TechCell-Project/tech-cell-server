@@ -155,7 +155,9 @@ jobs:
                   echo "${{ secrets.SERVER_SSH_KEY }}" > ssh_key
                   chmod 600 ssh_key
 
-                  DEPLOYED_SHA=$(ssh -i ssh_key -o StrictHostKeyChecking=no ${{ secrets.SERVER_SSH_USERNAME }}@${{ secrets.SERVER_SSH_HOST }} "docker compose -f ${{ steps.set_repo_dir.outputs.repo_dir_on_server}}/docker-compose.prod.yml images | grep lehuygiang28/techcell_api | awk '{print $(NF-2)}'")
+                  DEPLOYED_SHA_FULL=$(ssh -i ssh_key -o StrictHostKeyChecking=no ${{ secrets.SERVER_SSH_USERNAME }}@${{ secrets.SERVER_SSH_HOST }} "docker compose -f ${{ steps.set_repo_dir.outputs.repo_dir_on_server}}/docker-compose.prod.yml images | grep lehuygiang28/techcell_api")
+                  DEPLOYED_SHA=$(echo $DEPLOYED_SHA_FULL | awk '{print $(NF-2)}')
+
                   echo "DEPLOYED_SHA=$DEPLOYED_SHA" >> $GITHUB_ENV
                   echo "$DEPLOYED_SHA"
 
@@ -166,6 +168,7 @@ jobs:
                     echo "No deployed SHA found, not saving artifact."
                     echo "status=failure" >> $GITHUB_OUTPUT
                   fi
+
             - name: Upload deployment artifact
               if: steps.save_artifact.outputs.status == 'success'
               uses: actions/upload-artifact@v3
