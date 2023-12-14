@@ -15,7 +15,6 @@ env:
 
 jobs:
     automation-tests:
-        if: false
         runs-on: ubuntu-latest
 
         steps:
@@ -37,7 +36,6 @@ jobs:
               run: yarn test
 
     build-and-push-to-dockerhub:
-        if: false
         needs: [automation-tests]
         runs-on: ubuntu-latest
 
@@ -71,7 +69,7 @@ jobs:
                   rm .env
 
     deploy-to-server:
-        # needs: [automation-tests, build-and-push-to-dockerhub]
+        needs: [automation-tests, build-and-push-to-dockerhub]
         runs-on: ubuntu-latest
 
         steps:
@@ -133,12 +131,11 @@ jobs:
                       yarn install || { echo "Failed to install dependencies"; exit 1; }
                       yarn get-logs || { echo "Failed to get logs"; }
 
-                      # echo "COMPOSE_TAG=${{ github.sha }}" >> .env || { echo "Failed to set COMPOSE_TAG"; exit 1; }
-                      echo "COMPOSE_TAG=2dff3267b378f2ecdf1c21b246235eef62d8badf" >> .env || { echo "Failed to set COMPOSE_TAG"; exit 1; }
+                      echo "COMPOSE_TAG=${{ github.sha }}" >> .env || { echo "Failed to set COMPOSE_TAG"; exit 1; }
 
                       docker compose -f ./docker-compose.prod.yml pull || { echo "Failed to pull production"; exit 1; }
 
-                      if docker compose -f ./docker-compose.prod.ymlTEST up -d; then
+                      if docker compose -f ./docker-compose.prod.yml up -d; then
                           echo "Deployment successful saving new version to artifact: ${{ github.sha }}"
                       else
                           echo "Deployment failed, rolling back to previous version"
