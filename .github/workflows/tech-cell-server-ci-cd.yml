@@ -149,7 +149,6 @@ jobs:
               run: |
                   yarn start api &
                   sleep 20 &&
-                  curl http://localhost:8000/-json &&
                   yarn generate:swagger-yaml
 
             - name: Config git global
