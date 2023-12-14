@@ -159,14 +159,13 @@ jobs:
                   echo "DEPLOYED_SHA=$DEPLOYED_SHA" >> $GITHUB_ENV
                   echo "$DEPLOYED_SHA"
 
-                  if [[ -n "${{env.DEPLOYED_SHA}}" ]]; then
-                    echo "${{env.DEPLOYED_SHA}}" > deployment-artifact.txt
+                  if [[ -n "$DEPLOYED_SHA" ]]; then
+                    echo "$DEPLOYED_SHA" > deployment-artifact.txt
                     echo "status=success" >> $GITHUB_OUTPUT
                   else
                     echo "No deployed SHA found, not saving artifact."
                     echo "status=failure" >> $GITHUB_OUTPUT
                   fi
-
             - name: Upload deployment artifact
               if: steps.save_artifact.outputs.status == 'success'
               uses: actions/upload-artifact@v3
