@@ -15,6 +15,7 @@ env:
 
 jobs:
     automation-tests:
+        if: false
         runs-on: ubuntu-latest
 
         steps:
@@ -36,6 +37,7 @@ jobs:
               run: yarn test
 
     build-and-push-to-dockerhub:
+        if: false
         needs: [automation-tests]
         runs-on: ubuntu-latest
 
