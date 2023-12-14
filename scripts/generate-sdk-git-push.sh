@@ -3,12 +3,43 @@
 #
 # Usage example: /bin/sh ./generate-sdk-git-push.sh "lehuygiang28" "tech-cell-server-sdk" "minor update" main
 
-git_user_id=${1:-"GIT_USER_ID"}
-git_repo_id=${2:-"GIT_REPO_ID"}
-release_note=${3:-"Minor update"}
-branch=${4:-"master"}
-script_generate_sdk=${5:-""}
-directory_generated_sdk=${6:-""}
+# Initialize variables with default values
+git_user_id="GIT_USER_ID"
+git_repo_id="GIT_REPO_ID"
+release_note="Minor update"
+branch="master"
+script_generate_sdk=""
+directory_generated_sdk=""
+
+# Parse named arguments
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --git_user_id=*)
+      git_user_id="${1#*=}"
+      ;;
+    --git_repo_id=*)
+      git_repo_id="${1#*=}"
+      ;;
+    --release_note=*)
+      release_note="${1#*=}"
+      ;;
+    --branch=*)
+      branch="${1#*=}"
+      ;;
+    --script_generate_sdk=*)
+      script_generate_sdk="${1#*=}"
+      ;;
+    --directory_generated_sdk=*)
+      directory_generated_sdk="${1#*=}"
+      ;;
+    *)
+      printf "***************************\n"
+      printf "* Error: Invalid argument.*\n"
+      printf "***************************\n"
+      exit 1
+  esac
+  shift
+done
 
 if [ ! -d "$directory_generated_sdk" ]; then
     echo "Error: $directory_generated_sdk does not exist"
