@@ -131,7 +131,7 @@ jobs:
                       yarn get-logs || { echo "Failed to get logs"; }
 
                       # echo "COMPOSE_TAG=${{ github.sha }}" >> .env || { echo "Failed to set COMPOSE_TAG"; exit 1; }
-                      echo "COMPOSE_TAG=2dff3267b378f2ecdf1c21b246235eef62d8badf" >> .env || { echo "Failed to set COMPOSE_TAG"; exit 1; }
+                      echo "COMPOSE_TAG=2dff3267b378f2ecdf1c21b246235eef62d8badfTEST" >> .env || { echo "Failed to set COMPOSE_TAG"; exit 1; }
 
                       docker compose -f ./docker-compose.prod.yml pull || { echo "Failed to pull production"; exit 1; }
 
