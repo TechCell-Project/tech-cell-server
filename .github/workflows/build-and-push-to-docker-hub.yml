@@ -111,7 +111,11 @@ jobs:
                       fi
                       cd ${{ env.REPO_DIR_ON_SERVER }} || { echo "Failed to change to directory"; exit 1; }
                       echo "${{ secrets.SERVER_SSH_ENV_FILE }}" > .env || { echo "Failed to create .env file"; exit 1; }
-                      git switch ${{ env.CURRENT_BRANCH }} || { echo "Failed to switch to branch"; exit 1; }
+
+                      if [ "$(git rev-parse --abbrev-ref HEAD)" != "${{ env.CURRENT_BRANCH }}" ]; then
+                        git switch ${{ env.CURRENT_BRANCH }} || { echo "Failed to switch to branch"; exit 1; }
+                      fi    
+
                       git reset --hard || { echo "Failed to reset hard"; exit 1; }
                       git pull origin ${{ env.CURRENT_BRANCH }} || { echo "Failed to pull latest changes"; exit 1; }
                       yarn install || { echo "Failed to install dependencies"; exit 1; }
