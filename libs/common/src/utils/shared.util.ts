@@ -19,7 +19,7 @@ export function isEmail(email: string): boolean {
  * @returns A function to catch exception from microservice and throw it to client
  */
 export const catchException = () =>
-    catchError((error) => throwError(() => new RpcException(error.response)));
+    catchError((error) => throwError(() => new RpcException(error?.response ?? error?.error)));
 
 // create a function to generate random string
 export function generateRandomString(length: number) {
