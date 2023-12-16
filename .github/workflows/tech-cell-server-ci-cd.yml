@@ -27,7 +27,7 @@ jobs:
             - name: Checkout PR head
               if: github.event_name == 'pull_request'
               run: |
-                  git pull
+                  git fetch origin ${{ github.event.pull_request.head.ref }}
                   git checkout ${{ github.event.pull_request.head.ref }}
 
             - name: Get commit message
