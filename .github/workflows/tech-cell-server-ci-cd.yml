@@ -213,7 +213,7 @@ jobs:
                   generators=$(node -p "Object.keys(require('./openapitools.json')['generator-cli'].generators)")
                   echo $generators
 
-                  for generator in ${generators//,/ }
+                  for generator in $generators
                     do
                       (
                         echo $generator
