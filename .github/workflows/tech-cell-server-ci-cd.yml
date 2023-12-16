@@ -182,7 +182,7 @@ jobs:
                   techcell_version=$(node -p "require('./package.json').version")
                   node -e "
                   const fs = require('fs');
-                  const path = './generated/typescript-axios/package.json';
+                  const path = './generated/node/package.json';
                   let pkg;
                   if (fs.existsSync(path)) {
                     pkg = require(path);
