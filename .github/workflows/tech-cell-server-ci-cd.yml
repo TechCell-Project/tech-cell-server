@@ -22,10 +22,26 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v3
 
+            - name: Checkout PR head
+              if: github.event_name == 'pull_request'
+              run: |
+                  git fetch origin ${{ github.event.pull_request.head.ref }}
+                  git checkout ${{ github.event.pull_request.head.ref }}
+
+            - name: Get commit message
+              id: get_commit_message
+              run: |
+                  commit_message=$(git log -1 --pretty=%B)
+                  commit_message="${commit_message//'%'/'%25'}"
+                  commit_message="${commit_message//$'\n'/' '}"
+                  commit_message="${commit_message//$'\r'/' '}"
+                  echo $commit_message
+                  echo "commit_message=$commit_message" >> $GITHUB_OUTPUT
+
             - name: Check if commit message contains [skip ci]
               id: check_skip_ci
               run: |
-                  if [[ $(git log -1 --pretty=%B) =~ "[skip ci]" ]]; then
+                  if [[ "${{ steps.get_commit_message.outputs.commit_message }}" =~ "[skip ci]" ]]; then
                     echo "skip_ci=true" >> $GITHUB_OUTPUT
                     echo "skip ci found, skipping CI/CD..."
                   else
@@ -35,7 +51,7 @@ jobs:
             - name: Check if commit message contains [skip sdk]
               id: check_skip_sdk
               run: |
-                  if [[ $(git log -1 --pretty=%B) =~ "[skip sdk]" ]]; then
+                  if [[ "${{ steps.get_commit_message.outputs.commit_message }}" =~ "[skip sdk]" ]]; then
                     echo "skip_sdk=true" >> $GITHUB_OUTPUT
                     echo "skip sdk found, skipping SDK generation..."
                   else
@@ -45,7 +61,7 @@ jobs:
             - name: Check if commit message contains [skip docker]
               id: check_skip_docker
               run: |
-                  if [[ $(git log -1 --pretty=%B) =~ "[skip docker]" ]]; then
+                  if [[ "${{ steps.get_commit_message.outputs.commit_message }}" =~ "[skip docker]" ]]; then
                     echo "skip_docker=true" >> $GITHUB_OUTPUT
                     echo "skip docker found, skipping docker build and push..."
                   else
@@ -55,7 +71,7 @@ jobs:
             - name: Check if commit message contains [skip deploy]
               id: check_skip_deploy
               run: |
-                  if [[ $(git log -1 --pretty=%B) =~ "[skip deploy]" ]]; then
+                  if [[ "${{ steps.get_commit_message.outputs.commit_message }}" =~ "[skip deploy]" ]]; then
                     echo "skip_deploy=true" >> $GITHUB_OUTPUT
                     echo "skip deploy found, skipping deployment..."
                   else
@@ -85,7 +101,7 @@ jobs:
             - name: Run tests
               run: yarn test
 
-    generate-sdk:
+    generate-sdks:
         needs: [check-skip-ci, automation-tests]
         if: ${{ needs.check-skip-ci.outputs.skip_sdk != 'true' }}
         runs-on: ubuntu-latest
@@ -153,24 +169,10 @@ jobs:
                   git config --global user.email "lehuygiang28@gmail.com"
                   git config --global user.name "lehuygiang28"
 
-            - name: Generate Node SDK
+            - name: Generate SDKs
+              id: generate_sdks
               run: |
-                  npx @openapitools/openapi-generator-cli generate -i swagger.yaml \
-                  -g typescript-axios -o ./generated/typescript-axios \
-                  --additional-properties='supportsES6=true,useSingleRequestParameter=true,stringEnums=true,withSeparateModelsAndApi=true,apiPackage=services,modelPackage=models'
-
-            - name: Copy generate-sdk-git-push.sh to Node SDK
-              run: |
-                  cp ./scripts/generate-sdk-git-push.sh ./generated/typescript-axios
-
-            - name: Generate Dart-dio SDK
-              run: |
-                  npx @openapitools/openapi-generator-cli generate -i swagger.yaml \
-                  -g dart-dio -o ./generated/dart-dio
-
-            - name: Copy generate-sdk-git-push.sh to Dart-dio SDK
-              run: |
-                  cp ./scripts/generate-sdk-git-push.sh ./generated/dart-dio
+                  npx @openapitools/openapi-generator-cli generate
 
             - name: Update package.json of Node SDK
               run: |
@@ -178,7 +180,7 @@ jobs:
                   techcell_version=$(node -p "require('./package.json').version")
                   node -e "
                   const fs = require('fs');
-                  const path = './generated/typescript-axios/package.json';
+                  const path = './generated/node/package.json';
                   let pkg;
                   if (fs.existsSync(path)) {
                     pkg = require(path);
@@ -204,10 +206,26 @@ jobs:
                   fs.writeFileSync(path, JSON.stringify(pkg, null, 2));
                   "
 
-            - name: Check sdk-node if version already exists
+            - name: Push commit to SDK repositories
+              run: |
+                  generators=$(node -p "Object.keys(require('./openapitools.json')['generator-cli'].generators).join(' ')")
+
+                  for generator in $generators
+                    do
+                      (
+                        cp ./scripts/generate-sdk-git-push.sh ./generated/$generator
+                        cd ./generated/$generator
+                        /bin/sh ./generate-sdk-git-push.sh "TechCell-Project" "tech-cell-server-$generator-sdk" \
+                        "SDK generated by https://github.com/TechCell-Project/tech-cell-server/commit/${{ steps.get_commit_hash.outputs.commit_hash }}"
+                      )
+                    done
+              env:
+                  GIT_TOKEN: ${{secrets.GIAANG_SDK_REPO_SECRET}}
+
+            - name: Check exist node-sdk version on GitHub Packages
               id: check_version
               run: |
-                  cd ./generated/typescript-axios
+                  cd ./generated/node
                   version=$(node -p "require('./package.json').version")
                   if npm view --registry https://npm.pkg.github.com/ @techcell-project/tech-cell-server-node-sdk@$version version; then
                     echo "Version $version already exists, skipping publish..."
@@ -218,26 +236,10 @@ jobs:
               env:
                   NODE_AUTH_TOKEN: ${{secrets.GIAANG_PACKAGE_TOKEN}}
 
-            - name: Push commit to Node SDK repository
-              run: |
-                  cd ./generated/typescript-axios
-                  /bin/sh ./generate-sdk-git-push.sh "TechCell-Project" "tech-cell-server-node-sdk" \
-                  "SDK generated by https://github.com/TechCell-Project/tech-cell-server/commit/${{ steps.get_commit_hash.outputs.commit_hash }}" \
-              env:
-                  GIT_TOKEN: ${{secrets.GIAANG_SDK_REPO_SECRET}}
-
-            - name: Push commit to Dart-dio SDK repository
-              run: |
-                  cd ./generated/dart-dio
-                  /bin/sh ./generate-sdk-git-push.sh "TechCell-Project" "tech-cell-server-dart-dio-sdk" \
-                  "SDK generated by https://github.com/TechCell-Project/tech-cell-server/commit/${{ steps.get_commit_hash.outputs.commit_hash }}" \
-              env:
-                  GIT_TOKEN: ${{secrets.GIAANG_SDK_REPO_SECRET}}
-
             - name: Publish node-sdk package to GitHub Packages
               if: ${{ steps.check_version.outputs.skip_publish_node_sdk != 'true' }}
               run: |
-                  cd ./generated/typescript-axios
+                  cd ./generated/node
                   npm publish
               env:
                   NODE_AUTH_TOKEN: ${{secrets.GIAANG_PACKAGE_TOKEN}}
