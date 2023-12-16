@@ -24,6 +24,10 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v3
 
+            - name: Log commit message
+              run: |
+                  echo $(git log -1 --pretty=%B)
+
             - name: Check if commit message contains [skip ci]
               id: check_skip_ci
               run: |
@@ -194,7 +198,7 @@ jobs:
 
             - name: Push commit to SDK repositories
               run: |
-                  generators=$(node -p "require('./openapitools.json')['generator-cli'].generators")
+                  generators=$(node -p "Object.keys(require('./openapitools.json')['generator-cli'].generators)")
 
                   for generator in $generators; do
                       (
