@@ -33,12 +33,7 @@ jobs:
             - name: Get commit message
               id: get_commit_message
               run: |
-                  commit_message=""
-                  if [[ "${{ github.event_name }}" == "push" ]]; then
-                    commit_message=$(git log -1 --pretty=%B)
-                  elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
-                    commit_message=$(git log -1 --pretty=%B ${{ github.event.pull_request.head.sha }})
-                  fi
+                  commit_message=$(git log -1 --pretty=%B)
                   echo $commit_message
                   echo "commit_message=$commit_message" >> $GITHUB_OUTPUT
 
