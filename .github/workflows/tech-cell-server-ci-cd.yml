@@ -24,14 +24,22 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v3
 
-            - name: Log commit message
+            - name: Get commit message
+              id: get_commit_message
               run: |
-                  echo $(git log -1 --pretty=%B)
+                  commit_message=""
+                  if [[ "${{ github.event_name }}" == "push" ]]; then
+                    commit_message=$(git log -1 --pretty=%B)
+                  elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
+                    commit_message=$(git log -1 --pretty=%B ${{ github.event.pull_request.head.sha }})
+                  fi
+                  echo $commit_message
+                  echo "commit_message=$commit_message" >> $GITHUB_OUTPUT
 
             - name: Check if commit message contains [skip ci]
               id: check_skip_ci
               run: |
-                  if [[ $(git log -1 --pretty=%B) =~ "[skip ci]" ]]; then
+                  if [[ ${{ steps.get_commit_message.outputs.commit_message }} =~ "[skip ci]" ]]; then
                     echo "skip_ci=true" >> $GITHUB_OUTPUT
                     echo "skip ci found, skipping CI/CD..."
                   else
@@ -41,7 +49,7 @@ jobs:
             - name: Check if commit message contains [skip sdk]
               id: check_skip_sdk
               run: |
-                  if [[ $(git log -1 --pretty=%B) =~ "[skip sdk]" ]]; then
+                  if [[ ${{ steps.get_commit_message.outputs.commit_message }} =~ "[skip sdk]" ]]; then
                     echo "skip_sdk=true" >> $GITHUB_OUTPUT
                     echo "skip sdk found, skipping SDK generation..."
                   else
@@ -51,7 +59,7 @@ jobs:
             - name: Check if commit message contains [skip docker]
               id: check_skip_docker
               run: |
-                  if [[ $(git log -1 --pretty=%B) =~ "[skip docker]" ]]; then
+                  if [[ ${{ steps.get_commit_message.outputs.commit_message }} =~ "[skip docker]" ]]; then
                     echo "skip_docker=true" >> $GITHUB_OUTPUT
                     echo "skip docker found, skipping docker build and push..."
                   else
@@ -61,7 +69,7 @@ jobs:
             - name: Check if commit message contains [skip deploy]
               id: check_skip_deploy
               run: |
-                  if [[ $(git log -1 --pretty=%B) =~ "[skip deploy]" ]]; then
+                  if [[ ${{ steps.get_commit_message.outputs.commit_message }} =~ "[skip deploy]" ]]; then
                     echo "skip_deploy=true" >> $GITHUB_OUTPUT
                     echo "skip deploy found, skipping deployment..."
                   else
@@ -202,6 +210,8 @@ jobs:
 
                   for generator in $generators; do
                       (
+                        echo $generator
+
                         cp ./scripts/generate-sdk-git-push.sh ./generated/$generator
                         cd ./generated/$generator
                         /bin/sh ./generate-sdk-git-push.sh "TechCell-Project" "tech-cell-server-$generator-sdk" \
