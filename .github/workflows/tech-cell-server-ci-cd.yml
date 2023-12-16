@@ -211,13 +211,10 @@ jobs:
             - name: Push commit to SDK repositories
               run: |
                   generators=$(node -p "Object.keys(require('./openapitools.json')['generator-cli'].generators).join(' ')")
-                  echo $generators
 
                   for generator in $generators
                     do
                       (
-                        echo $generator
-
                         cp ./scripts/generate-sdk-git-push.sh ./generated/$generator
                         cd ./generated/$generator
                         /bin/sh ./generate-sdk-git-push.sh "TechCell-Project" "tech-cell-server-$generator-sdk" \

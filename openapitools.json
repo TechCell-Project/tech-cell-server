@@ -4,9 +4,9 @@
     "generator-cli": {
         "version": "7.1.0",
         "generators": {
-            "typescript-axios": {
+            "node": {
                 "generatorName": "typescript-axios",
-                "output": "#{cwd}/generated/typescript-axios",
+                "output": "#{cwd}/generated/node",
                 "glob": "swagger.yaml",
                 "additionalProperties": {
                     "supportsES6": "true",
