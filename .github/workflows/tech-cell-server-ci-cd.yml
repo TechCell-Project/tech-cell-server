@@ -227,7 +227,7 @@ jobs:
             - name: Check exist node-sdk version on GitHub Packages
               id: check_version
               run: |
-                  cd ./generated/typescript-axios
+                  cd ./generated/node
                   version=$(node -p "require('./package.json').version")
                   if npm view --registry https://npm.pkg.github.com/ @techcell-project/tech-cell-server-node-sdk@$version version; then
                     echo "Version $version already exists, skipping publish..."
@@ -241,7 +241,7 @@ jobs:
             - name: Publish node-sdk package to GitHub Packages
               if: ${{ steps.check_version.outputs.skip_publish_node_sdk != 'true' }}
               run: |
-                  cd ./generated/typescript-axios
+                  cd ./generated/node
                   npm publish
               env:
                   NODE_AUTH_TOKEN: ${{secrets.GIAANG_PACKAGE_TOKEN}}
