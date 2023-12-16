@@ -34,6 +34,9 @@ jobs:
               id: get_commit_message
               run: |
                   commit_message=$(git log -1 --pretty=%B)
+                  commit_message="${commit_message//'%'/'%25'}"
+                  commit_message="${commit_message//$'\n'/' '}"
+                  commit_message="${commit_message//$'\r'/' '}"
                   echo $commit_message
                   echo "commit_message=$commit_message" >> $GITHUB_OUTPUT
 
