@@ -236,13 +236,13 @@ jobs:
               env:
                   NODE_AUTH_TOKEN: ${{secrets.GIAANG_PACKAGE_TOKEN}}
 
-            # - name: Publish node-sdk package to GitHub Packages
-            #   if: ${{ steps.check_version.outputs.skip_publish_node_sdk != 'true' }}
-            #   run: |
-            #       cd ./generated/typescript-axios
-            #       npm publish
-            #   env:
-            #       NODE_AUTH_TOKEN: ${{secrets.GIAANG_PACKAGE_TOKEN}}
+            - name: Publish node-sdk package to GitHub Packages
+              if: ${{ steps.check_version.outputs.skip_publish_node_sdk != 'true' }}
+              run: |
+                  cd ./generated/typescript-axios
+                  npm publish
+              env:
+                  NODE_AUTH_TOKEN: ${{secrets.GIAANG_PACKAGE_TOKEN}}
 
     build-and-push-to-dockerhub:
         needs: [check-skip-ci, automation-tests]
