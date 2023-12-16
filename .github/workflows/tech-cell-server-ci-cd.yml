@@ -158,8 +158,6 @@ jobs:
             - name: Generate SDKs
               id: generate_sdks
               run: |
-                  generators=$(node -p "JSON.stringify(require('./openapitools.json')['generator-cli'].generators)")
-                  echo "generators=$generators" >> $GITHUB_OUTPUT
                   npx @openapitools/openapi-generator-cli generate
 
             - name: Update package.json of Node SDK
@@ -196,7 +194,8 @@ jobs:
 
             - name: Push commit to SDK repositories
               run: |
-                  generators=$(node -p "Object.keys(JSON.parse('${{steps.generate_sdks.outputs.generators}}'))")
+                  generators=$(node -p "require('./openapitools.json')['generator-cli'].generators")
+
                   for generator in $generators; do
                       (
                         cp ./scripts/generate-sdk-git-push.sh ./generated/$generator
