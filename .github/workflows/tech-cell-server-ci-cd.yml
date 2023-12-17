@@ -272,6 +272,18 @@ jobs:
                   cat .env
 
             - name: Build and push images
+              id: build_and_push
+              run: |
+                  docker compose -f docker-compose.prod.yml build
+                  docker compose -f docker-compose.prod.yml push
+
+            - name: Overwrite .env file for latest tag
+              run: |
+                  echo COMPOSE_TAG= "latest" >> .env
+                  cat .env
+
+            - name: Build and push images with latest tag
+              id: build_and_push_latest
               run: |
                   docker compose -f docker-compose.prod.yml build
                   docker compose -f docker-compose.prod.yml push
