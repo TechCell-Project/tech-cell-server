@@ -15,7 +15,7 @@ services:
             - URL=techcell.cloud
             - SUBDOMAINS=${SSL_SUBDOMAINS}
             - VALIDATION=http
-            - CERTPROVIDER=zerossl #optional
+            # - CERTPROVIDER=zerossl #optional
             - DNSPLUGIN=cloudflare #optional
             # - DUCKDNSTOKEN=<token> #optional
             - EMAIL=teams@techcell.cloud #optional
