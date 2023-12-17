@@ -284,19 +284,31 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
-            - name: Download last successful artifacts
-              uses: dawidd6/action-download-artifact@v3
-              with:
-                  workflow: tech-cell-server-ci-cd.yml
-                  name: deployment-artifact
-                  path: .
-              continue-on-error: true
+            - name: Download most recent existing artifact
+              id: download_artifact
+              run: |
+                  artifacts=$(curl -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{ github.repository }}/actions/artifacts)
+                  for artifact in $(echo "${artifacts}" | jq -r '.artifacts[] | @base64'); do
+                    _jq() {
+                      echo ${artifact} | base64 --decode | jq -r ${1}
+                    }
+                    name=$(_jq '.name')
+                    if [[ "${name}" == "deployment-artifact" ]]; then
+                      url=$(_jq '.archive_download_url')
+                      curl -L -o deployment-artifact.zip -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "${url}"
+                      break
+                    fi
+                  done
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
             - name: Extract last deployed SHA
               id: extract_artifact
               run: |
+                  unzip deployment-artifact.zip
                   cat deployment-artifact.txt
                   echo "last_deployed_sha=$(cat deployment-artifact.txt)" >> $GITHUB_OUTPUT
+              continue-on-error: true
 
             - name: Setup repository directory
               shell: bash
