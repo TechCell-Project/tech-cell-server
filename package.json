@@ -111,6 +111,8 @@
         "@automock/adapters.nestjs": "^2.0.0",
         "@automock/jest": "^2.0.0",
         "@babel/plugin-proposal-private-methods": "^7.18.6",
+        "@commitlint/config-conventional": "^18.4.3",
+        "@commitlint/prompt": "^18.4.3",
         "@compodoc/compodoc": "^1.1.21",
         "@nestjs/cli": "^10.0.3",
         "@nestjs/schematics": "^10.0.1",
