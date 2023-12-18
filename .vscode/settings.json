@@ -89,6 +89,7 @@
         "docker",
         "libs",
         "scripts",
-        "types"
+        "types",
+        "example"
     ]
 }
