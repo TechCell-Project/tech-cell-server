@@ -27,6 +27,7 @@ export class ListDataResponseDTO<T> {
     @ApiProperty({
         example: 1,
         description: 'Page number',
+        type: Number,
     })
     @IsNumber()
     page: number;
@@ -34,6 +35,7 @@ export class ListDataResponseDTO<T> {
     @ApiProperty({
         example: 10,
         description: 'Page size',
+        type: Number,
     })
     @IsNumber()
     pageSize: number;
@@ -41,6 +43,7 @@ export class ListDataResponseDTO<T> {
     @ApiProperty({
         example: 1,
         description: 'Total page with page size',
+        type: Number,
     })
     @IsNumber()
     totalPage: number;
@@ -48,6 +51,7 @@ export class ListDataResponseDTO<T> {
     @ApiProperty({
         example: 10,
         description: 'Total record with filter',
+        type: Number,
     })
     @IsNumber()
     totalRecord: number;

@@ -62,6 +62,24 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
         return document as unknown as TDocument;
     }
 
+    async findOneOrNull(
+        filterQuery: FilterQuery<TDocument>,
+        options?: Partial<QueryOptions<TDocument>>,
+        projection?: ProjectionType<TDocument>,
+    ): Promise<TDocument | null> {
+        const document = await this.model
+            .findOne(filterQuery, projection, {
+                ...options,
+            })
+            .lean(options?.lean ?? true);
+
+        if (!document) {
+            return null;
+        }
+
+        return document as unknown as TDocument;
+    }
+
     async findOneAndUpdate(
         filterQuery: FilterQuery<TDocument>,
         update: UpdateQuery<TDocument>,
@@ -138,8 +156,7 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
     }
 
     async count(filterQuery: FilterQuery<TDocument>) {
-        const countNum = await this.model.countDocuments(filterQuery);
-        return countNum;
+        return this.model.countDocuments(filterQuery);
     }
 
     async updateOne(

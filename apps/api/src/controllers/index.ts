@@ -15,6 +15,7 @@ import { NotificationsController } from './notifications.controller';
 import { HealthController } from './health.controller';
 import { OrdersManagementController } from './order-management.controller';
 import { StatsController } from './stats.controller';
+import { KpiController } from './kpi.controller';
 
 export const ListControllers = [
     AdminController,
@@ -31,6 +32,7 @@ export const ListControllers = [
     UsersController,
     // DiscountsController,
     NotificationsController,
+    KpiController,
     StatsController,
     AppController,
     HealthController,

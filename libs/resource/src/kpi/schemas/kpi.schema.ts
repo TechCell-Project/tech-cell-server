@@ -1,7 +1,8 @@
-import { Prop, SchemaFactory } from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { AbstractDocument } from '~libs/resource/abstract/abstract.schema';
 import { KpiStatusEnum, KpiTypeEnum } from '../enums';
 
+@Schema({ timestamps: true })
 export class Kpi extends AbstractDocument {
     @Prop({ required: true, unique: true })
     name: string;
