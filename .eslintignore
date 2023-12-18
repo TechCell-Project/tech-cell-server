@@ -1,4 +1,11 @@
+# Ignore node modules
 node_modules/
+
+# Ignore ESLint configuration files
 .eslintrc.js
+
+# Ignore build directories
 dist/
+
+# Ignore generated TypeScript files
 *.generated.ts
