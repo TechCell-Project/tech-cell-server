@@ -81,5 +81,13 @@
         "projectKey": "TechCell-Project_tech-cell-web-server"
     },
     "liveServer.settings.port": 5501,
-    "conventionalCommits.scopes": ["compose", "setting", "actions", "assets", "docker", "libs"]
+    "conventionalCommits.scopes": [
+        "compose",
+        "setting",
+        "actions",
+        "assets",
+        "docker",
+        "libs",
+        "scripts"
+    ]
 }
