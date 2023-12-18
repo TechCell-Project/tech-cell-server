@@ -1,5 +1,5 @@
 readme:
-    - '**/README.md'
+    - "**/README.md"
 
 actions:
     - .github/workflows/**/*
