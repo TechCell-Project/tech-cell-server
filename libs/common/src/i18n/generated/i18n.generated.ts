@@ -72,6 +72,7 @@ export type I18nTranslations = {
         "ONLY_IMAGE_FILE_IS_ACCEPTED": string;
         "FILE_IS_TOO_LARGE": string;
         "FILE_IS_TOO_LARGE_PROPERTY": string;
+        "START_DATE_MUST_BE_BEFORE_END_DATE": string;
     };
     "exception": {
         "InternalServerException": {
