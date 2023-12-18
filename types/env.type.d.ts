@@ -375,10 +375,16 @@ declare namespace NodeJS {
 
         /**
          * The `vnpay` data
+         * @description This value is used for `vnpay` module
+         * @example
+         * VNPAY_VERSION = '2.0.0'
          */
         VNPAY_VERSION: string;
         /**
          * The `vnpay` data
+         * @description This value is used for `vnpay` module
+         * @example
+         * VNPAY_PAYMENT_URL = 'https://sandbox.vnpayment.vn'
          */
         VNPAY_PAYMENT_URL: string;
         /**
