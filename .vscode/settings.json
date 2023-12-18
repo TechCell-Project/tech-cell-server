@@ -80,5 +80,6 @@
         "connectionId": "techcell-project",
         "projectKey": "TechCell-Project_tech-cell-web-server"
     },
-    "liveServer.settings.port": 5501
+    "liveServer.settings.port": 5501,
+    "conventionalCommits.scopes": ["compose", "setting"]
 }
