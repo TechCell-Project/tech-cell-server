@@ -1,4 +1,4 @@
-import { DynamicModule, Module } from '@nestjs/common';
+import { DynamicModule, Logger, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ClientProxyFactory, Transport } from '@nestjs/microservices';
 import { RabbitMQService } from './services';
@@ -11,6 +11,7 @@ import { RmqStateService } from './services/rmq-state.service';
 })
 export class RabbitMQModule {
     static registerRmq(service: string, queue: string): DynamicModule {
+        const logger = new Logger(RabbitMQModule.registerRmq.name);
         const providers = [
             {
                 provide: service,
@@ -37,6 +38,7 @@ export class RabbitMQModule {
             },
         ];
 
+        logger.debug(`Registering RMQ service: ${service} with queue: ${queue}`);
         return {
             module: RabbitMQModule,
             providers,
