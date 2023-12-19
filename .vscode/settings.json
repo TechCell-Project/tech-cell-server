@@ -90,6 +90,7 @@
         "libs",
         "scripts",
         "types",
-        "example"
+        "example",
+        "readme"
     ]
 }
