@@ -31,10 +31,19 @@ export class KpiMntController {
     @MessagePattern(KpiMntMessagePattern.getKpis)
     async getKpis(
         @Ctx() context: RmqContext,
-        @Payload() data: GetKpisRequestDTO & ObjectIdParamDTO,
+        @Payload() data: GetKpisRequestDTO,
     ): Promise<ListKpisResponseDTO> {
         this.rabbitMqService.acknowledgeMessage(context);
         return this.kpiMntService.getKpis(data);
+    }
+
+    @MessagePattern(KpiMntMessagePattern.getKpiById)
+    async getKpiById(
+        @Ctx() context: RmqContext,
+        @Payload() { id }: ObjectIdParamDTO,
+    ): Promise<KpiDTO> {
+        this.rabbitMqService.acknowledgeMessage(context);
+        return this.kpiMntService.getKpiById({ id });
     }
 
     @MessagePattern(KpiMntMessagePattern.updateKpi)
@@ -44,14 +53,5 @@ export class KpiMntController {
     ): Promise<KpiDTO> {
         this.rabbitMqService.acknowledgeMessage(context);
         return this.kpiMntService.updateKpi(data);
-    }
-
-    @MessagePattern(KpiMntMessagePattern.getKpiById)
-    async getKpiById(
-        @Ctx() context: RmqContext,
-        @Payload() data: ObjectIdParamDTO,
-    ): Promise<KpiDTO> {
-        this.rabbitMqService.acknowledgeMessage(context);
-        return this.kpiMntService.getKpiById(data);
     }
 }
