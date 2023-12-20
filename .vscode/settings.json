@@ -91,6 +91,7 @@
         "scripts",
         "types",
         "example",
-        "readme"
+        "readme",
+        "test"
     ]
 }
