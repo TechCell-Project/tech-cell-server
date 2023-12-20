@@ -97,6 +97,7 @@
         "i18n",
         "subdomain",
         "constant",
-        "test"
+        "test",
+        "utils"
     ]
 }
