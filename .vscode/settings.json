@@ -95,6 +95,7 @@
         "readme",
         "test",
         "i18n",
-        "subdomain"
+        "subdomain",
+        "constant"
     ]
 }
