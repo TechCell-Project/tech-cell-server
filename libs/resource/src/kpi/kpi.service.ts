@@ -5,10 +5,23 @@ import { ClientSession, FilterQuery, ProjectionType, QueryOptions, Types } from 
 import { KpiDTO } from './dtos';
 import { I18nContext } from 'nestjs-i18n';
 import { I18nTranslations } from '~libs/common/i18n/generated/i18n.generated';
+import { RedisService } from '~libs/common/Redis';
+import {
+    KPI_CACHE_PREFIX,
+    KPI_DAY,
+    KPI_MONTH,
+    KPI_YEAR,
+    calculateDaysBetweenDates,
+} from '~libs/common';
+import { KpiStatusEnum } from './enums';
+import { convertTimeString } from 'convert-time-string';
 
 @Injectable()
 export class KpiService {
-    constructor(private readonly kpiRepository: KpiRepository) {}
+    constructor(
+        private readonly kpiRepository: KpiRepository,
+        private readonly redisCache: RedisService,
+    ) {}
 
     async createKpi(data: KpiDTO, session?: ClientSession): Promise<Kpi | KpiDTO> {
         data.name = data.name.trim().toLowerCase();
@@ -175,5 +188,142 @@ export class KpiService {
                 ...(newData.endDate && { endDate: new Date(newData.endDate) }),
             },
         );
+    }
+
+    async calculateKpiDay({
+        day,
+        month,
+        year,
+        refreshCache = false,
+    }: {
+        day: number;
+        month: number;
+        year: number;
+        refreshCache?: boolean;
+    }) {
+        const cacheKey = `${KPI_DAY}_${year}_${month}_${day}`;
+
+        if (refreshCache) {
+            await this.redisCache.del(cacheKey);
+        }
+        const specificDate = new Date(year, month - 1, day).toISOString();
+        const kpis: Kpi[] | null = await this.kpiRepository.findOrNull({
+            filterQuery: {
+                kpiStatus: KpiStatusEnum.active,
+                $and: [{ startDate: { $lte: specificDate } }, { endDate: { $gte: specificDate } }],
+            },
+        });
+
+        const kpiDays = kpis?.map((kpi) => {
+            const diffDays = calculateDaysBetweenDates(kpi.startDate, kpi.endDate);
+            const kpiPerDay = kpi.value / diffDays;
+            kpi.value = kpiPerDay;
+            return { [kpi.name]: kpiPerDay };
+        });
+
+        return kpiDays;
+    }
+    async calculateKpiMonth({
+        month,
+        year,
+        refreshCache = false,
+    }: {
+        month: number;
+        year: number;
+        refreshCache?: boolean;
+    }) {
+        const cacheKey = `${KPI_MONTH}_${year}_${month}`;
+
+        if (refreshCache) {
+            await this.redisCache.del(cacheKey);
+        }
+
+        const startDate = new Date(year, month - 1, 1);
+        const endDate = new Date(year, month, 0);
+
+        const kpis: Kpi[] | null = await this.kpiRepository.findOrNull({
+            filterQuery: {
+                kpiStatus: KpiStatusEnum.active,
+                $or: [{ startDate: { $lte: startDate } }, { endDate: { $gte: endDate } }],
+            },
+        });
+
+        const kpiMonths = kpis?.map((kpi) => {
+            const diffDays = calculateDaysBetweenDates(kpi.startDate, kpi.endDate);
+            const diffMonths = Math.ceil(diffDays / new Date(year, month, 0).getDate());
+            const kpiPerMonth = kpi.value / diffMonths;
+            kpi.value = kpiPerMonth;
+            return { [kpi.name]: kpiPerMonth };
+        });
+
+        return kpiMonths;
+    }
+
+    async calculateKpiYear({
+        year,
+        refreshCache = false,
+    }: {
+        year: number;
+        refreshCache?: boolean;
+    }): Promise<Array<{ [key: string]: number }>> {
+        const cacheKey = `${KPI_YEAR}_${year}`;
+
+        if (refreshCache) {
+            await this.redisCache.del(cacheKey);
+        }
+
+        const startDate = new Date(year, 0, 1).toISOString();
+        const endDate = new Date(year + 1, 0, 0).toISOString();
+        const kpis: Kpi[] | null = await this.kpiRepository.findOrNull({
+            filterQuery: {
+                kpiStatus: KpiStatusEnum.active,
+                $or: [{ startDate: { $lte: startDate } }, { endDate: { $gte: endDate } }],
+            },
+        });
+
+        const kpiYears = kpis?.map((kpi) => {
+            const diffDays = calculateDaysBetweenDates(kpi.startDate, kpi.endDate);
+            const diffYears = Math.ceil(diffDays / new Date(year, 0, 0).getDate());
+            const kpiPerYear = kpi.value / diffYears;
+            kpi.value = kpiPerYear;
+            return { [kpi.name]: kpiPerYear };
+        });
+
+        return kpiYears;
+    }
+
+    async calculateKpiOfDateRange({
+        fromDate,
+        toDate,
+        refreshCache = false,
+    }: {
+        fromDate: Date;
+        toDate: Date;
+        refreshCache?: boolean;
+    }) {
+        const cacheKey = `${KPI_CACHE_PREFIX}_RANGE_${fromDate}_${toDate}`;
+
+        if (refreshCache) {
+            await this.redisCache.del(cacheKey);
+        }
+
+        const kpis: Kpi[] | null = await this.kpiRepository.findOrNull({
+            filterQuery: {
+                kpiStatus: KpiStatusEnum.active,
+                $or: [{ startDate: { $lte: fromDate } }, { endDate: { $gte: toDate } }],
+            },
+        });
+
+        const kpiOfDateRange = kpis?.map((kpi) => {
+            const diffDays = calculateDaysBetweenDates(kpi.startDate, kpi.endDate);
+            const diffDateRange = calculateDaysBetweenDates(fromDate, toDate);
+            const kpiOfDateRange = (kpi.value / diffDays) * diffDateRange;
+            kpi.value = kpiOfDateRange;
+            return { [kpi.name]: kpiOfDateRange };
+        });
+
+        await this.redisCache.set(cacheKey, kpiOfDateRange, convertTimeString('1h'));
+
+        return kpiOfDateRange;
     }
 }

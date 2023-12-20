@@ -149,6 +149,27 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
         return document;
     }
 
+    async findOrNull({
+        filterQuery,
+        queryOptions,
+        projection,
+    }: {
+        filterQuery: FilterQuery<TDocument>;
+        queryOptions?: Partial<QueryOptions<TDocument>>;
+        projection?: ProjectionType<TDocument>;
+    }): Promise<TDocument[] | null> {
+        const document = await this.model.find(filterQuery, projection, {
+            lean: true,
+            ...queryOptions,
+        });
+
+        if (!document || document.length <= 0) {
+            return null;
+        }
+
+        return document;
+    }
+
     async startTransaction() {
         const session = await this.connection.startSession();
         session.startTransaction();
