@@ -1,16 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { StatisticsService } from '~libs/resource/statistics/';
+import { TCalculate } from '~libs/resource/statistics/types';
+import { KpiDTO, KpiService, KpiStatusEnum, KpiTypeEnum } from '~libs/resource/kpi';
 import { GetStatsRequestDTO, GetStatsResponseDTO } from './dtos';
 import { StatsSplitBy } from './stats-mnt.enum';
-import { RedisService } from '~libs/common/Redis/services';
-import { REVENUE_DAY, REVENUE_MONTH, REVENUE_YEAR } from '~libs/common/constants/cache.constant';
-import { TCalculate } from '~libs/resource/statistics/types';
+import { calculateDaysBetweenDates } from '~libs/common/utils/shared.util';
 
 @Injectable()
 export class StatsMntService {
     constructor(
-        private readonly redisService: RedisService,
         private readonly statisticsService: StatisticsService,
+        private readonly kpiService: KpiService,
     ) {}
 
     async getStats({
@@ -23,40 +23,35 @@ export class StatsMntService {
         const dateRanges: Date[] = [];
         let dateIncrementFunction: (date: Date) => void;
         let revenueFunction: (date: Date) => Promise<TCalculate>;
-        let refreshCacheKey = '';
+        // const kpiRevenueFunction = (fromDate: string, toDate: string) =>
+        //     this.resolveKpi({ fromDate, toDate, splitBy });
 
         switch (splitBy) {
             case StatsSplitBy.day:
-                refreshCacheKey = `${REVENUE_DAY}*`;
                 dateIncrementFunction = (date) => date.setDate(date.getDate() + 1);
                 revenueFunction = (date) =>
                     this.statisticsService.calculateRevenueDay(
                         date.getDate(),
                         date.getMonth() + 1,
                         date.getFullYear(),
+                        refreshCache,
                     );
                 break;
             case StatsSplitBy.year:
-                refreshCacheKey = `${REVENUE_YEAR}*`;
                 dateIncrementFunction = (date) => date.setFullYear(date.getFullYear() + 1);
                 revenueFunction = (date) =>
-                    this.statisticsService.calculateRevenueYear(date.getFullYear());
+                    this.statisticsService.calculateRevenueYear(date.getFullYear(), refreshCache);
                 break;
             case StatsSplitBy.month:
             default:
-                refreshCacheKey = `${REVENUE_MONTH}*`;
                 dateIncrementFunction = (date) => date.setMonth(date.getMonth() + 1);
                 revenueFunction = (date) =>
                     this.statisticsService.calculateRevenueMonth(
                         date.getMonth() + 1,
                         date.getFullYear(),
+                        refreshCache,
                     );
                 break;
-        }
-
-        if (refreshCache) {
-            const keys = await this.redisService.keys(refreshCacheKey);
-            await Promise.all(keys.map((key) => this.redisService.del(key)));
         }
 
         for (let i = new Date(fromDate); i <= new Date(toDate); dateIncrementFunction(i)) {
@@ -82,6 +77,51 @@ export class StatsMntService {
         });
         const totalRevenue = dataCalculates.reduce((a, b) => a + b.revenue, 0);
         const totalOrders = dataCalculates.reduce((a, b) => a + b.orders, 0);
-        return { totalRevenue, totalOrders, fromDate, toDate, data: result };
+        const kpis = await this.resolveKpi({ fromDate, toDate, splitBy });
+        return {
+            totalRevenue,
+            totalOrders,
+            fromDate,
+            toDate,
+            data: result,
+            ...Object.fromEntries(kpis),
+        };
+    }
+
+    private async resolveKpi(dataResolve: GetStatsRequestDTO): Promise<Map<string, number>> {
+        const { fromDate, toDate, splitBy } = dataResolve;
+        const kpiType = KpiTypeEnum.revenue;
+        const kpis = await this.kpiService.getKpisOrNull({
+            filterQuery: {
+                kpiType: kpiType,
+                kpiStatus: KpiStatusEnum.active,
+                $or: [
+                    { startDate: { $gte: new Date(fromDate) } },
+                    { endDate: { $lte: new Date(toDate) } },
+                ],
+            },
+        });
+
+        const mapKpi = new Map<string, number>();
+        kpis.forEach((kpi: KpiDTO) => {
+            const { name, value, startDate, endDate } = kpi;
+            const numsOfDays = calculateDaysBetweenDates(startDate, endDate);
+            const valuePerDay = value / numsOfDays;
+
+            switch (splitBy) {
+                case StatsSplitBy.month:
+                    mapKpi.set(name, valuePerDay * 30);
+                    break;
+                case StatsSplitBy.year:
+                    mapKpi.set(name, valuePerDay * 365);
+                    break;
+                case StatsSplitBy.day:
+                default:
+                    mapKpi.set(name, valuePerDay);
+                    break;
+            }
+        });
+
+        return mapKpi;
     }
 }

@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { RedisService } from '~libs/common/Redis';
 import { Order, OrdersService, OrderStatusEnum } from '~libs/resource/orders';
-import { ProductsService } from '~libs/resource/products';
 import { REVENUE_DAY, REVENUE_MONTH, REVENUE_YEAR } from '~libs/common/constants/cache.constant';
 import { isCurrentTime } from '~libs/common/utils/shared.util';
 import { convertTimeString } from 'convert-time-string';
@@ -12,7 +11,6 @@ export class StatisticsService {
     constructor(
         private readonly redisService: RedisService,
         private readonly ordersService: OrdersService,
-        private readonly productsService: ProductsService,
     ) {}
 
     private calculateRevenue(orders: Order[]): number {
@@ -21,14 +19,18 @@ export class StatisticsService {
         return revenue;
     }
 
-    async calculateRevenueYear(year: number): Promise<TCalculate> {
+    async calculateRevenueYear(year: number, refreshCache = false): Promise<TCalculate> {
         const cacheKey = `${REVENUE_YEAR}_${year}`;
         const isCurrent = isCurrentTime(year);
+
+        if (refreshCache) {
+            await this.redisService.del(cacheKey);
+        }
+
         if (!isCurrent) {
-            const cached = await this.redisService.get<TCalculate>(cacheKey);
-            if (cached !== null) {
-                console.log(cached);
-                return cached;
+            const cachedRevenue = await this.redisService.get<TCalculate>(cacheKey);
+            if (cachedRevenue !== null) {
+                return cachedRevenue;
             }
         }
 
@@ -55,12 +57,21 @@ export class StatisticsService {
         return result;
     }
 
-    async calculateRevenueMonth(month: number, year: number): Promise<TCalculate> {
+    async calculateRevenueMonth(
+        month: number,
+        year: number,
+        refreshCache = false,
+    ): Promise<TCalculate> {
         const cacheKey = `${REVENUE_MONTH}_${year}_${month}`;
         const isCurrent = isCurrentTime(year, month);
+
+        if (refreshCache) {
+            await this.redisService.del(cacheKey);
+        }
+
         if (!isCurrent) {
-            const cached = await this.redisService.get<TCalculate>(cacheKey);
-            if (cached !== null) return cached;
+            const cachedRevenue = await this.redisService.get<TCalculate>(cacheKey);
+            if (cachedRevenue !== null) return cachedRevenue;
         }
 
         const orders = await this.ordersService.getOrdersOrNull({
@@ -86,12 +97,24 @@ export class StatisticsService {
         return result;
     }
 
-    async calculateRevenueDay(day: number, month: number, year: number): Promise<TCalculate> {
+    async calculateRevenueDay(
+        day: number,
+        month: number,
+        year: number,
+        refreshCache = false,
+    ): Promise<TCalculate> {
         const cacheKey = `${REVENUE_DAY}_${year}_${month}_${day}`;
         const isCurrent = isCurrentTime(year, month, day);
+
+        if (refreshCache) {
+            await this.redisService.del(cacheKey);
+        }
+
         if (!isCurrent) {
-            const cached = await this.redisService.get<TCalculate>(cacheKey);
-            if (cached !== null) return cached;
+            const cachedRevenue = await this.redisService.get<TCalculate>(cacheKey);
+            if (cachedRevenue !== null) {
+                return cachedRevenue;
+            }
         }
 
         const orders = await this.ordersService.getOrdersOrNull({
@@ -122,12 +145,18 @@ export class StatisticsService {
         day: number,
         month: number,
         year: number,
+        refreshCache = false,
     ): Promise<TCalculate> {
         const cacheKey = `${REVENUE_DAY}_${year}_${month}_${day}_${hour}`;
         const isCurrent = isCurrentTime(year, month, day, hour);
+
+        if (refreshCache) {
+            await this.redisService.del(cacheKey);
+        }
+
         if (!isCurrent) {
-            const cached = await this.redisService.get<TCalculate>(cacheKey);
-            if (cached !== null) return cached;
+            const cachedRevenue = await this.redisService.get<TCalculate>(cacheKey);
+            if (cachedRevenue !== null) return cachedRevenue;
         }
 
         const orders = await this.ordersService.getOrders({
