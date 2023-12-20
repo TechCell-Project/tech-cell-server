@@ -86,6 +86,30 @@ export class KpiService {
         });
     }
 
+    async getKpisOrNull({
+        filterQuery,
+        queryOptions,
+        projection,
+        logEnabled = true,
+    }: {
+        filterQuery: FilterQuery<Kpi>;
+        queryOptions?: Partial<QueryOptions<Kpi>>;
+        projection?: ProjectionType<Kpi>;
+        logEnabled?: boolean;
+    }) {
+        try {
+            const kpis = await this.kpiRepository.find({
+                filterQuery,
+                queryOptions,
+                projection,
+                logEnabled,
+            });
+            return kpis;
+        } catch (error) {
+            return null;
+        }
+    }
+
     async countKpis(filterQuery: FilterQuery<Kpi>) {
         return this.kpiRepository.count(filterQuery);
     }
