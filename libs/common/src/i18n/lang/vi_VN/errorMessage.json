@@ -4,7 +4,7 @@
     "PROPERTY_LABEL_NOT_FOUND": "{property} '{label}' không thể tìm thấy.",
     "PROPERTY_LABEL_IS_EXISTS": "{property} '{label}' đã tồn tại.",
     "FAIL_TO_HASH_OTP": "Không thể băm mã otp, hãy thử lại.",
-    "PROPERTY_IS_EXISTS": "{property} đã tồn tại.",
+    "PROPERTY_IS_EXISTS": "'{property}' đã tồn tại.",
     "PROPERTY_IS_NOT_FOUND": "{property} không tìm thấy.",
     "PROPERTY_IS_EXPIRED": "{property} đã hết hạn.",
     "PROPERTY_IS_INVALID": "{property} không hợp lệ.",
@@ -50,5 +50,6 @@
     "FORBIDDEN_ROLE": "Bạn không có quyền truy cập.",
     "ONLY_IMAGE_FILE_IS_ACCEPTED": "Chỉ chấp nhận tệp hình ảnh.",
     "FILE_IS_TOO_LARGE": "Tệp quá lớn.",
-    "FILE_IS_TOO_LARGE_PROPERTY": "Tệp quá lớn, kích thước tối đa cho phép là {maxSize}MB và tối đa là {maxCount} tệp."
+    "FILE_IS_TOO_LARGE_PROPERTY": "Tệp quá lớn, kích thước tối đa cho phép là {maxSize}MB và tối đa là {maxCount} tệp.",
+    "START_DATE_MUST_BE_BEFORE_END_DATE": "Ngày bắt đầu phải trước ngày kết thúc."
 }

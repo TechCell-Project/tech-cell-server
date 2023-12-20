@@ -4,7 +4,7 @@
     "PROPERTY_LABEL_NOT_FOUND": "{property} '{label}' can't found.",
     "PROPERTY_LABEL_IS_EXISTS": "{property} '{label}' is exist.",
     "FAIL_TO_HASH_OTP": "Fail to hash otp code, try again.",
-    "PROPERTY_IS_EXISTS": "{property} is already exist.",
+    "PROPERTY_IS_EXISTS": "'{property}' is already exist.",
     "PROPERTY_IS_NOT_FOUND": "{property} is not found.",
     "PROPERTY_IS_EXPIRED": "{property} is expired.",
     "PROPERTY_IS_INVALID": "{property} is invalid.",
@@ -50,5 +50,6 @@
     "FORBIDDEN_ROLE": "You don't have permission to access this resource.",
     "ONLY_IMAGE_FILE_IS_ACCEPTED": "Only image files is accepted.",
     "FILE_IS_TOO_LARGE": "File is too large.",
-    "FILE_IS_TOO_LARGE_PROPERTY": "File is too large, max file size is {maxSize}MB and max file count is {maxCount} files."
+    "FILE_IS_TOO_LARGE_PROPERTY": "File is too large, max file size is {maxSize}MB and max file count is {maxCount} files.",
+    "START_DATE_MUST_BE_BEFORE_END_DATE": "Start date must be before end date."
 }

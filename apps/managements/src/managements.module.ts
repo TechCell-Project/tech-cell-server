@@ -13,6 +13,7 @@ import { ManagementsController } from './managements.controller';
 import { OrdersMntModule } from './orders-mnt';
 import { StatsMntModule } from './stats-mnt/stats-mnt.module';
 import { I18nModule } from '~libs/common/i18n';
+import { KpiMntModule } from './kpi-mnt/kpi-mnt.module';
 
 @Module({
     imports: [
@@ -27,6 +28,7 @@ import { I18nModule } from '~libs/common/i18n';
         DiscountsMntModule,
         OrdersMntModule,
         StatsMntModule,
+        KpiMntModule,
     ],
     controllers: [ManagementsController],
     providers: [RabbitMQService, ManagementsHealthIndicator],

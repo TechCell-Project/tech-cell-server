@@ -18,6 +18,7 @@ import { catchException } from '~libs/common';
 import { firstValueFrom } from 'rxjs';
 import { UserDataResponseDTO } from '~apps/auth/dtos';
 import { I18nValidationExceptionFilter, I18nValidationPipe } from 'nestjs-i18n';
+import { SupportedLanguage } from '~libs/common/i18n/lang.enum';
 
 async function bootstrap() {
     const port = process.env.API_PORT || 8000;
@@ -49,12 +50,7 @@ async function bootstrap() {
         .setContact('TechCell Teams', 'https://techcell.cloud', 'teams@techcell.cloud')
         .setDescription('The documentations of the TechCell RESTful API')
         .setVersion('0.0.1')
-        .setDescription(
-            'This is the documentation for the TechCell RESTful API.' +
-                '\n\n' +
-                'You can change the language by setting the header (`x-lang`, `x-language`) ' +
-                'or by using a query (`lang`, `language`).',
-        )
+        .setDescription('This is the documentation for the TechCell RESTful API.')
         .setLicense(
             'MIT LICENSE',
             'https://github.com/TechCell-Project/tech-cell-server/blob/stable/LICENSE',
@@ -77,12 +73,12 @@ async function bootstrap() {
             name: 'x-lang',
             schema: {
                 type: 'string',
-                default: 'en',
+                default: SupportedLanguage.EN,
                 description: 'The language of the response',
-                enum: ['en', 'vi_VN'],
+                enum: Object.values(SupportedLanguage),
             },
             required: false,
-            example: 'en',
+            example: SupportedLanguage.EN,
             description: 'The language of the response',
         })
         .build();
@@ -110,7 +106,7 @@ async function bootstrap() {
                 const record = new RmqRecordBuilder()
                     .setOptions({
                         headers: {
-                            'x-lang': 'en',
+                            'x-lang': SupportedLanguage.EN,
                         },
                     })
                     .setData({ emailOrUsername: username, password })

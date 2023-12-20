@@ -16,11 +16,6 @@
                     "useSingleRequestParameter": "true",
                     "stringEnums": "true"
                 }
-            },
-            "dart-dio": {
-                "generatorName": "dart-dio",
-                "output": "#{cwd}/generated/dart-dio",
-                "glob": "swagger.yaml"
             }
         }
     }

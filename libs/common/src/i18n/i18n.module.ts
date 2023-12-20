@@ -25,10 +25,10 @@ import { RabbitMQHeaderResolver, SocketHeaderResolver } from './resolvers';
                 ),
             }),
             resolvers: [
-                new SocketHeaderResolver(['x-lang', 'lang', 'x-language']),
-                new RabbitMQHeaderResolver(['x-lang', 'lang', 'x-language']),
-                { use: QueryResolver, options: ['lang', 'language'] },
-                new HeaderResolver(['x-lang', 'lang', 'x-language']),
+                new SocketHeaderResolver(['x-lang', 'x-language', 'language']),
+                new RabbitMQHeaderResolver(['x-lang', 'x-language', 'language']),
+                { use: QueryResolver, options: ['language'] },
+                new HeaderResolver(['x-lang', 'x-language', 'language']),
                 AcceptLanguageResolver, // must be the last one
             ],
             inject: [ConfigService],

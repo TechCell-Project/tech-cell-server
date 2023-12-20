@@ -30,6 +30,7 @@
         "hostedtoolcache",
         "iíìỉĩị",
         "khóa",
+        "Kpis",
         "LASTNAME",
         "lehuygiang",
         "lscr",
@@ -79,5 +80,18 @@
         "connectionId": "techcell-project",
         "projectKey": "TechCell-Project_tech-cell-web-server"
     },
-    "liveServer.settings.port": 5501
+    "liveServer.settings.port": 5501,
+    "conventionalCommits.scopes": [
+        "compose",
+        "setting",
+        "actions",
+        "assets",
+        "docker",
+        "libs",
+        "scripts",
+        "types",
+        "example",
+        "readme",
+        "test"
+    ]
 }

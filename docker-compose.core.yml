@@ -192,8 +192,6 @@ networks:
 volumes:
     mongodb_master_data:
         driver: local
-    rabbitmq_data:
-        driver: local
     redis_data:
         driver: local
     redis-insight_data:

@@ -116,11 +116,3 @@ services:
 networks:
     techcell_backend:
         driver: bridge
-
-volumes:
-    nginx_conf_ssl:
-        driver: local
-    letsencrypt_certs:
-        driver: local
-    certbot_acme_challenge:
-        driver: local
