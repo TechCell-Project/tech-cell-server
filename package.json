@@ -39,7 +39,8 @@
         "update:prod": "docker compose -f ./docker-compose.prod.yml pull && yarn up:prod",
         "build:prod": "docker compose -f ./docker-compose.prod.yml up -d build",
         "push:prod": "docker compose -f ./docker-compose.prod.yml up -d push",
-        "generate:swagger-yaml": "node ./scripts/swagger-json-to-yaml.js"
+        "generate:swagger-yaml": "node ./scripts/swagger-json-to-yaml.js",
+        "env": "node ./scripts/convert-base64.js"
     },
     "dependencies": {
         "@discord-nestjs/core": "^5.3.8",
