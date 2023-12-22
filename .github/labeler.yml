@@ -8,3 +8,11 @@ actions:
 github:
     - .github/*
     - .git*
+
+test:
+    - apps/**/*.spec.ts
+    - libs/**/*.test.ts
+
+source:
+    - apps/**/*.ts
+    - libs/**/*.ts
