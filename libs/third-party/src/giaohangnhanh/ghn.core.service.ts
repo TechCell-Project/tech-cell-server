@@ -1,5 +1,5 @@
 import { HttpService } from '@nestjs/axios';
-import { Logger } from '@nestjs/common';
+import { InternalServerErrorException, Logger } from '@nestjs/common';
 import { AxiosError, AxiosResponse } from 'axios';
 import { catchError, firstValueFrom, map } from 'rxjs';
 import { GhnProvinceDTO } from './dtos/province.dto';
@@ -8,6 +8,8 @@ import { GhnWardDTO } from './dtos/ward.dto';
 import { GetShippingFeeDTO } from './dtos/get-shipping-fee.dto';
 import { TGhnDistrict, TGhnProvince, TGhnWard } from './types';
 import { TShippingFeeResponse } from './types/shipping-fee-response.ghn';
+import { I18nContext } from 'nestjs-i18n';
+import { I18nTranslations } from '~libs/common/i18n/generated';
 
 export class GhnCoreService {
     private GHN_URL: string = process.env.GHN_URL;
@@ -103,8 +105,10 @@ export class GhnCoreService {
         const response = await firstValueFrom(
             this.httpService.post(url, bodyPayload).pipe(
                 catchError((error: AxiosError) => {
-                    this.logger.error(error);
-                    throw new Error(error.message);
+                    this.logger.error(error.response.data);
+                    throw new InternalServerErrorException(
+                        I18nContext.current<I18nTranslations>().t('errorMessage.THIRD_PARTY_ERROR'),
+                    );
                 }),
                 map((response) => response.data.data as TShippingFeeResponse),
             ),

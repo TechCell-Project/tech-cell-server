@@ -73,6 +73,7 @@ export type I18nTranslations = {
         "FILE_IS_TOO_LARGE": string;
         "FILE_IS_TOO_LARGE_PROPERTY": string;
         "START_DATE_MUST_BE_BEFORE_END_DATE": string;
+        "THIRD_PARTY_ERROR": string;
     };
     "exception": {
         "InternalServerException": {
