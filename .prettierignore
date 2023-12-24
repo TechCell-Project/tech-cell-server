@@ -6,3 +6,8 @@ dist/
 
 # Ignore markdown files
 *.md
+
+.yarn/*
+
+.pnp.cjs
+.pnp.loader.mjs

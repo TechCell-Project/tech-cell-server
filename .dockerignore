@@ -2,6 +2,9 @@
 .git/
 .github/
 
+# Ignore configuration files
+.husky/
+
 # Ignore IDE directories
 .vscode/
 .vs/
@@ -15,15 +18,16 @@ logs/
 
 # Ignore environment files
 .env
-.env*
+.env\*
 
 # Ignore sample configuration files
-*.conf.sample
+\*.conf.sample
 
 # Ignore documentation directories
 compodoc/
 
 # Ignore upload directories
+
 uploads/
 
 # Ignore SSL directories
@@ -32,5 +36,25 @@ ssl/
 # Ignore generated directories
 generated/
 
+# Ignore build files
+dist/
+
 # Ignore API documentation files
+swagger.yaml
+
+# Ignore package manager files
+.yarn/\*
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
+
+# Ignore package manager cache files
+.pnp.cjs
+.pnp.loader.mjs
+
+containers/
+ssl/
+uploads/
+
 swagger.yaml
