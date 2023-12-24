@@ -20,16 +20,26 @@ export class GhnService extends GhnCoreService {
     }) {
         const { selectedDistrict, selectedWard } = await this.getSelectedAddress(address);
 
+        const integerItems = items.map((item) => ({
+            ...item,
+            weight: Math.floor(item.weight),
+            height: Math.floor(item.height),
+            length: Math.floor(item.length),
+            width: Math.floor(item.width),
+            quantity: Math.floor(item.quantity),
+        }));
+        const totalWeight = integerItems.reduce((total, item) => {
+            return total + item.weight * item.quantity;
+        }, 0);
         const dataFee = new GetShippingFeeDTO({
             service_type_id: 2,
             to_district_id: selectedDistrict.district_id,
             to_ward_code: selectedWard.ward_code,
-            weight: 1000,
-            items: items,
+            weight: totalWeight,
+            items: integerItems,
         });
         const fee = await this.getShippingFee(dataFee).catch((error) => {
             this.logger.error(error);
-            throw new Error(error);
         });
 
         return fee;
