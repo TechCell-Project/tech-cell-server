@@ -40,6 +40,7 @@ export class GhnService extends GhnCoreService {
         });
         const fee = await this.getShippingFee(dataFee).catch((error) => {
             this.logger.error(error);
+            throw error;
         });
 
         return fee;
