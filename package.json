@@ -96,7 +96,7 @@
         "passport-facebook": "^3.0.0",
         "passport-google-oauth20": "^2.0.0",
         "passport-jwt": "^4.0.1",
-        "prom-client": "^15.0.0",
+        "prom-client": "12",
         "redis": "^4.6.10",
         "redlock": "^5.0.0-beta.2",
         "reflect-metadata": "^0.1.13",
@@ -104,6 +104,8 @@
         "rxjs": "^7.8.1",
         "sanitize-html": "^2.11.0",
         "slugify": "^1.6.6",
+        "socket.io": "^4.7.2",
+        "socket.io-adapter": "^2.5.2",
         "streamifier": "^0.1.1",
         "swagger-stats": "^0.99.7",
         "vnpay": "^0.5.2"
@@ -111,6 +113,7 @@
     "devDependencies": {
         "@automock/adapters.nestjs": "^2.0.0",
         "@automock/jest": "^2.0.0",
+        "@babel/core": "^7.23.6",
         "@babel/plugin-proposal-private-methods": "^7.18.6",
         "@commitlint/config-conventional": "^18.4.3",
         "@commitlint/prompt": "^18.4.3",
@@ -119,6 +122,7 @@
         "@nestjs/schematics": "^10.0.1",
         "@nestjs/testing": "^10.0.3",
         "@openapitools/openapi-generator-cli": "^2.7.0",
+        "@types/babel__core": "^7",
         "@types/bcrypt": "^5.0.0",
         "@types/deep-diff": "^1.0.2",
         "@types/express": "^4.17.17",
@@ -153,7 +157,8 @@
         "ts-loader": "^9.4.3",
         "ts-node": "^10.9.1",
         "tsconfig-paths": "^4.2.0",
-        "typescript": "^5.2.2"
+        "typescript": "^5.2.2",
+        "webpack": "^5.89.0"
     },
     "jest": {
         "moduleFileExtensions": [
@@ -199,8 +204,5 @@
             ]
         }
     },
-    "resolutions": {
-        "wrap-ansi": "7.0.0",
-        "string-width": "4.1.0"
-    }
+    "packageManager": "yarn@4.0.2"
 }

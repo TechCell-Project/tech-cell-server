@@ -9,3 +9,8 @@ dist/
 
 # Ignore generated TypeScript files
 *.generated.ts
+
+.yarn/*
+
+.pnp.cjs
+.pnp.loader.mjs

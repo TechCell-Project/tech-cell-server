@@ -52,3 +52,12 @@ lerna-debug.log*
 # Generated files
 generated/
 swagger.yaml
+
+.yarn/*
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
+
+.pnp.cjs
+.pnp.loader.mjs
