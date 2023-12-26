@@ -107,6 +107,7 @@ export type I18nTranslations = {
         "ARRAY_MIN_SIZE": string;
         "ARRAY_MAX_SIZE": string;
         "IS_DATE_STRING": string;
+        "IS_OBJECT": string;
     };
 };
 export type I18nPath = Path<I18nTranslations>;

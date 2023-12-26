@@ -24,5 +24,6 @@
     "IS_NOT_EMPTY_OBJECT": "{property} không được là một đối tượng trống",
     "ARRAY_MIN_SIZE": "{property} phải có ít nhất {constraints.0} phần tử",
     "ARRAY_MAX_SIZE": "{property} phải có nhiều nhất {constraints.0} phần tử",
-    "IS_DATE_STRING": "{property} phải là một chuỗi ngày, thời gian hợp lệ (Date)"
+    "IS_DATE_STRING": "{property} phải là một chuỗi ngày, thời gian hợp lệ (Date)",
+    "IS_OBJECT": "{property} phải là một đối tượng"
 }

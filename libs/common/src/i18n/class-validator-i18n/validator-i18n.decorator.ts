@@ -27,6 +27,7 @@ import {
     ArrayMinSize,
     ArrayMaxSize,
     IsDateString,
+    IsObject,
 } from 'class-validator';
 import ValidatorJS from 'validator';
 import { I18nTranslations } from '~libs/common/i18n/generated';
@@ -264,6 +265,15 @@ export const IsDateStringI18n = (
     return (target: object, key: string) => {
         IsDateString(options, {
             message: i18nValidationMessage('validation.IS_DATE_STRING'),
+            ...validationOptions,
+        })(target, key);
+    };
+};
+
+export const IsObjectI18n = (validationOptions?: ValidationOptions) => {
+    return (target: object, key: string) => {
+        IsObject({
+            message: i18nValidationMessage('validation.IS_OBJECT'),
             ...validationOptions,
         })(target, key);
     };
