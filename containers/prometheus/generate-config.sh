@@ -8,6 +8,6 @@ scrape_configs:
     static_configs:
       - targets: [localhost:3050]
     basic_auth:
-      username: "${STATS_USER}"
-      password: "${STATS_PASSWORD}"
+      username: ${STATS_USER}
+      password: ${STATS_PASSWORD}
 EOF

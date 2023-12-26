@@ -3,11 +3,8 @@ version: '3'
 services:
     prometheus:
         build:
-            context: .
-            dockerfile: ./containers/prometheus/Dockerfile
-        volumes:
-            - ./prometheus.yml:/etc/prometheus/prometheus.yml
-            - ./generate-config.sh:/etc/prometheus/generate-config.sh
+            context: ./containers/prometheus/
+            dockerfile: Dockerfile
         environment:
             - STATS_USER="${STATS_USER}"
             - STATS_PASSWORD="${STATS_PASSWORD}"
@@ -16,6 +13,22 @@ services:
         networks:
             - techcell_backend
         restart: unless-stopped
+
+    grafana:
+        build:
+            context: ./containers/grafana/
+            dockerfile: Dockerfile
+        ports:
+            - 9091:3000
+        volumes:
+            - grafana-storage:/var/lib/grafana
+        networks:
+            - techcell_backend
+        restart: unless-stopped
+
 networks:
     techcell_backend:
         driver: bridge
+
+volumes:
+    grafana-storage:
