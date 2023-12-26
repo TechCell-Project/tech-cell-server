@@ -1,9 +1,0 @@
-scrape_configs:
-  - job_name: "sws-metrics-auth"
-    scrape_interval: "10s"
-    metrics_path: "/api-stats/metrics"
-    static_configs:
-      - targets: ["localhost:3050"]
-    basic_auth:
-      username: "swagger-stats"
-      password: "swagger-stats"
