@@ -2,10 +2,13 @@
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
 </p>
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
+<p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
 
-[![Tech Cell Server CI/CD](https://github.com/TechCell-Project/tech-cell-server/actions/workflows/tech-cell-server-ci-cd.yml/badge.svg)](https://github.com/TechCell-Project/tech-cell-server/actions/workflows/tech-cell-server-ci-cd.yml) [![Build and test on pull request](https://github.com/TechCell-Project/tech-cell-server/actions/workflows/build-test-pull-request.yml/badge.svg)](https://github.com/TechCell-Project/tech-cell-server/actions/workflows/build-test-pull-request.yml)
-
+<p align="center">
+  <a href="https://github.com/TechCell-Project/tech-cell-server" target="_blank"><img src="https://img.shields.io/github/license/TechCell-Project/tech-cell-server" alt="Project License" /></a>
+  <a href="https://github.com/TechCell-Project/tech-cell-server/actions/workflows/tech-cell-server-ci-cd.yml" target="_blank"><img src="https://github.com/TechCell-Project/tech-cell-server/actions/workflows/tech-cell-server-ci-cd.yml/badge.svg" alt="Tech Cell Server CI/CD" /></a>
+  <a href="https://github.com/TechCell-Project/tech-cell-server/actions/workflows/build-test-pull-request.yml" target="_blank"><img src="https://github.com/TechCell-Project/tech-cell-server/actions/workflows/build-test-pull-request.yml/badge.svg" alt="Build and test on pull request" /></a>
+</p>
 
 # 🚀 Deployed
 
