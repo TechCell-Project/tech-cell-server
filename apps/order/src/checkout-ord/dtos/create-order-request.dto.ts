@@ -1,8 +1,8 @@
 import { ApiProperty, IntersectionType } from '@nestjs/swagger';
 import { ReviewOrderRequestDTO } from './checkout-review-order-request.dto';
 import { ProductCartDTO } from '~libs/resource/carts/dtos/product-cart.dto';
-import { PaymentMethodEnum } from '../enums';
 import { IsEnumI18n, IsNotEmptyI18n, IsStringI18n } from '~libs/common/i18n';
+import { PaymentMethodEnum } from '~libs/resource/orders/enums';
 
 export class CreateOrderRequestDTO extends IntersectionType(ReviewOrderRequestDTO) {
     constructor(data: CreateOrderRequestDTO) {
