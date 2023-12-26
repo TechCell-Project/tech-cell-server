@@ -2,7 +2,7 @@ import { ApiProperty, IntersectionType, PickType } from '@nestjs/swagger';
 import { TCalculate } from '~libs/resource/statistics/types';
 import { GetStatsRequestDTO } from './get-stats-request.dto';
 
-class GetStatsDataDTO implements TCalculate {
+export class GetStatsDataDTO implements TCalculate {
     @ApiProperty({
         required: false,
         description: 'total of orders in a period of time',
@@ -29,7 +29,9 @@ class GetStatsDataDTO implements TCalculate {
         description: 'current stats date in string',
         example: '2023-10-10',
     })
-    dateString: string;
+    dateString?: string;
+
+    [key: string]: unknown;
 }
 
 export class GetStatsResponseDTO extends IntersectionType(

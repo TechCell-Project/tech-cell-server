@@ -39,7 +39,7 @@ import { THeaders } from '~libs/common/types/common.type';
     description: 'Internal server error, please try again later!',
 })
 @ApiBearerAuth(ACCESS_TOKEN_NAME)
-@UseGuards(ModGuard)
+// @UseGuards(ModGuard)
 @ApiTags('stats')
 @Controller('stats')
 export class StatsController {

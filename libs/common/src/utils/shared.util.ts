@@ -245,3 +245,21 @@ export function calculateDaysBetweenDates(
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
 }
+
+/**
+ * Get the number of days in a month
+ * @param date The date to get days in month
+ * @returns The number of days in a month
+ */
+export function getDaysInMonth(date: Date): number {
+    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+}
+
+/**
+ * Get the number of days in a year
+ * @param year The year to get days in year
+ * @returns The number of days in a year
+ */
+export function getDaysInYear(year: number): number {
+    return new Date(year, 12, 0).getDate();
+}
