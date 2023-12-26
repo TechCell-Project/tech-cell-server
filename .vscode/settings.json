@@ -94,6 +94,7 @@
         "example",
         "readme",
         "test",
-        "i18n"
+        "i18n",
+        "subdomain"
     ]
 }
