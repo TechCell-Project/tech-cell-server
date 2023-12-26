@@ -16,7 +16,7 @@ import { Product, ProductsService } from '~libs/resource';
 import { TProductDimensions } from './types';
 import { ItemShipping } from '~libs/third-party/giaohangnhanh/dtos';
 import { CreateOrderDTO } from '~libs/resource/orders/dtos/create-order.dto';
-import { OrderStatusEnum, PaymentStatusEnum } from '~libs/resource/orders/enums';
+import { OrderStatusEnum, PaymentMethodEnum, PaymentStatusEnum } from '~libs/resource/orders/enums';
 import { AddressSchema } from '~libs/resource/users/schemas/address.schema';
 import { Order, OrdersService } from '~libs/resource/orders';
 import { ProductCartDTO } from '~libs/resource/carts/dtos/product-cart.dto';
@@ -25,7 +25,6 @@ import { RedlockService } from '~libs/common/Redis/services/redlock.service';
 import { CreateOrderRequestDTO } from './dtos/create-order-request.dto';
 import { VnpayService } from '~libs/third-party/vnpay.vn';
 import { ProductCode } from '~libs/third-party/vnpay.vn/enums';
-import { PaymentMethodEnum } from './enums';
 import { ResponseForVnpayDTO } from './dtos/response-for-vnpay.dto';
 import { COMMUNICATIONS_SERVICE } from '~libs/common/constants/services.constant';
 import { NotifyEventPattern } from '~apps/communications/notifications';
@@ -160,9 +159,11 @@ export class CheckoutService {
         const giaohangnhanh = { total, service_fee };
 
         return new ReviewedOrderResponseDTO({
-            ...dataReview,
+            paymentMethod: dataReview.paymentMethod,
+            addressSelected: dataReview.addressSelected,
+            productSelected,
+            totalProductPrice,
             shipping: { giaohangnhanh },
-            totalProductPrice: totalProductPrice,
         });
     }
 
@@ -494,7 +495,7 @@ export class CheckoutService {
         ip: string,
     ): Promise<string | null> {
         switch (paymentMethod) {
-            case PaymentMethodEnum.VNPAY:
+            case PaymentMethodEnum.VNPAY: {
                 const vnpayUrl = await this.vnpayService.createPaymentUrl({
                     vnp_IpAddr: ip,
                     vnp_Amount: newOrder.checkoutOrder.totalPrice,
@@ -509,6 +510,7 @@ export class CheckoutService {
                     );
                 }
                 return vnpayUrl;
+            }
             case PaymentMethodEnum.COD:
             // case PaymentMethodEnum.MOMO:
             default:
