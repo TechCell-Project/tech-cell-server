@@ -62,6 +62,9 @@ export class RedisService {
 
     public async delWithPrefix(prefix: string): Promise<number> {
         const keys = await this.redisClient.keys(prefix);
+        if (!keys || keys?.length <= 0) {
+            return 0;
+        }
         return this.redisClient.del(...keys);
     }
 
