@@ -1,3 +1,6 @@
+labeler:
+    - .github/labeler.yml
+
 readme:
     - "**/README.md"
 
@@ -8,11 +11,53 @@ actions:
 github:
     - .github/*
     - .git*
+    - .gitignore
 
 test:
     - apps/**/*.spec.ts
     - libs/**/*.test.ts
 
-source:
+apps:
     - apps/**/*.ts
     - libs/**/*.ts
+
+tsconfig:
+    - tsconfig*.json
+
+package:
+    - package.json
+    - yarn.lock
+    - .yarnrc
+    - .yarn/*
+    - .pnp*
+    - .yarn-integrity
+    - .yarnclean
+    - .yarnignore
+
+dependencies:
+    - "package.json"
+    - "yarn.lock"
+
+license:
+    - LICENSE
+    - LICENSE.md
+
+ignore:
+    - .dockerignore
+    - .eslintignore
+    - .gitignore
+    - .prettierignore
+    - .npmignore
+    - .yarnignore
+    - .yarnclean
+
+docker:
+    - Dockerfile
+    - docker-compose.*
+    - .dockerignore
+    - containers/**/*
+
+editor:
+    - .editorconfig
+    - .vscode/*
+    - .idea/
