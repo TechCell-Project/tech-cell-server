@@ -8,6 +8,9 @@
   <a href="https://github.com/TechCell-Project/tech-cell-server" target="_blank"><img src="https://img.shields.io/github/license/TechCell-Project/tech-cell-server" alt="Project License" /></a>
   <a href="https://github.com/TechCell-Project/tech-cell-server/actions/workflows/tech-cell-server-ci-cd.yml" target="_blank"><img src="https://github.com/TechCell-Project/tech-cell-server/actions/workflows/tech-cell-server-ci-cd.yml/badge.svg" alt="Tech Cell Server CI/CD" /></a>
   <a href="https://github.com/TechCell-Project/tech-cell-server/actions/workflows/build-test-pull-request.yml" target="_blank"><img src="https://github.com/TechCell-Project/tech-cell-server/actions/workflows/build-test-pull-request.yml/badge.svg" alt="Build and test on pull request" /></a>
+  <a href="https://api.techcell.cloud" target="_blank"><img src="https://img.shields.io/badge/RESTful%20API-Online-green" alt="RESTful API" /></a>
+  <a href="https://docs.techcell.cloud" target="_blank"><img src="https://img.shields.io/badge/Documentation-Online-green" alt="Documentation" /></a>
+  <a href="https://design.techcell.cloud" target="_blank"><img src="https://img.shields.io/badge/Source%20Code%20Docs-Online-green" alt="Source Code Docs" /></a>
 </p>
 
 # 🚀 Deployed
