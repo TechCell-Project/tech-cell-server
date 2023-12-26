@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+    prometheus:
+        build:
+            context: .
+            dockerfile: ./containers/prometheus/Dockerfile
+        volumes:
+            - ./prometheus.yml:/etc/prometheus/prometheus.yml
+            - ./generate-config.sh:/etc/prometheus/generate-config.sh
+        environment:
+            - STATS_USER="${STATS_USER}"
+            - STATS_PASSWORD="${STATS_PASSWORD}"
+        ports:
+            - 9090:9090
+        networks:
+            - techcell_backend
+        restart: unless-stopped
+networks:
+    techcell_backend:
+        driver: bridge
