@@ -2,6 +2,8 @@ version: '3'
 
 services:
     prometheus:
+        container_name: prometheus
+        hostname: prometheus
         build:
             context: ./containers/prometheus/
             dockerfile: Dockerfile
@@ -9,17 +11,19 @@ services:
             - STATS_USER="${STATS_USER}"
             - STATS_PASSWORD="${STATS_PASSWORD}"
         ports:
-            - 9090:9090
+            - ${PROMETHEUS_PORT:-9090}:9090
         networks:
             - techcell_backend
         restart: unless-stopped
 
     grafana:
+        container_name: grafana
+        hostname: grafana
         build:
             context: ./containers/grafana/
             dockerfile: Dockerfile
         ports:
-            - 9091:3000
+            - ${GRAFANA_PORT:-3000}:3000
         volumes:
             - grafana-storage:/var/lib/grafana
         networks:
