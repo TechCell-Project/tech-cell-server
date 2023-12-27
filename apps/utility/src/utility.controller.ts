@@ -34,4 +34,13 @@ export class UtilityController {
         this.rabbitMqService.acknowledgeMessage(context);
         return await this.utilityService.writeLogsToFile(message, type);
     }
+
+    @EventPattern(UtilityEventPattern.writeLogsBashToDiscord)
+    async writeLogsBashToDiscord(
+        @Ctx() context: RmqContext,
+        @Payload() { message }: { message: string },
+    ) {
+        this.rabbitMqService.acknowledgeMessage(context);
+        return await this.utilityService.writeLogsBashToDiscord(message);
+    }
 }

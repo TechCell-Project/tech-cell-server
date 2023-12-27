@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { Logger } from '@nestjs/common';
 import { AppModule } from './app.module';
-import { RpcExceptionFilter } from '~libs/common/filters';
+import { RpcExceptionFilter, HttpExceptionFilter } from '~libs/common/filters';
 import {
     SwaggerModule,
     DocumentBuilder,
@@ -11,7 +11,7 @@ import {
 import helmet from 'helmet';
 import { ACCESS_TOKEN_NAME } from '~libs/common/constants/api.constant';
 import * as swaggerStats from 'swagger-stats';
-import { AUTH_SERVICE } from '~libs/common/constants';
+import { AUTH_SERVICE, UTILITY_SERVICE } from '~libs/common/constants';
 import { ClientRMQ, RmqRecordBuilder } from '@nestjs/microservices';
 import { AuthMessagePattern } from '~apps/auth/auth.pattern';
 import { catchException } from '~libs/common';
@@ -25,12 +25,17 @@ async function bootstrap() {
     const logger = new Logger('api-gateway');
 
     const app = await NestFactory.create(AppModule);
+    const authService: ClientRMQ = app.get(AUTH_SERVICE);
+    const utilityService: ClientRMQ = app.get(UTILITY_SERVICE);
 
     app.enableCors();
     app.use(helmet());
 
     // Use to catch exceptions and send them to responses
-    app.useGlobalFilters(new RpcExceptionFilter());
+    app.useGlobalFilters(
+        new HttpExceptionFilter(utilityService),
+        new RpcExceptionFilter(utilityService),
+    );
 
     // Use to validate DTOs and throw exceptions if they are not valid
     app.useGlobalPipes(
@@ -92,7 +97,6 @@ async function bootstrap() {
     };
     SwaggerModule.setup('/', app, document, swaggerCustomOptions);
 
-    const authService: ClientRMQ = app.get(AUTH_SERVICE);
     // Use swagger-stats to generate statistics
     app.use(
         swaggerStats.getMiddleware({

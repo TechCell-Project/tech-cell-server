@@ -36,6 +36,10 @@ export class UtilityService {
     }
 
     async writeLogsToDiscord(message: any) {
-        return await this.botGateway.writeLogs(message);
+        return await this.botGateway.writeJsonLogs(message);
+    }
+
+    async writeLogsBashToDiscord(message: string) {
+        return await this.botGateway.writeBashLogs(message);
     }
 }

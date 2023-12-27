@@ -47,3 +47,12 @@ export function formatJsonLogsDiscord(message: string): Array<{ content: string 
         return null;
     }
 }
+
+export function formatJsonLogsBash(message: string): string {
+    try {
+        return `\`\`\`bash\n${message}\n\`\`\``;
+    } catch (error) {
+        Logger.error(error);
+        return null;
+    }
+}
