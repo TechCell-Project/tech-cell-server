@@ -29,6 +29,7 @@ import { ResponseForVnpayDTO } from './dtos/response-for-vnpay.dto';
 import { COMMUNICATIONS_SERVICE } from '~libs/common/constants/services.constant';
 import { NotifyEventPattern } from '~apps/communications/notifications';
 import { cleanUserBeforeResponse } from '~libs/resource/users/utils';
+import { Lock } from 'redlock';
 
 @Injectable()
 export class CheckoutService {
@@ -230,27 +231,19 @@ export class CheckoutService {
         );
 
         // Create a session to start transaction
-        const session = await this.productService.startTransaction();
+        const session: ClientSession = await this.productService.startTransaction();
+        // Lock the `createOrder` for each user and product
+        const lockOrder: Lock = await this.redlockService.lock(resources, 5000);
 
         // Create order to return
         let resultOrder: Order;
         try {
-            // Lock the `createOrder` for each user and product
-            const lock = await this.redlockService.lock(resources, 5000);
-            try {
-                [resultOrder] = await Promise.all([
-                    this.orderService.createOrder(newOrder, session),
-                    this.reduceStock(reviewedOrder.productSelected, session),
-                    this.removeProductFromCart(
-                        userFound._id,
-                        reviewedOrder.productSelected,
-                        session,
-                    ),
-                ]);
-                await session.commitTransaction();
-            } finally {
-                await this.redlockService.unlock(lock);
-            }
+            [resultOrder] = await Promise.all([
+                this.orderService.createOrder(newOrder, session),
+                this.reduceStock(reviewedOrder.productSelected, session),
+                this.removeProductFromCart(userFound._id, reviewedOrder.productSelected, session),
+            ]);
+            await session.commitTransaction();
         } catch (error) {
             await session.abortTransaction();
 
@@ -259,7 +252,7 @@ export class CheckoutService {
                 new UnprocessableEntityException('Some problem with your order, please try again'),
             );
         } finally {
-            await session.endSession();
+            await Promise.all([this.redlockService.unlock(lockOrder), session.endSession()]);
         }
 
         // Emit a event to communications service that a new order is created
