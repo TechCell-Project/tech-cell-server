@@ -36,15 +36,19 @@ services:
     node_exporter:
         container_name: node_exporter
         hostname: node_exporter
-        build:
-            context: ./containers/node_exporter/
-            dockerfile: Dockerfile
+        image: prom/node-exporter:v1.7.0
         ports:
             - ${GRAFANA_NODE_EXPORTER:-9092}
         volumes:
-            - proc_volume:/host/proc:ro
-            - sys_volume:/host/sys:ro
-            - rootfs_volume:/rootfs:ro
+            - /proc:/host/proc:ro
+            - /sys:/host/sys:ro
+            - /:/rootfs:ro
+        command:
+            - '--path.procfs=/host/proc'
+            - '--path.sysfs=/host/sys'
+            - '--path.rootfs=/rootfs'
+            - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
+            - '--web.listen-address=0.0.0.0:${GRAFANA_NODE_EXPORTER:-9092}'
         networks:
             - techcell_backend
         restart: unless-stopped
@@ -55,6 +59,3 @@ networks:
 
 volumes:
     grafana-storage:
-    proc_volume:
-    sys_volume:
-    rootfs_volume:
