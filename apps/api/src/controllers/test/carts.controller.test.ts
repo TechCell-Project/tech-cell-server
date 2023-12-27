@@ -4,7 +4,6 @@ import { ClientRMQ, RmqRecord, RmqRecordBuilder } from '@nestjs/microservices';
 import { CartsController } from '../carts.controller';
 import { ORDER_SERVICE } from '~libs/common/constants';
 import { TCurrentUser, THeaders } from '~libs/common/types';
-import { PaginationQuery } from '~libs/common/dtos';
 import {
     CartsOrdMessagePattern,
     AddCartRequestDTO,
@@ -55,15 +54,10 @@ describe(CartsController, () => {
     describe('getCarts', () => {
         const message = CartsOrdMessagePattern.getCarts;
         test(`should called orderService.send with ${JSON.stringify(message)}`, async () => {
-            const query: PaginationQuery = {
-                page: 1,
-                pageSize: 10,
-            };
-            await cartsController.getCarts(mockHeaders, query, mockCurrentUser);
+            await cartsController.getCarts(mockHeaders, mockCurrentUser);
             expect(orderService.send).toHaveBeenCalledWith(
                 message,
                 mockRmqRecord({
-                    query,
                     user: mockCurrentUser,
                 }),
             );

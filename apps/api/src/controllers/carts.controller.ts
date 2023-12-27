@@ -1,6 +1,5 @@
 import { AuthGuard } from '~libs/common/guards';
 import { CurrentUser } from '~libs/common/decorators';
-import { PaginationQuery } from '~libs/common/dtos';
 import { TCurrentUser, THeaders } from '~libs/common/types';
 import {
     Body,
@@ -11,7 +10,6 @@ import {
     Inject,
     Post,
     Headers,
-    Query,
     UseGuards,
 } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
@@ -29,11 +27,11 @@ import {
     CartsOrdMessagePattern,
     AddCartRequestDTO,
     DeleteProductsCartRequestDTO,
-    GetCartResponseDTO,
 } from '~apps/order/carts-ord';
 import { ACCESS_TOKEN_NAME } from '~libs/common/constants/api.constant';
 import { ORDER_SERVICE } from '~libs/common/constants/services.constant';
 import { sendMessagePipeException } from '~libs/common/RabbitMQ/rmq.util';
+import { CartDTO } from '~libs/resource/carts/dtos';
 
 @ApiBadRequestResponse({
     description: 'Invalid request, please check your request data!',
@@ -58,17 +56,13 @@ export class CartsController {
         summary: 'Get list of carts',
         description: 'Get list of carts',
     })
-    @ApiOkResponse({ description: 'Carts found!', type: GetCartResponseDTO })
+    @ApiOkResponse({ description: 'Carts found!', type: CartDTO })
     @Get('/')
-    async getCarts(
-        @Headers() headers: THeaders,
-        @Query() query: PaginationQuery,
-        @CurrentUser() user: TCurrentUser,
-    ) {
+    async getCarts(@Headers() headers: THeaders, @CurrentUser() user: TCurrentUser) {
         return sendMessagePipeException({
             client: this.orderService,
             pattern: CartsOrdMessagePattern.getCarts,
-            data: { query, user },
+            data: { user },
             headers,
         });
     }
