@@ -235,7 +235,7 @@ export class CategoryIdDTO {
         example: '612f5e4c1f5c3d0012a0f0b4',
     })
     @IsNotEmptyI18n()
-    @IsMongoIdI18n({ message: 'Invalid product id' })
+    @IsMongoIdI18n()
     _id: string | Types.ObjectId;
 }
 

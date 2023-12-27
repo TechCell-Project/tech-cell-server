@@ -87,7 +87,15 @@ export class ProductsMntService extends ProductsMntUtilService {
         try {
             productId = new Types.ObjectId(productId);
         } catch (error) {
-            throw new RpcException(new BadRequestException('Invalid product id'));
+            throw new RpcException(
+                new BadRequestException(
+                    this.i18n.t('errorMessage.PROPERTY_ID_INVALID', {
+                        args: {
+                            property: 'product',
+                        },
+                    }),
+                ),
+            );
         }
 
         // Find product by id to check if it is exist or not
@@ -181,7 +189,15 @@ export class ProductsMntService extends ProductsMntUtilService {
         try {
             productId = new Types.ObjectId(productId);
         } catch (error) {
-            throw new RpcException(new BadRequestException('Invalid product id'));
+            throw new RpcException(
+                new BadRequestException(
+                    this.i18n.t('errorMessage.PROPERTY_ID_INVALID', {
+                        args: {
+                            property: 'product',
+                        },
+                    }),
+                ),
+            );
         }
 
         // Find product by id to check if it is exist or not
@@ -199,7 +215,15 @@ export class ProductsMntService extends ProductsMntUtilService {
         try {
             productId = new Types.ObjectId(productId);
         } catch (error) {
-            throw new RpcException(new BadRequestException('Invalid product id'));
+            throw new RpcException(
+                new BadRequestException(
+                    this.i18n.t('errorMessage.PROPERTY_ID_INVALID', {
+                        args: {
+                            property: 'product',
+                        },
+                    }),
+                ),
+            );
         }
 
         // Find product by id to check if it is exist or not

@@ -12,7 +12,7 @@ export class AddCartRequestDTO {
 
     @ApiProperty({ type: String, description: 'Product ID', example: '5f9d5f3b9d6b2b0017b6d5a0' })
     @IsNotEmptyI18n()
-    @IsMongoIdI18n({ message: 'Invalid product id' })
+    @IsMongoIdI18n()
     productId: Types.ObjectId;
 
     @ApiProperty({

@@ -10,7 +10,7 @@ export class ProductIdParamsDTO {
         example: '64eb328d9f1cee1867c00a8c',
     })
     @IsNotEmptyI18n()
-    @IsMongoIdI18n({ message: 'Invalid product id' })
+    @IsMongoIdI18n()
     productId: string | Types.ObjectId;
 }
 
