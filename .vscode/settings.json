@@ -78,7 +78,8 @@
         "yarnrc",
         "yýỳỷỹỵ",
         "zerossl",
-        "rootfs"
+        "rootfs",
+        "sysfs"
     ],
     "sonarlint.connectedMode.project": {
         "connectionId": "techcell-project",
