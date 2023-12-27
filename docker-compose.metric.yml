@@ -11,9 +11,9 @@ services:
             - STATS_USER="${STATS_USER}"
             - STATS_PASSWORD="${STATS_PASSWORD}"
         ports:
-            - ${PROMETHEUS_PORT:-9090}:9090
+            - 9090
         networks:
-            - techcell_backend
+            techcell_backend:
         restart: unless-stopped
 
     grafana:
@@ -23,11 +23,11 @@ services:
             context: ./containers/grafana/
             dockerfile: Dockerfile
         ports:
-            - ${GRAFANA_PORT:-3000}:3000
+            - 3000
         volumes:
             - grafana-storage:/var/lib/grafana
         networks:
-            - techcell_backend
+            techcell_backend:
         restart: unless-stopped
 
 networks:
