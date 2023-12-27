@@ -33,9 +33,28 @@ services:
             techcell_backend:
         restart: unless-stopped
 
+    node_exporter:
+        container_name: node_exporter
+        hostname: node_exporter
+        build:
+            context: ./containers/node_exporter/
+            dockerfile: Dockerfile
+        ports:
+            - ${GRAFANA_NODE_EXPORTER:-9092}
+        volumes:
+            - proc_volume:/host/proc:ro
+            - sys_volume:/host/sys:ro
+            - rootfs_volume:/rootfs:ro
+        networks:
+            - techcell_backend
+        restart: unless-stopped
+
 networks:
     techcell_backend:
         driver: bridge
 
 volumes:
     grafana-storage:
+    proc_volume:
+    sys_volume:
+    rootfs_volume:
