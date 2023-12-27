@@ -11,4 +11,8 @@ scrape_configs:
     basic_auth:
       username: ${STATS_USER}
       password: ${STATS_PASSWORD}
+
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node_exporter:9092']
 EOF
