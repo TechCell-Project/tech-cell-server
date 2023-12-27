@@ -26,6 +26,14 @@ services:
             - 3000
         volumes:
             - grafana-storage:/var/lib/grafana
+        environment:
+            - GF_SERVER_HTTP_PORT=3000
+            - GF_DATABASE_TYPE=postgres
+            - GF_DATABASE_HOST=${POSTGRES_HOST}
+            - GF_DATABASE_NAME=${POSTGRES_DB}
+            - GF_DATABASE_USER=${POSTGRES_USER}
+            - GF_DATABASE_PASSWORD=${POSTGRES_PASSWORD}
+            - GF_DATABASE_SSL_MODE=${POSTGRES_SSL_MODE}
         networks:
             techcell_backend:
         restart: unless-stopped
