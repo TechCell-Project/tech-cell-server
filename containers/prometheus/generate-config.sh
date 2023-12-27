@@ -13,6 +13,7 @@ scrape_configs:
       password: ${STATS_PASSWORD}
 
   - job_name: 'node-exporter'
+    scrape_interval: "10s"
     static_configs:
       - targets: ['node_exporter:9092']
 EOF
