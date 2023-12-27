@@ -8,10 +8,10 @@ services:
             context: ./containers/prometheus/
             dockerfile: Dockerfile
         environment:
-            - STATS_USER="${STATS_USER}"
-            - STATS_PASSWORD="${STATS_PASSWORD}"
+            - STATS_USER=${STATS_USER}
+            - STATS_PASSWORD=${STATS_PASSWORD}
         ports:
-            - 9090
+            - ${PROMETHEUS_PORT:-9090}
         networks:
             techcell_backend:
         restart: unless-stopped
@@ -23,17 +23,12 @@ services:
             context: ./containers/grafana/
             dockerfile: Dockerfile
         ports:
-            - 3000
+            - ${GRAFANA_PORT:-9091}
         volumes:
             - grafana-storage:/var/lib/grafana
         environment:
-            - GF_SERVER_HTTP_PORT=3000
-            - GF_DATABASE_TYPE=postgres
-            - GF_DATABASE_HOST=${POSTGRES_HOST}
-            - GF_DATABASE_NAME=${POSTGRES_DB}
-            - GF_DATABASE_USER=${POSTGRES_USER}
-            - GF_DATABASE_PASSWORD=${POSTGRES_PASSWORD}
-            - GF_DATABASE_SSL_MODE=${POSTGRES_SSL_MODE}
+            - GF_SERVER_HTTP_PORT=${GRAFANA_PORT:-9091}
+            - GF_DATABASE_TYPE=${GRAFANA_DATABASE_TYPE:-sqlite3}
         networks:
             techcell_backend:
         restart: unless-stopped
