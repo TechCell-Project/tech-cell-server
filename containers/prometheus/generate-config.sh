@@ -6,7 +6,7 @@ scrape_configs:
     scrape_interval: "10s"
     metrics_path: "/api-stats/metrics"
     static_configs:
-      - targets: [localhost:3050]
+      - targets: [api:8000]
     basic_auth:
       username: ${STATS_USER}
       password: ${STATS_PASSWORD}
