@@ -4,3 +4,4 @@ export * from './logs.util';
 export * from './product.util';
 export * from './shared.util';
 export * from './user.util';
+export * from './cloudinary.util';
