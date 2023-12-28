@@ -1,4 +1,4 @@
-import { AdminGuard } from '~libs/common';
+import { AuthGuard } from '~libs/common';
 import {
     BadRequestException,
     Controller,
@@ -154,7 +154,7 @@ export class ImagesController {
         },
     })
     @Post('/')
-    @UseGuards(AdminGuard)
+    @UseGuards(AuthGuard)
     async uploadSingleImage(
         @Headers() headers: THeaders,
         @UploadedFile(
@@ -245,7 +245,7 @@ export class ImagesController {
         }),
     )
     @Post('/array')
-    @UseGuards(AdminGuard)
+    @UseGuards(AuthGuard)
     async uploadArrayImages(
         @Headers() headers: THeaders,
         @UploadedFiles(
