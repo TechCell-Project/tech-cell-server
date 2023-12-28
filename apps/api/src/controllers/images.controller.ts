@@ -42,6 +42,7 @@ import {
     IMAGE_FILE_MAX_SIZE_IN_BYTES,
     IMAGE_FILE_MAX_SIZE_IN_MB,
     SINGLE_IMAGE_FILE_MAX_COUNT,
+    IMAGE_FILE_ACCEPTED_EXTENSIONS,
 } from '~libs/common/constants/api.constant';
 import { MANAGEMENTS_SERVICE } from '~libs/common/constants/services.constant';
 import { Request } from 'express';
@@ -110,7 +111,11 @@ export class ImagesController {
                 fileSize: IMAGE_FILE_MAX_SIZE_IN_BYTES,
             },
             fileFilter: (req, file, cb) => {
-                if (!RegExp(/\.(jpg|jpeg|png|gif|webp)$/).exec(file.originalname)) {
+                if (
+                    !RegExp(`\\.(${IMAGE_FILE_ACCEPTED_EXTENSIONS})$`).exec(
+                        file.originalname?.toLowerCase(),
+                    )
+                ) {
                     return cb(
                         new BadRequestException(
                             I18nContext.current<I18nTranslations>().t(
@@ -214,7 +219,11 @@ export class ImagesController {
                 fileSize: IMAGE_FILE_MAX_SIZE_IN_BYTES,
             },
             fileFilter: (req, file, cb) => {
-                if (!RegExp(/\.(jpg|jpeg|png|gif|webp)$/).exec(file.originalname)) {
+                if (
+                    !RegExp(`\\.(${IMAGE_FILE_ACCEPTED_EXTENSIONS})$`).exec(
+                        file.originalname?.toLowerCase(),
+                    )
+                ) {
                     return cb(
                         new BadRequestException(
                             I18nContext.current<I18nTranslations>().t(
