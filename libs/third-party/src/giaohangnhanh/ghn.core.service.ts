@@ -1,5 +1,5 @@
 import { HttpService } from '@nestjs/axios';
-import { InternalServerErrorException, Logger } from '@nestjs/common';
+import { BadRequestException, InternalServerErrorException, Logger } from '@nestjs/common';
 import { AxiosError, AxiosResponse } from 'axios';
 import { catchError, firstValueFrom, map } from 'rxjs';
 import { GhnProvinceDTO } from './dtos/province.dto';
@@ -10,6 +10,7 @@ import { TGhnDistrict, TGhnProvince, TGhnWard } from './types';
 import { TShippingFeeResponse } from './types/shipping-fee-response.ghn';
 import { I18nContext } from 'nestjs-i18n';
 import { I18nTranslations } from '~libs/common/i18n/generated';
+import { StatusEnum, SupportTypeEnum } from './enums';
 
 export class GhnCoreService {
     private GHN_URL: string = process.env.GHN_URL;
@@ -102,6 +103,18 @@ export class GhnCoreService {
     protected async getShippingFee(data: GetShippingFeeDTO): Promise<TShippingFeeResponse> {
         const url = '/shiip/public-api/v2/shipping-order/fee';
         const bodyPayload = new GetShippingFeeDTO(data);
+
+        const isCanShip = await this.checkIsAddressLock(
+            data.province_id,
+            data.to_district_id,
+            data.to_ward_code,
+        );
+        if (!isCanShip) {
+            throw new BadRequestException(
+                I18nContext.current<I18nTranslations>().t('errorMessage.NOT_SUPPORT_SHIP'),
+            );
+        }
+
         const response = await firstValueFrom(
             this.httpService.post(url, bodyPayload).pipe(
                 catchError((error: AxiosError) => {
@@ -115,5 +128,30 @@ export class GhnCoreService {
         );
 
         return response;
+    }
+
+    protected async checkIsAddressLock(provinceId: number, districtId: number, wardCode: string) {
+        const provinceTo = (await this.getProvinces()).find(
+            (province) => province.province_id === provinceId,
+        );
+        if (provinceTo?.status === StatusEnum.disable_route) {
+            return false;
+        }
+
+        const districtTo = (await this.getDistricts(provinceId)).find(
+            (district) => district.district_id === districtId,
+        );
+        if (districtTo?.support_type === SupportTypeEnum.lock_route) {
+            return false;
+        }
+
+        const wardTo = (await this.getWards(districtId)).find(
+            (ward) => ward.ward_code === wardCode,
+        );
+        if (wardTo?.support_type === SupportTypeEnum.lock_route) {
+            return false;
+        }
+
+        return true;
     }
 }

@@ -52,5 +52,6 @@
     "FILE_IS_TOO_LARGE": "Tệp quá lớn.",
     "FILE_IS_TOO_LARGE_PROPERTY": "Tệp quá lớn, kích thước tối đa cho phép là {maxSize}MB và tối đa là {maxCount} tệp.",
     "START_DATE_MUST_BE_BEFORE_END_DATE": "Ngày bắt đầu phải trước ngày kết thúc.",
-    "THIRD_PARTY_ERROR": "Đã xảy ra lỗi, vui lòng thử lại sau."
+    "THIRD_PARTY_ERROR": "Đã xảy ra lỗi, vui lòng thử lại sau.",
+    "NOT_SUPPORT_SHIP": "Chưa hỗ trợ vận chuyển đến địa chỉ này."
 }

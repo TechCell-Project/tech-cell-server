@@ -37,9 +37,9 @@ export class GhnService extends GhnCoreService {
             to_ward_code: selectedWard.ward_code,
             weight: totalWeight,
             items: integerItems,
+            province_id: selectedDistrict.province_id,
         });
         const fee = await this.getShippingFee(dataFee).catch((error) => {
-            this.logger.error(error);
             throw error;
         });
 

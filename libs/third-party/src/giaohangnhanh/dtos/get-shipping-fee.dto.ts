@@ -33,6 +33,7 @@ export class GetShippingFeeDTO {
         this.length = data?.length;
         this.insurance_value = data?.insurance_value;
         this.items = data?.items.map((item) => new ItemShipping(item));
+        this.province_id = data?.province_id;
     }
 
     @IsOptional()
@@ -58,4 +59,6 @@ export class GetShippingFeeDTO {
 
     insurance_value?: number;
     items: ItemShipping[];
+
+    province_id?: number;
 }
