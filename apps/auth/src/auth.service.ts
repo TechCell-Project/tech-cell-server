@@ -238,7 +238,7 @@ export class AuthService extends AuthUtilService {
                 role,
             });
 
-            // await this.revokeRefreshToken(oldRefreshToken);
+            await this.revokeRefreshToken(oldRefreshToken);
 
             return { ...cleanUserBeforeResponse(userFound), accessToken, refreshToken };
         } catch (error) {
