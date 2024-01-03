@@ -139,11 +139,31 @@ export class AuthUtilService {
     protected async revokeRefreshToken(refreshToken: string): Promise<boolean> {
         try {
             const revokeRefreshTokenKey = buildRevokeRefreshTokenKey(refreshToken);
+            const isExitsInStore = await this.redisService.get<{
+                refreshToken: string;
+                usedTimeRemaining?: number;
+            }>(revokeRefreshTokenKey);
+
+            if (isExitsInStore && isExitsInStore?.usedTimeRemaining > 1) {
+                await this.redisService.set(
+                    revokeRefreshTokenKey,
+                    {
+                        refreshToken,
+                        usedTimeRemaining: isExitsInStore?.usedTimeRemaining - 1,
+                    },
+                    convertTimeString(process.env.JWT_REFRESH_TOKEN_EXPIRE_TIME_STRING),
+                );
+                return true;
+            }
+
             await this.redisService.set(
                 revokeRefreshTokenKey,
                 {
-                    revoked: true,
                     refreshToken,
+                    usedTimeRemaining:
+                        process.env.JWT_REFRESH_TOKEN_MAX_USED_TIME !== undefined
+                            ? +process.env.JWT_REFRESH_TOKEN_MAX_USED_TIME
+                            : 5,
                 },
                 convertTimeString(process.env.JWT_REFRESH_TOKEN_EXPIRE_TIME_STRING),
             );
@@ -157,8 +177,15 @@ export class AuthUtilService {
     protected async isRefreshTokenRevoked(refreshToken: string): Promise<boolean> {
         try {
             const revokeRefreshTokenKey = buildRevokeRefreshTokenKey(refreshToken);
-            const isRevoked = await this.redisService.get(revokeRefreshTokenKey);
-            if (isRevoked) return true;
+            const isRevoked = await this.redisService.get<{
+                refreshToken: string;
+                usedTimeRemaining?: number;
+            }>(revokeRefreshTokenKey);
+
+            if (isRevoked && isRevoked?.usedTimeRemaining < 1) {
+                return true;
+            }
+
             return false;
         } catch (error) {
             this.logger.error(`Error when check revoked refresh token: ${error.message}`);
