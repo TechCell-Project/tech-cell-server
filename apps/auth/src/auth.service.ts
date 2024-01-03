@@ -223,7 +223,7 @@ export class AuthService extends AuthUtilService {
             if (!oldRefreshToken) {
                 throw new RpcException(
                     new BadRequestException(
-                        this.i18n.t('errorMessage.AUTH_REFRESH_TOKEN_IS_INVALID'),
+                        this.i18n.t('errorMessage.AUTH_REFRESH_TOKEN_IS_MISSING'),
                     ),
                 );
             }
