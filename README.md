@@ -31,7 +31,7 @@ This application is built using a microservices architecture with [Nest](https:/
   - Database with [MongoDB](https://www.mongodb.com/)
   - Job queue with [BullMQ](https://bullmq.io/)
   - Deploy with [Google Cloud](https://cloud.google.com/), [Azure](https://azure.microsoft.com/), and other cloud services
-  - Continuous Integration with [Github Actions](https://github.com/features/actions)
+  - CI/CD with [Github Actions](https://github.com/features/actions)
   - Reverse proxy with [Nginx](https://www.nginx.com/)
   - SSL with [Let's Encrypt](https://letsencrypt.org/), [ZeroSSL](https://zerossl.com/), and [Cloudflare](https://www.cloudflare.com/)
   - High availability with [HAProxy](https://www.haproxy.org/)
