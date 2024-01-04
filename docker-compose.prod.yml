@@ -3,6 +3,7 @@ version: '3'
 services:
     compodoc-techcell:
         container_name: compodoc-techcell
+        hostname: compodoc-techcell
         build:
             context: ./
             dockerfile: ./containers/compodoc-techcell/Dockerfile
@@ -15,6 +16,7 @@ services:
 
     api:
         container_name: api
+        hostname: api
         build:
             context: ./
             dockerfile: ./apps/api/Dockerfile
@@ -29,6 +31,7 @@ services:
 
     auth:
         container_name: auth
+        hostname: auth
         build:
             context: ./
             dockerfile: ./apps/auth/Dockerfile
@@ -41,6 +44,7 @@ services:
 
     communications:
         container_name: communications
+        hostname: communications
         build:
             context: ./
             dockerfile: ./apps/communications/Dockerfile
@@ -55,6 +59,7 @@ services:
 
     search:
         container_name: search
+        hostname: search
         build:
             context: ./
             dockerfile: ./apps/search/Dockerfile
@@ -67,6 +72,7 @@ services:
 
     utility:
         container_name: utility
+        hostname: utility
         build:
             context: ./
             dockerfile: ./apps/utility/Dockerfile
@@ -79,6 +85,7 @@ services:
 
     managements:
         container_name: managements
+        hostname: managements
         build:
             context: ./
             dockerfile: ./apps/managements/Dockerfile
@@ -91,6 +98,7 @@ services:
 
     order:
         container_name: order
+        hostname: order
         build:
             context: ./
             dockerfile: ./apps/order/Dockerfile
@@ -103,6 +111,7 @@ services:
 
     task:
         container_name: task
+        hostname: task
         build:
             context: ./
             dockerfile: ./apps/task/Dockerfile
