@@ -97,6 +97,7 @@
         "i18n",
         "subdomain",
         "auth",
-        "api"
+        "api",
+        "products"
     ]
 }

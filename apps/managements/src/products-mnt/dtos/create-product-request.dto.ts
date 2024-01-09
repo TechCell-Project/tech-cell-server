@@ -254,6 +254,7 @@ export class CreateProductRequestDTO {
                     return {
                         k: attr?.k?.toLowerCase(),
                         v: attr?.v,
+                        ...(attr.name != null && attr.name != undefined ? { name: attr.name } : {}), // remove name if null
                         ...(attr.u != null && attr.u != undefined ? { u: attr?.u } : {}), // remove unit if null
                     };
                 })
@@ -284,6 +285,7 @@ export class CreateProductRequestDTO {
                 return {
                     k: attr.k.toLowerCase(),
                     v: attr.v,
+                    ...(attr.name != null && attr.name != undefined ? { name: attr.name } : {}), // remove name if null
                     ...(attr.u != null && attr.u != undefined ? { u: attr.u } : {}), // remove unit if null
                 };
             })
