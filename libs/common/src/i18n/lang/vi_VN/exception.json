@@ -1,5 +1,4 @@
 {
-    "InternalServerException": {
-        "message": "Lỗi máy chủ nội bộ"
-    }
+    "InternalServerException": "Lỗi máy chủ nội bộ",
+    "ThrottleException": "Quá nhiều yêu cầu"
 }

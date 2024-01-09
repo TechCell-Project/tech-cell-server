@@ -1,5 +1,6 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
+import { ThrottlerException } from '@nestjs/throttler';
 import { Request, Response } from 'express';
 import { I18nContext } from 'nestjs-i18n';
 import { UtilityEventPattern } from '~apps/utility/utility.pattern';
@@ -26,10 +27,20 @@ export class HttpExceptionFilter implements ExceptionFilter {
             path: request.url,
         };
 
+        if (exception instanceof ThrottlerException) {
+            return response.status(HttpStatus.TOO_MANY_REQUESTS).json({
+                ...errObj,
+                message: i18n.t('exception.ThrottleException'),
+                statusCode: HttpStatus.TOO_MANY_REQUESTS,
+            });
+        }
+
         if (typeof error === 'string') {
-            return response
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .json({ ...errObj, message: error, statusCode: HttpStatus.INTERNAL_SERVER_ERROR });
+            return response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+                ...errObj,
+                message: error,
+                statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+            });
         }
 
         const statusCode = error
@@ -37,7 +48,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
             : HttpStatus.INTERNAL_SERVER_ERROR;
 
         const errorMessage = error ?? {
-            message: i18n.t('exception.InternalServerException.message'),
+            message: i18n.t('exception.InternalServerException'),
             statusCode,
         };
 

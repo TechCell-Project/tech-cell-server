@@ -1,5 +1,4 @@
 {
-    "InternalServerException": {
-        "message": "Internal Server Error"
-    }
+    "InternalServerException": "Internal Server Error",
+    "ThrottleException": "Too Many Requests"
 }

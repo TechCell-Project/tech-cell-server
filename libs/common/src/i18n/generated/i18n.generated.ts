@@ -77,9 +77,8 @@ export type I18nTranslations = {
         "NOT_SUPPORT_SHIP": string;
     };
     "exception": {
-        "InternalServerException": {
-            "message": string;
-        };
+        "InternalServerException": string;
+        "ThrottleException": string;
     };
     "validation": {
         "IS_NUMBER": string;
