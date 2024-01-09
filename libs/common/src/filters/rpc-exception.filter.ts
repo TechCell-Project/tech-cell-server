@@ -37,7 +37,7 @@ export class RpcExceptionFilter implements ExceptionFilter {
             : HttpStatus.INTERNAL_SERVER_ERROR;
 
         const errorMessage = error ?? {
-            message: i18n.t('exception.InternalServerException.message'),
+            message: i18n.t('exception.InternalServerException'),
             statusCode,
         };
 
