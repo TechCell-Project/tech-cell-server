@@ -64,14 +64,6 @@ export class ProductPriceDTO implements PriceSchema {
     base: number;
 
     @ApiProperty({
-        description: 'The sale off price',
-        example: 11899000,
-        type: Number,
-        required: false,
-    })
-    saleOff?: number;
-
-    @ApiProperty({
         description: 'The special price',
         example: 10899000,
         type: Number,

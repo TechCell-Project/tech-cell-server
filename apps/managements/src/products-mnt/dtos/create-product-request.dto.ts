@@ -4,7 +4,7 @@ import { ProductStatus } from '~libs/resource/products/enums';
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { Types } from 'mongoose';
 import { replaceWhitespaceTo, sanitizeHtmlString } from '~libs/common/utils';
-import { AttributeSchema } from '~libs/resource/products/schemas';
+import { AttributeSchema, PriceSchema } from '~libs/resource/products/schemas';
 import {
     ArrayMinSizeI18n,
     IsArrayI18n,
@@ -19,7 +19,7 @@ import {
     MinI18n,
 } from '~libs/common/i18n';
 
-export class PriceDTO {
+export class PriceDTO extends PriceSchema {
     @ApiProperty({
         type: Number,
         required: true,
@@ -39,26 +39,6 @@ export class PriceDTO {
     @MaxI18n(Number.MAX_SAFE_INTEGER)
     @IsNotEmptyI18n()
     base: number;
-
-    @ApiProperty({
-        type: Number,
-        required: true,
-        description: 'Sale price of product',
-        example: 900000,
-        minimum: 0,
-        maximum: Number.MAX_SAFE_INTEGER,
-    })
-    @Transform(({ value }) => Number(String(value).replace(/,/g, '')))
-    @IsNumberI18n(
-        { maxDecimalPlaces: 0 },
-        {
-            message: 'Sale price must be number',
-        },
-    )
-    @MinI18n(0)
-    @MaxI18n(Number.MAX_SAFE_INTEGER)
-    @IsOptional()
-    sale?: number;
 
     @ApiProperty({
         type: 'number',
@@ -189,7 +169,6 @@ export class VariationRequestDTO {
         description: 'Price of product',
         example: {
             base: 1000000,
-            sale: 900000,
             special: 800000,
         },
     })

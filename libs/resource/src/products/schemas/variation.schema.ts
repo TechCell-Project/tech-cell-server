@@ -7,9 +7,6 @@ export class PriceSchema {
     base: number;
 
     @Prop({ required: false, default: null })
-    saleOff?: number;
-
-    @Prop({ required: false, default: null })
     special?: number;
 }
 
