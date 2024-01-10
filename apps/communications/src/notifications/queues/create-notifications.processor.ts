@@ -46,7 +46,7 @@ export class CreateNotificationProcessor extends WorkerHost {
                         ? new Types.ObjectId(userToNotify._id)
                         : userToNotify._id,
                 notificationType: NotificationType.newOrder,
-                content: `${customer?.userName} đã đặt đơn hàng mới #${order?._id}`,
+                content: `${customer.userName ?? order.userId} đã đặt đơn hàng mới #${order?._id}`,
                 data: {
                     order,
                     customer: cleanUserBeforeResponse(customer),

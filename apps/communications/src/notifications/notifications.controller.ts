@@ -39,4 +39,10 @@ export class NotificationsController {
         this.rabbitmqService.acknowledgeMessage(context);
         this.notificationsCallGateway.newOrderCreated({ order, customer });
     }
+
+    @EventPattern(NotifyEventPattern.orderStatusChanged)
+    async orderStatusChanged(@Ctx() context: RmqContext, @Payload() { order }: { order: Order }) {
+        this.rabbitmqService.acknowledgeMessage(context);
+        this.notificationsCallGateway.orderStatusChanged({ order });
+    }
 }

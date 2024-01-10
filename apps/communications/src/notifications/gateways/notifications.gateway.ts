@@ -12,7 +12,7 @@ import {
 import { firstValueFrom, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Server, Socket } from 'socket.io';
-import { NotificationsMessageSubscribe } from '../constants/notifications.message';
+import { NotificationsMessagePublish } from '../constants/notifications.message';
 import { Logger } from '@nestjs/common';
 import { ClientRMQ, RmqRecordBuilder } from '@nestjs/microservices';
 import { ITokenVerifiedResponse } from '~apps/auth/interfaces';
@@ -100,7 +100,7 @@ export class NotificationsGateway
         this.connectedClients.delete(client.id);
     }
 
-    @SubscribeMessage(NotificationsMessageSubscribe.MarkNotificationAsRead)
+    @SubscribeMessage(NotificationsMessagePublish.MarkNotificationAsRead)
     async markNotificationAsRead(
         @ConnectedSocket() client: Socket,
         @MessageBody() { notificationId }: { notificationId: string },
@@ -114,7 +114,7 @@ export class NotificationsGateway
         if (!client.handshake.auth.user) {
             this.logger.debug(`Client ${client.id} is not authenticated`);
             return {
-                event: NotificationsMessageSubscribe.MarkNotificationAsRead,
+                event: NotificationsMessagePublish.MarkNotificationAsRead,
                 data: {
                     isSuccess: false,
                     message: 'Unauthorized',
@@ -125,7 +125,7 @@ export class NotificationsGateway
         if (!notificationId) {
             this.logger.debug(`Client ${client.id} notification id is required`);
             return {
-                event: NotificationsMessageSubscribe.MarkNotificationAsRead,
+                event: NotificationsMessagePublish.MarkNotificationAsRead,
                 data: {
                     isSuccess: false,
                     message: 'Notification id is required',
@@ -136,7 +136,7 @@ export class NotificationsGateway
         if (!Types.ObjectId.isValid(notificationId)) {
             this.logger.debug(`Client ${client.id} notification id is invalid`);
             return {
-                event: NotificationsMessageSubscribe.MarkNotificationAsRead,
+                event: NotificationsMessagePublish.MarkNotificationAsRead,
                 data: {
                     isSuccess: false,
                     message: 'Notification id is invalid',
@@ -151,7 +151,7 @@ export class NotificationsGateway
         if (notification === null) {
             this.logger.debug(`Client ${client.id} notification not found`);
             return {
-                event: NotificationsMessageSubscribe.MarkNotificationAsRead,
+                event: NotificationsMessagePublish.MarkNotificationAsRead,
                 data: {
                     isSuccess: false,
                     message: 'Notification not found',
@@ -162,7 +162,7 @@ export class NotificationsGateway
         if (notification === false) {
             this.logger.debug(`Client ${client.id} notification already read`);
             return {
-                event: NotificationsMessageSubscribe.MarkNotificationAsRead,
+                event: NotificationsMessagePublish.MarkNotificationAsRead,
                 data: {
                     isSuccess: false,
                     message: 'Notification already read',
@@ -172,7 +172,7 @@ export class NotificationsGateway
 
         this.logger.debug(`Client ${client.id} mark notification as read successfully`);
         return {
-            event: NotificationsMessageSubscribe.MarkNotificationAsRead,
+            event: NotificationsMessagePublish.MarkNotificationAsRead,
             data: {
                 isSuccess: true,
                 message: 'Mark notification as read successfully',

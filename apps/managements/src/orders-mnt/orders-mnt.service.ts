@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { Order, OrdersService } from '~libs/resource/orders';
 import { GetOrdersRequestDTO } from './dtos/get-orders-request.dto';
 import { convertPageQueryToMongoose } from '~libs/common/utils';
@@ -6,12 +6,16 @@ import { FilterQuery, Types } from 'mongoose';
 import { ListDataResponseDTO } from '~libs/common/dtos';
 import { AllEnum } from '~libs/common/base/enums';
 import { Product, ProductsService } from '~libs/resource';
+import { COMMUNICATIONS_SERVICE } from '~libs/common/constants/services.constant';
+import { ClientRMQ } from '@nestjs/microservices';
+import { NotifyEventPattern } from '~apps/communications/notifications';
 
 @Injectable()
 export class OrdersMntService {
     constructor(
         private readonly ordersService: OrdersService,
         private readonly productsService: ProductsService,
+        @Inject(COMMUNICATIONS_SERVICE) protected communicationsService: ClientRMQ,
     ) {}
 
     async getOrder(orderId: Types.ObjectId) {
@@ -117,6 +121,7 @@ export class OrdersMntService {
         const order = await this.ordersService.getOrderById(orderId);
         order.orderStatus = orderStatus;
         const orderUpdated = await this.ordersService.updateOrderById(orderId, order);
+        this.communicationsService.emit(NotifyEventPattern.orderStatusChanged, { order });
         return orderUpdated;
     }
 }
