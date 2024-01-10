@@ -6,7 +6,6 @@ import {
     WebSocketServer,
     MessageBody,
     SubscribeMessage,
-    WsResponse,
     ConnectedSocket,
 } from '@nestjs/websockets';
 import { firstValueFrom, of } from 'rxjs';
@@ -24,6 +23,8 @@ import { Types } from 'mongoose';
 import { instrument, RedisStore } from '@socket.io/admin-ui';
 import { RedisService } from '~libs/common/Redis/services/redis.service';
 import { AuthCoreGuard } from '~libs/common/guards/auth.core.guard';
+import { AsyncApiPub } from 'nestjs-asyncapi';
+import { NotificationId } from '../dtos';
 
 @WebSocketGateway({
     cors: {
@@ -43,13 +44,12 @@ export class NotificationsGateway
         protected readonly redisService: RedisService,
     ) {}
 
-    @WebSocketServer()
-    readonly server: Server;
+    @WebSocketServer() public readonly socketServer: Server;
 
     async afterInit() {
         this.logger.debug('Notification gateway initialized');
         this.connectedClients = new Map<string, Socket>();
-        instrument(this.server, {
+        instrument(this.socketServer, {
             mode: 'development',
             auth: {
                 type: 'basic',
@@ -71,20 +71,22 @@ export class NotificationsGateway
         }
 
         const rooms = [NotifyRoom.AllUserRoom, `user_id_${userVerified._id}`];
-        if (userVerified.role === UserRole.SuperAdmin) {
-            rooms.push(NotifyRoom.SuperAdminRoom, NotifyRoom.AdminRoom);
-        }
 
-        if (userVerified.role === UserRole.Admin) {
-            rooms.push(NotifyRoom.AdminRoom);
-        }
-
-        if (userVerified.role === UserRole.Mod) {
-            rooms.push(NotifyRoom.ModRoom);
-        }
-
-        if (userVerified.role === UserRole.User) {
-            rooms.push(NotifyRoom.UserRoom);
+        switch (userVerified.role) {
+            case UserRole.SuperAdmin:
+                rooms.push(NotifyRoom.SuperAdminRoom);
+                break;
+            case UserRole.Admin:
+                rooms.push(NotifyRoom.AdminRoom);
+                break;
+            case UserRole.Mod:
+                rooms.push(NotifyRoom.ModRoom);
+                break;
+            case UserRole.User:
+                rooms.push(NotifyRoom.UserRoom);
+                break;
+            default:
+                break;
         }
 
         this.logger.debug(`Client ${client.id} connected to ${rooms.join(', ')}`);
@@ -101,15 +103,17 @@ export class NotificationsGateway
     }
 
     @SubscribeMessage(NotificationsMessagePublish.MarkNotificationAsRead)
+    @AsyncApiPub({
+        channel: NotificationsMessagePublish.MarkNotificationAsRead,
+        message: {
+            name: NotificationsMessagePublish.MarkNotificationAsRead,
+            payload: NotificationId,
+        },
+    })
     async markNotificationAsRead(
         @ConnectedSocket() client: Socket,
-        @MessageBody() { notificationId }: { notificationId: string },
-    ): Promise<
-        WsResponse<{
-            isSuccess: boolean;
-            message: string;
-        }>
-    > {
+        @MessageBody() { notificationId }: NotificationId,
+    ) {
         this.logger.debug(`Client ${client.id} called mark notification as read`);
         if (!client.handshake.auth.user) {
             this.logger.debug(`Client ${client.id} is not authenticated`);

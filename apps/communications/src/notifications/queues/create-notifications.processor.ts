@@ -53,7 +53,7 @@ export class CreateNotificationProcessor extends WorkerHost {
                 },
             });
 
-            return this.notificationsCallGateway.server
+            return this.notificationsCallGateway.socketServer
                 .to([`user_id_${userToNotify._id}`])
                 .emit(NotificationsMessageSubscribe.NewOrderAdmin, {
                     time: Date.now().toString(),

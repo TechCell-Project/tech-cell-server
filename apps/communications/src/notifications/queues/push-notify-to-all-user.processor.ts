@@ -47,7 +47,7 @@ export class PushNotifyToAllUserProcessor extends WorkerHost {
                 },
             });
 
-            return this.notificationsCallGateway.server
+            return this.notificationsCallGateway.socketServer
                 .to([`user_id_${userToNotify._id}`])
                 .emit(NotificationsMessageSubscribe.NewOrderAdmin, {
                     notifications,

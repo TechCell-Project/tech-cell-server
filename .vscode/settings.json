@@ -4,6 +4,7 @@
         "amqp",
         "apikey",
         "appdata",
+        "asyncapi",
         "autopopulate",
         "bson",
         "bullmq",
@@ -38,6 +39,7 @@
         "MOMO",
         "murlock",
         "necord",
+        "Noti",
         "Nums",
         "oóòỏõọôốồổỗộơớờởỡợ",
         "openapi",
@@ -99,6 +101,7 @@
         "auth",
         "api",
         "products",
-        "notifications"
+        "notifications",
+        "socket"
     ]
 }
