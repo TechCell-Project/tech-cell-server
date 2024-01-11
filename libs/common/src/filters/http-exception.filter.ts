@@ -26,14 +26,11 @@ export class HttpExceptionFilter implements ExceptionFilter {
         const response = ctx.getResponse<Response>();
         const request = ctx.getRequest<Request>();
         const i18n = I18nContext.current<I18nTranslations>(host);
-        const errObj = {
-            timestamps: new Date().toISOString(),
-            path: request.url,
-        };
 
         const sendResponse = (status: HttpStatus, message: string, error: object | string) => {
             return response.status(status).json({
-                ...errObj,
+                timestamps: new Date().toISOString(),
+                path: request.url,
                 message,
                 statusCode: status,
                 ...(typeof error === 'string' ? { error } : error),
@@ -64,25 +61,25 @@ export class HttpExceptionFilter implements ExceptionFilter {
                         i18n.t('exception.ServiceUnavailableException'),
                         error,
                     );
-                case exception instanceof HttpException:
+                case exception instanceof HttpException: {
                     return sendResponse(
                         exception.getStatus(),
                         typeof error === 'string' ? error : error['message'],
                         error,
                     );
-                case typeof error === 'string':
-                    return sendResponse(HttpStatus.INTERNAL_SERVER_ERROR, error, errObj);
+                }
+                case typeof error === 'string': {
+                    const responseMessage: string =
+                        error['message'] ?? i18n.t('exception.InternalServerException');
+                    return sendResponse(HttpStatus.INTERNAL_SERVER_ERROR, responseMessage, error);
+                }
                 default: {
+                    const responseMessage: string =
+                        error['message'] ?? i18n.t('exception.InternalServerException');
                     const statusCode = error
-                        ? error?.['statusCode'] ?? error?.['status']
+                        ? error['statusCode'] ?? error['status']
                         : HttpStatus.INTERNAL_SERVER_ERROR;
-                    return sendResponse(
-                        statusCode,
-                        typeof error === 'string'
-                            ? error
-                            : i18n.t('exception.InternalServerException'),
-                        error,
-                    );
+                    return sendResponse(statusCode, responseMessage, error);
                 }
             }
         } catch (error) {
