@@ -40,6 +40,7 @@
         "build:prod": "docker compose -f ./docker-compose.prod.yml up -d build",
         "push:prod": "docker compose -f ./docker-compose.prod.yml up -d push",
         "generate:swagger-yaml": "node ./scripts/swagger-json-to-yaml.js",
+        "generate:asyncapi-yaml": "node ./scripts/asyncapi-json-to-yaml.js",
         "env": "node ./scripts/convert-base64.js"
     },
     "dependencies": {
