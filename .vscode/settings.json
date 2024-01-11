@@ -102,6 +102,7 @@
         "api",
         "products",
         "notifications",
-        "socket"
+        "socket",
+        "exceptions"
     ]
 }

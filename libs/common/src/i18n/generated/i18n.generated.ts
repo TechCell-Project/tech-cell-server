@@ -79,6 +79,7 @@ export type I18nTranslations = {
     "exception": {
         "InternalServerException": string;
         "ThrottleException": string;
+        "ServiceUnavailableException": string;
     };
     "validation": {
         "IS_NUMBER": string;

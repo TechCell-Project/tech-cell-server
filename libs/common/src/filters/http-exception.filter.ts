@@ -1,4 +1,12 @@
-import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus } from '@nestjs/common';
+import {
+    ArgumentsHost,
+    Catch,
+    ExceptionFilter,
+    HttpException,
+    HttpStatus,
+    Logger,
+    ServiceUnavailableException,
+} from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import { ThrottlerException } from '@nestjs/throttler';
 import { Request, Response } from 'express';
@@ -8,11 +16,9 @@ import { I18nTranslations } from '~libs/common/i18n/generated/i18n.generated';
 
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
-    private readonly utilityService: ClientRMQ;
-    constructor(utilityService?: ClientRMQ) {
-        if (utilityService) {
-            this.utilityService = utilityService;
-        }
+    private readonly logger = new Logger(HttpExceptionFilter.name);
+    constructor(private readonly utilityService: ClientRMQ) {
+        this.utilityService = utilityService;
     }
 
     catch(exception: HttpException, host: ArgumentsHost) {
@@ -20,39 +26,23 @@ export class HttpExceptionFilter implements ExceptionFilter {
         const response = ctx.getResponse<Response>();
         const request = ctx.getRequest<Request>();
         const i18n = I18nContext.current<I18nTranslations>(host);
-
-        const error: object | string = exception.getResponse();
         const errObj = {
             timestamps: new Date().toISOString(),
             path: request.url,
         };
 
-        if (exception instanceof ThrottlerException) {
-            return response.status(HttpStatus.TOO_MANY_REQUESTS).json({
+        const sendResponse = (status: HttpStatus, message: string, error: object | string) => {
+            return response.status(status).json({
                 ...errObj,
-                message: i18n.t('exception.ThrottleException'),
-                statusCode: HttpStatus.TOO_MANY_REQUESTS,
+                message,
+                statusCode: status,
+                ...(typeof error === 'string' ? { error } : error),
             });
-        }
-
-        if (typeof error === 'string') {
-            return response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-                ...errObj,
-                message: error,
-                statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-            });
-        }
-
-        const statusCode = error
-            ? error['statusCode'] ?? error['status']
-            : HttpStatus.INTERNAL_SERVER_ERROR;
-
-        const errorMessage = error ?? {
-            message: i18n.t('exception.InternalServerException'),
-            statusCode,
         };
 
-        if (this.utilityService) {
+        try {
+            const error: object | string = exception.getResponse();
+
             const exceptionMessage =
                 exception?.message ?? exception?.toString() ?? 'Unexpected error when logging';
             this.utilityService.emit(UtilityEventPattern.writeLogsBashToDiscord, {
@@ -60,12 +50,43 @@ export class HttpExceptionFilter implements ExceptionFilter {
                     request.url
                 } - ${exceptionMessage}`,
             });
-        }
 
-        return response.status(statusCode).json({
-            ...errObj,
-            ...errorMessage,
-            statusCode,
-        });
+            switch (true) {
+                case exception instanceof ThrottlerException:
+                    return sendResponse(
+                        HttpStatus.TOO_MANY_REQUESTS,
+                        i18n.t('exception.ThrottleException'),
+                        error,
+                    );
+                case exception instanceof ServiceUnavailableException:
+                    return sendResponse(
+                        HttpStatus.SERVICE_UNAVAILABLE,
+                        i18n.t('exception.ServiceUnavailableException'),
+                        error,
+                    );
+                case exception instanceof HttpException:
+                    return sendResponse(
+                        exception.getStatus(),
+                        typeof error === 'string' ? error : error['message'],
+                        error,
+                    );
+                case typeof error === 'string':
+                    return sendResponse(HttpStatus.INTERNAL_SERVER_ERROR, error, errObj);
+                default: {
+                    const statusCode = error
+                        ? error?.['statusCode'] ?? error?.['status']
+                        : HttpStatus.INTERNAL_SERVER_ERROR;
+                    return sendResponse(
+                        statusCode,
+                        typeof error === 'string'
+                            ? error
+                            : i18n.t('exception.InternalServerException'),
+                        error,
+                    );
+                }
+            }
+        } catch (error) {
+            return sendResponse(HttpStatus.INTERNAL_SERVER_ERROR, error, error);
+        }
     }
 }
