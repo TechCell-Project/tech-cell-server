@@ -51,10 +51,11 @@ export class GhnService extends GhnCoreService {
         const provinceData = await this.getProvinces().catch((error) => {
             throw error;
         });
-        const selectedProvince = provinceData.find((province) =>
-            province.name_extension.some((name) =>
-                generateRegexQuery(address.provinceLevel.province_name).test(name),
-            ),
+        const selectedProvince = provinceData.find(
+            (province) =>
+                province.name_extension?.some((name) =>
+                    generateRegexQuery(address.provinceLevel.province_name).test(name),
+                ),
         );
 
         const districtData = await this.getDistricts(selectedProvince.province_id).catch(
@@ -62,19 +63,21 @@ export class GhnService extends GhnCoreService {
                 throw error;
             },
         );
-        const selectedDistrict = districtData.find((district) =>
-            district.name_extension.some((name) =>
-                generateRegexQuery(address.districtLevel.district_name).test(name),
-            ),
+        const selectedDistrict = districtData.find(
+            (district) =>
+                district.name_extension?.some((name) =>
+                    generateRegexQuery(address.districtLevel.district_name).test(name),
+                ),
         );
 
         const wardData = await this.getWards(selectedDistrict.district_id).catch((error) => {
             throw error;
         });
-        const selectedWard = wardData.find((ward) =>
-            ward.name_extension.some((name) =>
-                generateRegexQuery(address.wardLevel.ward_name).test(name),
-            ),
+        const selectedWard = wardData.find(
+            (ward) =>
+                ward.name_extension?.some((name) =>
+                    generateRegexQuery(address.wardLevel.ward_name).test(name),
+                ),
         );
 
         return { selectedProvince, selectedDistrict, selectedWard };
