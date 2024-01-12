@@ -23,7 +23,6 @@ import { Types } from 'mongoose';
 import { instrument, RedisStore } from '@socket.io/admin-ui';
 import { RedisService } from '~libs/common/Redis/services/redis.service';
 import { AuthCoreGuard } from '~libs/common/guards/auth.core.guard';
-import { AsyncApiPub } from 'nestjs-asyncapi';
 import { NotificationId } from '../dtos';
 
 @WebSocketGateway({
@@ -103,13 +102,6 @@ export class NotificationsGateway
     }
 
     @SubscribeMessage(NotificationsMessagePublish.MarkNotificationAsRead)
-    @AsyncApiPub({
-        channel: NotificationsMessagePublish.MarkNotificationAsRead,
-        message: {
-            name: NotificationsMessagePublish.MarkNotificationAsRead,
-            payload: NotificationId,
-        },
-    })
     async markNotificationAsRead(
         @ConnectedSocket() client: Socket,
         @MessageBody() { notificationId }: NotificationId,

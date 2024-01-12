@@ -12,8 +12,6 @@ import { ICreateNotificationQueue, IPushNotifyToAllUserQueue } from '../interfac
 import { RedisService } from '~libs/common/Redis/services/redis.service';
 import { NotificationsMessageSubscribe } from '../constants/notifications.message';
 import { Types } from 'mongoose';
-import { AsyncApiSub } from 'nestjs-asyncapi';
-import { NotificationsDTO } from '~libs/resource/notifications/dtos';
 
 @Injectable()
 export class NotificationsCallGateway extends NotificationsGateway {
@@ -65,12 +63,6 @@ export class NotificationsCallGateway extends NotificationsGateway {
         return notifies;
     }
 
-    @AsyncApiSub({
-        channel: NotificationsMessageSubscribe.NewOrderAdmin,
-        message: {
-            payload: NotificationsDTO,
-        },
-    })
     public async newOrderCreated({ order, customer }: { order: Order; customer: User }) {
         const adminUsers = await this.usersService.getUsers({
             $or: [{ role: UserRole.SuperAdmin }, { role: UserRole.Admin }],
@@ -100,12 +92,6 @@ export class NotificationsCallGateway extends NotificationsGateway {
         return notifies;
     }
 
-    @AsyncApiSub({
-        channel: NotificationsMessageSubscribe.orderStatusChanged,
-        message: {
-            payload: NotificationsDTO,
-        },
-    })
     public async orderStatusChanged({ order }: { order: Order }) {
         const notifications = await this.notificationService.createNotification({
             recipientId: new Types.ObjectId(order.userId),
