@@ -30,6 +30,8 @@ import { COMMUNICATIONS_SERVICE } from '~libs/common/constants/services.constant
 import { NotifyEventPattern } from '~apps/communications/notifications';
 import { cleanUserBeforeResponse } from '~libs/resource/users/utils';
 import { Lock } from 'redlock';
+import { I18n, I18nService } from 'nestjs-i18n';
+import { I18nTranslations } from '~libs/common/i18n/generated/i18n.generated';
 
 @Injectable()
 export class CheckoutService {
@@ -43,6 +45,7 @@ export class CheckoutService {
         private readonly cartService: CartsService,
         private readonly redlockService: RedlockService,
         @Inject(COMMUNICATIONS_SERVICE) private readonly communicationsService: ClientRMQ,
+        @I18n() protected readonly i18n: I18nService<I18nTranslations>,
     ) {}
 
     /**
@@ -487,23 +490,43 @@ export class CheckoutService {
         newOrder: Order,
         ip: string,
     ): Promise<string | null> {
+        const data2CreatePayment = {
+            vnp_IpAddr: ip,
+            vnp_Amount: newOrder.checkoutOrder.totalPrice,
+            vnp_OrderInfo: `Thanh toan don hang TechCell ${newOrder._id.toString()}`,
+            vnp_OrderType: ProductCode.Bill,
+            vnp_TxnRef: newOrder._id.toString(),
+        };
         switch (paymentMethod) {
             case PaymentMethodEnum.VNPAY: {
-                const vnpayUrl = await this.vnpayService.createPaymentUrl({
-                    vnp_IpAddr: ip,
-                    vnp_Amount: newOrder.checkoutOrder.totalPrice,
-                    vnp_OrderInfo: `Thanh toan don hang TechCell ${newOrder._id.toString()}`,
-                    vnp_OrderType: ProductCode.Bill,
-                    vnp_TxnRef: newOrder._id.toString(),
-                });
-
+                const vnpayUrl = await this.vnpayService.createPaymentUrl(data2CreatePayment);
                 if (!vnpayUrl) {
                     throw new RpcException(
-                        new InternalServerErrorException('Cannot create payment url'),
+                        new InternalServerErrorException(
+                            this.i18n.translate('errorMessage.CAN_NOT_CREATE_ORDER'),
+                        ),
                     );
                 }
                 return vnpayUrl;
             }
+            case PaymentMethodEnum.ATM:
+            case PaymentMethodEnum.JCB:
+            case PaymentMethodEnum.MASTERCARD:
+            case PaymentMethodEnum.VISA: {
+                const vnpayUrl = await this.vnpayService.createPaymentUrl({
+                    ...data2CreatePayment,
+                    bankCode: paymentMethod,
+                });
+                if (!vnpayUrl) {
+                    throw new RpcException(
+                        new InternalServerErrorException(
+                            this.i18n.translate('errorMessage.CAN_NOT_CREATE_ORDER'),
+                        ),
+                    );
+                }
+                return vnpayUrl;
+            }
+
             case PaymentMethodEnum.COD:
             // case PaymentMethodEnum.MOMO:
             default:

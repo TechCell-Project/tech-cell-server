@@ -53,5 +53,6 @@
     "FILE_IS_TOO_LARGE_PROPERTY": "File is too large, max file size is {maxSize}MB and max file count is {maxCount} files.",
     "START_DATE_MUST_BE_BEFORE_END_DATE": "Start date must be before end date.",
     "THIRD_PARTY_ERROR": "Some thing went wrong, please try again later.",
-    "NOT_SUPPORT_SHIP": "Not support ship to this address yet."
+    "NOT_SUPPORT_SHIP": "Not support ship to this address yet.",
+    "CAN_NOT_CREATE_ORDER": "Can not create order, please try again later."
 }
