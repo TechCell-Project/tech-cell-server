@@ -104,6 +104,7 @@
         "notifications",
         "socket",
         "exceptions",
-        "order"
+        "order",
+        "seeder"
     ]
 }

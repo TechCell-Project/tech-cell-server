@@ -16,6 +16,7 @@
         "start": "nest start",
         "repl": "nest start api --entryFile ../../repl.ts",
         "repl:dev": "nest start api --watch --entryFile ../../repl.ts",
+        "seeder": "nest start api --entryFile ../../seeder.ts",
         "start:dev": "nest start --watch",
         "start:debug": "nest start --debug --watch",
         "start:prod": "node ./scripts/start-production.js",
@@ -45,6 +46,7 @@
     },
     "dependencies": {
         "@discord-nestjs/core": "^5.3.8",
+        "@faker-js/faker": "^8.3.1",
         "@nestjs-modules/mailer": "^1.9.1",
         "@nestjs/axios": "^3.0.0",
         "@nestjs/bullmq": "^10.0.1",
@@ -90,6 +92,7 @@
         "mongoose-autopopulate": "^1.0.1",
         "morgan": "^1.10.0",
         "nestjs-i18n": "^10.3.7",
+        "nestjs-seeder": "^0.3.2",
         "nestjs-throttler-storage-redis": "^0.3.3",
         "nodemailer": "^6.9.3",
         "otp-generator": "^4.0.1",

@@ -1,5 +1,6 @@
 import { Prop, Schema } from '@nestjs/mongoose';
-import { SchemaTypes, Types } from 'mongoose';
+import { Types } from 'mongoose';
+import { Factory } from 'nestjs-seeder';
 
 /**
  * @description Abstract document
@@ -10,6 +11,7 @@ import { SchemaTypes, Types } from 'mongoose';
  */
 @Schema()
 export class AbstractDocument {
-    @Prop({ type: SchemaTypes.ObjectId, default: new Types.ObjectId() })
+    @Factory(() => new Types.ObjectId())
+    @Prop({ type: Types.ObjectId, default: new Types.ObjectId() })
     _id: Types.ObjectId;
 }

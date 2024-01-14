@@ -1985,6 +1985,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@faker-js/faker@npm:^8.3.1":
+  version: 8.3.1
+  resolution: "@faker-js/faker@npm:8.3.1"
+  checksum: ed50c27a5674a8c755574ccc0c79c29fa70cd17d524b701269f584d2f78720c690da219f6111b0e743a4f6570fb08685d826b2d9e80ca9c1484b8c26047864c6
+  languageName: node
+  linkType: hard
+
 "@fastify/ajv-compiler@npm:^1.0.0":
   version: 1.1.0
   resolution: "@fastify/ajv-compiler@npm:1.1.0"
@@ -12033,6 +12040,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"nestjs-seeder@npm:^0.3.2":
+  version: 0.3.2
+  resolution: "nestjs-seeder@npm:0.3.2"
+  peerDependencies:
+    "@faker-js/faker": ^8.0.0
+  checksum: 05d132b14d35190e89e2b8455a94760c39f42b109481ac519f76c9d6d03082528b77be2383cca4bbfae4a54cf23ea28682bf47244dc052d78384d4fc66a4b52e
+  languageName: node
+  linkType: hard
+
 "nestjs-throttler-storage-redis@npm:^0.3.3":
   version: 0.3.3
   resolution: "nestjs-throttler-storage-redis@npm:0.3.3"
@@ -14925,6 +14941,7 @@ __metadata:
     "@commitlint/prompt": "npm:^18.4.3"
     "@compodoc/compodoc": "npm:^1.1.21"
     "@discord-nestjs/core": "npm:^5.3.8"
+    "@faker-js/faker": "npm:^8.3.1"
     "@nestjs-modules/mailer": "npm:^1.9.1"
     "@nestjs/axios": "npm:^3.0.0"
     "@nestjs/bullmq": "npm:^10.0.1"
@@ -15002,6 +15019,7 @@ __metadata:
     mongoose-autopopulate: "npm:^1.0.1"
     morgan: "npm:^1.10.0"
     nestjs-i18n: "npm:^10.3.7"
+    nestjs-seeder: "npm:^0.3.2"
     nestjs-throttler-storage-redis: "npm:^0.3.3"
     nodemailer: "npm:^6.9.3"
     otp-generator: "npm:^4.0.1"
