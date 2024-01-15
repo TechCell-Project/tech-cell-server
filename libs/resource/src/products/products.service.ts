@@ -120,7 +120,7 @@ export class ProductsService {
         session: ClientSession = null,
     ) {
         return await this.productsRepository.findOneAndUpdate(
-            productId,
+            new Types.ObjectId(productId),
             updateQueries,
             {},
             session,
@@ -157,7 +157,7 @@ export class ProductsService {
 
     async deleteProductById(productId: Types.ObjectId) {
         const product = await this.productsRepository.findOneAndUpdate(
-            { _id: productId },
+            { _id: new Types.ObjectId(productId) },
             {
                 $set: {
                     status: ProductStatus.Deleted,
@@ -182,7 +182,7 @@ export class ProductsService {
 
         try {
             result = await this.productsRepository.findOneAndUpdate(
-                { _id: productId },
+                { _id: new Types.ObjectId(productId) },
                 updateQueries,
                 {},
                 session,

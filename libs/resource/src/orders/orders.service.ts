@@ -78,14 +78,14 @@ export class OrdersService {
 
     async getOrderById(id: Types.ObjectId) {
         return this.orderRepository.findOne({
-            _id: id,
+            _id: new Types.ObjectId(id),
         });
     }
 
     async getOrderByIdPopulate(id: Types.ObjectId) {
         return this.orderRepository.findOne(
             {
-                _id: id,
+                _id: new Types.ObjectId(id),
             },
             { lean: false },
         );
@@ -94,7 +94,7 @@ export class OrdersService {
     async getOrderByIdOrNull(id: Types.ObjectId) {
         try {
             const order = await this.orderRepository.findOne({
-                _id: id,
+                _id: new Types.ObjectId(id),
             });
             return order;
         } catch (error) {
@@ -114,7 +114,7 @@ export class OrdersService {
         try {
             result = await this.orderRepository.findOneAndUpdate(
                 {
-                    _id: orderId,
+                    _id: new Types.ObjectId(orderId),
                 },
                 dataUpdate,
                 null,
@@ -130,7 +130,7 @@ export class OrdersService {
     async getAllUserOrders(userId: Types.ObjectId, options?: QueryOptions<Order>) {
         return this.orderRepository.find({
             filterQuery: {
-                userId: userId,
+                userId: new Types.ObjectId(userId),
             },
             queryOptions: {
                 sort: {
