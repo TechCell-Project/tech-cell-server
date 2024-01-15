@@ -71,7 +71,7 @@
         "@socket.io/redis-adapter": "^8.2.1",
         "amqp-connection-manager": "^4.1.13",
         "amqplib": "^0.10.3",
-        "axios": "^1.6.0",
+        "axios": "^1.6.4",
         "bcrypt": "^5.1.0",
         "bullmq": "^4.12.7",
         "cache-manager": "^5.2.3",
