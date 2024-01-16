@@ -103,7 +103,7 @@
         "prom-client": "12",
         "redis": "^4.6.10",
         "redlock": "^5.0.0-beta.2",
-        "reflect-metadata": "^0.1.13",
+        "reflect-metadata": "^0.2.1",
         "regex-vietnamese": "^2.0.1",
         "rxjs": "^7.8.1",
         "sanitize-html": "^2.11.0",
