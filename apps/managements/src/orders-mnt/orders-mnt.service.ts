@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Order, OrdersService } from '~libs/resource/orders';
 import { GetOrdersRequestDTO } from './dtos/get-orders-request.dto';
-import { convertPageQueryToMongoose } from '~libs/common/utils';
+import { convertPageQueryToMongoose, convertToObjectId } from '~libs/common/utils';
 import { FilterQuery, Types } from 'mongoose';
 import { ListDataResponseDTO } from '~libs/common/dtos';
 import { AllEnum } from '~libs/common/base/enums';
@@ -24,7 +24,7 @@ export class OrdersMntService {
             order.products.map((prod) =>
                 this.productsService.getProduct({
                     filterQueries: {
-                        _id: prod.productId,
+                        _id: convertToObjectId(prod.productId),
                     },
                 }),
             ),
@@ -72,7 +72,7 @@ export class OrdersMntService {
         }
 
         if (orderId) {
-            filter._id = new Types.ObjectId(orderId);
+            filter._id = convertToObjectId(orderId);
         }
 
         if (userId) {

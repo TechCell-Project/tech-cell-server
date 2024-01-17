@@ -7,6 +7,7 @@ import { UpdateProductRequestDTO } from './dtos/update-product-request.dto';
 import { ProductIdParamsDTO, ProductSkuParamsDTO } from './dtos/params.dto';
 import { Types } from 'mongoose';
 import { ProductStatus } from '~libs/resource/products/enums';
+import { convertToObjectId } from '~libs/common';
 
 @Injectable()
 export class ProductsMntService extends ProductsMntUtilService {
@@ -85,7 +86,7 @@ export class ProductsMntService extends ProductsMntUtilService {
         ...newData
     }: ProductIdParamsDTO & UpdateProductRequestDTO) {
         try {
-            productId = new Types.ObjectId(productId);
+            productId = convertToObjectId(productId);
         } catch (error) {
             throw new RpcException(
                 new BadRequestException(

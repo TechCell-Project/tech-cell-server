@@ -11,7 +11,7 @@ import {
 import { RpcException } from '@nestjs/microservices';
 import { BlockActivity, UserRole } from '~libs/resource/users/enums';
 import { UsersMntUtilService } from './users-mnt.util.service';
-import { generateRandomString } from '~libs/common';
+import { convertToObjectId, generateRandomString } from '~libs/common';
 import { AddressSchemaDTO, CreateUserDTO, ImageSchemaDTO } from '~libs/resource/users/dtos';
 import { USERS_CACHE_PREFIX } from '~libs/common/constants';
 import { cleanUserBeforeResponse } from '~libs/resource/users/utils';
@@ -170,7 +170,10 @@ export class UsersMntService extends UsersMntUtilService {
         });
 
         const [changeRole] = await Promise.all([
-            this.usersService.findOneAndUpdateUser({ _id: victimId }, { role: role }),
+            this.usersService.findOneAndUpdateUser(
+                { _id: convertToObjectId(victimId) },
+                { role: role },
+            ),
             this.setUserRequiredRefresh({ user }),
             this.redisService.delWithPrefix(USERS_CACHE_PREFIX),
         ]);
@@ -210,7 +213,7 @@ export class UsersMntService extends UsersMntUtilService {
         dataUpdate: UpdateUserRequestDTO;
     }) {
         this.logger.debug(dataUpdate);
-        const oldUser = await this.usersService.getUser({ _id: new Types.ObjectId(user._id) });
+        const oldUser = await this.usersService.getUser({ _id: convertToObjectId(user._id) });
         delete oldUser.createdAt;
         delete oldUser.updatedAt;
 
@@ -247,7 +250,7 @@ export class UsersMntService extends UsersMntUtilService {
             }),
         };
         const userUpdated = await this.usersService.findOneAndUpdateUser(
-            { _id: user._id },
+            { _id: convertToObjectId(user._id) },
             newUser,
         );
 
@@ -286,7 +289,7 @@ export class UsersMntService extends UsersMntUtilService {
 
         userFound.address = newAddr;
         const userUpdated = await this.usersService.findOneAndUpdateUser(
-            { _id: userFound._id },
+            { _id: convertToObjectId(userFound._id) },
             userFound,
         );
         return {

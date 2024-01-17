@@ -1,10 +1,11 @@
 import { RpcException } from '@nestjs/microservices';
-import { FilterQuery, ProjectionFields, QueryOptions, Types } from 'mongoose';
+import { FilterQuery, ProjectionFields, QueryOptions } from 'mongoose';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ListDataResponseDTO } from '~libs/common/dtos';
 import { GetUsersQueryDTO } from './dtos';
 import { User } from '~libs/resource/users';
 import { UsersSearchUtilService } from './users-search.util.service';
+import { convertToObjectId } from '~libs/common';
 
 @Injectable()
 export class UsersSearchService extends UsersSearchUtilService {
@@ -33,8 +34,7 @@ export class UsersSearchService extends UsersSearchUtilService {
 
     async getUserById(id: string) {
         try {
-            const idSearch: Types.ObjectId = typeof id === 'string' ? new Types.ObjectId(id) : id;
-            return await this.usersService.getUser({ _id: idSearch }, {}, ['-password']);
+            return this.usersService.getUser({ _id: convertToObjectId(id) }, {}, ['-password']);
         } catch (error) {
             throw new RpcException(new BadRequestException('User Id is invalid'));
         }

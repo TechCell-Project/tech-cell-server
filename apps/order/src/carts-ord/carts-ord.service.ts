@@ -8,6 +8,7 @@ import { TCurrentUser } from '~libs/common/types';
 import { DeleteProductsCartRequestDTO } from './dtos';
 import { CartState } from '~libs/resource/carts/enums';
 import { CartDTO } from '~libs/resource/carts/dtos';
+import { convertToObjectId } from '~libs/common';
 
 @Injectable()
 export class CartsOrdService {
@@ -204,7 +205,10 @@ export class CartsOrdService {
         quantity: number;
     }) {
         const productFound = await this.productsService.getProduct({
-            filterQueries: { _id: productId, variations: { $elemMatch: { sku } } },
+            filterQueries: {
+                _id: convertToObjectId(productId),
+                variations: { $elemMatch: { sku } },
+            },
         });
 
         productFound.variations.forEach((variation) => {

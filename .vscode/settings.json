@@ -106,6 +106,7 @@
         "exceptions",
         "order",
         "seeder",
-        "search"
+        "search",
+        "resources"
     ]
 }

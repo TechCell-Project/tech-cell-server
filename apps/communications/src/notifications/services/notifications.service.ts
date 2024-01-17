@@ -1,9 +1,10 @@
 import { TCurrentUser } from '~libs/common/types';
 import { Notification, NotificationService } from '~libs/resource/notifications';
 import { Injectable } from '@nestjs/common';
-import { FilterQuery, QueryOptions, Types } from 'mongoose';
+import { FilterQuery, QueryOptions } from 'mongoose';
 import { GetUserNotificationsDTO, OrderBy, ReadType } from '../dtos/get-user-notifications.dto';
 import { ListDataResponseDTO, PaginationQuery } from '~libs/common/dtos';
+import { convertToObjectId } from '~libs/common';
 
 @Injectable()
 export class NotificationsService {
@@ -12,7 +13,7 @@ export class NotificationsService {
     async getUserNotifications(user: TCurrentUser, requestQuery: GetUserNotificationsDTO) {
         const { readType, orderBy } = requestQuery;
         const query: FilterQuery<Notification> = {
-            recipientId: typeof user._id === 'string' ? new Types.ObjectId(user._id) : user._id,
+            recipientId: convertToObjectId(user._id),
             ...(readType === ReadType.read && { readAt: { $ne: null } }),
             ...(readType === ReadType.unread && { readAt: null }),
         };

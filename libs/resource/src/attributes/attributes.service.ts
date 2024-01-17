@@ -12,6 +12,7 @@ import { RpcException } from '@nestjs/microservices';
 import { Attribute } from './schemas';
 import { I18nContext } from 'nestjs-i18n';
 import { I18nTranslations } from '~libs/common/i18n/generated/i18n.generated';
+import { convertToObjectId } from '~libs/common';
 
 @Injectable()
 export class AttributesService {
@@ -27,8 +28,7 @@ export class AttributesService {
 
     async getAttributeById(id: string | Types.ObjectId) {
         try {
-            const idFind = id instanceof Types.ObjectId ? id : new Types.ObjectId(id);
-            return this.attributesRepository.findOne({ _id: idFind });
+            return this.attributesRepository.findOne({ _id: convertToObjectId(id) });
         } catch (error) {
             throw new RpcException(
                 new BadRequestException(
@@ -100,7 +100,7 @@ export class AttributesService {
         const { attributeId, name, description } = newAttribute;
         return this.attributesRepository.findOneAndUpdate(
             {
-                _id: attributeId,
+                _id: convertToObjectId(attributeId),
             },
             { name, description },
         );
@@ -108,7 +108,9 @@ export class AttributesService {
 
     async deleteAttribute(attributeId: string) {
         return this.attributesRepository.findOneAndUpdate(
-            { _id: attributeId },
+            {
+                _id: convertToObjectId(attributeId),
+            },
             {
                 isDeleted: true,
             },

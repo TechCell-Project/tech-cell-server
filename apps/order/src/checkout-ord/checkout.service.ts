@@ -32,6 +32,7 @@ import { cleanUserBeforeResponse } from '~libs/resource/users/utils';
 import { Lock } from 'redlock';
 import { I18n, I18nService } from 'nestjs-i18n';
 import { I18nTranslations } from '~libs/common/i18n/generated/i18n.generated';
+import { convertToObjectId } from '~libs/common';
 
 @Injectable()
 export class CheckoutService {
@@ -203,7 +204,7 @@ export class CheckoutService {
         // Build a new order data
         const newOrder = new CreateOrderDTO({
             _id: new Types.ObjectId(),
-            userId: userFound._id,
+            userId: convertToObjectId(userFound._id),
             shippingOrder: {
                 toAddress: userFound.address[reviewedOrder.addressSelected],
             },
@@ -244,7 +245,11 @@ export class CheckoutService {
             [resultOrder] = await Promise.all([
                 this.orderService.createOrder(newOrder, session),
                 this.reduceStock(reviewedOrder.productSelected, session),
-                this.removeProductFromCart(userFound._id, reviewedOrder.productSelected, session),
+                this.removeProductFromCart(
+                    convertToObjectId(userFound._id),
+                    reviewedOrder.productSelected,
+                    session,
+                ),
             ]);
             await session.commitTransaction();
         } catch (error) {
@@ -335,7 +340,7 @@ export class CheckoutService {
             const { vnp_SecureHash, ...vnpayQueryData } = query;
             order.paymentOrder.orderData = vnpayQueryData;
             this.logger.debug({ order });
-            await this.orderService.updateOrderById(order._id, order);
+            await this.orderService.updateOrderById(convertToObjectId(order._id), order);
             return {
                 RspCode: '00',
                 Message: 'Confirm success',

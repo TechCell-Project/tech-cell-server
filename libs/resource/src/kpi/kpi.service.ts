@@ -5,6 +5,7 @@ import { ClientSession, FilterQuery, ProjectionType, QueryOptions, Types } from 
 import { KpiDTO } from './dtos';
 import { I18nContext } from 'nestjs-i18n';
 import { I18nTranslations } from '~libs/common/i18n/generated/i18n.generated';
+import { convertToObjectId } from '~libs/common';
 
 @Injectable()
 export class KpiService {
@@ -50,8 +51,7 @@ export class KpiService {
     }
 
     async getKpiById(id: string | Types.ObjectId) {
-        const idFind = id instanceof Types.ObjectId ? id : new Types.ObjectId(id);
-        return this.kpiRepository.findOne({ _id: idFind });
+        return this.kpiRepository.findOne({ _id: convertToObjectId(id) });
     }
 
     async getKpisByDateRange(startDate: Date, endDate: Date) {
@@ -91,9 +91,7 @@ export class KpiService {
     }
 
     async updateKpi(id: string | Types.ObjectId, newData: Partial<KpiDTO>) {
-        const idFind = id instanceof Types.ObjectId ? id : new Types.ObjectId(id);
-
-        const oldKpi = await this.kpiRepository.findOne({ _id: idFind });
+        const oldKpi = await this.kpiRepository.findOne({ _id: convertToObjectId(id) });
 
         if (newData?.name) {
             newData.name = newData.name.trim().toLowerCase();
@@ -144,7 +142,7 @@ export class KpiService {
         }
 
         return this.kpiRepository.findOneAndUpdate(
-            { _id: idFind },
+            { __id: convertToObjectId(id) },
             {
                 ...newData,
                 ...(newData.startDate && { startDate: new Date(newData.startDate) }),
