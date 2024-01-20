@@ -107,6 +107,7 @@
         "order",
         "seeder",
         "search",
-        "resources"
+        "resources",
+        "managements"
     ]
 }
