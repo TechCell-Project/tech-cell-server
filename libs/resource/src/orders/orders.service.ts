@@ -25,17 +25,22 @@ export class OrdersService {
         return this.orderRepository.create(data, {}, session);
     }
 
-    async getOrder(
-        filter: FilterQuery<Order>,
-        queryOptions?: QueryOptions<Order>,
-        projection?: ProjectionType<Order>,
-        session?: ClientSession,
-    ) {
+    async getOrder({
+        filter,
+        projection,
+        queryOptions,
+        session,
+    }: {
+        filter: FilterQuery<Order>;
+        queryOptions?: QueryOptions<Order>;
+        projection?: ProjectionType<Order>;
+        session?: ClientSession;
+    }) {
         return this.orderRepository.findOne({
             filterQuery: filter,
-            queryOptions: queryOptions,
-            projection: projection,
-            session: session,
+            ...(queryOptions ?? {}),
+            projection,
+            session,
         });
     }
 
@@ -100,6 +105,13 @@ export class OrdersService {
         } catch (error) {
             return null;
         }
+    }
+
+    async getUserOrderById(orderId: Types.ObjectId, userId: Types.ObjectId) {
+        return this.orderRepository.findOne({
+            _id: new Types.ObjectId(orderId),
+            userId: new Types.ObjectId(userId),
+        });
     }
 
     async updateOrderById(

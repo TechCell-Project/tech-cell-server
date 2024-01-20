@@ -4,8 +4,9 @@ import { CheckoutService } from './checkout.service';
 import { Ctx, MessagePattern, Payload, RmqContext } from '@nestjs/microservices';
 import { CheckoutMessagePattern } from './checkout.pattern';
 import { TCurrentUser } from '~libs/common/types';
-import { ReviewOrderRequestDTO, VnpayIpnUrlDTO } from './dtos';
+import { GetUserOrdersRequestDTO, ReviewOrderRequestDTO, VnpayIpnUrlDTO } from './dtos';
 import { CreateOrderRequestDTO } from './dtos/create-order-request.dto';
+import { ObjectIdParamDTO } from '~libs/common/dtos';
 
 @Controller('checkout')
 export class CheckoutController {
@@ -55,9 +56,20 @@ export class CheckoutController {
         });
     }
 
-    @MessagePattern(CheckoutMessagePattern.getAllUserOrders)
-    async getAllUserOrders({ user }: { user: TCurrentUser }) {
-        return this.checkoutService.getAllUserOrders({ user });
+    @MessagePattern(CheckoutMessagePattern.getUserOrders)
+    async getUserOrders({
+        user,
+        data2Get,
+    }: {
+        user: TCurrentUser;
+        data2Get: GetUserOrdersRequestDTO;
+    }) {
+        return this.checkoutService.getUserOrders({ user, data2Get });
+    }
+
+    @MessagePattern(CheckoutMessagePattern.getUserOrderById)
+    async getUserOrderById({ user, id }: { user: TCurrentUser } & ObjectIdParamDTO) {
+        return this.checkoutService.getUserOrderById({ user, id });
     }
 
     @MessagePattern(CheckoutMessagePattern.vnpayIpnUrl)

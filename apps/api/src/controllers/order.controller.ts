@@ -9,6 +9,7 @@ import {
     Query,
     Ip,
     Headers,
+    Param,
 } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import { ACCESS_TOKEN_NAME, ORDER_SERVICE } from '~libs/common/constants';
@@ -29,6 +30,8 @@ import { AuthGuard } from '~libs/common';
 import { CurrentUser } from '~libs/common/decorators';
 import { TCurrentUser } from '~libs/common/types';
 import {
+    GetUserOrdersRequestDTO,
+    ListUserOrderResponseDTO,
     ReviewOrderRequestDTO,
     ReviewedOrderResponseDTO,
     VnpayIpnUrlDTO,
@@ -37,6 +40,7 @@ import { CreateOrderRequestDTO } from '~apps/order/checkout-ord/dtos/create-orde
 import { OrderSchemaDTO } from '~libs/resource/orders/dtos/order-schema.dto';
 import { sendMessagePipeException } from '~libs/common/RabbitMQ/rmq.util';
 import { THeaders } from '~libs/common/types/common.type';
+import { ObjectIdParamDTO } from '~libs/common/dtos';
 
 @ApiBadRequestResponse({
     description: 'Invalid request, please check your request data!',
@@ -60,14 +64,35 @@ export class OrderController {
     constructor(@Inject(ORDER_SERVICE) private readonly orderService: ClientRMQ) {}
 
     @UseGuards(AuthGuard)
-    @ApiOperation({ summary: "Get all order's user" })
-    @ApiResponse({ description: 'Get all user orders', type: [OrderSchemaDTO] })
+    @ApiOperation({ summary: "Get order's user" })
+    @ApiResponse({ description: 'Get user orders', type: ListUserOrderResponseDTO })
     @Get('/')
-    async getAllUserOrders(@Headers() headers: THeaders, @CurrentUser() user: TCurrentUser) {
+    async getUserOrders(
+        @Headers() headers: THeaders,
+        @CurrentUser() user: TCurrentUser,
+        @Query() data2Get: GetUserOrdersRequestDTO,
+    ) {
         return sendMessagePipeException({
             client: this.orderService,
-            pattern: CheckoutMessagePattern.getAllUserOrders,
-            data: { user },
+            pattern: CheckoutMessagePattern.getUserOrders,
+            data: { user, data2Get },
+            headers,
+        });
+    }
+
+    @UseGuards(AuthGuard)
+    @ApiOperation({ summary: "Get user's order by id" })
+    @ApiResponse({ description: "Get user's order by id", type: OrderSchemaDTO })
+    @Get('/:id')
+    async getUserOrderId(
+        @Headers() headers: THeaders,
+        @CurrentUser() user: TCurrentUser,
+        @Param() { id }: ObjectIdParamDTO,
+    ) {
+        return sendMessagePipeException({
+            client: this.orderService,
+            pattern: CheckoutMessagePattern.getUserOrderById,
+            data: { user, id },
             headers,
         });
     }

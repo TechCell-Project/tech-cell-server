@@ -10,8 +10,13 @@ import {
     UnprocessableEntityException,
 } from '@nestjs/common';
 import { ClientRMQ, RpcException } from '@nestjs/microservices';
-import { ClientSession, Types } from 'mongoose';
-import { ReviewOrderRequestDTO, ReviewedOrderResponseDTO, VnpayIpnUrlDTO } from './dtos';
+import { ClientSession, FilterQuery, Types, QueryOptions } from 'mongoose';
+import {
+    GetUserOrdersRequestDTO,
+    ReviewOrderRequestDTO,
+    ReviewedOrderResponseDTO,
+    VnpayIpnUrlDTO,
+} from './dtos';
 import { Product, ProductsService } from '~libs/resource';
 import { TProductDimensions } from './types';
 import { ItemShipping } from '~libs/third-party/giaohangnhanh/dtos';
@@ -32,7 +37,8 @@ import { cleanUserBeforeResponse } from '~libs/resource/users/utils';
 import { Lock } from 'redlock';
 import { I18n, I18nService } from 'nestjs-i18n';
 import { I18nTranslations } from '~libs/common/i18n/generated/i18n.generated';
-import { convertToObjectId } from '~libs/common';
+import { convertPageQueryToMongoose, convertToObjectId } from '~libs/common';
+import { ListDataResponseDTO, ObjectIdParamDTO, PaginationQuery } from '~libs/common/dtos';
 
 @Injectable()
 export class CheckoutService {
@@ -278,11 +284,47 @@ export class CheckoutService {
     }
 
     /**
-     * @description Get all user's orders
+     * @description Get user's orders
      */
-    public async getAllUserOrders({ user }: { user: TCurrentUser }) {
-        const orders = await this.orderService.getAllUserOrders(new Types.ObjectId(user._id));
-        return orders;
+    public async getUserOrders({
+        user,
+        data2Get,
+    }: {
+        user: TCurrentUser;
+        data2Get: GetUserOrdersRequestDTO;
+    }) {
+        const { orderStatus, paymentMethod, paymentStatus } = data2Get;
+        const { page, pageSize } = new PaginationQuery({
+            page: data2Get?.page,
+            pageSize: data2Get?.pageSize,
+        });
+
+        const filterQueries: FilterQuery<Order> = {
+            userId: convertToObjectId(user._id),
+            ...(orderStatus && { orderStatus }),
+            ...(paymentMethod && { 'paymentOrder.method': paymentMethod }),
+            ...(paymentStatus && { 'paymentOrder.status': paymentStatus }),
+        };
+        const optionQueries: QueryOptions<Order> = {
+            ...convertPageQueryToMongoose({ page, pageSize }),
+        };
+
+        const [orders, totalRecord] = await Promise.all([
+            this.orderService.getOrders(filterQueries, optionQueries),
+            this.orderService.countOrders(filterQueries),
+        ]);
+
+        return new ListDataResponseDTO({
+            page,
+            pageSize,
+            totalPage: Math.ceil(totalRecord / pageSize),
+            totalRecord,
+            data: orders,
+        });
+    }
+
+    public async getUserOrderById({ user, id }: { user: TCurrentUser } & ObjectIdParamDTO) {
+        return await this.orderService.getUserOrderById(id, convertToObjectId(user._id));
     }
 
     /**
