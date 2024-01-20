@@ -29,6 +29,8 @@ import {
     IsDateString,
     IsObject,
     IsUrl,
+    IsIP,
+    IsIpVersion,
 } from 'class-validator';
 import ValidatorJS from 'validator';
 import { I18nTranslations } from '~libs/common/i18n/generated';
@@ -287,6 +289,15 @@ export const IsUrlI18n = (
     return (target: object, key: string) => {
         IsUrl(options, {
             message: i18nValidationMessage('validation.IS_URL'),
+            ...validationOptions,
+        })(target, key);
+    };
+};
+
+export const IsIPI18n = (version?: IsIpVersion, validationOptions?: ValidationOptions) => {
+    return (target: object, key: string) => {
+        IsIP(version, {
+            message: i18nValidationMessage('validation.IS_IP'),
             ...validationOptions,
         })(target, key);
     };

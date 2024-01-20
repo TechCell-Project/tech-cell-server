@@ -26,5 +26,6 @@
     "ARRAY_MAX_SIZE": "{property} phải có nhiều nhất {constraints.0} phần tử",
     "IS_DATE_STRING": "{property} phải là một chuỗi ngày, thời gian hợp lệ (Date)",
     "IS_OBJECT": "{property} phải là một đối tượng",
-    "IS_URL": "{property} phải là một URL hợp lệ"
+    "IS_URL": "{property} phải là một địa chỉ URL hợp lệ",
+    "IS_IP": "{property} phải là một địa chỉ IP hợp lệ"
 }
