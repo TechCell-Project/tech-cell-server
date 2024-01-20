@@ -110,6 +110,7 @@ export type I18nTranslations = {
         "ARRAY_MAX_SIZE": string;
         "IS_DATE_STRING": string;
         "IS_OBJECT": string;
+        "IS_URL": string;
     };
 };
 export type I18nPath = Path<I18nTranslations>;
