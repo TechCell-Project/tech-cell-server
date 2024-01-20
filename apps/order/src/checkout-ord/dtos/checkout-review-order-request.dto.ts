@@ -21,18 +21,6 @@ export class ReviewOrderRequestDTO {
     }
 
     @ApiProperty({
-        description: 'Payment method, default is COD',
-        type: String,
-        enum: PaymentMethodEnum,
-        example: PaymentMethodEnum.COD,
-        required: false,
-    })
-    @IsOptional()
-    @IsStringI18n()
-    @IsEnumI18n(PaymentMethodEnum)
-    paymentMethod: string;
-
-    @ApiProperty({
         description: 'Index of address selected (index begin from 0)',
         example: 1,
         type: Number,
@@ -55,4 +43,16 @@ export class ReviewOrderRequestDTO {
     @Type(() => ProductCartDTO)
     @ValidateNested({ each: true })
     productSelected: Array<ProductCartDTO>;
+
+    @ApiProperty({
+        description: 'Payment method, default is COD',
+        type: String,
+        enum: PaymentMethodEnum,
+        example: PaymentMethodEnum.COD,
+        required: false,
+    })
+    @IsOptional()
+    @IsStringI18n()
+    @IsEnumI18n(PaymentMethodEnum)
+    paymentMethod: string;
 }
