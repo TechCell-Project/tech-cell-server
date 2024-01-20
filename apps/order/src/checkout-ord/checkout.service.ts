@@ -184,6 +184,7 @@ export class CheckoutService {
         data2CreateOrder: CreateOrderRequestDTO;
         ip: string;
     }) {
+        this.validatePayment(data2CreateOrder);
         const reviewedOrder = await this.reviewOrder({ user, dataReview: data2CreateOrder });
 
         const resources = [];
@@ -232,6 +233,7 @@ export class CheckoutService {
             data2CreateOrder.paymentMethod,
             newOrder,
             ip,
+            data2CreateOrder.paymentReturnUrl,
         );
 
         // Create a session to start transaction
@@ -494,6 +496,7 @@ export class CheckoutService {
         paymentMethod: CreateOrderRequestDTO['paymentMethod'],
         newOrder: Order,
         ip: string,
+        returnUrl?: string,
     ): Promise<string | null> {
         const data2CreatePayment = {
             vnp_IpAddr: ip,
@@ -504,7 +507,20 @@ export class CheckoutService {
         };
         switch (paymentMethod) {
             case PaymentMethodEnum.VNPAY: {
-                const vnpayUrl = await this.vnpayService.createPaymentUrl(data2CreatePayment);
+                if (!returnUrl) {
+                    throw new BadRequestException(
+                        this.i18n.translate('errorMessage.RETURN_URL_REQUIRED', {
+                            args: {
+                                method: paymentMethod,
+                            },
+                        }),
+                    );
+                }
+
+                const vnpayUrl = await this.vnpayService.createPaymentUrl({
+                    ...data2CreatePayment,
+                    vnp_ReturnUrl: returnUrl,
+                });
                 if (!vnpayUrl) {
                     throw new RpcException(
                         new InternalServerErrorException(
@@ -518,14 +534,28 @@ export class CheckoutService {
             case PaymentMethodEnum.JCB:
             case PaymentMethodEnum.MASTERCARD:
             case PaymentMethodEnum.VISA: {
+                if (!returnUrl) {
+                    throw new BadRequestException(
+                        this.i18n.translate('errorMessage.RETURN_URL_REQUIRED', {
+                            args: {
+                                method: paymentMethod,
+                            },
+                        }),
+                    );
+                }
                 const vnpayUrl = await this.vnpayService.createPaymentUrl({
                     ...data2CreatePayment,
                     bankCode: paymentMethod,
+                    vnp_ReturnUrl: returnUrl,
                 });
                 if (!vnpayUrl) {
                     throw new RpcException(
                         new InternalServerErrorException(
-                            this.i18n.translate('errorMessage.CAN_NOT_CREATE_ORDER'),
+                            this.i18n.translate('errorMessage.CAN_NOT_CREATE_ORDER', {
+                                args: {
+                                    method: paymentMethod,
+                                },
+                            }),
                         ),
                     );
                 }
@@ -536,6 +566,32 @@ export class CheckoutService {
             // case PaymentMethodEnum.MOMO:
             default:
                 return null;
+        }
+    }
+
+    private validatePayment(data2CreateOrder: CreateOrderRequestDTO) {
+        const { paymentMethod, paymentReturnUrl } = data2CreateOrder;
+        switch (paymentMethod) {
+            case PaymentMethodEnum.VNPAY:
+            case PaymentMethodEnum.ATM:
+            case PaymentMethodEnum.JCB:
+            case PaymentMethodEnum.MASTERCARD:
+            case PaymentMethodEnum.VISA: {
+                if (!paymentReturnUrl) {
+                    throw new BadRequestException(
+                        this.i18n.translate('errorMessage.RETURN_URL_REQUIRED', {
+                            args: {
+                                method: paymentMethod,
+                            },
+                        }),
+                    );
+                }
+                break;
+            }
+
+            case PaymentMethodEnum.COD:
+            default:
+                return true;
         }
     }
 }

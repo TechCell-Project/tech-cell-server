@@ -5,6 +5,7 @@ import {
     ApiBadRequestResponse,
     ApiBearerAuth,
     ApiCreatedResponse,
+    ApiExcludeController,
     ApiInternalServerErrorResponse,
     ApiNotFoundResponse,
     ApiOkResponse,
@@ -25,6 +26,7 @@ import { sendMessagePipeException } from '~libs/common/RabbitMQ/rmq.util';
 import { KpiDTO } from '~libs/resource/kpi';
 import { ObjectIdParamDTO } from '~libs/common/dtos';
 
+@ApiExcludeController()
 @ApiBadRequestResponse({
     description: 'Invalid request, please check your request data!',
 })

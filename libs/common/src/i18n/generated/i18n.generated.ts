@@ -76,6 +76,7 @@ export type I18nTranslations = {
         "THIRD_PARTY_ERROR": string;
         "NOT_SUPPORT_SHIP": string;
         "CAN_NOT_CREATE_ORDER": string;
+        "RETURN_URL_REQUIRED": string;
     };
     "exception": {
         "InternalServerException": string;
@@ -110,6 +111,8 @@ export type I18nTranslations = {
         "ARRAY_MAX_SIZE": string;
         "IS_DATE_STRING": string;
         "IS_OBJECT": string;
+        "IS_URL": string;
+        "IS_IP": string;
     };
 };
 export type I18nPath = Path<I18nTranslations>;
