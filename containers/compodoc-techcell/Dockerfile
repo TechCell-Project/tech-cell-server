@@ -18,5 +18,6 @@ USER node
 WORKDIR /usr/src/app
 
 COPY --from=build-stage --chown=node /usr/src/app/ ./
+RUN npm install --global '@compodoc/compodoc@1.1' && npm cache clean --force
 
 CMD ["node", "scripts/run-compodoc.js", "--serve"]
