@@ -13,6 +13,10 @@ RUN rm -rf ./node_modules
 
 FROM node:18-alpine AS production
 
+LABEL git="https://github.com/TechCell-Project/tech-cell-server"
+LABEL author="lehuygiang28 <lehuygiang28@gmail.com>"
+LABEL org.opencontainers.image.maintainer="lehuygiang28 <lehuygiang28@gmail.com>"
+
 USER node
 
 WORKDIR /usr/src/app
