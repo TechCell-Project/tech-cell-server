@@ -14,7 +14,7 @@ export class AdminController {
     @Get('copy-db')
     async forceCopyPrimaryToBackup() {
         this.taskService
-            .emit(DatabaseTaskEventPattern.forceCopyPrimaryToBackup, {})
+            .emit(DatabaseTaskEventPattern.forceCopyPrimaryToBackup, { force: true })
             .pipe(catchException());
 
         return { message: 'Copy database from primary to backup is running' };

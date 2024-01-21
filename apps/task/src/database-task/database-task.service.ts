@@ -25,9 +25,9 @@ export class DatabaseTaskService {
         name: 'copyPrimaryToBackup',
         timeZone: process.env.TZ ?? 'Asia/Ho_Chi_Minh',
     })
-    async copyPrimaryToBackup() {
+    async copyPrimaryToBackup(force = false) {
         this.logger.log('Start copy primary to backup');
-        if (!isTrueSet(process.env.IS_ENABLE_BACKUP_MONGODB)) {
+        if (!isTrueSet(process.env.IS_ENABLE_BACKUP_MONGODB) && !force) {
             this.logger.log('Skip copy primary to backup because IS_BACKUP_MONGODB is false');
             return;
         }
