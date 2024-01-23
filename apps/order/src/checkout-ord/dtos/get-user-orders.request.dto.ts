@@ -7,31 +7,34 @@ import { PaymentMethodEnum, PaymentStatusEnum, OrderStatusEnum } from '~libs/res
 export class GetUserOrdersRequestDTO extends IntersectionType(PaginationQuery) {
     @ApiProperty({
         description: 'Payment method',
+        type: String,
         enum: PaymentMethodEnum,
         example: PaymentMethodEnum.COD,
         required: false,
     })
     @IsOptional()
-    @IsEnumI18n({ enum: PaymentMethodEnum })
+    @IsEnumI18n(PaymentMethodEnum)
     paymentMethod?: PaymentMethodEnum;
 
     @ApiProperty({
         description: 'Payment status',
+        type: String,
         enum: PaymentStatusEnum,
         example: PaymentStatusEnum.PENDING,
         required: false,
     })
     @IsOptional()
-    @IsEnumI18n({ enum: PaymentStatusEnum })
+    @IsEnumI18n(PaymentStatusEnum)
     paymentStatus?: PaymentStatusEnum;
 
     @ApiProperty({
         description: 'Order status',
+        type: String,
         enum: OrderStatusEnum,
         example: OrderStatusEnum.PENDING,
         required: false,
     })
     @IsOptional()
-    @IsEnumI18n({ enum: OrderStatusEnum })
+    @IsEnumI18n(OrderStatusEnum)
     orderStatus?: OrderStatusEnum;
 }
