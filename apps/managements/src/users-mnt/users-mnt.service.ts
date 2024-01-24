@@ -1,5 +1,4 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
-import { Types } from 'mongoose';
 import {
     BlockUnblockRequestDTO,
     ChangeRoleRequestDTO,
@@ -59,8 +58,8 @@ export class UsersMntService extends UsersMntUtilService {
         }
 
         const [victimUser, blockByUser] = await Promise.all([
-            this.usersService.getUser({ _id: new Types.ObjectId(victimId) }),
-            this.usersService.getUser({ _id: new Types.ObjectId(actorId) }),
+            this.usersService.getUser({ _id: convertToObjectId(victimId) }),
+            this.usersService.getUser({ _id: convertToObjectId(actorId) }),
         ]);
 
         this.canBlockAndUnblockUser({
@@ -84,7 +83,7 @@ export class UsersMntService extends UsersMntUtilService {
 
         const [userReturn] = await Promise.all([
             this.usersService.findOneAndUpdateUser(
-                { _id: victimId },
+                { _id: convertToObjectId(victimId) },
                 {
                     block: {
                         isBlocked: true,
@@ -110,8 +109,8 @@ export class UsersMntService extends UsersMntUtilService {
         }
 
         const [victimUser, unblockByUser] = await Promise.all([
-            this.usersService.getUser({ _id: new Types.ObjectId(victimId) }),
-            this.usersService.getUser({ _id: new Types.ObjectId(actorId) }),
+            this.usersService.getUser({ _id: convertToObjectId(victimId) }),
+            this.usersService.getUser({ _id: convertToObjectId(actorId) }),
         ]);
 
         this.canBlockAndUnblockUser({
@@ -135,7 +134,7 @@ export class UsersMntService extends UsersMntUtilService {
 
         const [userReturn] = await Promise.all([
             this.usersService.findOneAndUpdateUser(
-                { _id: victimId },
+                { _id: convertToObjectId(victimId) },
                 {
                     block: {
                         isBlocked: false,
@@ -159,8 +158,8 @@ export class UsersMntService extends UsersMntUtilService {
         actorId: string;
     }) {
         const [user, updatedByUser] = await Promise.all([
-            this.usersService.getUser({ _id: new Types.ObjectId(victimId) }),
-            this.usersService.getUser({ _id: new Types.ObjectId(actorId) }),
+            this.usersService.getUser({ _id: convertToObjectId(victimId) }),
+            this.usersService.getUser({ _id: convertToObjectId(actorId) }),
         ]);
 
         this.canChangeRole({
@@ -267,7 +266,7 @@ export class UsersMntService extends UsersMntUtilService {
         user: TCurrentUser;
         addressData: UpdateUserAddressRequestDTO;
     }) {
-        const userFound = await this.usersService.getUser({ _id: new Types.ObjectId(user._id) });
+        const userFound = await this.usersService.getUser({ _id: convertToObjectId(user._id) });
         const newAddr = Array.isArray(addressData.address)
             ? addressData.address.map((addr) => {
                   if (!addr?.customerName) {
