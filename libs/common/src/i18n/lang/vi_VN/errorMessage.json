@@ -55,5 +55,6 @@
     "THIRD_PARTY_ERROR": "Đã xảy ra lỗi, vui lòng thử lại sau.",
     "NOT_SUPPORT_SHIP": "Chưa hỗ trợ vận chuyển đến địa chỉ này.",
     "CAN_NOT_CREATE_ORDER": "Không thể tạo đơn hàng, vui lòng thử lại sau.",
-    "RETURN_URL_REQUIRED": "Địa chỉ trả về là bắt buộc cho phương thức thanh toán '{method}'"
+    "RETURN_URL_REQUIRED": "Địa chỉ trả về là bắt buộc cho phương thức thanh toán '{method}'",
+    "CAN_NOT_GET_PAYMENT_URL": "Không thể trả về địa chỉ thanh toán cho phương thức thanh toán '{method}'"
 }

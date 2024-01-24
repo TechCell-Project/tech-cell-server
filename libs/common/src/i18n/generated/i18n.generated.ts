@@ -77,6 +77,7 @@ export type I18nTranslations = {
         "NOT_SUPPORT_SHIP": string;
         "CAN_NOT_CREATE_ORDER": string;
         "RETURN_URL_REQUIRED": string;
+        "CAN_NOT_GET_PAYMENT_URL": string;
     };
     "exception": {
         "InternalServerException": string;

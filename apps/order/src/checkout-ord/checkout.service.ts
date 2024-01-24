@@ -414,6 +414,41 @@ export class CheckoutService {
         return { isSuccess, message };
     }
 
+    public async reGeneratePaymentUrl(data: {
+        orderId: Types.ObjectId;
+        userId: Types.ObjectId;
+        ip: string;
+        paymentReturnUrl?: string;
+    }) {
+        const order = await this.getUserOrderById({ id: data.orderId, user: { _id: data.userId } });
+        const paymentUrl = await this.getPaymentUrl(
+            order.paymentOrder.method,
+            order,
+            data.ip,
+            data?.paymentReturnUrl,
+        );
+
+        if (!paymentUrl) {
+            throw new BadRequestException(
+                this.i18n.t('errorMessage.CAN_NOT_GET_PAYMENT_URL', {
+                    args: {
+                        method: order.paymentOrder.method,
+                    },
+                }),
+            );
+        }
+
+        const newOrder = await this.orderService.updateOrderById(order._id, {
+            ...order,
+            paymentOrder: {
+                ...order.paymentOrder,
+                paymentUrl,
+            },
+        });
+
+        return newOrder;
+    }
+
     /// PRIVATE METHOD
 
     /**

@@ -55,5 +55,6 @@
     "THIRD_PARTY_ERROR": "Some thing went wrong, please try again later.",
     "NOT_SUPPORT_SHIP": "Not support ship to this address yet.",
     "CAN_NOT_CREATE_ORDER": "Can not create order, please try again later.",
-    "RETURN_URL_REQUIRED": "Return url is required for '{method}'"
+    "RETURN_URL_REQUIRED": "Return url is required for '{method}'",
+    "CAN_NOT_GET_PAYMENT_URL": "Can not get payment url for '{method}'"
 }

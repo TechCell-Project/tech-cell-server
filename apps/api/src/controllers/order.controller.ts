@@ -19,6 +19,7 @@ import {
     ApiExcludeEndpoint,
     ApiInternalServerErrorResponse,
     ApiNotFoundResponse,
+    ApiOkResponse,
     ApiOperation,
     ApiResponse,
     ApiTags,
@@ -30,6 +31,7 @@ import { AuthGuard } from '~libs/common';
 import { CurrentUser } from '~libs/common/decorators';
 import { TCurrentUser } from '~libs/common/types';
 import {
+    GetPaymentUrlRequestDTO,
     GetUserOrdersRequestDTO,
     ListUserOrderResponseDTO,
     ReviewOrderRequestDTO,
@@ -156,6 +158,25 @@ export class OrderController {
             client: this.orderService,
             pattern: CheckoutMessagePattern.vnpayReturnUrl,
             data: { ...query },
+            headers,
+        });
+    }
+
+    @UseGuards(AuthGuard)
+    @ApiOperation({ summary: 'Get order with the newer payment url' })
+    @ApiOkResponse({ description: 'Get order with the newer payment url', type: OrderSchemaDTO })
+    @Get('/:id/payment-url')
+    async getPaymentUrl(
+        @Headers() headers: THeaders,
+        @CurrentUser() user: TCurrentUser,
+        @Ip() ip: string,
+        @Param() { id }: ObjectIdParamDTO,
+        @Query() { paymentReturnUrl }: GetPaymentUrlRequestDTO,
+    ) {
+        return sendMessagePipeException({
+            client: this.orderService,
+            pattern: CheckoutMessagePattern.getPaymentUrl,
+            data: { id, user, ip, paymentReturnUrl },
             headers,
         });
     }

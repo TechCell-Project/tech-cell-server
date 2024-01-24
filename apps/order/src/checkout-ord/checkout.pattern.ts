@@ -6,4 +6,5 @@ export const CheckoutMessagePattern = {
     vnpayIpnUrl: { cmd: 'checkout_vnpay_ipn_url' },
     getUserOrders: { cmd: 'checkout_get_user_orders' },
     getUserOrderById: { cmd: 'checkout_get_user_order_by_id' },
+    getPaymentUrl: { cmd: 'checkout_get_payment_url' },
 };

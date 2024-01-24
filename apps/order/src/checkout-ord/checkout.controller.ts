@@ -7,6 +7,7 @@ import { TCurrentUser } from '~libs/common/types';
 import { GetUserOrdersRequestDTO, ReviewOrderRequestDTO, VnpayIpnUrlDTO } from './dtos';
 import { CreateOrderRequestDTO } from './dtos/create-order-request.dto';
 import { ObjectIdParamDTO } from '~libs/common/dtos';
+import { CurrentUserDTO } from '~libs/common/dtos/current-user.dto';
 
 @Controller('checkout')
 export class CheckoutController {
@@ -82,5 +83,23 @@ export class CheckoutController {
     async vnpayReturnUrl(@Ctx() context: RmqContext, @Payload() { ...query }: VnpayIpnUrlDTO) {
         this.rabbitmqService.acknowledgeMessage(context);
         return this.checkoutService.vnpayReturnUrl({ ...query });
+    }
+
+    @MessagePattern(CheckoutMessagePattern.getPaymentUrl)
+    async getPaymentUrl(
+        @Ctx() context: RmqContext,
+        @Payload()
+        data: ObjectIdParamDTO &
+            CurrentUserDTO & {
+                ip: string;
+            },
+    ) {
+        this.rabbitmqService.acknowledgeMessage(context);
+        return this.checkoutService.reGeneratePaymentUrl({
+            ip: data.ip,
+            orderId: data.id,
+            userId: data.user._id,
+            paymentReturnUrl: data?.paymentReturnUrl,
+        });
     }
 }
