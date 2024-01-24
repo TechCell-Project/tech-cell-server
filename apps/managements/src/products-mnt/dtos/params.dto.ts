@@ -14,7 +14,7 @@ export class ProductIdParamsDTO {
     productId: string | Types.ObjectId;
 }
 
-export class ProductSkuParamsDTO {
+export class ProductSkuQueryDTO {
     @ApiProperty({
         type: String,
         required: true,

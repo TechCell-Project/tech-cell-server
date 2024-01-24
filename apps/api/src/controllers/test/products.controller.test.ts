@@ -10,7 +10,7 @@ import {
     CreateProductRequestDTO,
     UpdateProductRequestDTO,
     ProductIdParamsDTO,
-    ProductSkuParamsDTO,
+    ProductSkuQueryDTO,
 } from '~apps/managements/products-mnt/dtos';
 import { Types } from 'mongoose';
 import { THeaders } from '~libs/common/types/common.type';
@@ -150,7 +150,7 @@ describe(ProductsController, () => {
             const productIdParams: ProductIdParamsDTO = {
                 productId: new Types.ObjectId(),
             };
-            const skuParams: ProductSkuParamsDTO = {
+            const skuParams: ProductSkuQueryDTO = {
                 sku: 'sku',
             };
             await productsController.deleteProductVariation(

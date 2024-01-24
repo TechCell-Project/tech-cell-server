@@ -4,7 +4,7 @@ import { CreateProductRequestDTO } from './dtos';
 import { RpcException } from '@nestjs/microservices';
 import { CreateProductDTO } from '~libs/resource';
 import { UpdateProductRequestDTO } from './dtos/update-product-request.dto';
-import { ProductIdParamsDTO, ProductSkuParamsDTO } from './dtos/params.dto';
+import { ProductIdParamsDTO, ProductSkuQueryDTO } from './dtos/params.dto';
 import { Types } from 'mongoose';
 import { ProductStatus } from '~libs/resource/products/enums';
 import { convertToObjectId } from '~libs/common';
@@ -103,7 +103,7 @@ export class ProductsMntService extends ProductsMntUtilService {
         // If not, throw the exception
         const oldProduct = await this.productsService.getProduct({
             filterQueries: {
-                _id: productId,
+                _id: convertToObjectId(productId),
             },
         });
 
@@ -205,14 +205,14 @@ export class ProductsMntService extends ProductsMntUtilService {
         // If not, throw the exception
         const product = await this.productsService.getProduct({
             filterQueries: {
-                _id: productId,
+                _id: convertToObjectId(productId),
             },
         });
 
         return await this.productsService.deleteProductById(product._id);
     }
 
-    async deleteProductVariation({ productId, sku }: ProductIdParamsDTO & ProductSkuParamsDTO) {
+    async deleteProductVariation({ productId, sku }: ProductIdParamsDTO & ProductSkuQueryDTO) {
         try {
             productId = new Types.ObjectId(productId);
         } catch (error) {
@@ -231,7 +231,7 @@ export class ProductsMntService extends ProductsMntUtilService {
         // If not, throw the exception
         const product = await this.productsService.getProduct({
             filterQueries: {
-                _id: productId,
+                _id: convertToObjectId(productId),
                 variations: {
                     $elemMatch: {
                         sku: sku,

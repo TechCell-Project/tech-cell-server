@@ -38,7 +38,7 @@ import {
     CreateProductRequestDTO,
     UpdateProductRequestDTO,
     ProductIdParamsDTO,
-    ProductSkuParamsDTO,
+    ProductSkuQueryDTO,
 } from '~apps/managements/products-mnt/dtos';
 import { ProductDTO } from '~libs/resource/products/dtos/product.dto';
 import { sendMessagePipeException } from '~libs/common/RabbitMQ/rmq.util';
@@ -181,12 +181,12 @@ export class ProductsController {
     @ApiOkResponse({
         description: 'Delete product variation successfully!',
     })
-    @Delete('/:productId/:sku')
+    @Delete('/:productId')
     @UseGuards(ModGuard)
     async deleteProductVariation(
         @Headers() headers: THeaders,
         @Param() { productId }: ProductIdParamsDTO,
-        @Param() { sku }: ProductSkuParamsDTO,
+        @Query() { sku }: ProductSkuQueryDTO,
     ) {
         return sendMessagePipeException({
             client: this.managementsService,
