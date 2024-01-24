@@ -16,7 +16,6 @@ import { ACCESS_TOKEN_NAME, ORDER_SERVICE } from '~libs/common/constants';
 import {
     ApiBadRequestResponse,
     ApiBearerAuth,
-    ApiExcludeEndpoint,
     ApiInternalServerErrorResponse,
     ApiNotFoundResponse,
     ApiOkResponse,
@@ -36,7 +35,6 @@ import {
     ListUserOrderResponseDTO,
     ReviewOrderRequestDTO,
     ReviewedOrderResponseDTO,
-    VnpayIpnUrlDTO,
 } from '~apps/order/checkout-ord/dtos';
 import { CreateOrderRequestDTO } from '~apps/order/checkout-ord/dtos/create-order-request.dto';
 import { OrderSchemaDTO } from '~libs/resource/orders/dtos/order-schema.dto';
@@ -136,28 +134,6 @@ export class OrderController {
             client: this.orderService,
             pattern: CheckoutMessagePattern.createOrder,
             data: { user, data2CreateOrder, ip },
-            headers,
-        });
-    }
-
-    @ApiExcludeEndpoint()
-    @Get('/vnpay-ipn')
-    async vnpayIpnUrl(@Headers() headers: THeaders, @Query() { ...query }: VnpayIpnUrlDTO) {
-        return sendMessagePipeException({
-            client: this.orderService,
-            pattern: CheckoutMessagePattern.vnpayIpnUrl,
-            data: { ...query },
-            headers,
-        });
-    }
-
-    @ApiExcludeEndpoint()
-    @Get('/vnpay-return')
-    async vnpayReturnUrl(@Headers() headers: THeaders, @Query() { ...query }: VnpayIpnUrlDTO) {
-        return sendMessagePipeException({
-            client: this.orderService,
-            pattern: CheckoutMessagePattern.vnpayReturnUrl,
-            data: { ...query },
             headers,
         });
     }

@@ -16,6 +16,7 @@ import { HealthController } from './health.controller';
 import { OrdersManagementController } from './order-management.controller';
 import { StatsController } from './stats.controller';
 import { KpiController } from './kpi.controller';
+import { PaymentController } from './payments.controller';
 
 export const ListControllers = [
     AdminController,
@@ -36,4 +37,5 @@ export const ListControllers = [
     StatsController,
     AppController,
     HealthController,
+    PaymentController,
 ];
