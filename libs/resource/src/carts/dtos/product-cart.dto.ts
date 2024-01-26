@@ -6,9 +6,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class ProductCartDTO implements ProductCartSchema {
     constructor(data: ProductCartDTO) {
-        this.productId = data.productId;
-        this.sku = data.sku;
-        this.quantity = data.quantity;
+        Object.assign(this, data);
     }
 
     @ApiProperty({

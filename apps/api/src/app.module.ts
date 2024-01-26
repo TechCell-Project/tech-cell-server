@@ -16,7 +16,7 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerStorageRedisService } from 'nestjs-throttler-storage-redis';
 import { MorganMiddleware } from './middlewares';
-import { GoogleStrategy, AccessTokenStrategy, FacebookStrategy } from '~apps/auth/strategies';
+import { GoogleStrategy, AccessTokenStrategy } from '~apps/auth/strategies';
 import { CloudinaryModule } from '~libs/third-party/cloudinary.com';
 import { MulterModule } from '@nestjs/platform-express/multer';
 import { diskStorage } from 'multer';
@@ -27,6 +27,7 @@ import { ApiTaskService } from './services';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TerminusModule } from '@nestjs/terminus';
 import { HttpModule } from '@nestjs/axios';
+import { I18nModule } from '~libs/common/i18n';
 
 @Module({
     imports: [
@@ -71,6 +72,7 @@ import { HttpModule } from '@nestjs/axios';
                 index: false,
             },
         }),
+        I18nModule,
         ScheduleModule.forRoot(),
         RabbitMQModule.registerRmq(UTILITY_SERVICE, process.env.RABBITMQ_UTILITY_QUEUE),
         RabbitMQModule.registerRmq(SEARCH_SERVICE, process.env.RABBITMQ_SEARCH_QUEUE),
@@ -91,7 +93,6 @@ import { HttpModule } from '@nestjs/axios';
         },
         GoogleStrategy,
         AccessTokenStrategy,
-        FacebookStrategy,
         ApiTaskService,
     ],
 })

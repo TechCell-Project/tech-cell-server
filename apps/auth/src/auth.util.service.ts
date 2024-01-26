@@ -1,4 +1,11 @@
-import { Injectable, Inject, Logger, HttpException, HttpStatus } from '@nestjs/common';
+import {
+    Injectable,
+    Inject,
+    Logger,
+    HttpException,
+    HttpStatus,
+    UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { TokenExpiredError } from 'jsonwebtoken';
 import { UsersService } from '~libs/resource/users';
@@ -7,9 +14,8 @@ import { ConfigService } from '@nestjs/config';
 import { JwtPayloadDto, UserDataResponseDTO } from '~apps/auth/dtos';
 import * as bcrypt from 'bcrypt';
 import { RpcException, ClientRMQ } from '@nestjs/microservices';
-import { COMMUNICATIONS_SERVICE, REDIS_CACHE, REQUIRE_USER_REFRESH } from '~libs/common/constants';
+import { COMMUNICATIONS_SERVICE, REQUIRE_USER_REFRESH } from '~libs/common/constants';
 import { OtpService } from '~libs/resource/otp';
-import { Store } from 'cache-manager';
 import {
     buildRevokeAccessTokenKey,
     buildRevokeRefreshTokenKey,
@@ -18,7 +24,9 @@ import {
 } from '~libs/common';
 import { convertTimeString, TimeUnitOutPut } from 'convert-time-string';
 import { cleanUserBeforeResponse } from '~libs/resource/users/utils';
-import { AuthExceptions } from './auth.exception';
+import { RedisService } from '~libs/common/Redis/services';
+import { I18n, I18nService } from 'nestjs-i18n';
+import { I18nTranslations } from '~libs/common/i18n/generated/i18n.generated';
 
 @Injectable()
 export class AuthUtilService {
@@ -29,7 +37,8 @@ export class AuthUtilService {
         protected configService: ConfigService,
         @Inject(COMMUNICATIONS_SERVICE) protected communicationsService: ClientRMQ,
         protected readonly otpService: OtpService,
-        @Inject(REDIS_CACHE) protected cacheManager: Store,
+        protected redisService: RedisService,
+        @I18n() protected readonly i18n: I18nService<I18nTranslations>,
     ) {}
 
     // Utils below
@@ -47,7 +56,7 @@ export class AuthUtilService {
 
     protected async checkIsRequiredRefresh(userId: string) {
         const cacheUserKey = `${REQUIRE_USER_REFRESH}_${userId}`;
-        const userFound = await this.cacheManager.get(cacheUserKey);
+        const userFound = await this.redisService.get(cacheUserKey);
         if (userFound) {
             return true;
         }
@@ -56,7 +65,7 @@ export class AuthUtilService {
 
     protected async removeRequireRefresh(userId: string) {
         const cacheUserKey = `${REQUIRE_USER_REFRESH}_${userId}`;
-        await this.cacheManager.del(cacheUserKey);
+        await this.redisService.del(cacheUserKey);
     }
 
     async buildUserTokenResponse(user: User): Promise<UserDataResponseDTO> {
@@ -97,7 +106,7 @@ export class AuthUtilService {
     protected async revokeAccessToken(accessToken: string): Promise<boolean> {
         try {
             const revokeAccessTokenKey = buildRevokeAccessTokenKey(accessToken);
-            await this.cacheManager.set(
+            await this.redisService.set(
                 revokeAccessTokenKey,
                 {
                     revoked: true,
@@ -118,7 +127,7 @@ export class AuthUtilService {
     protected async isAccessTokenRevoked(accessToken: string): Promise<boolean> {
         try {
             const revokeAccessTokenKey = buildRevokeAccessTokenKey(accessToken);
-            const isRevoked = await this.cacheManager.get(revokeAccessTokenKey);
+            const isRevoked = await this.redisService.get(revokeAccessTokenKey);
             if (isRevoked) return true;
             return false;
         } catch (error) {
@@ -130,11 +139,31 @@ export class AuthUtilService {
     protected async revokeRefreshToken(refreshToken: string): Promise<boolean> {
         try {
             const revokeRefreshTokenKey = buildRevokeRefreshTokenKey(refreshToken);
-            await this.cacheManager.set(
+            const isExitsInStore = await this.redisService.get<{
+                refreshToken: string;
+                usedTimeRemaining?: number;
+            }>(revokeRefreshTokenKey);
+
+            if (isExitsInStore && isExitsInStore?.usedTimeRemaining > 1) {
+                await this.redisService.set(
+                    revokeRefreshTokenKey,
+                    {
+                        refreshToken,
+                        usedTimeRemaining: isExitsInStore?.usedTimeRemaining - 1,
+                    },
+                    convertTimeString(process.env.JWT_REFRESH_TOKEN_EXPIRE_TIME_STRING),
+                );
+                return true;
+            }
+
+            await this.redisService.set(
                 revokeRefreshTokenKey,
                 {
-                    revoked: true,
                     refreshToken,
+                    usedTimeRemaining:
+                        process.env.JWT_REFRESH_TOKEN_MAX_USED_TIME !== undefined
+                            ? +process.env.JWT_REFRESH_TOKEN_MAX_USED_TIME
+                            : 5,
                 },
                 convertTimeString(process.env.JWT_REFRESH_TOKEN_EXPIRE_TIME_STRING),
             );
@@ -148,8 +177,15 @@ export class AuthUtilService {
     protected async isRefreshTokenRevoked(refreshToken: string): Promise<boolean> {
         try {
             const revokeRefreshTokenKey = buildRevokeRefreshTokenKey(refreshToken);
-            const isRevoked = await this.cacheManager.get(revokeRefreshTokenKey);
-            if (isRevoked) return true;
+            const isRevoked = await this.redisService.get<{
+                refreshToken: string;
+                usedTimeRemaining?: number;
+            }>(revokeRefreshTokenKey);
+
+            if (isRevoked && isRevoked?.usedTimeRemaining < 1) {
+                return true;
+            }
+
             return false;
         } catch (error) {
             this.logger.error(`Error when check revoked refresh token: ${error.message}`);
@@ -165,9 +201,25 @@ export class AuthUtilService {
             return dataVerified;
         } catch (error) {
             if (error instanceof TokenExpiredError) {
-                throw new RpcException(AuthExceptions.tokenIsExpired);
+                throw new RpcException(
+                    new UnauthorizedException(
+                        this.i18n.t('errorMessage.PROPERTY_IS_EXPIRED', {
+                            args: {
+                                property: 'Token',
+                            },
+                        }),
+                    ),
+                );
             }
-            throw new RpcException(AuthExceptions.tokenIsInvalid);
+            throw new RpcException(
+                new UnauthorizedException(
+                    this.i18n.t('errorMessage.PROPERTY_IS_INVALID', {
+                        args: {
+                            property: 'Token',
+                        },
+                    }),
+                ),
+            );
         }
     }
 
@@ -212,9 +264,9 @@ export class AuthUtilService {
 
     protected async limitEmailSent(email: string) {
         const cacheKey = `EMAIL_SENT_${email}`;
-        const isEmailSentTimes = await this.cacheManager.get(cacheKey);
+        const isEmailSentTimes = await this.redisService.get(cacheKey);
         if (!isEmailSentTimes) {
-            return await this.cacheManager.set(cacheKey, { times: 1 }, convertTimeString('30m'));
+            return await this.redisService.set(cacheKey, { times: 1 }, convertTimeString('30m'));
         }
 
         const times = Number(isEmailSentTimes['times']);
@@ -223,15 +275,14 @@ export class AuthUtilService {
                 new HttpException(
                     {
                         statusCode: HttpStatus.TOO_MANY_REQUESTS,
-                        message: 'You have sent too many emails, please try again later.',
-                        error: 'Too Many Requests',
+                        message: this.i18n.t('errorMessage.TOO_MANY_EMAIL_SENT'),
                     },
                     HttpStatus.TOO_MANY_REQUESTS,
                 ),
             );
         }
 
-        return await this.cacheManager.set(
+        return await this.redisService.set(
             cacheKey,
             { times: times + 1 },
             convertTimeString('30m'),

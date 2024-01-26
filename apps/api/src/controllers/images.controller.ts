@@ -1,4 +1,4 @@
-import { AdminGuard, catchException } from '~libs/common';
+import { AuthGuard } from '~libs/common';
 import {
     BadRequestException,
     Controller,
@@ -15,6 +15,7 @@ import {
     UseInterceptors,
     UploadedFiles,
     Req,
+    Headers,
 } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
@@ -41,9 +42,14 @@ import {
     IMAGE_FILE_MAX_SIZE_IN_BYTES,
     IMAGE_FILE_MAX_SIZE_IN_MB,
     SINGLE_IMAGE_FILE_MAX_COUNT,
+    IMAGE_FILE_ACCEPTED_EXTENSIONS,
 } from '~libs/common/constants/api.constant';
 import { MANAGEMENTS_SERVICE } from '~libs/common/constants/services.constant';
 import { Request } from 'express';
+import { I18nContext } from 'nestjs-i18n';
+import { I18nTranslations } from '~libs/common/i18n/generated/i18n.generated';
+import { sendMessagePipeException } from '~libs/common/RabbitMQ/rmq.util';
+import { THeaders } from '~libs/common/types/common.type';
 
 @ApiBadRequestResponse({
     description: 'Invalid request, please check your request data!',
@@ -78,10 +84,13 @@ export class ImagesController {
         description: 'Image not found',
     })
     @Get('/:publicId')
-    async getImageByPublicId(@Param() { publicId }: PublicIdDTO) {
-        return this.managementsService
-            .send(ImagesMntMessagePattern.getImageByPublicId, { publicId })
-            .pipe(catchException());
+    async getImageByPublicId(@Headers() headers: THeaders, @Param() { publicId }: PublicIdDTO) {
+        return sendMessagePipeException({
+            client: this.managementsService,
+            pattern: ImagesMntMessagePattern.getImageByPublicId,
+            data: { publicId },
+            headers,
+        });
     }
 
     @ApiOperation({
@@ -102,11 +111,35 @@ export class ImagesController {
                 fileSize: IMAGE_FILE_MAX_SIZE_IN_BYTES,
             },
             fileFilter: (req, file, cb) => {
-                if (!RegExp(/\.(jpg|jpeg|png|gif|webp)$/).exec(file.originalname)) {
-                    return cb(new BadRequestException('Only image files are allowed!'), false);
+                if (
+                    !RegExp(`\\.(${IMAGE_FILE_ACCEPTED_EXTENSIONS})$`).exec(
+                        file.originalname?.toLowerCase(),
+                    )
+                ) {
+                    return cb(
+                        new BadRequestException(
+                            I18nContext.current<I18nTranslations>().t(
+                                'errorMessage.ONLY_IMAGE_FILE_IS_ACCEPTED',
+                            ),
+                        ),
+                        false,
+                    );
                 }
                 if (file.size > IMAGE_FILE_MAX_SIZE_IN_BYTES) {
-                    return cb(new PayloadTooLargeException('Image size too large'), false);
+                    return cb(
+                        new PayloadTooLargeException(
+                            I18nContext.current<I18nTranslations>().t(
+                                'errorMessage.FILE_IS_TOO_LARGE_PROPERTY',
+                                {
+                                    args: {
+                                        maxSize: IMAGE_FILE_MAX_SIZE_IN_MB,
+                                        maxCount: SINGLE_IMAGE_FILE_MAX_COUNT,
+                                    },
+                                },
+                            ),
+                        ),
+                        false,
+                    );
                 }
                 cb(null, true);
             },
@@ -126,8 +159,9 @@ export class ImagesController {
         },
     })
     @Post('/')
-    @UseGuards(AdminGuard)
+    @UseGuards(AuthGuard)
     async uploadSingleImage(
+        @Headers() headers: THeaders,
         @UploadedFile(
             new ParseFilePipe({
                 validators: [
@@ -143,9 +177,12 @@ export class ImagesController {
         @Req() req: Request,
     ) {
         const imageUrl = ImagesController.buildUploadImageUrl(req, image.filename);
-        return this.managementsService
-            .send(ImagesMntMessagePattern.uploadSingleImage, { image, imageUrl })
-            .pipe(catchException());
+        return sendMessagePipeException({
+            client: this.managementsService,
+            pattern: ImagesMntMessagePattern.uploadSingleImage,
+            data: { image, imageUrl },
+            headers,
+        });
     }
 
     @ApiOperation({
@@ -182,19 +219,44 @@ export class ImagesController {
                 fileSize: IMAGE_FILE_MAX_SIZE_IN_BYTES,
             },
             fileFilter: (req, file, cb) => {
-                if (!RegExp(/\.(jpg|jpeg|png|gif|webp)$/).exec(file.originalname)) {
-                    return cb(new BadRequestException('Only image files are allowed!'), false);
+                if (
+                    !RegExp(`\\.(${IMAGE_FILE_ACCEPTED_EXTENSIONS})$`).exec(
+                        file.originalname?.toLowerCase(),
+                    )
+                ) {
+                    return cb(
+                        new BadRequestException(
+                            I18nContext.current<I18nTranslations>().t(
+                                'errorMessage.ONLY_IMAGE_FILE_IS_ACCEPTED',
+                            ),
+                        ),
+                        false,
+                    );
                 }
                 if (file.size > IMAGE_FILE_MAX_SIZE_IN_BYTES) {
-                    return cb(new PayloadTooLargeException('Image size too large'), false);
+                    return cb(
+                        new PayloadTooLargeException(
+                            I18nContext.current<I18nTranslations>().t(
+                                'errorMessage.FILE_IS_TOO_LARGE_PROPERTY',
+                                {
+                                    args: {
+                                        maxSize: IMAGE_FILE_MAX_SIZE_IN_MB,
+                                        maxCount: ARRAY_IMAGE_FILE_MAX_COUNT,
+                                    },
+                                },
+                            ),
+                        ),
+                        false,
+                    );
                 }
                 cb(null, true);
             },
         }),
     )
     @Post('/array')
-    @UseGuards(AdminGuard)
+    @UseGuards(AuthGuard)
     async uploadArrayImages(
+        @Headers() headers: THeaders,
         @UploadedFiles(
             new ParseFilePipe({
                 validators: [
@@ -212,8 +274,11 @@ export class ImagesController {
         const imageUrls = images.map((image) =>
             ImagesController.buildUploadImageUrl(req, image.filename),
         );
-        return this.managementsService
-            .send(ImagesMntMessagePattern.uploadArrayImage, { images, imageUrls })
-            .pipe(catchException());
+        return sendMessagePipeException({
+            client: this.managementsService,
+            pattern: ImagesMntMessagePattern.uploadArrayImage,
+            data: { images, imageUrls },
+            headers,
+        });
     }
 }

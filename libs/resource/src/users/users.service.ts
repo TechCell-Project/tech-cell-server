@@ -5,6 +5,8 @@ import { CreateUserDTO } from './dtos';
 import { User } from './schemas/user.schema';
 import { RpcException } from '@nestjs/microservices';
 import { FilterQuery, ProjectionType, QueryOptions } from 'mongoose';
+import { I18nContext } from 'nestjs-i18n';
+import { I18nTranslations } from '~libs/common/i18n/generated/i18n.generated';
 
 @Injectable()
 export class UsersService {
@@ -34,11 +36,27 @@ export class UsersService {
         ]);
 
         if (emailCount > 0) {
-            throw new RpcException(new UnprocessableEntityException('Email already exists.'));
+            throw new RpcException(
+                new UnprocessableEntityException(
+                    I18nContext.current<I18nTranslations>().t('errorMessage.PROPERTY_IS_EXISTS', {
+                        args: {
+                            property: 'Email',
+                        },
+                    }),
+                ),
+            );
         }
 
         if (userNameCount > 0) {
-            throw new RpcException(new UnprocessableEntityException('Username already exists.'));
+            throw new RpcException(
+                new UnprocessableEntityException(
+                    I18nContext.current<I18nTranslations>().t('errorMessage.PROPERTY_IS_EXISTS', {
+                        args: {
+                            property: 'Username',
+                        },
+                    }),
+                ),
+            );
         }
     }
 

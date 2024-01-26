@@ -1,28 +1,34 @@
-import { Attribute } from '~libs/resource/attributes';
 import { Type } from 'class-transformer';
-import { IsLowercase, IsNotEmpty, IsOptional, IsString, Matches } from 'class-validator';
+import { IsLowercase, IsOptional, Matches, ValidateNested } from 'class-validator';
+import { i18nValidationMessage } from 'nestjs-i18n';
+import { IsNotEmptyI18n, IsStringI18n } from '~libs/common/i18n';
+import { I18nTranslations } from '~libs/common/i18n/generated/i18n.generated';
+import { AttributeDTO } from '~libs/resource/attributes/dtos';
 
 export class CreateCategoryDTO {
-    @IsString()
-    @IsNotEmpty()
+    @IsStringI18n()
+    @IsNotEmptyI18n()
     name: string;
 
-    @IsString()
-    @IsNotEmpty()
+    @IsStringI18n()
+    @IsNotEmptyI18n()
     @IsLowercase()
-    @Matches(/^[a-z_]*[a-z][a-z_]*$/, {
-        message: 'Label must only contain lowercase letters and optional underscores',
+    @Matches(/^[a-z0-9_]*[a-z0-9][a-z0-9_]*$/, {
+        message: i18nValidationMessage<I18nTranslations>(
+            'validation.ONLY_LOWER_CASE_OPTIONAL_UNDERSCORE',
+        ),
     })
     label: string;
 
-    @IsString()
-    @IsNotEmpty()
+    @IsStringI18n()
+    @IsNotEmptyI18n()
     description: string;
 
-    @IsString()
+    @IsStringI18n()
     @IsOptional()
     url: string;
 
-    @Type(() => Attribute)
-    requireAttributes: Attribute[];
+    @Type(() => AttributeDTO)
+    @ValidateNested({ each: true })
+    requireAttributes: AttributeDTO[];
 }

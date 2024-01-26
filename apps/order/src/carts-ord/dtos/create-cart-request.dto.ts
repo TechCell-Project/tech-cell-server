@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsMongoId, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { Types } from 'mongoose';
+import { IsMongoIdI18n, IsNotEmptyI18n, IsNumberI18n, IsStringI18n } from '~libs/common/i18n';
 
 export class AddCartRequestDTO {
     constructor(cartData: AddCartRequestDTO) {
@@ -11,8 +11,8 @@ export class AddCartRequestDTO {
     }
 
     @ApiProperty({ type: String, description: 'Product ID', example: '5f9d5f3b9d6b2b0017b6d5a0' })
-    @IsNotEmpty()
-    @IsMongoId({ message: 'Invalid product id' })
+    @IsNotEmptyI18n()
+    @IsMongoIdI18n()
     productId: Types.ObjectId;
 
     @ApiProperty({
@@ -20,8 +20,8 @@ export class AddCartRequestDTO {
         description: "sku of product's variation",
         example: 'iphone_13-color.black-storage.128.gb',
     })
-    @IsNotEmpty()
-    @IsString()
+    @IsNotEmptyI18n()
+    @IsStringI18n()
     sku: string;
 
     @ApiProperty({
@@ -30,8 +30,8 @@ export class AddCartRequestDTO {
             'Quantity of product, can be a negative to reduce quantity or remove product from cart',
         example: 1,
     })
-    @IsNotEmpty()
-    @IsNumber()
+    @IsNotEmptyI18n()
+    @IsNumberI18n()
     @Type(() => Number)
     quantity: number;
 }

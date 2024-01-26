@@ -6,29 +6,28 @@ import {
     WebSocketServer,
     MessageBody,
     SubscribeMessage,
-    WsResponse,
+    ConnectedSocket,
 } from '@nestjs/websockets';
 import { firstValueFrom, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Server, Socket } from 'socket.io';
-import { NotificationsMessageSubscribe } from '../constants/notifications.message';
-import { Logger, UseGuards } from '@nestjs/common';
-import { ClientRMQ } from '@nestjs/microservices';
+import { NotificationsMessagePublish } from '../constants/notifications.message';
+import { Logger } from '@nestjs/common';
+import { ClientRMQ, RmqRecordBuilder } from '@nestjs/microservices';
 import { ITokenVerifiedResponse } from '~apps/auth/interfaces';
 import { AuthMessagePattern } from '~apps/auth/auth.pattern';
-import { AuthGuard } from '~libs/common';
 import { UserRole } from '~libs/resource/users/enums';
 import { NotifyRoom } from '../constants/notifications.constant';
 import { NotificationService } from '~libs/resource';
 import { Types } from 'mongoose';
-import { CurrentUser } from '~libs/common/decorators';
-import { TCurrentUser } from '~libs/common/types';
 import { instrument, RedisStore } from '@socket.io/admin-ui';
 import { RedisService } from '~libs/common/Redis/services/redis.service';
+import { AuthCoreGuard } from '~libs/common/guards/auth.core.guard';
+import { NotificationId } from '../dtos';
 
 @WebSocketGateway({
     cors: {
-        origin: '*',
+        origin: process.env.SOCKET_CORS_HOST?.split(',')?.map((host) => host?.trim()),
         credentials: true,
     },
 })
@@ -44,20 +43,18 @@ export class NotificationsGateway
         protected readonly redisService: RedisService,
     ) {}
 
-    @WebSocketServer()
-    readonly server: Server;
+    @WebSocketServer() public readonly socketServer: Server;
 
     async afterInit() {
-        this.logger.log('Notification gateway initialized');
+        this.logger.debug('Notification gateway initialized');
         this.connectedClients = new Map<string, Socket>();
-        instrument(this.server, {
+        instrument(this.socketServer, {
             mode: 'development',
             auth: {
                 type: 'basic',
                 username: process.env.SOCKET_ADMIN_USER,
                 password: process.env.SOCKET_ADMIN_PASSWORD,
             },
-            namespaceName: 'notifications',
             store: new RedisStore(this.redisService.getClient()),
         });
     }
@@ -68,27 +65,30 @@ export class NotificationsGateway
     async handleConnection(client: Socket) {
         const userVerified: ITokenVerifiedResponse | null = await this.authenticateClient(client);
         if (!userVerified) {
-            return client.disconnect(true);
+            this.logger.debug(`Client ${client.id} connected to server as guest`);
+            return;
         }
 
         const rooms = [NotifyRoom.AllUserRoom, `user_id_${userVerified._id}`];
-        if (userVerified.role === UserRole.SuperAdmin) {
-            rooms.push(NotifyRoom.SuperAdminRoom, NotifyRoom.AdminRoom);
+
+        switch (userVerified.role) {
+            case UserRole.SuperAdmin:
+                rooms.push(NotifyRoom.SuperAdminRoom);
+                break;
+            case UserRole.Admin:
+                rooms.push(NotifyRoom.AdminRoom);
+                break;
+            case UserRole.Mod:
+                rooms.push(NotifyRoom.ModRoom);
+                break;
+            case UserRole.User:
+                rooms.push(NotifyRoom.UserRoom);
+                break;
+            default:
+                break;
         }
 
-        if (userVerified.role === UserRole.Admin) {
-            rooms.push(NotifyRoom.AdminRoom);
-        }
-
-        if (userVerified.role === UserRole.Mod) {
-            rooms.push(NotifyRoom.ModRoom);
-        }
-
-        if (userVerified.role === UserRole.User) {
-            rooms.push(NotifyRoom.UserRoom);
-        }
-
-        this.logger.log(`Client ${client.id} connected to ${rooms.join(', ')}`);
+        this.logger.debug(`Client ${client.id} connected to ${rooms.join(', ')}`);
         this.connectedClients.set(client.id, client);
         return client.join(rooms);
     }
@@ -97,24 +97,31 @@ export class NotificationsGateway
      * @description Handle disconnect from client
      */
     async handleDisconnect(client: Socket) {
-        this.logger.log(`Client ${client.id} disconnected`);
+        this.logger.debug(`Client ${client.id} disconnected`);
         this.connectedClients.delete(client.id);
     }
 
-    @UseGuards(AuthGuard)
-    @SubscribeMessage(NotificationsMessageSubscribe.MarkNotificationAsRead)
+    @SubscribeMessage(NotificationsMessagePublish.MarkNotificationAsRead)
     async markNotificationAsRead(
-        @MessageBody() { notificationId }: { notificationId: string },
-        @CurrentUser() user: TCurrentUser,
-    ): Promise<
-        WsResponse<{
-            isSuccess: boolean;
-            message: string;
-        }>
-    > {
-        if (!notificationId) {
+        @ConnectedSocket() client: Socket,
+        @MessageBody() { notificationId }: NotificationId,
+    ) {
+        this.logger.debug(`Client ${client.id} called mark notification as read`);
+        if (!client.handshake.auth.user) {
+            this.logger.debug(`Client ${client.id} is not authenticated`);
             return {
-                event: NotificationsMessageSubscribe.MarkNotificationAsRead,
+                event: NotificationsMessagePublish.MarkNotificationAsRead,
+                data: {
+                    isSuccess: false,
+                    message: 'Unauthorized',
+                },
+            };
+        }
+
+        if (!notificationId) {
+            this.logger.debug(`Client ${client.id} notification id is required`);
+            return {
+                event: NotificationsMessagePublish.MarkNotificationAsRead,
                 data: {
                     isSuccess: false,
                     message: 'Notification id is required',
@@ -123,8 +130,9 @@ export class NotificationsGateway
         }
 
         if (!Types.ObjectId.isValid(notificationId)) {
+            this.logger.debug(`Client ${client.id} notification id is invalid`);
             return {
-                event: NotificationsMessageSubscribe.MarkNotificationAsRead,
+                event: NotificationsMessagePublish.MarkNotificationAsRead,
                 data: {
                     isSuccess: false,
                     message: 'Notification id is invalid',
@@ -134,11 +142,12 @@ export class NotificationsGateway
 
         const notification = await this.notificationService.markNotificationAsRead({
             _id: new Types.ObjectId(notificationId),
-            recipientId: new Types.ObjectId(user._id),
+            recipientId: new Types.ObjectId(client.handshake.auth.user._id),
         });
         if (notification === null) {
+            this.logger.debug(`Client ${client.id} notification not found`);
             return {
-                event: NotificationsMessageSubscribe.MarkNotificationAsRead,
+                event: NotificationsMessagePublish.MarkNotificationAsRead,
                 data: {
                     isSuccess: false,
                     message: 'Notification not found',
@@ -147,8 +156,9 @@ export class NotificationsGateway
         }
 
         if (notification === false) {
+            this.logger.debug(`Client ${client.id} notification already read`);
             return {
-                event: NotificationsMessageSubscribe.MarkNotificationAsRead,
+                event: NotificationsMessagePublish.MarkNotificationAsRead,
                 data: {
                     isSuccess: false,
                     message: 'Notification already read',
@@ -156,8 +166,9 @@ export class NotificationsGateway
             };
         }
 
+        this.logger.debug(`Client ${client.id} mark notification as read successfully`);
         return {
-            event: NotificationsMessageSubscribe.MarkNotificationAsRead,
+            event: NotificationsMessagePublish.MarkNotificationAsRead,
             data: {
                 isSuccess: true,
                 message: 'Mark notification as read successfully',
@@ -172,7 +183,10 @@ export class NotificationsGateway
      * @param client Socket client
      * @returns ITokenVerifiedResponse | null
      */
-    private async authenticateClient(client: Socket): Promise<ITokenVerifiedResponse> | null {
+    private async authenticateClient(
+        client: Socket,
+        guard?: AuthCoreGuard,
+    ): Promise<ITokenVerifiedResponse> | null {
         let authHeaderParts = client.handshake?.headers?.authorization?.split(' ');
         if (!authHeaderParts) {
             authHeaderParts = client.handshake?.auth?.token?.split(' ');
@@ -181,8 +195,16 @@ export class NotificationsGateway
             return null;
         }
         const [, jwt] = authHeaderParts;
+        const record = new RmqRecordBuilder()
+            .setOptions({
+                headers: {
+                    'x-lang': 'en',
+                },
+            })
+            .setData({ jwt })
+            .build();
         const userVerified: ITokenVerifiedResponse = await firstValueFrom(
-            this.authService.send(AuthMessagePattern.verifyJwt, { jwt }).pipe(
+            this.authService.send(AuthMessagePattern.verifyJwt, record).pipe(
                 catchError(() => {
                     return of(null);
                 }),
@@ -190,6 +212,10 @@ export class NotificationsGateway
         );
 
         if (!userVerified) {
+            return null;
+        }
+
+        if (guard && !guard._acceptRoles.includes(userVerified.role)) {
             return null;
         }
 

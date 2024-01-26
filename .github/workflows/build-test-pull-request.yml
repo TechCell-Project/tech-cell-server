@@ -1,0 +1,57 @@
+name: Build and test on pull request
+
+on:
+    pull_request:
+        branches: ['*']
+
+jobs:
+    select-runner:
+        runs-on: ubuntu-latest
+        outputs:
+            runner-label: ${{ steps.set-runner.outputs.runner-label }}
+
+        steps:
+            - name: Set runner
+              id: set-runner
+              run: |
+                  # This script checks if the pull request has the label "run-self-hosted" and if so, and a self-hosted runner is available, runs the job on the self-hosted runner.
+                  runner_label="ubuntu-latest"
+                  trap 'echo "runner-label=$runner_label" >> $GITHUB_OUTPUT' ERR
+
+                  if [ "${{ github.event_name }}" = "pull_request" ]; then
+                      labels=$(curl -s -H "Accept: application/vnd.github+json" -H "Authorization: token ${{ secrets.REPO_ACCESS_TOKEN }}" "${{ github.event.pull_request.url }}/labels")
+                      if echo "$labels" | jq -e '.[] | select(.name == "run-self-hosted")' > /dev/null; then
+                          runners=$(curl -s -H "Accept: application/vnd.github+json" -H "Authorization: token ${{ secrets.REPO_ACCESS_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/actions/runners")
+                          available=$(echo "$runners" | jq '.runners[] | select(.status == "online" and .busy == false and .labels[] .name == "self-hosted")')
+                          if [ -n "$available" ]; then
+                              runner_label="self-hosted"
+                          fi
+                      fi
+                  fi
+
+                  echo "runner-label=$runner_label" >> $GITHUB_OUTPUT
+
+    automation-tests:
+        needs: select-runner
+        runs-on: ${{ needs.select-runner.outputs.runner-label }}
+
+        steps:
+            - name: Log runner label
+              run: echo "Running on runner ${{ needs.select-runner.outputs.runner-label }}"
+
+            - name: Checkout code
+              uses: actions/checkout@v3
+
+            - name: Use Node.js 18.x
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 18.x
+
+            - name: Install dependencies
+              run: yarn install
+
+            - name: Build all services
+              run: yarn build:all
+
+            - name: Run unit tests
+              run: yarn test

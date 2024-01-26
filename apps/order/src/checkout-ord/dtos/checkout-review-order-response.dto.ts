@@ -1,12 +1,12 @@
 import { ApiProperty, IntersectionType } from '@nestjs/swagger';
 import { ReviewOrderRequestDTO } from './checkout-review-order-request.dto';
-import { IsNumber } from 'class-validator';
+import { IsNumberI18n } from '~libs/common/i18n';
 
 export class ReviewOrderResponseDTO extends IntersectionType(ReviewOrderRequestDTO) {
     constructor(data: ReviewOrderResponseDTO) {
         super(data);
-        this.addressSelected = super.addressSelected;
-        this.productSelected = super.productSelected;
+        this.addressSelected = data.addressSelected;
+        this.productSelected = data.productSelected;
         this.totalShipping = data.totalShipping;
         this.totalOrder = data.totalOrder;
     }
@@ -15,13 +15,13 @@ export class ReviewOrderResponseDTO extends IntersectionType(ReviewOrderRequestD
         description: 'Total shipping fee',
         example: 20000,
     })
-    @IsNumber()
+    @IsNumberI18n()
     totalShipping: number;
 
     @ApiProperty({
         description: 'Total order',
         example: 20000000,
     })
-    @IsNumber()
+    @IsNumberI18n()
     totalOrder: number;
 }

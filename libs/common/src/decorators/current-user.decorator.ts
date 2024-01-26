@@ -3,18 +3,18 @@ import { TCurrentUser, RequestType } from '../types';
 
 export const getCurrentUserByContext = (context: ExecutionContext): TCurrentUser | null => {
     switch (context.getType()?.toLowerCase()) {
-        case RequestType.Http:
+        case RequestType.Http: {
             const request = context.switchToHttp().getRequest();
             return request.user;
-
-        case RequestType.Rpc:
+        }
+        case RequestType.Rpc: {
             const ctx = context.switchToRpc().getData();
             return ctx.user;
-
-        case RequestType.Ws:
+        }
+        case RequestType.Ws: {
             const client = context.switchToWs().getClient();
             return client.handshake.auth.user;
-
+        }
         default:
             return null;
     }

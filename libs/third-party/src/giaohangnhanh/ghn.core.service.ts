@@ -1,6 +1,6 @@
 import { HttpService } from '@nestjs/axios';
-import { Logger } from '@nestjs/common';
-import { AxiosError } from 'axios';
+import { BadRequestException, InternalServerErrorException, Logger } from '@nestjs/common';
+import { AxiosError, AxiosResponse } from 'axios';
 import { catchError, firstValueFrom, map } from 'rxjs';
 import { GhnProvinceDTO } from './dtos/province.dto';
 import { GhnDistrictDTO } from './dtos/district.dto';
@@ -8,13 +8,19 @@ import { GhnWardDTO } from './dtos/ward.dto';
 import { GetShippingFeeDTO } from './dtos/get-shipping-fee.dto';
 import { TGhnDistrict, TGhnProvince, TGhnWard } from './types';
 import { TShippingFeeResponse } from './types/shipping-fee-response.ghn';
+import { I18nContext } from 'nestjs-i18n';
+import { I18nTranslations } from '~libs/common/i18n/generated';
+import { StatusEnum, SupportTypeEnum } from './enums';
 
 export class GhnCoreService {
     private GHN_URL: string = process.env.GHN_URL;
     private GHN_SHOP_ID: string | number = +process.env.GHN_SHOP_ID;
     private GHN_API_TOKEN: string = process.env.GHN_API_TOKEN;
 
-    constructor(protected readonly httpService: HttpService, protected readonly logger: Logger) {
+    constructor(
+        protected readonly httpService: HttpService,
+        protected readonly logger: Logger,
+    ) {
         this.logger = new Logger(GhnCoreService.name);
 
         this.httpService.axiosRef.defaults.headers = Object.assign(
@@ -35,10 +41,11 @@ export class GhnCoreService {
                 catchError((error: AxiosError) => {
                     throw error;
                 }),
-                map((response) =>
-                    (response.data.data as TGhnProvince[])?.map(
-                        (province) => new GhnProvinceDTO(province),
-                    ),
+                map(
+                    (response) =>
+                        (response.data.data as TGhnProvince[])?.map(
+                            (province) => new GhnProvinceDTO(province),
+                        ),
                 ),
             ),
         );
@@ -58,10 +65,11 @@ export class GhnCoreService {
                     catchError((error: AxiosError) => {
                         throw error;
                     }),
-                    map((response) =>
-                        (response.data.data as TGhnDistrict[])?.map(
-                            (district) => new GhnDistrictDTO(district),
-                        ),
+                    map(
+                        (response) =>
+                            (response.data.data as TGhnDistrict[])?.map(
+                                (district) => new GhnDistrictDTO(district),
+                            ),
                     ),
                 ),
         );
@@ -82,8 +90,9 @@ export class GhnCoreService {
                     catchError((error: AxiosError) => {
                         throw error;
                     }),
-                    map((response) =>
-                        (response.data.data as TGhnWard[])?.map((ward) => new GhnWardDTO(ward)),
+                    map(
+                        (response: AxiosResponse) =>
+                            (response.data.data as TGhnWard[])?.map((ward) => new GhnWardDTO(ward)),
                     ),
                 ),
         );
@@ -94,16 +103,55 @@ export class GhnCoreService {
     protected async getShippingFee(data: GetShippingFeeDTO): Promise<TShippingFeeResponse> {
         const url = '/shiip/public-api/v2/shipping-order/fee';
         const bodyPayload = new GetShippingFeeDTO(data);
+
+        const isCanShip = await this.checkIsAddressLock(
+            data.province_id,
+            data.to_district_id,
+            data.to_ward_code,
+        );
+        if (!isCanShip) {
+            throw new BadRequestException(
+                I18nContext.current<I18nTranslations>().t('errorMessage.NOT_SUPPORT_SHIP'),
+            );
+        }
+
         const response = await firstValueFrom(
             this.httpService.post(url, bodyPayload).pipe(
                 catchError((error: AxiosError) => {
-                    this.logger.error(error);
-                    throw new Error(error.message);
+                    this.logger.error(error.response.data);
+                    throw new InternalServerErrorException(
+                        I18nContext.current<I18nTranslations>().t('errorMessage.THIRD_PARTY_ERROR'),
+                    );
                 }),
                 map((response) => response.data.data as TShippingFeeResponse),
             ),
         );
 
         return response;
+    }
+
+    protected async checkIsAddressLock(provinceId: number, districtId: number, wardCode: string) {
+        const provinceTo = (await this.getProvinces()).find(
+            (province) => province.province_id === provinceId,
+        );
+        if (provinceTo?.status === StatusEnum.disable_route) {
+            return false;
+        }
+
+        const districtTo = (await this.getDistricts(provinceId)).find(
+            (district) => district.district_id === districtId,
+        );
+        if (districtTo?.support_type === SupportTypeEnum.lock_route) {
+            return false;
+        }
+
+        const wardTo = (await this.getWards(districtId)).find(
+            (ward) => ward.ward_code === wardCode,
+        );
+        if (wardTo?.support_type === SupportTypeEnum.lock_route) {
+            return false;
+        }
+
+        return true;
     }
 }

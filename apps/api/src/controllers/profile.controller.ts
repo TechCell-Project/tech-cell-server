@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Inject, Patch, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Inject, Patch, UseGuards, Headers } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~libs/common/constants';
 import {
@@ -14,7 +14,7 @@ import {
     ApiTooManyRequestsResponse,
     ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { AuthGuard, catchException } from '~libs/common';
+import { AuthGuard } from '~libs/common';
 import { CurrentUser } from '~libs/common/decorators';
 import { TCurrentUser } from '~libs/common/types';
 import { UserMntResponseDTO } from '~libs/resource/users/dtos';
@@ -25,6 +25,8 @@ import {
     UpdateUserRequestDTO,
     UsersMntMessagePattern,
 } from '~apps/managements/users-mnt';
+import { sendMessagePipeException } from '~libs/common/RabbitMQ/rmq.util';
+import { THeaders } from '~libs/common/types/common.type';
 
 @ApiBadRequestResponse({
     description: 'Invalid request, please check your request data!',
@@ -60,10 +62,13 @@ export class ProfileController {
     })
     @ApiOkResponse({ description: 'Get current user info success', type: UserMntResponseDTO })
     @Get('/')
-    async getProfile(@CurrentUser() user: TCurrentUser) {
-        return this.searchService
-            .send(UsersSearchMessagePattern.getUserById, { id: user._id })
-            .pipe(catchException());
+    async getProfile(@Headers() headers: THeaders, @CurrentUser() user: TCurrentUser) {
+        return sendMessagePipeException({
+            client: this.searchService,
+            pattern: UsersSearchMessagePattern.getUserById,
+            data: { id: user._id },
+            headers,
+        });
     }
 
     @ApiOperation({
@@ -73,12 +78,16 @@ export class ProfileController {
     @ApiOkResponse({ description: 'Update current user info success', type: UserMntResponseDTO })
     @Patch('/info')
     async updateUserInfo(
+        @Headers() headers: THeaders,
         @CurrentUser() user: TCurrentUser,
         @Body() dataUpdate: UpdateUserRequestDTO,
     ) {
-        return this.managementsService
-            .send(UsersMntMessagePattern.updateUserInfo, { user, dataUpdate })
-            .pipe(catchException());
+        return sendMessagePipeException({
+            client: this.managementsService,
+            pattern: UsersMntMessagePattern.updateUserInfo,
+            data: { user, dataUpdate },
+            headers,
+        });
     }
 
     @ApiOperation({
@@ -89,11 +98,15 @@ export class ProfileController {
     @ApiOkResponse({ description: 'Update current user address success', type: UserMntResponseDTO })
     @Patch('/address')
     async updateUserAddress(
+        @Headers() headers: THeaders,
         @CurrentUser() user: TCurrentUser,
         @Body() addressData: UpdateUserAddressRequestDTO,
     ) {
-        return this.managementsService
-            .send(UsersMntMessagePattern.updateUserAddress, { user, addressData })
-            .pipe(catchException());
+        return sendMessagePipeException({
+            client: this.managementsService,
+            pattern: UsersMntMessagePattern.updateUserAddress,
+            data: { user, addressData },
+            headers,
+        });
     }
 }

@@ -30,10 +30,12 @@ class ShippingOrderDTO implements ShippingOrderSchema {
 class PaymentOrderDTO implements PaymentOrder {
     method: string;
     status: string;
+    paymentUrl?: string;
 }
 
 export class CreateOrderDTO implements Omit<Order, '_id'> {
     constructor(data: CreateOrderDTO) {
+        this._id = data._id;
         this.userId = data.userId;
         this.products = data.products;
         this.checkoutOrder = data.checkoutOrder;
@@ -43,6 +45,7 @@ export class CreateOrderDTO implements Omit<Order, '_id'> {
         this.orderStatus = data.orderStatus;
     }
 
+    _id: Types.ObjectId;
     userId: Types.ObjectId;
     products: Array<ProductOrderDTO>;
     checkoutOrder: CheckoutOrderDTO;

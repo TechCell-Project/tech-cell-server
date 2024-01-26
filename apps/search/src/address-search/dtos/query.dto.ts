@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsNumber } from 'class-validator';
+import { IsNumberI18n } from '~libs/common/i18n/class-validator-i18n';
 
 export class QueryDistrictsDTO {
     @ApiProperty({
@@ -8,7 +8,7 @@ export class QueryDistrictsDTO {
         example: 201,
         description: 'Mã tỉnh thành',
     })
-    @IsNumber()
+    @IsNumberI18n()
     @Type(() => Number)
     province_id: number;
 }
@@ -19,7 +19,7 @@ export class QueryWardsDTO {
         example: 1490,
         description: 'Mã quận huyện',
     })
-    @IsNumber()
+    @IsNumberI18n()
     @Type(() => Number)
     district_id: number;
 }

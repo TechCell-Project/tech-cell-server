@@ -1,9 +1,17 @@
-import { IsBoolean, IsEnum, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
+import { IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { MAX_PRODUCTS_PER_PAGE } from '~libs/common/constants/product.constant';
 import { Transform, Type } from 'class-transformer';
 import { SelectType } from '~apps/search/enums';
 import { isTrueSet } from '~libs/common';
+import {
+    IsBooleanI18n,
+    IsEnumI18n,
+    IsNumberI18n,
+    IsStringI18n,
+    MaxI18n,
+    MinI18n,
+} from '~libs/common/i18n/class-validator-i18n';
 
 export class GetProductsDTO {
     constructor(data: GetProductsDTO) {
@@ -21,9 +29,9 @@ export class GetProductsDTO {
     })
     @IsOptional()
     @Type(() => Number)
-    @IsNumber()
-    @Min(1)
-    @Max(MAX_PRODUCTS_PER_PAGE)
+    @IsNumberI18n()
+    @MinI18n(1)
+    @MaxI18n(MAX_PRODUCTS_PER_PAGE)
     page?: number;
 
     @ApiProperty({
@@ -33,9 +41,9 @@ export class GetProductsDTO {
     })
     @IsOptional()
     @Type(() => Number)
-    @IsNumber()
-    @Min(1)
-    @Max(MAX_PRODUCTS_PER_PAGE)
+    @IsNumberI18n()
+    @MinI18n(1)
+    @MaxI18n(MAX_PRODUCTS_PER_PAGE)
     pageSize?: number;
 
     @ApiProperty({
@@ -43,7 +51,7 @@ export class GetProductsDTO {
         description: 'Get detail of products',
         required: false,
     })
-    @IsBoolean()
+    @IsBooleanI18n()
     @IsOptional()
     @Transform(({ value }) => isTrueSet(value))
     detail?: boolean;
@@ -56,8 +64,8 @@ export class GetProductsDTO {
         required: false,
     })
     @IsOptional()
-    @IsString()
-    @IsEnum(SelectType)
+    @IsStringI18n()
+    @IsEnumI18n(SelectType)
     select_type?: string;
 
     @ApiProperty({
@@ -66,6 +74,6 @@ export class GetProductsDTO {
         required: false,
     })
     @IsOptional()
-    @IsString()
+    @IsStringI18n()
     keyword?: string;
 }

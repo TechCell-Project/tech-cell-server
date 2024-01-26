@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AppConfigModule } from '~libs/common';
-import { RedisCacheModule } from '~libs/common/RedisCache';
+import { RedisModule } from '~libs/common/Redis';
 import { RabbitMQModule, RabbitMQService } from '~libs/common/RabbitMQ';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
@@ -11,14 +11,16 @@ import { JwtGuard } from './guards';
 import { OtpModule } from '~libs/resource/otp';
 import { COMMUNICATIONS_SERVICE } from '~libs/common/constants';
 import { AuthHealthIndicator } from './auth.health';
+import { I18nModule } from '~libs/common/i18n';
 
 @Module({
     imports: [
         AppConfigModule,
+        I18nModule,
         UsersModule,
         OtpModule,
         JwtModule.register({}),
-        RedisCacheModule,
+        RedisModule,
         RabbitMQModule,
         RabbitMQModule.registerRmq(
             COMMUNICATIONS_SERVICE,

@@ -25,17 +25,22 @@ export class OrdersService {
         return this.orderRepository.create(data, {}, session);
     }
 
-    async getOrder(
-        filter: FilterQuery<Order>,
-        queryOptions?: QueryOptions<Order>,
-        projection?: ProjectionType<Order>,
-        session?: ClientSession,
-    ) {
+    async getOrder({
+        filter,
+        projection,
+        queryOptions,
+        session,
+    }: {
+        filter: FilterQuery<Order>;
+        queryOptions?: QueryOptions<Order>;
+        projection?: ProjectionType<Order>;
+        session?: ClientSession;
+    }) {
         return this.orderRepository.findOne({
             filterQuery: filter,
-            queryOptions: queryOptions,
-            projection: projection,
-            session: session,
+            ...(queryOptions ?? {}),
+            projection,
+            session,
         });
     }
 
@@ -51,6 +56,23 @@ export class OrdersService {
         });
     }
 
+    async getOrdersOrNull(
+        filter: FilterQuery<Order>,
+        queryOptions?: QueryOptions<Order>,
+        projection?: ProjectionType<Order>,
+    ): Promise<Order[] | null> {
+        try {
+            const result = await this.orderRepository.find({
+                filterQuery: filter,
+                queryOptions: queryOptions,
+                projection: projection,
+            });
+            return result;
+        } catch (error) {
+            return null;
+        }
+    }
+
     async countOrders(filter: FilterQuery<Order>) {
         return this.orderRepository.count(filter);
     }
@@ -61,14 +83,14 @@ export class OrdersService {
 
     async getOrderById(id: Types.ObjectId) {
         return this.orderRepository.findOne({
-            _id: id,
+            _id: new Types.ObjectId(id),
         });
     }
 
     async getOrderByIdPopulate(id: Types.ObjectId) {
         return this.orderRepository.findOne(
             {
-                _id: id,
+                _id: new Types.ObjectId(id),
             },
             { lean: false },
         );
@@ -77,12 +99,19 @@ export class OrdersService {
     async getOrderByIdOrNull(id: Types.ObjectId) {
         try {
             const order = await this.orderRepository.findOne({
-                _id: id,
+                _id: new Types.ObjectId(id),
             });
             return order;
         } catch (error) {
             return null;
         }
+    }
+
+    async getUserOrderById(orderId: Types.ObjectId, userId: Types.ObjectId) {
+        return this.orderRepository.findOne({
+            _id: new Types.ObjectId(orderId),
+            userId: new Types.ObjectId(userId),
+        });
     }
 
     async updateOrderById(
@@ -97,7 +126,7 @@ export class OrdersService {
         try {
             result = await this.orderRepository.findOneAndUpdate(
                 {
-                    _id: orderId,
+                    _id: new Types.ObjectId(orderId),
                 },
                 dataUpdate,
                 null,
@@ -113,7 +142,7 @@ export class OrdersService {
     async getAllUserOrders(userId: Types.ObjectId, options?: QueryOptions<Order>) {
         return this.orderRepository.find({
             filterQuery: {
-                userId: userId,
+                userId: new Types.ObjectId(userId),
             },
             queryOptions: {
                 sort: {

@@ -13,7 +13,7 @@ services:
             - PGID=${PGID:-1002}
             - TZ=Etc/UTC
             - URL=techcell.cloud
-            - SUBDOMAINS=api, socket, docs, server, design
+            - SUBDOMAINS=${SSL_SUBDOMAINS}
             - VALIDATION=http
             - CERTPROVIDER=zerossl #optional
             - DNSPLUGIN=cloudflare #optional
@@ -75,11 +75,6 @@ services:
         networks:
             - techcell_backend
         restart: unless-stopped
-        healthcheck:
-            test: rabbitmq-diagnostics -q ping
-            interval: 30s
-            timeout: 30s
-            retries: 3
 
     rabbitmq2:
         container_name: rabbitmq2
@@ -95,11 +90,6 @@ services:
         networks:
             - techcell_backend
         restart: unless-stopped
-        healthcheck:
-            test: rabbitmq-diagnostics -q ping
-            interval: 30s
-            timeout: 30s
-            retries: 3
 
     rabbitmq3:
         container_name: rabbitmq3
@@ -115,11 +105,6 @@ services:
         networks:
             - techcell_backend
         restart: unless-stopped
-        healthcheck:
-            test: rabbitmq-diagnostics -q ping
-            interval: 30s
-            timeout: 30s
-            retries: 3
 
     mongodb-primary:
         container_name: mongodb-primary
@@ -136,11 +121,6 @@ services:
         networks:
             - techcell_backend
         restart: unless-stopped
-        healthcheck:
-            test: ['CMD', 'mongo', '--eval', "db.adminCommand('ping')"]
-            interval: 30s
-            timeout: 10s
-            retries: 3
 
     mongodb-secondary:
         container_name: mongodb-secondary
@@ -158,11 +138,6 @@ services:
         networks:
             - techcell_backend
         restart: unless-stopped
-        healthcheck:
-            test: ['CMD', 'mongo', '--eval', "db.adminCommand('ping')"]
-            interval: 30s
-            timeout: 10s
-            retries: 3
 
     mongodb-arbiter:
         container_name: mongodb-arbiter
@@ -180,29 +155,36 @@ services:
         networks:
             - techcell_backend
         restart: unless-stopped
-        healthcheck:
-            test: ['CMD', 'mongo', '--eval', "db.adminCommand('ping')"]
-            interval: 30s
-            timeout: 10s
-            retries: 3
 
     redis:
         container_name: redis
         hostname: redis
-        image: docker.io/bitnami/redis:7.0
+        image: docker.io/bitnami/redis:7.2
         environment:
-            - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL,CONFIG
             - REDIS_PASSWORD=${REDIS_PASSWORD}
-        networks:
-            - techcell_backend
+            - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
+        ports:
+            - 6379
         volumes:
-            - 'redis_data:/redis/data'
+            - 'redis_data:/bitnami/redis/data'
         restart: unless-stopped
-        healthcheck:
-            test: ['CMD', 'redis-cli', 'ping']
-            interval: 30s
-            timeout: 10s
-            retries: 3
+        networks:
+            techcell_backend:
+
+    redis-insight:
+        container_name: redis-insight
+        hostname: redis-insight
+        image: redislabs/redisinsight:latest
+        environment:
+            - RIPORT=8001
+            - RITRUSTEDORIGINS = http://localhost:80,http://localhost:443,http://swag:80,http://swag:443
+        ports:
+            - 8001
+        volumes:
+            - redis-insight_data:/db
+        restart: unless-stopped
+        networks:
+            techcell_backend:
 
 networks:
     techcell_backend:
@@ -210,7 +192,7 @@ networks:
 volumes:
     mongodb_master_data:
         driver: local
-    rabbitmq_data:
-        driver: local
     redis_data:
+        driver: local
+    redis-insight_data:
         driver: local

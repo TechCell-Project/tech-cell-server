@@ -72,8 +72,7 @@ export class BlockSchemaDTO {
 
 class ProvinceSchemaDTO implements ProvinceSchema {
     constructor(province: ProvinceSchema) {
-        this.province_id = province.province_id;
-        this.province_name = province.province_name;
+        Object.assign(this, province);
     }
 
     @ApiProperty({ description: 'The id of province', example: 201 })
@@ -90,8 +89,7 @@ class ProvinceSchemaDTO implements ProvinceSchema {
 
 class DistrictSchemaDTO implements DistrictSchema {
     constructor(district: DistrictSchema) {
-        this.district_id = district.district_id;
-        this.district_name = district.district_name;
+        Object.assign(this, district);
     }
 
     @ApiProperty({ description: 'The id of district', example: 1490 })
@@ -108,8 +106,7 @@ class DistrictSchemaDTO implements DistrictSchema {
 
 class WardSchemaDTO implements WardSchema {
     constructor(ward: WardSchema) {
-        this.ward_code = ward.ward_code;
-        this.ward_name = ward.ward_name;
+        Object.assign(this, ward);
     }
 
     @ApiProperty({ description: 'The code of ward', example: '1A0807' })
@@ -125,14 +122,7 @@ class WardSchemaDTO implements WardSchema {
 
 export class AddressSchemaDTO implements AddressSchema {
     constructor(address: AddressSchemaDTO) {
-        this.addressName = address.addressName;
-        this.customerName = address?.customerName;
-        this.phoneNumbers = address.phoneNumbers;
-        this.provinceLevel = new ProvinceSchemaDTO(address.provinceLevel);
-        this.districtLevel = new DistrictSchemaDTO(address.districtLevel);
-        this.wardLevel = new WardSchemaDTO(address.wardLevel);
-        this.detail = address.detail;
-        this.isDefault = address.isDefault;
+        Object.assign(this, address);
     }
 
     @ApiProperty({ description: 'The name of address', example: 'Home' })

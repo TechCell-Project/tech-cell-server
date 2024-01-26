@@ -1,18 +1,17 @@
 import { Attribute, AttributesService } from '~libs/resource/attributes';
-import { Inject, Injectable } from '@nestjs/common';
-import { Store } from 'cache-manager';
-import { REDIS_CACHE } from '~libs/common/constants';
+import { Injectable } from '@nestjs/common';
 import { GetAttributesRequestDTO } from './dtos';
 import { SelectType } from './enums';
 import { FilterQuery, QueryOptions } from 'mongoose';
 import { ListDataResponseDTO } from '~libs/common/dtos';
 import { generateRegexQuery } from 'regex-vietnamese';
+import { RedisService } from '~libs/common/Redis/services';
 
 @Injectable()
 export class AttributesSearchService {
     constructor(
         private readonly attributesService: AttributesService,
-        @Inject(REDIS_CACHE) private cacheManager: Store,
+        private redisService: RedisService,
     ) {}
 
     async getAttributes({

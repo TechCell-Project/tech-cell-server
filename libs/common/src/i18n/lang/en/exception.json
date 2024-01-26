@@ -1,0 +1,5 @@
+{
+    "InternalServerException": "Internal Server Error",
+    "ThrottleException": "Too Many Requests",
+    "ServiceUnavailableException": "Service Unavailable"
+}

@@ -7,14 +7,19 @@ import { UsersService } from '~libs/resource/users';
 import { NotificationsMessageSubscribe } from '../constants/notifications.message';
 import { NotificationsCallGateway } from '../gateways/notifications.call.gateway';
 import { IPushNotifyToAllUserQueue } from '../interfaces';
+import { Types } from 'mongoose';
 
 @Injectable()
 @Processor(NOTIFICATIONS_JOB_PUSH_ALL, {
-    concurrency: 10,
-    // limiter: {
-    //     max: 2,
-    //     duration: 60000,
-    // },
+    // The concurrency option specifies how many jobs this processor can handle concurrently.
+    // In this case, it can handle up to 100 jobs at the same time.
+    concurrency: 50,
+    // The limiter option is used to rate limit the job processing.
+    // In this case, the processor can handle a maximum of 100 jobs per 10,000 milliseconds (or 10 seconds).
+    limiter: {
+        max: 200,
+        duration: 5000,
+    },
 })
 export class PushNotifyToAllUserProcessor extends WorkerHost {
     private readonly logger = new Logger(PushNotifyToAllUserProcessor.name);
@@ -33,7 +38,7 @@ export class PushNotifyToAllUserProcessor extends WorkerHost {
 
         try {
             const notifications = await this.notificationService.createNotification({
-                recipientId: userToNotify._id.toString(),
+                recipientId: new Types.ObjectId(userToNotify._id),
                 notificationType: NotificationType.newOrder,
                 content: body,
                 data: {
@@ -42,7 +47,7 @@ export class PushNotifyToAllUserProcessor extends WorkerHost {
                 },
             });
 
-            return this.notificationsCallGateway.server
+            return this.notificationsCallGateway.socketServer
                 .to([`user_id_${userToNotify._id}`])
                 .emit(NotificationsMessageSubscribe.NewOrderAdmin, {
                     notifications,

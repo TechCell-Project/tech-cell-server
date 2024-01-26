@@ -1,6 +1,6 @@
 import { of } from 'rxjs';
 import { TestBed } from '@automock/jest';
-import { ClientRMQ } from '@nestjs/microservices';
+import { ClientRMQ, RmqRecord, RmqRecordBuilder } from '@nestjs/microservices';
 import { CategoriesController } from '../categories.controller';
 import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~libs/common/constants';
 import {
@@ -15,11 +15,14 @@ import {
 } from '~apps/managements/categories-mnt';
 import { CategoryIdParam } from '~libs/resource/categories/dtos';
 import { Types } from 'mongoose';
+import { THeaders } from '~libs/common/types/common.type';
 
 describe(CategoriesController, () => {
     let cartsController: CategoriesController;
     let managementsService: jest.Mocked<ClientRMQ>;
     let searchService: jest.Mocked<ClientRMQ>;
+    let mockHeaders: jest.Mocked<THeaders>;
+    let mockRmqRecord: (data: Record<string, any>) => jest.Mocked<RmqRecord>;
 
     beforeAll(async () => {
         const mockUsing = {
@@ -37,6 +40,11 @@ describe(CategoriesController, () => {
         cartsController = unit;
         managementsService = unitRef.get<ClientRMQ>(MANAGEMENTS_SERVICE);
         searchService = unitRef.get<ClientRMQ>(SEARCH_SERVICE);
+        mockHeaders = {
+            lang: 'en',
+        };
+        mockRmqRecord = (data: Record<string, any>) =>
+            new RmqRecordBuilder().setOptions({ headers: mockHeaders }).setData(data).build();
     });
 
     afterAll(() => {
@@ -57,8 +65,8 @@ describe(CategoriesController, () => {
                 page: 1,
                 pageSize: 10,
             };
-            await cartsController.getCategories(data);
-            expect(searchService.send).toBeCalledWith(message, data);
+            await cartsController.getCategories(mockHeaders, data);
+            expect(searchService.send).toHaveBeenCalledWith(message, mockRmqRecord(data));
         });
     });
 
@@ -68,8 +76,8 @@ describe(CategoriesController, () => {
             const data: GetCategoryByLabelRequestDTO = {
                 label: 'label',
             };
-            await cartsController.getCategoryByLabel(data);
-            expect(searchService.send).toBeCalledWith(message, data);
+            await cartsController.getCategoryByLabel(mockHeaders, data);
+            expect(searchService.send).toHaveBeenCalledWith(message, mockRmqRecord(data));
         });
     });
 
@@ -79,8 +87,8 @@ describe(CategoriesController, () => {
             const data: CategoryIdParam = {
                 categoryId: new Types.ObjectId(),
             };
-            await cartsController.getCategoryById(data);
-            expect(searchService.send).toBeCalledWith(message, data);
+            await cartsController.getCategoryById(mockHeaders, data);
+            expect(searchService.send).toHaveBeenCalledWith(message, mockRmqRecord(data));
         });
     });
 
@@ -94,8 +102,8 @@ describe(CategoriesController, () => {
                 requireAttributes: [],
                 url: 'url',
             };
-            await cartsController.createCategory(data);
-            expect(managementsService.send).toBeCalledWith(message, data);
+            await cartsController.createCategory(mockHeaders, data);
+            expect(managementsService.send).toHaveBeenCalledWith(message, mockRmqRecord(data));
         });
     });
 
@@ -109,8 +117,11 @@ describe(CategoriesController, () => {
             const param: CategoryIdParam = {
                 categoryId: new Types.ObjectId(),
             };
-            await cartsController.updateCategory(param, data);
-            expect(managementsService.send).toBeCalledWith(message, { ...param, ...data });
+            await cartsController.updateCategory(mockHeaders, param, data);
+            expect(managementsService.send).toHaveBeenCalledWith(
+                message,
+                mockRmqRecord({ ...param, ...data }),
+            );
         });
     });
 });

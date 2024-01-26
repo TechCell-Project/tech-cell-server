@@ -4,9 +4,10 @@ import { CreateProductRequestDTO } from './dtos';
 import { RpcException } from '@nestjs/microservices';
 import { CreateProductDTO } from '~libs/resource';
 import { UpdateProductRequestDTO } from './dtos/update-product-request.dto';
-import { ProductIdParamsDTO, ProductSkuParamsDTO } from './dtos/params.dto';
+import { ProductIdParamsDTO, ProductSkuQueryDTO } from './dtos/params.dto';
 import { Types } from 'mongoose';
 import { ProductStatus } from '~libs/resource/products/enums';
+import { convertToObjectId } from '~libs/common';
 
 @Injectable()
 export class ProductsMntService extends ProductsMntUtilService {
@@ -47,9 +48,8 @@ export class ProductsMntService extends ProductsMntUtilService {
         /* REASSIGN IMAGE */
         // Resolve images to add the url to image object
         // Because user just post the `publicId` of image
-        const { generalImages, descriptionImages, variations } = await this.resolveImages(
-            productData,
-        );
+        const { generalImages, descriptionImages, variations } =
+            await this.resolveImages(productData);
 
         // Assign `generalImages` product
         if (generalImages?.length > 0) {
@@ -86,16 +86,24 @@ export class ProductsMntService extends ProductsMntUtilService {
         ...newData
     }: ProductIdParamsDTO & UpdateProductRequestDTO) {
         try {
-            productId = new Types.ObjectId(productId);
+            productId = convertToObjectId(productId);
         } catch (error) {
-            throw new RpcException(new BadRequestException('Invalid product id'));
+            throw new RpcException(
+                new BadRequestException(
+                    this.i18n.t('errorMessage.PROPERTY_ID_INVALID', {
+                        args: {
+                            property: 'product',
+                        },
+                    }),
+                ),
+            );
         }
 
         // Find product by id to check if it is exist or not
         // If not, throw the exception
         const oldProduct = await this.productsService.getProduct({
             filterQueries: {
-                _id: productId,
+                _id: convertToObjectId(productId),
             },
         });
 
@@ -108,9 +116,8 @@ export class ProductsMntService extends ProductsMntUtilService {
 
         // Resolve images to add the url to image object
         // Because user just post the `publicId` of image
-        const { generalImages, descriptionImages, variations } = await this.resolveImages(
-            productUpdatedData,
-        );
+        const { generalImages, descriptionImages, variations } =
+            await this.resolveImages(productUpdatedData);
 
         // Resolve add new variations
         // If the variation is already exist, throw the exception
@@ -183,32 +190,48 @@ export class ProductsMntService extends ProductsMntUtilService {
         try {
             productId = new Types.ObjectId(productId);
         } catch (error) {
-            throw new RpcException(new BadRequestException('Invalid product id'));
+            throw new RpcException(
+                new BadRequestException(
+                    this.i18n.t('errorMessage.PROPERTY_ID_INVALID', {
+                        args: {
+                            property: 'product',
+                        },
+                    }),
+                ),
+            );
         }
 
         // Find product by id to check if it is exist or not
         // If not, throw the exception
         const product = await this.productsService.getProduct({
             filterQueries: {
-                _id: productId,
+                _id: convertToObjectId(productId),
             },
         });
 
         return await this.productsService.deleteProductById(product._id);
     }
 
-    async deleteProductVariation({ productId, sku }: ProductIdParamsDTO & ProductSkuParamsDTO) {
+    async deleteProductVariation({ productId, sku }: ProductIdParamsDTO & ProductSkuQueryDTO) {
         try {
             productId = new Types.ObjectId(productId);
         } catch (error) {
-            throw new RpcException(new BadRequestException('Invalid product id'));
+            throw new RpcException(
+                new BadRequestException(
+                    this.i18n.t('errorMessage.PROPERTY_ID_INVALID', {
+                        args: {
+                            property: 'product',
+                        },
+                    }),
+                ),
+            );
         }
 
         // Find product by id to check if it is exist or not
         // If not, throw the exception
         const product = await this.productsService.getProduct({
             filterQueries: {
-                _id: productId,
+                _id: convertToObjectId(productId),
                 variations: {
                     $elemMatch: {
                         sku: sku,

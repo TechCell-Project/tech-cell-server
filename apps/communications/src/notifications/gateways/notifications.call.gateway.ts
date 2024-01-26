@@ -2,7 +2,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { NotificationsGateway } from './notifications.gateway';
 import { AUTH_SERVICE } from '~libs/common/constants/services.constant';
 import { ClientRMQ } from '@nestjs/microservices';
-import { NotificationService } from '~libs/resource/notifications';
+import { NotificationService, NotificationType } from '~libs/resource/notifications';
 import { Order, User, UsersService } from '~libs/resource';
 import { NOTIFICATIONS_JOB_CREATE } from '../constants/notifications.constant';
 import { UserRole } from '~libs/resource/users/enums';
@@ -10,6 +10,8 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { ICreateNotificationQueue, IPushNotifyToAllUserQueue } from '../interfaces';
 import { RedisService } from '~libs/common/Redis/services/redis.service';
+import { NotificationsMessageSubscribe } from '../constants/notifications.message';
+import { Types } from 'mongoose';
 
 @Injectable()
 export class NotificationsCallGateway extends NotificationsGateway {
@@ -88,5 +90,22 @@ export class NotificationsCallGateway extends NotificationsGateway {
         );
 
         return notifies;
+    }
+
+    public async orderStatusChanged({ order }: { order: Order }) {
+        const notifications = await this.notificationService.createNotification({
+            recipientId: new Types.ObjectId(order.userId),
+            notificationType: NotificationType.orderStatusChanged,
+            content: `Đơn hàng của bạn ${order._id} vừa được cập nhật.`,
+            data: {
+                order,
+            },
+        });
+
+        this.socketServer
+            .to([`user_id_${order.userId.toString()}`])
+            .emit(NotificationsMessageSubscribe.orderStatusChanged, {
+                notifications,
+            });
     }
 }

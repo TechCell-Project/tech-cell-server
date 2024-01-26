@@ -1,13 +1,24 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus } from '@nestjs/common';
-import { RpcException } from '@nestjs/microservices';
+import { ClientRMQ, RpcException } from '@nestjs/microservices';
 import { Request, Response } from 'express';
+import { I18nContext } from 'nestjs-i18n';
+import { UtilityEventPattern } from '~apps/utility/utility.pattern';
+import { I18nTranslations } from '~libs/common/i18n/generated/i18n.generated';
 
 @Catch(RpcException)
 export class RpcExceptionFilter implements ExceptionFilter {
+    private readonly utilityService: ClientRMQ;
+    constructor(utilityService?: ClientRMQ) {
+        if (utilityService) {
+            this.utilityService = utilityService;
+        }
+    }
+
     catch(exception: RpcException, host: ArgumentsHost) {
         const ctx = host.switchToHttp();
         const response = ctx.getResponse<Response>();
         const request = ctx.getRequest<Request>();
+        const i18n = I18nContext.current<I18nTranslations>(host);
 
         const error: object | string = exception.getError();
         const errObj = {
@@ -25,7 +36,20 @@ export class RpcExceptionFilter implements ExceptionFilter {
             ? error['statusCode'] ?? error['status']
             : HttpStatus.INTERNAL_SERVER_ERROR;
 
-        const errorMessage = error ?? { message: 'Internal server error', statusCode };
+        const errorMessage = error ?? {
+            message: i18n.t('exception.InternalServerException'),
+            statusCode,
+        };
+
+        if (this.utilityService) {
+            const exceptionMessage =
+                exception?.message ?? exception?.toString() ?? 'Unexpected error when logging';
+            this.utilityService.emit(UtilityEventPattern.writeLogsBashToDiscord, {
+                message: `${new Date().toLocaleString('en-GB')} - ${
+                    request.url
+                } - ${exceptionMessage}`,
+            });
+        }
 
         return response.status(statusCode).json({
             ...errObj,

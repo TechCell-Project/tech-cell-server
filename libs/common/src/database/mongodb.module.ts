@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Logger, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MongooseModule, MongooseModuleAsyncOptions } from '@nestjs/mongoose';
 
@@ -7,9 +7,17 @@ import { MongooseModule, MongooseModuleAsyncOptions } from '@nestjs/mongoose';
         MongooseModule.forRootAsync({
             useFactory: (configService: ConfigService) => ({
                 uri: configService.get<string>('MONGODB_URI') || process.env.MONGODB_URI,
+                retryDelay: 1000,
                 connectionFactory: (connection) => {
                     // eslint-disable-next-line @typescript-eslint/no-var-requires
                     connection.plugin(require('mongoose-autopopulate'));
+
+                    connection.on('connected', () => {
+                        Logger.debug(
+                            `[Mongodb] is connected: ${connection?.host}/${connection?.name}`,
+                        );
+                    });
+                    connection._events.connected();
                     return connection;
                 },
             }),
@@ -23,10 +31,18 @@ export class MongodbModule {
             connectionName: name ?? undefined,
             useFactory: () => ({
                 uri,
+                retryDelay: 1000,
                 connectionFactory: (connection) => {
                     if (autopopulate) {
                         // eslint-disable-next-line @typescript-eslint/no-var-requires
                         connection.plugin(require('mongoose-autopopulate'));
+
+                        connection.on('connected', () => {
+                            Logger.debug(
+                                `[Mongodb] is connected: ${connection?.host}/${connection?.name}`,
+                            );
+                        });
+                        connection._events.connected();
                     }
                     return connection;
                 },

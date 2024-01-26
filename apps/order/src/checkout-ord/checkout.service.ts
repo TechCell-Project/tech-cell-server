@@ -10,13 +10,18 @@ import {
     UnprocessableEntityException,
 } from '@nestjs/common';
 import { ClientRMQ, RpcException } from '@nestjs/microservices';
-import { ClientSession, Types } from 'mongoose';
-import { ReviewOrderRequestDTO, ReviewedOrderResponseDTO, VnpayIpnUrlDTO } from './dtos';
+import { ClientSession, FilterQuery, Types, QueryOptions } from 'mongoose';
+import {
+    GetUserOrdersRequestDTO,
+    ReviewOrderRequestDTO,
+    ReviewedOrderResponseDTO,
+    VnpayIpnUrlDTO,
+} from './dtos';
 import { Product, ProductsService } from '~libs/resource';
 import { TProductDimensions } from './types';
 import { ItemShipping } from '~libs/third-party/giaohangnhanh/dtos';
 import { CreateOrderDTO } from '~libs/resource/orders/dtos/create-order.dto';
-import { OrderStatusEnum, PaymentStatusEnum } from '~libs/resource/orders/enums';
+import { OrderStatusEnum, PaymentMethodEnum, PaymentStatusEnum } from '~libs/resource/orders/enums';
 import { AddressSchema } from '~libs/resource/users/schemas/address.schema';
 import { Order, OrdersService } from '~libs/resource/orders';
 import { ProductCartDTO } from '~libs/resource/carts/dtos/product-cart.dto';
@@ -25,11 +30,15 @@ import { RedlockService } from '~libs/common/Redis/services/redlock.service';
 import { CreateOrderRequestDTO } from './dtos/create-order-request.dto';
 import { VnpayService } from '~libs/third-party/vnpay.vn';
 import { ProductCode } from '~libs/third-party/vnpay.vn/enums';
-import { PaymentMethodEnum } from './enums';
 import { ResponseForVnpayDTO } from './dtos/response-for-vnpay.dto';
 import { COMMUNICATIONS_SERVICE } from '~libs/common/constants/services.constant';
 import { NotifyEventPattern } from '~apps/communications/notifications';
 import { cleanUserBeforeResponse } from '~libs/resource/users/utils';
+import { Lock } from 'redlock';
+import { I18n, I18nService } from 'nestjs-i18n';
+import { I18nTranslations } from '~libs/common/i18n/generated/i18n.generated';
+import { convertPageQueryToMongoose, convertToObjectId } from '~libs/common';
+import { ListDataResponseDTO, ObjectIdParamDTO, PaginationQuery } from '~libs/common/dtos';
 
 @Injectable()
 export class CheckoutService {
@@ -43,6 +52,7 @@ export class CheckoutService {
         private readonly cartService: CartsService,
         private readonly redlockService: RedlockService,
         @Inject(COMMUNICATIONS_SERVICE) private readonly communicationsService: ClientRMQ,
+        @I18n() protected readonly i18n: I18nService<I18nTranslations>,
     ) {}
 
     /**
@@ -150,7 +160,7 @@ export class CheckoutService {
 
             productUserSelected.productId = new Types.ObjectId(productUserSelected.productId);
             const price = productWithSku.price.base;
-            return total + price;
+            return total + price * productUserSelected.quantity;
         }, 0);
 
         const { total, service_fee } = await this.ghnService.calculateShippingFee({
@@ -160,9 +170,11 @@ export class CheckoutService {
         const giaohangnhanh = { total, service_fee };
 
         return new ReviewedOrderResponseDTO({
-            ...dataReview,
+            paymentMethod: dataReview.paymentMethod,
+            addressSelected: dataReview.addressSelected,
+            productSelected,
+            totalProductPrice,
             shipping: { giaohangnhanh },
-            totalProductPrice: totalProductPrice,
         });
     }
 
@@ -172,10 +184,13 @@ export class CheckoutService {
     public async createOrder({
         user,
         data2CreateOrder,
+        ip,
     }: {
         user: TCurrentUser;
         data2CreateOrder: CreateOrderRequestDTO;
+        ip: string;
     }) {
+        this.validatePayment(data2CreateOrder);
         const reviewedOrder = await this.reviewOrder({ user, dataReview: data2CreateOrder });
 
         const resources = [];
@@ -195,7 +210,8 @@ export class CheckoutService {
 
         // Build a new order data
         const newOrder = new CreateOrderDTO({
-            userId: userFound._id,
+            _id: new Types.ObjectId(),
+            userId: convertToObjectId(userFound._id),
             shippingOrder: {
                 toAddress: userFound.address[reviewedOrder.addressSelected],
             },
@@ -205,39 +221,45 @@ export class CheckoutService {
                 totalPrice:
                     reviewedOrder.totalProductPrice + reviewedOrder.shipping.giaohangnhanh.total,
             },
-            orderStatus: OrderStatusEnum.PENDING,
             products: reviewedOrder.productSelected,
             trackingCode: this.createTrackingCode(userFound.address[reviewedOrder.addressSelected]),
             paymentOrder: {
                 method: data2CreateOrder.paymentMethod,
-                status: PaymentStatusEnum.PROCESSING,
+                status:
+                    data2CreateOrder.paymentMethod === PaymentMethodEnum.COD
+                        ? PaymentStatusEnum.PROCESSING
+                        : PaymentStatusEnum.WAIT_FOR_PAYMENT,
             },
+            orderStatus:
+                data2CreateOrder.paymentMethod === PaymentMethodEnum.COD
+                    ? OrderStatusEnum.PENDING
+                    : OrderStatusEnum.PROCESSING,
         });
+        newOrder.paymentOrder.paymentUrl = await this.getPaymentUrl(
+            data2CreateOrder.paymentMethod,
+            newOrder,
+            ip,
+            data2CreateOrder.paymentReturnUrl,
+        );
 
         // Create a session to start transaction
-        const session = await this.productService.startTransaction();
+        const session: ClientSession = await this.productService.startTransaction();
+        // Lock the `createOrder` for each user and product
+        const lockOrder: Lock = await this.redlockService.lock(resources, 5000);
 
         // Create order to return
         let resultOrder: Order;
-        let paymentUrl: string | null = null;
         try {
-            // Lock the `createOrder` for each user and product
-            const lock = await this.redlockService.lock(resources, 5000);
-            try {
-                [resultOrder] = await Promise.all([
-                    this.orderService.createOrder(newOrder, session),
-                    this.reduceStock(reviewedOrder.productSelected, session),
-                    this.removeProductFromCart(
-                        userFound._id,
-                        reviewedOrder.productSelected,
-                        session,
-                    ),
-                ]);
-                paymentUrl = await this.getPaymentUrl(data2CreateOrder.paymentMethod, resultOrder);
-                await session.commitTransaction();
-            } finally {
-                await this.redlockService.unlock(lock);
-            }
+            [resultOrder] = await Promise.all([
+                this.orderService.createOrder(newOrder, session),
+                this.reduceStock(reviewedOrder.productSelected, session),
+                this.removeProductFromCart(
+                    convertToObjectId(userFound._id),
+                    reviewedOrder.productSelected,
+                    session,
+                ),
+            ]);
+            await session.commitTransaction();
         } catch (error) {
             await session.abortTransaction();
 
@@ -246,7 +268,7 @@ export class CheckoutService {
                 new UnprocessableEntityException('Some problem with your order, please try again'),
             );
         } finally {
-            await session.endSession();
+            await Promise.all([this.redlockService.unlock(lockOrder), session.endSession()]);
         }
 
         // Emit a event to communications service that a new order is created
@@ -258,16 +280,51 @@ export class CheckoutService {
         return {
             ...resultOrder,
             customer: cleanUserBeforeResponse(userFound),
-            paymentUrl: paymentUrl ?? undefined,
         };
     }
 
     /**
-     * @description Get all user's orders
+     * @description Get user's orders
      */
-    public async getAllUserOrders({ user }: { user: TCurrentUser }) {
-        const orders = await this.orderService.getAllUserOrders(new Types.ObjectId(user._id));
-        return orders;
+    public async getUserOrders({
+        user,
+        data2Get,
+    }: {
+        user: TCurrentUser;
+        data2Get: GetUserOrdersRequestDTO;
+    }) {
+        const { orderStatus, paymentMethod, paymentStatus } = data2Get;
+        const { page, pageSize } = new PaginationQuery({
+            page: data2Get?.page,
+            pageSize: data2Get?.pageSize,
+        });
+
+        const filterQueries: FilterQuery<Order> = {
+            userId: convertToObjectId(user._id),
+            ...(orderStatus && { orderStatus }),
+            ...(paymentMethod && { 'paymentOrder.method': paymentMethod }),
+            ...(paymentStatus && { 'paymentOrder.status': paymentStatus }),
+        };
+        const optionQueries: QueryOptions<Order> = {
+            ...convertPageQueryToMongoose({ page, pageSize }),
+        };
+
+        const [orders, totalRecord] = await Promise.all([
+            this.orderService.getOrders(filterQueries, optionQueries),
+            this.orderService.countOrders(filterQueries),
+        ]);
+
+        return new ListDataResponseDTO({
+            page,
+            pageSize,
+            totalPage: Math.ceil(totalRecord / pageSize),
+            totalRecord,
+            data: orders,
+        });
+    }
+
+    public async getUserOrderById({ user, id }: { user: TCurrentUser } & ObjectIdParamDTO) {
+        return await this.orderService.getUserOrderById(id, convertToObjectId(user._id));
     }
 
     /**
@@ -316,12 +373,18 @@ export class CheckoutService {
             if (query.vnp_ResponseCode === '00' || query.vnp_TransactionStatus === '00') {
                 order.paymentOrder.status = PaymentStatusEnum.COMPLETED;
                 order.orderStatus = OrderStatusEnum.PROCESSING;
+                this.logger.debug('Payment success');
             } else {
                 order.paymentOrder.status = PaymentStatusEnum.CANCELLED;
                 order.orderStatus = OrderStatusEnum.CANCELLED;
+                this.logger.debug('Payment failed');
             }
 
-            await this.orderService.updateOrderById(order._id, order);
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { vnp_SecureHash, ...vnpayQueryData } = query;
+            order.paymentOrder.orderData = vnpayQueryData;
+            this.logger.debug({ order });
+            await this.orderService.updateOrderById(convertToObjectId(order._id), order);
             return {
                 RspCode: '00',
                 Message: 'Confirm success',
@@ -349,6 +412,41 @@ export class CheckoutService {
         }
 
         return { isSuccess, message };
+    }
+
+    public async reGeneratePaymentUrl(data: {
+        orderId: Types.ObjectId;
+        userId: Types.ObjectId;
+        ip: string;
+        paymentReturnUrl?: string;
+    }) {
+        const order = await this.getUserOrderById({ id: data.orderId, user: { _id: data.userId } });
+        const paymentUrl = await this.getPaymentUrl(
+            order.paymentOrder.method,
+            order,
+            data.ip,
+            data?.paymentReturnUrl,
+        );
+
+        if (!paymentUrl) {
+            throw new BadRequestException(
+                this.i18n.t('errorMessage.CAN_NOT_GET_PAYMENT_URL', {
+                    args: {
+                        method: order.paymentOrder.method,
+                    },
+                }),
+            );
+        }
+
+        const newOrder = await this.orderService.updateOrderById(order._id, {
+            ...order,
+            paymentOrder: {
+                ...order.paymentOrder,
+                paymentUrl,
+            },
+        });
+
+        return newOrder;
     }
 
     /// PRIVATE METHOD
@@ -468,33 +566,109 @@ export class CheckoutService {
     /**
      * Get payment url
      * @param paymentMethod Enum of payment method
-     * @param resultOrder Order information
+     * @param newOrder Order information
      * @returns Payment url
      */
     private async getPaymentUrl(
         paymentMethod: CreateOrderRequestDTO['paymentMethod'],
-        resultOrder: Order,
+        newOrder: Order,
+        ip: string,
+        returnUrl?: string,
     ): Promise<string | null> {
+        const data2CreatePayment = {
+            vnp_IpAddr: ip,
+            vnp_Amount: newOrder.checkoutOrder.totalPrice,
+            vnp_OrderInfo: `Thanh toan don hang TechCell ${newOrder._id.toString()}`,
+            vnp_OrderType: ProductCode.Bill,
+            vnp_TxnRef: newOrder._id.toString(),
+        };
         switch (paymentMethod) {
-            case PaymentMethodEnum.VNPAY:
-                const vnpayUrl = await this.vnpayService.createPaymentUrl({
-                    vnp_IpAddr: '127.0.0.1',
-                    vnp_Amount: resultOrder.checkoutOrder.totalPrice,
-                    vnp_OrderInfo: `Thanh toan don hang TechCell ${resultOrder._id.toString()}`,
-                    vnp_OrderType: ProductCode.Bill,
-                    vnp_TxnRef: resultOrder._id.toString(),
-                });
+            case PaymentMethodEnum.VNPAY: {
+                if (!returnUrl) {
+                    throw new BadRequestException(
+                        this.i18n.translate('errorMessage.RETURN_URL_REQUIRED', {
+                            args: {
+                                method: paymentMethod,
+                            },
+                        }),
+                    );
+                }
 
+                const vnpayUrl = await this.vnpayService.createPaymentUrl({
+                    ...data2CreatePayment,
+                    vnp_ReturnUrl: returnUrl,
+                });
                 if (!vnpayUrl) {
                     throw new RpcException(
-                        new InternalServerErrorException('Cannot create payment url'),
+                        new InternalServerErrorException(
+                            this.i18n.translate('errorMessage.CAN_NOT_CREATE_ORDER'),
+                        ),
                     );
                 }
                 return vnpayUrl;
+            }
+            case PaymentMethodEnum.ATM:
+            case PaymentMethodEnum.JCB:
+            case PaymentMethodEnum.MASTERCARD:
+            case PaymentMethodEnum.VISA: {
+                if (!returnUrl) {
+                    throw new BadRequestException(
+                        this.i18n.translate('errorMessage.RETURN_URL_REQUIRED', {
+                            args: {
+                                method: paymentMethod,
+                            },
+                        }),
+                    );
+                }
+                const vnpayUrl = await this.vnpayService.createPaymentUrl({
+                    ...data2CreatePayment,
+                    bankCode: paymentMethod,
+                    vnp_ReturnUrl: returnUrl,
+                });
+                if (!vnpayUrl) {
+                    throw new RpcException(
+                        new InternalServerErrorException(
+                            this.i18n.translate('errorMessage.CAN_NOT_CREATE_ORDER', {
+                                args: {
+                                    method: paymentMethod,
+                                },
+                            }),
+                        ),
+                    );
+                }
+                return vnpayUrl;
+            }
+
             case PaymentMethodEnum.COD:
             // case PaymentMethodEnum.MOMO:
             default:
                 return null;
+        }
+    }
+
+    private validatePayment(data2CreateOrder: CreateOrderRequestDTO) {
+        const { paymentMethod, paymentReturnUrl } = data2CreateOrder;
+        switch (paymentMethod) {
+            case PaymentMethodEnum.VNPAY:
+            case PaymentMethodEnum.ATM:
+            case PaymentMethodEnum.JCB:
+            case PaymentMethodEnum.MASTERCARD:
+            case PaymentMethodEnum.VISA: {
+                if (!paymentReturnUrl) {
+                    throw new BadRequestException(
+                        this.i18n.translate('errorMessage.RETURN_URL_REQUIRED', {
+                            args: {
+                                method: paymentMethod,
+                            },
+                        }),
+                    );
+                }
+                break;
+            }
+
+            case PaymentMethodEnum.COD:
+            default:
+                return true;
         }
     }
 }

@@ -5,128 +5,68 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Techcell Cloud</title>
-    <link rel="shortcut icon" href="https://techcell.cloud/favicon.ico" type="image/x-icon" />
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f5f5f5;
-        }
-
-        header {
-            background-color: #333;
-            color: #fff;
-            padding: 10px;
-        }
-
-        h1 {
-            margin: 0;
-            padding: 10px;
-            font-size: 36px;
-            text-align: center;
-        }
-
-        main {
-            margin: 20px;
-            background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-        }
-
-        h2 {
-            font-size: 24px;
-            margin-top: 20px;
-        }
-
-        p {
-            margin: 10px 0;
-            font-size: 18px;
-            line-height: 1.5;
-        }
-
-        a {
-            text-decoration: none;
-        }
-
-        a:hover {
-            text-decoration: underline;
-        }
-
-        /* Responsive layout */
-        @media screen and (max-width: 600px) {
-            h1 {
-                font-size: 24px;
-            }
-
-            main {
-                margin: 10px;
-                padding: 10px;
-            }
-
-            h2 {
-                font-size: 20px;
-            }
-
-            p {
-                font-size: 16px;
-            }
-        }
-
-        footer {
-            background-color: #333;
-            color: #fff;
-            padding: 10px;
-            text-align: center;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-        }
-    </style>
+    <link rel="shortcut icon" href="https://architecture.techcell.cloud/images/favicon.ico" type="image/x-icon" />
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body>
-    <header>
+<body class="bg-gray-900 text-gray-100 font-sans m-0 p-0">
+    <header class="bg-gray-800 text-white p-2">
         <a href="http://techcell.cloud">
-            <img src="https://techcell.cloud/_next/image?url=%2Flogo-red.png&w=1920&q=75" alt="logo" height="50" />
+            <img src="https://architecture.techcell.cloud/images/logo-red.png" alt="logo" height="5" />
         </a>
     </header>
-    <main>
-        <h1>Techcell Cloud</h1>
-        <h2>Contact us at:</h2>
-        <p>
-            <a href="mailto:teams@techcell.cloud">teams@techcell.cloud</a>
+
+    <main class="m-5 bg-gray-800 rounded p-5 shadow-lg">
+        <h1 class="m-0 p-2 text-4xl text-center text-red-500">Documentations Page</h1>
+        <h2 class="text-2xl mt-5 text-red-400">Contact us at:</h2>
+        <p class="m-2 text-lg leading-relaxed">
+            Teams: <a href="mailto:teams@techcell.cloud"
+                class="text-gray-100 transition-colors duration-500 ease-in-out hover:text-red-500">teams@techcell.cloud</a>
         </p>
 
-        <h2>Official website:</h2>
-        <p>
-            <a href="https://techcell.cloud" target="_blank" rel="noopener noreferrer">Techcell</a>
+        <h2 class="text-2xl mt-5 text-red-400">Official website:</h2>
+        <p class="m-2 text-lg leading-relaxed">
+            <a href="https://techcell.cloud" target="_blank" rel="noopener noreferrer"
+                class="text-gray-100 transition-colors duration-500 ease-in-out hover:text-red-500">https://techcell.cloud</a>
         </p>
 
-        <h2>RESTful API Documentations:</h2>
-        <p>
-            <a href="https://api.techcell.cloud" target="_blank" rel="noopener noreferrer">Swagger Docs (Default Swagger
-                Ui)</a>
+        <h2 class="text-2xl mt-5 text-red-400">Admin website:</h2>
+        <p class="m-2 text-lg leading-relaxed">
+            <a href="https://admin.techcell.cloud" target="_blank" rel="noopener noreferrer"
+                class="text-gray-100 transition-colors duration-500 ease-in-out hover:text-red-500">Admin Techcell:
+                admin.techcell.cloud</a>
         </p>
-        <p>
-            <a href="https://docs.techcell.cloud/stoplight" target="_blank" rel="noopener noreferrer">Stoplight
+
+        <h2 class="text-2xl mt-5 text-red-400">RESTful API Documentations:</h2>
+        <p class="m-2 text-lg leading-relaxed">
+            <a href="https://api.techcell.cloud" target="_blank" rel="noopener noreferrer"
+                class="text-gray-100 transition-colors duration-500 ease-in-out hover:text-red-500">Swagger
+                Docs (Default Swagger Ui)</a>
+        </p>
+        <p class="m-2 text-lg leading-relaxed">
+            <a href="https://docs.techcell.cloud/stoplight" target="_blank" rel="noopener noreferrer"
+                class="text-gray-100 transition-colors duration-500 ease-in-out hover:text-red-500">Stoplight
                 (Desktop Recommend)</a>
         </p>
-        <p>
-            <a href="https://docs.techcell.cloud/redoc" target="_blank" rel="noopener noreferrer">Redoc (Mobile
-                Recommend)</a>
+        <p class="m-2 text-lg leading-relaxed">
+            <a href="https://docs.techcell.cloud/redoc" target="_blank" rel="noopener noreferrer"
+                class="text-gray-100 transition-colors duration-500 ease-in-out hover:text-red-500">Redoc
+                (Mobile Recommend)</a>
         </p>
-        <p>
-            <a href="https://docs.techcell.cloud/rapi-doc" target="_blank" rel="noopener noreferrer">Rapi-doc</a>
+        <p class="m-2 text-lg leading-relaxed">
+            <a href="https://docs.techcell.cloud/rapi-doc" target="_blank" rel="noopener noreferrer"
+                class="text-gray-100 transition-colors duration-500 ease-in-out hover:text-red-500">Rapi-doc</a>
         </p>
 
-        <h2>Source Code Documentations:</h2>
-        <p>
-            <a href="https://design.techcell.cloud" target="_blank" rel="noopener noreferrer">Click here!</a>
+        <h2 class="text-2xl mt-5 text-red-400">Source Code (architecture) Documentations:</h2>
+        <p class="m-2 text-lg leading-relaxed">
+            <a href="https://architecture.techcell.cloud" target="_blank" rel="noopener noreferrer"
+                class="text-gray-100 transition-colors duration-500 ease-in-out hover:text-red-500">
+                Click here: https://architecture.techcell.cloud</a>
         </p>
     </main>
-    <footer>&copy; 2023 TechCell Teams. All rights reserved.</footer>
+    <footer class="bg-gray-800 text-white p-2 text-center bottom-0 w-full">&copy; 2023 TechCell
+        Teams. All rights reserved.</footer>
 </body>
 
 </html>

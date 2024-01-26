@@ -14,7 +14,7 @@ import {
 } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 import { ProductStatus } from '../enums';
-import { AttributeSchema, VariationSchema } from '../schemas';
+import { AttributeSchema, PriceSchema, VariationSchema } from '../schemas';
 import { ImageSchema } from '../schemas/image.schema';
 import { CreateProductRequestDTO } from '~apps/managements/products-mnt/dtos';
 import { ApiProperty } from '@nestjs/swagger';
@@ -57,7 +57,7 @@ class AttributeDTO implements AttributeSchema {
     name?: string;
 }
 
-class PriceDTO {
+class PriceDTO extends PriceSchema {
     @ApiProperty({
         description: 'Base price',
         example: 1000000,
@@ -65,15 +65,6 @@ class PriceDTO {
     @IsNumber()
     @IsNotEmpty()
     base: number;
-
-    @ApiProperty({
-        description: 'Sale price',
-        example: 900000,
-    })
-    @IsNumber()
-    @IsNotEmpty()
-    @IsOptional()
-    sale?: number;
 
     @ApiProperty({
         description: 'Special price',
@@ -87,9 +78,7 @@ class PriceDTO {
 
 export class ImageDTO implements ImageSchema {
     constructor(data: ImageSchema) {
-        this.url = data.url;
-        this.publicId = data.publicId;
-        this.isThumbnail = data.isThumbnail ?? false;
+        Object.assign(this, data);
     }
 
     @ApiProperty({
@@ -169,6 +158,7 @@ export class VariationDTO implements VariationSchema {
     })
     @IsArray()
     @Type(() => ImageDTO)
+    @ValidateNested({ each: true })
     images: ImageDTO[];
 
     @IsNumber()

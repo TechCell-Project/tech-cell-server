@@ -48,3 +48,17 @@ lerna-debug.log*
 
 # Uploads folder
 /uploads
+
+# Generated files
+generated/
+swagger.yaml
+asyncapi.yaml
+
+.yarn/*
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
+
+.pnp.cjs
+.pnp.loader.mjs

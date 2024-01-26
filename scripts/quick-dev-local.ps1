@@ -15,7 +15,6 @@ foreach ($dir in $directories) {
         continue
     }
 
-    $title = "techcell-local-ps-$folder_name"
     # Open a new PowerShell window and run the command with a unique identifier in the process title
-    Start-Process powershell -ArgumentList "-NoExit","-Command yarn start:dev $folder_name"
+    Start-Process powershell -ArgumentList "-NoExit", "-Command yarn start:dev $folder_name"
 }

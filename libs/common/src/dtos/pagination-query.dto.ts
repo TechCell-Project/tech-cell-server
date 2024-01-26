@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsNumber, IsOptional, Max, Min } from 'class-validator';
+import { IsOptional } from 'class-validator';
+import { IsNumberI18n, MaxI18n, MinI18n } from '../i18n';
 
 export class PaginationQuery {
     /**
@@ -10,8 +11,8 @@ export class PaginationQuery {
      * @param query
      */
     constructor(query: Partial<PaginationQuery>) {
-        this.page = query?.page ? Number(query.page) : 1;
-        this.pageSize = query?.pageSize ? Number(query.pageSize) : 10;
+        this.page = Number(query?.page) || 1;
+        this.pageSize = Math.min(500, Number(query?.pageSize) || 10);
     }
 
     @ApiProperty({
@@ -20,12 +21,13 @@ export class PaginationQuery {
         default: 1,
         minimum: 1,
         maximum: Number.MAX_SAFE_INTEGER,
+        required: false,
     })
     @IsOptional()
-    @IsNumber()
+    @IsNumberI18n()
     @Type(() => Number)
-    @Min(1)
-    @Max(Number.MAX_SAFE_INTEGER)
+    @MinI18n(1)
+    @MaxI18n(Number.MAX_SAFE_INTEGER)
     page?: number;
 
     @ApiProperty({
@@ -34,11 +36,12 @@ export class PaginationQuery {
         default: 10,
         minimum: 1,
         maximum: 500,
+        required: false,
     })
     @IsOptional()
-    @IsNumber()
+    @IsNumberI18n()
     @Type(() => Number)
-    @Min(1)
-    @Max(500)
+    @MinI18n(1)
+    @MaxI18n(500)
     pageSize?: number;
 }

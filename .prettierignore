@@ -1,3 +1,13 @@
+# Ignore node modules
 node_modules/
+
+# Ignore build directories
 dist/
+
+# Ignore markdown files
 *.md
+
+.yarn/*
+
+.pnp.cjs
+.pnp.loader.mjs

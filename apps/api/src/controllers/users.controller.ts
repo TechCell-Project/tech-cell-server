@@ -8,6 +8,7 @@ import {
     Query,
     Param,
     Post,
+    Headers,
 } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~libs/common/constants';
@@ -32,13 +33,14 @@ import {
     BlockUnblockRequestDTO,
     CreateUserRequestDto,
 } from '~apps/managements/users-mnt';
-import { catchException } from '~libs/common';
 import { UserMntResponseDTO } from '~libs/resource/users/dtos';
 import { CurrentUser } from '~libs/common/decorators';
 import { TCurrentUser } from '~libs/common/types';
 import { UsersSearchMessagePattern } from '~apps/search/users-search';
 import { GetUsersQueryDTO, ListUserResponseDTO } from '~apps/search/users-search/dtos';
 import { ACCESS_TOKEN_NAME } from '~libs/common/constants/api.constant';
+import { sendMessagePipeException } from '~libs/common/RabbitMQ/rmq.util';
+import { THeaders } from '~libs/common/types/common.type';
 
 @ApiBadRequestResponse({
     description: 'Invalid request, please check your request data!',
@@ -58,7 +60,7 @@ import { ACCESS_TOKEN_NAME } from '~libs/common/constants/api.constant';
 @ApiInternalServerErrorResponse({
     description: 'Internal server error, please try again later!',
 })
-@ApiTags('users managements (admin only)')
+@ApiTags('users management')
 @ApiBearerAuth(ACCESS_TOKEN_NAME)
 @Controller('users')
 export class UsersController {
@@ -74,10 +76,16 @@ export class UsersController {
     @ApiCreatedResponse({ description: 'Create user success', type: UserMntResponseDTO })
     @UseGuards(SuperAdminGuard)
     @Post('/')
-    async createUser(@Body() createUserRequestDto: CreateUserRequestDto) {
-        return this.managementsService
-            .send(UsersMntMessagePattern.createUser, { ...createUserRequestDto })
-            .pipe(catchException());
+    async createUser(
+        @Headers() headers: THeaders,
+        @Body() createUserRequestDto: CreateUserRequestDto,
+    ) {
+        return sendMessagePipeException({
+            client: this.managementsService,
+            pattern: UsersMntMessagePattern.createUser,
+            data: { ...createUserRequestDto },
+            headers,
+        });
     }
 
     @ApiOperation({
@@ -91,10 +99,13 @@ export class UsersController {
     @ApiNotFoundResponse({ description: 'No users found' })
     @UseGuards(ModGuard)
     @Get('/')
-    async getUsers(@Query() requestQuery: GetUsersQueryDTO) {
-        return this.searchService
-            .send(UsersSearchMessagePattern.getUsers, { ...requestQuery })
-            .pipe(catchException());
+    async getUsers(@Headers() headers: THeaders, @Query() requestQuery: GetUsersQueryDTO) {
+        return sendMessagePipeException<GetUsersQueryDTO>({
+            client: this.searchService,
+            pattern: UsersSearchMessagePattern.getUsers,
+            data: { ...requestQuery },
+            headers,
+        });
     }
 
     @ApiOperation({
@@ -105,10 +116,13 @@ export class UsersController {
     @ApiNotFoundResponse({ description: 'No users found' })
     @UseGuards(ModGuard)
     @Get('/:id')
-    async getUserById(@Param('id') id: string) {
-        return this.searchService
-            .send(UsersSearchMessagePattern.getUserById, { id })
-            .pipe(catchException());
+    async getUserById(@Headers() headers: THeaders, @Param('id') id: string) {
+        return sendMessagePipeException({
+            client: this.searchService,
+            pattern: UsersSearchMessagePattern.getUserById,
+            data: { id },
+            headers,
+        });
     }
 
     @ApiOperation({
@@ -122,18 +136,22 @@ export class UsersController {
     @UseGuards(ModGuard)
     @Patch('/:id/block')
     async blockUser(
+        @Headers() headers: THeaders,
         @Param('id') idParam: string,
         @Body() { reason = '', note = '' }: BlockUnblockRequestDTO,
         @CurrentUser() user: TCurrentUser,
     ) {
-        return this.managementsService
-            .send(UsersMntMessagePattern.blockUser, {
+        return sendMessagePipeException({
+            client: this.managementsService,
+            pattern: UsersMntMessagePattern.blockUser,
+            data: {
                 victimId: idParam,
                 actorId: user._id,
                 reason,
                 note,
-            })
-            .pipe(catchException());
+            },
+            headers,
+        });
     }
 
     @ApiOperation({
@@ -147,18 +165,22 @@ export class UsersController {
     @UseGuards(ModGuard)
     @Patch('/:id/unblock')
     async unblockUser(
+        @Headers() headers: THeaders,
         @Param('id') idParam: string,
         @Body() { reason = '', note = '' }: BlockUnblockRequestDTO,
         @CurrentUser() user: TCurrentUser,
     ) {
-        return this.managementsService
-            .send(UsersMntMessagePattern.unblockUser, {
+        return sendMessagePipeException({
+            client: this.managementsService,
+            pattern: UsersMntMessagePattern.unblockUser,
+            data: {
                 victimId: idParam,
                 actorId: user._id,
                 reason,
                 note,
-            })
-            .pipe(catchException());
+            },
+            headers,
+        });
     }
 
     @ApiOperation({
@@ -172,25 +194,32 @@ export class UsersController {
     @UseGuards(ModGuard)
     @Patch('/:id/change-role')
     async changeRoleUser(
+        @Headers() headers: THeaders,
         @Param('id') idParam: string,
         @Body() { role }: ChangeRoleRequestDTO,
         @CurrentUser() user: TCurrentUser,
     ) {
-        return this.managementsService
-            .send(UsersMntMessagePattern.changeRoleUser, {
+        return sendMessagePipeException({
+            client: this.managementsService,
+            pattern: UsersMntMessagePattern.changeRoleUser,
+            data: {
                 victimId: idParam,
                 actorId: user._id,
                 role,
-            })
-            .pipe(catchException());
+            },
+            headers,
+        });
     }
 
     @ApiExcludeEndpoint(true)
     @UseGuards(SuperAdminGuard)
     @Post('/gen-clone')
-    async gen(@Query() { num }: { num: number }) {
-        return this.managementsService
-            .send(UsersMntMessagePattern.generateUsers, { num })
-            .pipe(catchException());
+    async gen(@Headers() headers: THeaders, @Query() { num }: { num: number }) {
+        return sendMessagePipeException({
+            client: this.managementsService,
+            pattern: UsersMntMessagePattern.generateUsers,
+            data: { num },
+            headers,
+        });
     }
 }

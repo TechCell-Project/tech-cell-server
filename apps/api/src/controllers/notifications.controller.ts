@@ -1,7 +1,7 @@
-import { Controller, Get, Inject, UseGuards, Query } from '@nestjs/common';
+import { Controller, Get, Inject, UseGuards, Query, Headers } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import { ACCESS_TOKEN_NAME, COMMUNICATIONS_SERVICE } from '~libs/common/constants';
-import { AuthGuard, catchException } from '~libs/common';
+import { AuthGuard } from '~libs/common';
 import { GetUserNotificationsDTO, NotifyMessagePattern } from '~apps/communications/notifications';
 import { CurrentUser } from '~libs/common/decorators';
 import { TCurrentUser } from '~libs/common/types';
@@ -11,11 +11,14 @@ import {
     ApiInternalServerErrorResponse,
     ApiNotFoundResponse,
     ApiOkResponse,
+    ApiOperation,
     ApiTags,
     ApiTooManyRequestsResponse,
     ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { ListNotificationsResponseDTO } from '~libs/resource/notifications/dtos';
+import { sendMessagePipeException } from '~libs/common/RabbitMQ/rmq.util';
+import { THeaders } from '~libs/common/types/common.type';
 
 @ApiBadRequestResponse({
     description: 'Invalid request, please check your request data!',
@@ -41,14 +44,19 @@ export class NotificationsController {
         @Inject(COMMUNICATIONS_SERVICE) private readonly communicationsService: ClientRMQ,
     ) {}
 
+    @ApiOperation({ summary: "Get notifications's user" })
     @ApiOkResponse({ description: 'Get user notifications', type: ListNotificationsResponseDTO })
     @Get('/')
     async getUserNotifications(
+        @Headers() headers: THeaders,
         @Query() { ...query }: GetUserNotificationsDTO,
         @CurrentUser() user: TCurrentUser,
     ) {
-        return this.communicationsService
-            .send(NotifyMessagePattern.getUsersNotifications, { user, query })
-            .pipe(catchException());
+        return sendMessagePipeException({
+            client: this.communicationsService,
+            pattern: NotifyMessagePattern.getUsersNotifications,
+            data: { user, query },
+            headers,
+        });
     }
 }

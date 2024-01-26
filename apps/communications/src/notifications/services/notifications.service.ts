@@ -1,26 +1,27 @@
 import { TCurrentUser } from '~libs/common/types';
 import { Notification, NotificationService } from '~libs/resource/notifications';
 import { Injectable } from '@nestjs/common';
-import { QueryOptions, Types } from 'mongoose';
+import { FilterQuery, QueryOptions } from 'mongoose';
 import { GetUserNotificationsDTO, OrderBy, ReadType } from '../dtos/get-user-notifications.dto';
-import { ListDataResponseDTO } from '~libs/common/dtos';
+import { ListDataResponseDTO, PaginationQuery } from '~libs/common/dtos';
+import { convertToObjectId } from '~libs/common';
 
 @Injectable()
 export class NotificationsService {
     constructor(private readonly notificationService: NotificationService) {}
 
-    async getUserNotifications(
-        user: TCurrentUser,
-        { page, pageSize, readType, orderBy }: GetUserNotificationsDTO,
-    ) {
-        const query = {
-            recipientId: new Types.ObjectId(user._id),
+    async getUserNotifications(user: TCurrentUser, requestQuery: GetUserNotificationsDTO) {
+        const { readType, orderBy } = requestQuery;
+        const query: FilterQuery<Notification> = {
+            recipientId: convertToObjectId(user._id),
             ...(readType === ReadType.read && { readAt: { $ne: null } }),
             ...(readType === ReadType.unread && { readAt: null }),
         };
+
+        const { page, pageSize } = new PaginationQuery(requestQuery);
         const options: QueryOptions<Notification> = {
             limit: pageSize,
-            skip: page * pageSize,
+            skip: (page - 1) * pageSize,
         };
 
         if (orderBy === OrderBy.oldest) {

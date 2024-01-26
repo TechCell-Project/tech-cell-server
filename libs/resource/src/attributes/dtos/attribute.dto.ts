@@ -1,6 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Attribute } from '../schemas';
 import { Types } from 'mongoose';
+import { IsMongoIdI18n, IsNotEmptyI18n, IsStringI18n } from '~libs/common/i18n';
+import { IsOptional } from 'class-validator';
 
 export class AttributeDTO implements Attribute {
     @ApiProperty({
@@ -9,6 +11,8 @@ export class AttributeDTO implements Attribute {
         example: '60f7b0f6c2e6a9b3e8b4e3d2',
         format: 'ObjectId',
     })
+    @IsMongoIdI18n()
+    @IsNotEmptyI18n()
     _id: Types.ObjectId;
 
     @ApiProperty({
@@ -16,6 +20,8 @@ export class AttributeDTO implements Attribute {
         description: 'Attribute name',
         example: 'bộ nhớ',
     })
+    @IsNotEmptyI18n()
+    @IsStringI18n()
     name: string;
 
     @ApiProperty({
@@ -24,6 +30,8 @@ export class AttributeDTO implements Attribute {
         example: 'storage',
         uniqueItems: true,
     })
+    @IsNotEmptyI18n()
+    @IsStringI18n()
     label: string;
 
     @ApiProperty({
@@ -31,6 +39,10 @@ export class AttributeDTO implements Attribute {
         description: 'Attribute description',
         example: 'Bộ nhớ của sản phẩm',
     })
+    @IsOptional()
+    @IsStringI18n()
     description: string;
+
+    @IsOptional()
     isDeleted?: boolean;
 }

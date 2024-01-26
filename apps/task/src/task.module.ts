@@ -7,11 +7,13 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { DatabaseTaskModule } from './database-task/database-task.module';
 import { TaskHealthIndicator } from './task.health';
 import { TaskController } from './task.controller';
+import { I18nModule } from '~libs/common/i18n/i18n.module';
 
 @Module({
     imports: [
         AppConfigModule,
         ScheduleModule.forRoot(),
+        I18nModule,
         CloudinaryModule,
         ImageTaskModule,
         DatabaseTaskModule,

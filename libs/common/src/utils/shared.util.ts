@@ -19,7 +19,7 @@ export function isEmail(email: string): boolean {
  * @returns A function to catch exception from microservice and throw it to client
  */
 export const catchException = () =>
-    catchError((error) => throwError(() => new RpcException(error.response)));
+    catchError((error) => throwError(() => new RpcException(error?.response ?? error?.error)));
 
 // create a function to generate random string
 export function generateRandomString(length: number) {
@@ -210,4 +210,21 @@ export function dateToString(currentDate = new Date()): string {
     const year = currentDate.getFullYear().toString();
 
     return `${day}-${month}-${year}`;
+}
+
+/**
+ *
+ * @param year year to check
+ * @param month month to check
+ * @param day day to check
+ * @param hour hour to check
+ * @returns true if the current time is equal to the time passed in, otherwise false
+ */
+export function isCurrentTime(year: number, month?: number, day?: number, hour?: number): boolean {
+    const now = new Date();
+    if (year !== now.getFullYear()) return false;
+    if (month !== undefined && month !== now.getMonth() + 1) return false;
+    if (day !== undefined && day !== now.getDate()) return false;
+    if (hour !== undefined && hour !== now.getHours()) return false;
+    return true;
 }

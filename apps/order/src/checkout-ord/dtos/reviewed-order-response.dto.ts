@@ -1,22 +1,24 @@
-import {
-    IsArray,
-    IsInt,
-    IsNotEmpty,
-    IsNumber,
-    IsObject,
-    IsPositive,
-    ValidateNested,
-} from 'class-validator';
+import { ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ProductCartDTO } from '~libs/resource/carts/dtos/product-cart.dto';
 import { ApiProperty } from '@nestjs/swagger';
+import {
+    IsArrayI18n,
+    IsEnumI18n,
+    IsIntI18n,
+    IsNotEmptyI18n,
+    IsNumberI18n,
+    IsObjectI18n,
+    IsPositiveI18n,
+} from '~libs/common/i18n';
+import { PaymentMethodEnum } from '~libs/resource';
 
 class Shipping {
-    @IsNumber()
-    @IsPositive()
+    @IsNumberI18n()
+    @IsPositiveI18n()
     total: number;
 
-    @IsNumber()
+    @IsNumberI18n()
     service_fee: number;
 }
 
@@ -26,28 +28,40 @@ export class ReviewedOrderResponseDTO {
     }
 
     @ApiProperty({
+        example: PaymentMethodEnum.COD,
+        description: 'Payment method',
+        type: String,
+        enum: PaymentMethodEnum,
+    })
+    @IsNotEmptyI18n()
+    @IsEnumI18n(PaymentMethodEnum)
+    paymentMethod: string;
+
+    @ApiProperty({
         example: 1,
         description: 'Index of address selected',
+        type: Number,
     })
-    @IsInt()
-    @IsPositive()
+    @IsIntI18n()
+    @IsPositiveI18n()
     addressSelected: number;
 
     @ApiProperty({
         type: [ProductCartDTO],
         description: 'List of product selected',
     })
-    @IsArray()
+    @IsNotEmptyI18n({ each: true })
+    @IsArrayI18n()
     @ValidateNested({ each: true })
     @Type(() => ProductCartDTO)
-    @IsNotEmpty({ each: true })
     productSelected: ProductCartDTO[];
 
     @ApiProperty({
         example: 100000,
         description: 'Total product price',
+        type: Number,
     })
-    @IsNumber()
+    @IsNumberI18n()
     totalProductPrice: number;
 
     @ApiProperty({
@@ -59,9 +73,9 @@ export class ReviewedOrderResponseDTO {
         },
         description: 'Total shipping price',
     })
-    @IsObject()
+    @IsObjectI18n()
+    @IsNotEmptyI18n()
     @ValidateNested()
     @Type(() => Shipping)
-    @IsNotEmpty()
     shipping: { [key: string]: Shipping };
 }

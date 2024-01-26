@@ -5,9 +5,11 @@ import { Cart, CartSchema } from './schemas';
 import { CartsRepository } from './carts.repository';
 import { CartsService } from './carts.service';
 import { RedisModule } from '~libs/common/Redis';
+import { I18nModule } from '~libs/common/i18n';
 
 @Module({
     imports: [
+        I18nModule,
         MongodbModule,
         MongooseModule.forFeature([
             {

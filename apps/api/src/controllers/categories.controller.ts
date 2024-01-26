@@ -1,7 +1,6 @@
-import { Controller, Inject, Get, Query, Post, Body, Patch, Param } from '@nestjs/common';
+import { Controller, Inject, Get, Query, Post, Body, Patch, Param, Headers } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~libs/common/constants';
-import { catchException } from '~libs/common';
 import {
     ApiBadRequestResponse,
     ApiCreatedResponse,
@@ -24,6 +23,8 @@ import {
     UpdateCategoryRequestDTO,
 } from '~apps/managements/categories-mnt';
 import { CategoryDTO, CategoryIdParam } from '~libs/resource/categories/dtos';
+import { sendMessagePipeException } from '~libs/common/RabbitMQ/rmq.util';
+import { THeaders } from '~libs/common/types/common.type';
 
 @ApiBadRequestResponse({
     description: 'Invalid request, please check your request data!',
@@ -52,10 +53,13 @@ export class CategoriesController {
     @ApiOkResponse({ description: 'Get categories successfully!', type: ListCategoryResponseDTO })
     @ApiNotFoundResponse({ description: 'Categories not found!' })
     @Get('/')
-    async getCategories(@Query() query: GetCategoriesRequestDTO) {
-        return this.searchService
-            .send(CategoriesSearchMessagePattern.getCategories, { ...query })
-            .pipe(catchException());
+    async getCategories(@Headers() headers: THeaders, @Query() query: GetCategoriesRequestDTO) {
+        return sendMessagePipeException<GetCategoriesRequestDTO>({
+            client: this.searchService,
+            pattern: CategoriesSearchMessagePattern.getCategories,
+            data: { ...query },
+            headers,
+        });
     }
 
     @ApiOperation({
@@ -65,10 +69,13 @@ export class CategoriesController {
     @ApiOkResponse({ description: 'Get category successfully!', type: CategoryDTO })
     @ApiNotFoundResponse({ description: 'Category not found!' })
     @Get(':categoryId')
-    async getCategoryById(@Param() { categoryId }: CategoryIdParam) {
-        return this.searchService
-            .send(CategoriesSearchMessagePattern.getCategoryById, { categoryId })
-            .pipe(catchException());
+    async getCategoryById(@Headers() headers: THeaders, @Param() { categoryId }: CategoryIdParam) {
+        return sendMessagePipeException<CategoryIdParam>({
+            client: this.searchService,
+            pattern: CategoriesSearchMessagePattern.getCategoryById,
+            data: { categoryId },
+            headers,
+        });
     }
 
     @ApiOperation({
@@ -78,10 +85,16 @@ export class CategoriesController {
     @ApiOkResponse({ description: 'Get category successfully!', type: CategoryDTO })
     @ApiNotFoundResponse({ description: 'Category not found!' })
     @Get('/label/:label')
-    async getCategoryByLabel(@Param() { label }: GetCategoryByLabelRequestDTO) {
-        return this.searchService
-            .send(CategoriesSearchMessagePattern.getCategoryByLabel, { label })
-            .pipe(catchException());
+    async getCategoryByLabel(
+        @Headers() headers: THeaders,
+        @Param() { label }: GetCategoryByLabelRequestDTO,
+    ) {
+        return sendMessagePipeException<GetCategoryByLabelRequestDTO>({
+            client: this.searchService,
+            pattern: CategoriesSearchMessagePattern.getCategoryByLabel,
+            data: { label },
+            headers,
+        });
     }
 
     @ApiOperation({
@@ -91,10 +104,13 @@ export class CategoriesController {
     @ApiCreatedResponse({ description: 'The category has been successfully created.' })
     @ApiBadRequestResponse({ description: 'Something wrong, re-check your input.' })
     @Post('/')
-    async createCategory(@Body() data: CreateCategoryRequestDTO) {
-        return this.managementsService
-            .send(CategoriesMntMessagePattern.createCategory, { ...data })
-            .pipe(catchException());
+    async createCategory(@Headers() headers: THeaders, @Body() data: CreateCategoryRequestDTO) {
+        return sendMessagePipeException<CreateCategoryRequestDTO>({
+            client: this.managementsService,
+            pattern: CategoriesMntMessagePattern.createCategory,
+            data: { ...data },
+            headers,
+        });
     }
 
     @ApiOperation({
@@ -103,11 +119,15 @@ export class CategoriesController {
     })
     @Patch('/:categoryId')
     async updateCategory(
+        @Headers() headers: THeaders,
         @Param() { categoryId }: CategoryIdParam,
         @Body() data: UpdateCategoryRequestDTO,
     ) {
-        return this.managementsService
-            .send(CategoriesMntMessagePattern.updateCategory, { categoryId, ...data })
-            .pipe(catchException());
+        return sendMessagePipeException<UpdateCategoryRequestDTO & CategoryIdParam>({
+            client: this.managementsService,
+            pattern: CategoriesMntMessagePattern.updateCategory,
+            data: { categoryId, ...data },
+            headers,
+        });
     }
 }

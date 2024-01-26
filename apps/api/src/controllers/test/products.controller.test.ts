@@ -1,6 +1,6 @@
 import { of } from 'rxjs';
 import { TestBed } from '@automock/jest';
-import { ClientRMQ } from '@nestjs/microservices';
+import { ClientRMQ, RmqRecord, RmqRecordBuilder } from '@nestjs/microservices';
 import { ProductsController } from '../products.controller';
 import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~libs/common/constants';
 import { ProductsMntMessagePattern } from '~apps/managements/products-mnt';
@@ -10,14 +10,17 @@ import {
     CreateProductRequestDTO,
     UpdateProductRequestDTO,
     ProductIdParamsDTO,
-    ProductSkuParamsDTO,
+    ProductSkuQueryDTO,
 } from '~apps/managements/products-mnt/dtos';
 import { Types } from 'mongoose';
+import { THeaders } from '~libs/common/types/common.type';
 
 describe(ProductsController, () => {
     let productsController: ProductsController;
     let managementsService: jest.Mocked<ClientRMQ>;
     let searchService: jest.Mocked<ClientRMQ>;
+    let mockHeaders: jest.Mocked<THeaders>;
+    let mockRmqRecord: (data: Record<string, any>) => jest.Mocked<RmqRecord>;
 
     beforeAll(async () => {
         const mockUsing = {
@@ -35,6 +38,11 @@ describe(ProductsController, () => {
         productsController = unit;
         managementsService = unitRef.get<ClientRMQ>(MANAGEMENTS_SERVICE);
         searchService = unitRef.get<ClientRMQ>(SEARCH_SERVICE);
+        mockHeaders = {
+            lang: 'en',
+        };
+        mockRmqRecord = (data: Record<string, any>) =>
+            new RmqRecordBuilder().setOptions({ headers: mockHeaders }).setData(data).build();
     });
 
     afterAll(() => {
@@ -55,8 +63,8 @@ describe(ProductsController, () => {
                 page: 1,
                 pageSize: 10,
             };
-            await productsController.getProducts(data);
-            expect(searchService.send).toBeCalledWith(message, data);
+            await productsController.getProducts(mockHeaders, data);
+            expect(searchService.send).toHaveBeenCalledWith(message, mockRmqRecord(data));
         });
     });
 
@@ -69,11 +77,14 @@ describe(ProductsController, () => {
             const query: GetProductByIdQueryDTO = {
                 detail: false,
             };
-            await productsController.getProductById(params, query);
-            expect(searchService.send).toBeCalledWith(message, {
-                productId: params.productId,
-                ...query,
-            });
+            await productsController.getProductById(mockHeaders, params, query);
+            expect(searchService.send).toHaveBeenCalledWith(
+                message,
+                mockRmqRecord({
+                    productId: params.productId,
+                    ...query,
+                }),
+            );
         });
     });
 
@@ -90,8 +101,8 @@ describe(ProductsController, () => {
                 variations: [],
                 descriptionImages: [],
             };
-            await productsController.createProduct(product);
-            expect(managementsService.send).toBeCalledWith(message, product);
+            await productsController.createProduct(mockHeaders, product);
+            expect(managementsService.send).toHaveBeenCalledWith(message, mockRmqRecord(product));
         });
     });
 
@@ -111,11 +122,14 @@ describe(ProductsController, () => {
                 variations: [],
                 descriptionImages: [],
             };
-            await productsController.updateProduct(params, product);
-            expect(managementsService.send).toBeCalledWith(message, {
-                productId: params.productId,
-                ...product,
-            });
+            await productsController.updateProduct(mockHeaders, params, product);
+            expect(managementsService.send).toHaveBeenCalledWith(
+                message,
+                mockRmqRecord({
+                    productId: params.productId,
+                    ...product,
+                }),
+            );
         });
     });
 
@@ -125,8 +139,8 @@ describe(ProductsController, () => {
             const params: ProductIdParamsDTO = {
                 productId: new Types.ObjectId(),
             };
-            await productsController.deleteProduct(params);
-            expect(managementsService.send).toBeCalledWith(message, params);
+            await productsController.deleteProduct(mockHeaders, params);
+            expect(managementsService.send).toHaveBeenCalledWith(message, mockRmqRecord(params));
         });
     });
 
@@ -136,14 +150,21 @@ describe(ProductsController, () => {
             const productIdParams: ProductIdParamsDTO = {
                 productId: new Types.ObjectId(),
             };
-            const skuParams: ProductSkuParamsDTO = {
+            const skuParams: ProductSkuQueryDTO = {
                 sku: 'sku',
             };
-            await productsController.deleteProductVariation(productIdParams, skuParams);
-            expect(managementsService.send).toBeCalledWith(message, {
-                productId: productIdParams.productId,
-                sku: skuParams.sku,
-            });
+            await productsController.deleteProductVariation(
+                mockHeaders,
+                productIdParams,
+                skuParams,
+            );
+            expect(managementsService.send).toHaveBeenCalledWith(
+                message,
+                mockRmqRecord({
+                    productId: productIdParams.productId,
+                    sku: skuParams.sku,
+                }),
+            );
         });
     });
 });

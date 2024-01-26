@@ -1,5 +1,4 @@
-import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common';
-import { Types } from 'mongoose';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import {
     BlockUnblockRequestDTO,
     ChangeRoleRequestDTO,
@@ -11,25 +10,25 @@ import {
 import { RpcException } from '@nestjs/microservices';
 import { BlockActivity, UserRole } from '~libs/resource/users/enums';
 import { UsersMntUtilService } from './users-mnt.util.service';
-import { delStartWith, generateRandomString } from '~libs/common';
+import { convertToObjectId, generateRandomString } from '~libs/common';
 import { AddressSchemaDTO, CreateUserDTO, ImageSchemaDTO } from '~libs/resource/users/dtos';
-import { REDIS_CACHE, USERS_CACHE_PREFIX } from '~libs/common/constants';
-import { cleanUserBeforeResponse, delCacheUsers } from '~libs/resource/users/utils';
+import { USERS_CACHE_PREFIX } from '~libs/common/constants';
+import { cleanUserBeforeResponse } from '~libs/resource/users/utils';
 import { TCurrentUser } from '~libs/common/types';
 import { UsersService } from '~libs/resource/users';
-import { Store } from 'cache-manager';
 import { CloudinaryService } from '~libs/third-party/cloudinary.com';
 import { UsersMntExceptions } from './users-mnt.exception';
+import { RedisService } from '~libs/common/Redis/services';
 
 @Injectable()
 export class UsersMntService extends UsersMntUtilService {
     protected readonly logger = new Logger(UsersMntService.name);
     constructor(
         protected readonly usersService: UsersService,
-        @Inject(REDIS_CACHE) protected cacheManager: Store,
+        protected redisService: RedisService,
         private readonly cloudinaryService: CloudinaryService,
     ) {
-        super(usersService, cacheManager);
+        super(usersService, redisService);
         this.logger = new Logger(UsersMntService.name);
     }
 
@@ -42,7 +41,7 @@ export class UsersMntService extends UsersMntUtilService {
 
         const [userCreated] = await Promise.all([
             this.usersService.createUser(newUser),
-            delStartWith(USERS_CACHE_PREFIX, this.cacheManager), // remove users cache
+            this.redisService.delWithPrefix(USERS_CACHE_PREFIX), // remove users cache
         ]);
 
         return userCreated;
@@ -59,8 +58,8 @@ export class UsersMntService extends UsersMntUtilService {
         }
 
         const [victimUser, blockByUser] = await Promise.all([
-            this.usersService.getUser({ _id: new Types.ObjectId(victimId) }),
-            this.usersService.getUser({ _id: new Types.ObjectId(actorId) }),
+            this.usersService.getUser({ _id: convertToObjectId(victimId) }),
+            this.usersService.getUser({ _id: convertToObjectId(actorId) }),
         ]);
 
         this.canBlockAndUnblockUser({
@@ -84,7 +83,7 @@ export class UsersMntService extends UsersMntUtilService {
 
         const [userReturn] = await Promise.all([
             this.usersService.findOneAndUpdateUser(
-                { _id: victimId },
+                { _id: convertToObjectId(victimId) },
                 {
                     block: {
                         isBlocked: true,
@@ -93,7 +92,7 @@ export class UsersMntService extends UsersMntUtilService {
                 },
             ),
             this.setUserRequiredRefresh({ user: victimUser }),
-            delCacheUsers(this.cacheManager),
+            this.redisService.delWithPrefix(USERS_CACHE_PREFIX),
         ]);
 
         return userReturn;
@@ -110,8 +109,8 @@ export class UsersMntService extends UsersMntUtilService {
         }
 
         const [victimUser, unblockByUser] = await Promise.all([
-            this.usersService.getUser({ _id: new Types.ObjectId(victimId) }),
-            this.usersService.getUser({ _id: new Types.ObjectId(actorId) }),
+            this.usersService.getUser({ _id: convertToObjectId(victimId) }),
+            this.usersService.getUser({ _id: convertToObjectId(actorId) }),
         ]);
 
         this.canBlockAndUnblockUser({
@@ -135,7 +134,7 @@ export class UsersMntService extends UsersMntUtilService {
 
         const [userReturn] = await Promise.all([
             this.usersService.findOneAndUpdateUser(
-                { _id: victimId },
+                { _id: convertToObjectId(victimId) },
                 {
                     block: {
                         isBlocked: false,
@@ -144,7 +143,7 @@ export class UsersMntService extends UsersMntUtilService {
                 },
             ),
             this.setUserRequiredRefresh({ user: victimUser }),
-            delCacheUsers(this.cacheManager),
+            this.redisService.delWithPrefix(USERS_CACHE_PREFIX),
         ]);
 
         return userReturn;
@@ -159,8 +158,8 @@ export class UsersMntService extends UsersMntUtilService {
         actorId: string;
     }) {
         const [user, updatedByUser] = await Promise.all([
-            this.usersService.getUser({ _id: new Types.ObjectId(victimId) }),
-            this.usersService.getUser({ _id: new Types.ObjectId(actorId) }),
+            this.usersService.getUser({ _id: convertToObjectId(victimId) }),
+            this.usersService.getUser({ _id: convertToObjectId(actorId) }),
         ]);
 
         this.canChangeRole({
@@ -170,9 +169,12 @@ export class UsersMntService extends UsersMntUtilService {
         });
 
         const [changeRole] = await Promise.all([
-            this.usersService.findOneAndUpdateUser({ _id: victimId }, { role: role }),
+            this.usersService.findOneAndUpdateUser(
+                { _id: convertToObjectId(victimId) },
+                { role: role },
+            ),
             this.setUserRequiredRefresh({ user }),
-            delCacheUsers(this.cacheManager),
+            this.redisService.delWithPrefix(USERS_CACHE_PREFIX),
         ]);
 
         return changeRole;
@@ -210,7 +212,7 @@ export class UsersMntService extends UsersMntUtilService {
         dataUpdate: UpdateUserRequestDTO;
     }) {
         this.logger.debug(dataUpdate);
-        const oldUser = await this.usersService.getUser({ _id: new Types.ObjectId(user._id) });
+        const oldUser = await this.usersService.getUser({ _id: convertToObjectId(user._id) });
         delete oldUser.createdAt;
         delete oldUser.updatedAt;
 
@@ -247,7 +249,7 @@ export class UsersMntService extends UsersMntUtilService {
             }),
         };
         const userUpdated = await this.usersService.findOneAndUpdateUser(
-            { _id: user._id },
+            { _id: convertToObjectId(user._id) },
             newUser,
         );
 
@@ -264,7 +266,7 @@ export class UsersMntService extends UsersMntUtilService {
         user: TCurrentUser;
         addressData: UpdateUserAddressRequestDTO;
     }) {
-        const userFound = await this.usersService.getUser({ _id: new Types.ObjectId(user._id) });
+        const userFound = await this.usersService.getUser({ _id: convertToObjectId(user._id) });
         const newAddr = Array.isArray(addressData.address)
             ? addressData.address.map((addr) => {
                   if (!addr?.customerName) {
@@ -286,7 +288,7 @@ export class UsersMntService extends UsersMntUtilService {
 
         userFound.address = newAddr;
         const userUpdated = await this.usersService.findOneAndUpdateUser(
-            { _id: userFound._id },
+            { _id: convertToObjectId(userFound._id) },
             userFound,
         );
         return {

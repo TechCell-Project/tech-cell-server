@@ -1,0 +1,5 @@
+{
+    "InternalServerException": "Lỗi máy chủ nội bộ",
+    "ThrottleException": "Quá nhiều yêu cầu",
+    "ServiceUnavailableException": "Dịch vụ đang bảo trì"
+}

@@ -1,0 +1,422 @@
+name: Tech Cell Server CI/CD
+
+on:
+    push:
+        branches:
+            - development
+
+env:
+    DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+    DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
+    COMPOSE_PROJECT_NAME: tech-cell-server
+
+jobs:
+    check-skip-ci:
+        runs-on: ubuntu-latest
+        outputs:
+            skip_ci: ${{ steps.check_skip_ci.outputs.skip_ci }}
+            skip_sdk: ${{ steps.check_skip_sdk.outputs.skip_sdk }}
+            skip_docker: ${{ steps.check_skip_docker.outputs.skip_docker }}
+            skip_deploy: ${{ steps.check_skip_deploy.outputs.skip_deploy }}
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+
+            - name: Checkout PR head
+              if: github.event_name == 'pull_request'
+              run: |
+                  git fetch origin ${{ github.event.pull_request.head.ref }}
+                  git checkout ${{ github.event.pull_request.head.ref }}
+
+            - name: Get commit message
+              id: get_commit_message
+              run: |
+                  commit_message=$(git log -1 --pretty=%B)
+                  commit_message="${commit_message//'%'/'%25'}"
+                  commit_message="${commit_message//$'\n'/' '}"
+                  commit_message="${commit_message//$'\r'/' '}"
+                  echo $commit_message
+                  echo "commit_message=$commit_message" >> $GITHUB_OUTPUT
+
+            - name: Check if commit message contains [skip ci]
+              id: check_skip_ci
+              run: |
+                  if [[ "${{ steps.get_commit_message.outputs.commit_message }}" =~ "[skip ci]" ]]; then
+                    echo "skip_ci=true" >> $GITHUB_OUTPUT
+                    echo "skip ci found, skipping CI/CD..."
+                  else
+                    echo "skip_ci=false" >> $GITHUB_OUTPUT
+                  fi
+
+            - name: Check if commit message contains [skip sdk]
+              id: check_skip_sdk
+              run: |
+                  if [[ "${{ steps.get_commit_message.outputs.commit_message }}" =~ "[skip sdk]" ]]; then
+                    echo "skip_sdk=true" >> $GITHUB_OUTPUT
+                    echo "skip sdk found, skipping SDK generation..."
+                  else
+                    echo "skip_sdk=false" >> $GITHUB_OUTPUT
+                  fi
+
+            - name: Check if commit message contains [skip docker]
+              id: check_skip_docker
+              run: |
+                  if [[ "${{ steps.get_commit_message.outputs.commit_message }}" =~ "[skip docker]" ]]; then
+                    echo "skip_docker=true" >> $GITHUB_OUTPUT
+                    echo "skip docker found, skipping docker build and push..."
+                  else
+                    echo "skip_docker=false" >> $GITHUB_OUTPUT
+                  fi
+
+            - name: Check if commit message contains [skip deploy]
+              id: check_skip_deploy
+              run: |
+                  if [[ "${{ steps.get_commit_message.outputs.commit_message }}" =~ "[skip deploy]" ]]; then
+                    echo "skip_deploy=true" >> $GITHUB_OUTPUT
+                    echo "skip deploy found, skipping deployment..."
+                  else
+                    echo "skip_deploy=false" >> $GITHUB_OUTPUT
+                  fi
+
+    automation-tests:
+        needs: [check-skip-ci]
+        if: ${{ needs.check-skip-ci.outputs.skip_ci != 'true' }}
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+
+            - name: Use Node.js 18.x
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 18.x
+
+            - name: Install dependencies
+              run: yarn install
+
+            - name: Build all services
+              run: yarn build:all
+
+            - name: Run tests
+              run: yarn test
+
+    generate-sdks:
+        needs: [check-skip-ci, automation-tests]
+        if: ${{ needs.check-skip-ci.outputs.skip_sdk != 'true' }}
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+
+            - name: Set up JDK 11
+              uses: actions/setup-java@v3
+              with:
+                  java-version: '11'
+                  distribution: 'adopt'
+
+            - name: Use Node.js 18.x
+              uses: actions/setup-node@v3
+              with:
+                  node-version: '18.x'
+                  registry-url: 'https://npm.pkg.github.com'
+                  scope: '@lehuygiang28'
+
+            - name: Set short SHA
+              id: set_short_sha
+              run: echo "SHORT_SHA=$(echo ${{ github.sha }} | cut -c 1-7)" >> $GITHUB_OUTPUT
+
+            - name: 'Create .env file'
+              run: |
+                  touch .env
+                  echo API_PORT= '8000' >> .env 
+                  echo GOOGLE_CLIENT_ID= 'google_sample' >> .env
+                  echo GOOGLE_CLIENT_SECRET= 'google_sample' >> .env
+                  echo GOOGLE_REDIRECT_URL= 'google_sample' >> .env
+                  echo JWT_ACCESS_TOKEN_SECRET= 'jwt_sample' >> .env
+                  echo JWT_REFRESH_TOKEN_SECRET= 'jwt_sample' >> .env
+                  echo JWT_ACCESS_TOKEN_EXPIRE_TIME_STRING= '1h' >> .env
+                  echo JWT_REFRESH_TOKEN_EXPIRE_TIME_STRING= '1h' >> .env
+                  echo FALLBACK_LANGUAGE= 'en' >> .env
+                  echo RABBITMQ_UTILITY_QUEUE= 'utility_queue' >> .env
+                  echo RABBITMQ_SEARCH_QUEUE= 'search_queue' >> .env
+                  echo RABBITMQ_AUTH_QUEUE= 'auth_queue' >> .env
+                  echo RABBITMQ_COMMUNICATIONS_QUEUE= 'communications_queue' >> .env
+                  echo RABBITMQ_MANAGEMENTS_QUEUE= 'managements_queue' >> .env
+                  echo RABBITMQ_ORDER_QUEUE= 'order_queue' >> .env
+                  echo RABBITMQ_TASK_QUEUE= 'task_queue' >> .env
+                  echo MONGODB_URI= '${{secrets.MONGODB_URI}}' >> .env
+                  echo RABBITMQ_URLS= '${{secrets.RABBITMQ_URLS}}' >> .env
+                  echo REDIS_HOST= '${{secrets.REDIS_HOST}}' >> .env
+                  echo REDIS_PORT= '${{secrets.REDIS_PORT}}' >> .env
+                  echo REDIS_PASSWORD= '${{secrets.REDIS_PASSWORD}}' >> .env
+                  cat .env
+
+            - name: Install dependencies
+              run: yarn install
+
+            - name: Run the web server and generate the OpenAPI YAML
+              run: |
+                  yarn start api &
+                  sleep 25 &&
+                  yarn generate:swagger-yaml
+
+            - name: Config git global
+              run: |
+                  git config --global user.email "lehuygiang28@gmail.com"
+                  git config --global user.name "lehuygiang28"
+
+            - name: Generate SDKs
+              id: generate_sdks
+              run: |
+                  npx @openapitools/openapi-generator-cli generate
+
+            - name: Update package.json of Node SDK
+              run: |
+                  echo Adding publishConfig, updating name and version in package.json...
+                  techcell_version=$(node -p "require('./package.json').version")
+                  node -e "
+                  const fs = require('fs');
+                  const path = './generated/node/package.json';
+                  let pkg;
+                  if (fs.existsSync(path)) {
+                    pkg = require(path);
+                  } else {
+                    pkg = {
+                      name: '',
+                      version: '',
+                      description: '',
+                      main: 'index.ts',
+                      scripts: {
+                        test: 'echo \"Error: no test specified\" && exit 1'
+                      },
+                      author: '',
+                      license: 'ISC'
+                    };
+                  }
+                  pkg.name='@TechCell-Project/tech-cell-server-node-sdk';
+                  pkg.version='${techcell_version}-${{ steps.set_short_sha.outputs.SHORT_SHA }}';
+                  pkg.publishConfig={registry:'https://npm.pkg.github.com/'};
+                  pkg.author='TechCell Teams <teams@techcell.cloud>';
+                  pkg.description='TechCell Server Node SDK autogenerated';
+                  pkg.main='index.ts';
+                  fs.writeFileSync(path, JSON.stringify(pkg, null, 2));
+                  "
+
+            - name: Push commit to SDK repositories
+              run: |
+                  generators=$(node -p "Object.keys(require('./openapitools.json')['generator-cli'].generators).join(' ')")
+
+                  for generator in $generators
+                    do
+                      (
+                        cp ./scripts/generate-sdk-git-push.sh ./generated/$generator
+                        cd ./generated/$generator
+                        /bin/sh ./generate-sdk-git-push.sh "TechCell-Project" "tech-cell-server-$generator-sdk" \
+                        "SDK generated by https://github.com/TechCell-Project/tech-cell-server/commit/${{ steps.set_short_sha.outputs.SHORT_SHA }}"
+                      )
+                    done
+              env:
+                  GIT_TOKEN: ${{secrets.GIAANG_SDK_REPO_SECRET}}
+
+            - name: Check exist node-sdk version on GitHub Packages
+              id: check_version
+              run: |
+                  cd ./generated/node
+                  version=$(node -p "require('./package.json').version")
+                  if npm view --registry https://npm.pkg.github.com/ @techcell-project/tech-cell-server-node-sdk@$version version; then
+                    echo "Version $version already exists, skipping publish..."
+                    echo "skip_publish_node_sdk=true" >> $GITHUB_OUTPUT
+                  else
+                    echo "Version $version does not exist, proceeding with publish..."
+                  fi
+              env:
+                  NODE_AUTH_TOKEN: ${{secrets.GIAANG_PACKAGE_TOKEN}}
+
+            - name: Publish node-sdk package to GitHub Packages
+              if: ${{ steps.check_version.outputs.skip_publish_node_sdk != 'true' }}
+              run: |
+                  cd ./generated/node
+                  npm publish
+              env:
+                  NODE_AUTH_TOKEN: ${{secrets.GIAANG_PACKAGE_TOKEN}}
+
+    build-and-push-to-dockerhub:
+        needs: [check-skip-ci, automation-tests]
+        if: ${{ needs.check-skip-ci.outputs.skip_docker != 'true' }}
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+
+            - name: Login to Docker Hub
+              uses: docker/login-action@v3
+              with:
+                  username: ${{ env.DOCKERHUB_USERNAME }}
+                  password: ${{ env.DOCKERHUB_PASSWORD }}
+
+            - name: Free disk space up
+              run: rm -rf /opt/hostedtoolcache
+
+            - name: Set short SHA
+              id: set_short_sha
+              run: echo "SHORT_SHA=$(echo ${{ github.sha }} | cut -c 1-7)" >> $GITHUB_OUTPUT
+
+            - name: 'Create .env file'
+              run: |
+                  touch .env
+                  echo COMPOSE_PROJECT_NAME= ${{ env.COMPOSE_PROJECT_NAME }} >> .env
+                  echo COMPOSE_TAG= "${{ steps.set_short_sha.outputs.SHORT_SHA }}" >> .env
+                  cat .env
+
+            - name: Build and push images
+              id: build_and_push
+              run: |
+                  docker compose -f docker-compose.prod.yml build
+                  docker compose -f docker-compose.prod.yml push
+
+            - name: Overwrite .env file for latest tag
+              run: |
+                  echo COMPOSE_TAG= "latest" >> .env
+                  cat .env
+
+            - name: Build and push images with latest tag
+              id: build_and_push_latest
+              run: |
+                  docker compose -f docker-compose.prod.yml build
+                  docker compose -f docker-compose.prod.yml push
+
+            - name: Remove .env file
+              run: |
+                  rm .env
+
+    deploy-to-server:
+        needs: [check-skip-ci, automation-tests, build-and-push-to-dockerhub]
+        if: ${{ needs.check-skip-ci.outputs.skip_deploy != 'true' }}
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Set short SHA
+              id: set_short_sha
+              run: echo "SHORT_SHA=$(echo ${{ github.sha }} | cut -c 1-7)" >> $GITHUB_OUTPUT
+
+            - name: Download most recent existing artifact
+              id: download_artifact
+              run: |
+                  artifacts=$(curl -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/${{ github.repository }}/actions/artifacts)
+                  for artifact in $(echo "${artifacts}" | jq -r '.artifacts[] | @base64'); do
+                    _jq() {
+                      echo ${artifact} | base64 --decode | jq -r ${1}
+                    }
+                    name=$(_jq '.name')
+                    if [[ "${name}" == "deployment-artifact" ]]; then
+                      url=$(_jq '.archive_download_url')
+                      curl -L -o deployment-artifact.zip -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "${url}"
+                      break
+                    fi
+                  done
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Extract last deployed SHA
+              id: extract_artifact
+              run: |
+                  unzip deployment-artifact.zip
+                  cat deployment-artifact.txt
+                  echo "last_deployed_sha=$(cat deployment-artifact.txt)" >> $GITHUB_OUTPUT
+              continue-on-error: true
+
+            - name: Setup repository directory
+              shell: bash
+              run: echo "repo_dir_on_server=/home/${{ secrets.SERVER_SSH_USERNAME }}/tech-cell-server" >> $GITHUB_OUTPUT
+              id: set_repo_dir
+
+            - name: Extract branch name
+              shell: bash
+              run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+              id: extract_branch
+
+            - name: Execute remote ssh commands
+              uses: appleboy/ssh-action@master
+              id: exec_ssh_deploy
+              with:
+                  host: ${{ secrets.SERVER_SSH_HOST }}
+                  username: ${{ secrets.SERVER_SSH_USERNAME }}
+                  key: ${{ secrets.SERVER_SSH_KEY }}
+                  script: |
+                      export NVM_DIR=~/.nvm
+                      source ~/.nvm/nvm.sh
+
+                      if [ -d "${{ steps.set_repo_dir.outputs.repo_dir_on_server }}" ]; then
+                          if [ ! -d "${{ steps.set_repo_dir.outputs.repo_dir_on_server }}/.git" ]; then
+                              rm -rf ${{ steps.set_repo_dir.outputs.repo_dir_on_server }}
+                              git clone https://github.com/${{ github.repository }}.git ${{ steps.set_repo_dir.outputs.repo_dir_on_server }} || { echo "Failed to clone repository"; exit 1; }
+                          fi
+                      else
+                          git clone https://github.com/${{ github.repository }}.git ${{ steps.set_repo_dir.outputs.repo_dir_on_server }} || { echo "Failed to clone repository"; exit 1; }
+                      fi
+
+                      cd ${{ steps.set_repo_dir.outputs.repo_dir_on_server }} || { echo "Failed to change to directory"; exit 1; }
+                      echo "${{ secrets.SERVER_SSH_ENV_FILE }}" | base64 --decode > .env || { echo "Failed to create .env file"; exit 1; }
+
+                      git reset --hard || { echo "Failed to reset hard"; exit 1; }
+                      git pull || { echo "Failed to pull latest changes"; exit 1; }
+                      if [ "$(git rev-parse --abbrev-ref HEAD)" != "${{ steps.extract_branch.outputs.branch }}" ]; then
+                        git switch ${{ steps.extract_branch.outputs.branch }} || { echo "Failed to switch to branch"; exit 1; }
+                      fi    
+
+                      git reset --hard || { echo "Failed to reset hard"; exit 1; }
+                      git pull || { echo "Failed to pull latest changes"; exit 1; }
+                      yarn install || { echo "Failed to install dependencies"; exit 1; }
+                      yarn get-logs || { echo "Failed to get logs"; }
+
+                      echo "COMPOSE_TAG=${{ steps.set_short_sha.outputs.SHORT_SHA }}" >> .env || { echo "Failed to set COMPOSE_TAG"; exit 1; }
+
+                      docker compose -f ./docker-compose.prod.yml pull || { echo "Failed to pull production"; exit 1; }
+
+                      if docker compose -f ./docker-compose.prod.yml up -d; then
+                          echo "Deployment successful saving new version to artifact: ${{ steps.set_short_sha.outputs.SHORT_SHA }}"
+                      else
+                          echo "Deployment failed, rolling back to previous version"
+                          if [ -n "${{steps.extract_artifact.outputs.last_deployed_sha}}" ]; then
+                              echo "COMPOSE_TAG=${{steps.extract_artifact.outputs.last_deployed_sha}}" >> .env || { echo "Failed to set COMPOSE_TAG"; exit 1; }
+                              echo "Rolling back to previous version: ${{steps.extract_artifact.outputs.last_deployed_sha}}"
+                              docker compose -f ./docker-compose.prod.yml pull || { echo "Failed to pull previous production"; exit 1; }
+                              docker compose -f ./docker-compose.prod.yml up -d || { echo "Failed to up previous production"; exit 1; }
+                          else
+                              echo "No previous version found, rollback failed"
+                              exit 1
+                          fi
+                      fi
+
+                      docker system prune -a -f || { echo "Failed to prune docker system"; exit 1; }
+
+            - name: Save deployment artifact
+              if: success()
+              id: save_artifact
+              run: |
+                  echo "${{ secrets.SERVER_SSH_KEY }}" > ssh_key
+                  chmod 600 ssh_key
+
+                  DEPLOYED_SHA_FULL=$(ssh -i ssh_key -o StrictHostKeyChecking=no ${{ secrets.SERVER_SSH_USERNAME }}@${{ secrets.SERVER_SSH_HOST }} "docker compose -f ${{ steps.set_repo_dir.outputs.repo_dir_on_server}}/docker-compose.prod.yml images | grep lehuygiang28/techcell_api")
+                  DEPLOYED_SHA=$(echo $DEPLOYED_SHA_FULL | awk '{print $(NF-2)}')
+
+                  echo "DEPLOYED_SHA=$DEPLOYED_SHA" >> $GITHUB_ENV
+                  echo "$DEPLOYED_SHA"
+
+                  if [[ -n "$DEPLOYED_SHA" ]]; then
+                    echo "$DEPLOYED_SHA" > deployment-artifact.txt
+                    echo "status=success" >> $GITHUB_OUTPUT
+                  else
+                    echo "No deployed SHA found, not saving artifact."
+                    echo "status=failure" >> $GITHUB_OUTPUT
+                  fi
+
+            - name: Upload deployment artifact
+              if: steps.save_artifact.outputs.status == 'success'
+              uses: actions/upload-artifact@v3
+              with:
+                  name: deployment-artifact
+                  path: deployment-artifact.txt

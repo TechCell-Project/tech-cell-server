@@ -2,12 +2,13 @@ import { Cart, CartsService } from '~libs/resource/carts';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { AddCartRequestDTO } from './dtos/create-cart-request.dto';
 import { RpcException } from '@nestjs/microservices';
-import { QueryOptions, Types } from 'mongoose';
+import { Types } from 'mongoose';
 import { ProductsService } from '~libs/resource';
-import { PaginationQuery } from '~libs/common/dtos';
 import { TCurrentUser } from '~libs/common/types';
 import { DeleteProductsCartRequestDTO } from './dtos';
 import { CartState } from '~libs/resource/carts/enums';
+import { CartDTO } from '~libs/resource/carts/dtos';
+import { convertToObjectId } from '~libs/common';
 
 @Injectable()
 export class CartsOrdService {
@@ -16,17 +17,11 @@ export class CartsOrdService {
         private readonly productsService: ProductsService,
     ) {}
 
-    async getCarts({ query, user }: { query: PaginationQuery; user: TCurrentUser }) {
-        const { page, pageSize } = new PaginationQuery(query);
-        const queryOptions: QueryOptions<Cart> = {
-            skip: (page - 1) * pageSize,
-            limit: pageSize > 500 ? 500 : pageSize,
-        };
-
-        return await this.cartsService.getCartByUserId({
+    async getCarts({ user }: { user: TCurrentUser }): Promise<CartDTO> {
+        const cart = await this.cartsService.getCartByUserId({
             userId: new Types.ObjectId(user._id),
-            options: queryOptions,
         });
+        return cart;
     }
 
     public async addProductToCart({
@@ -210,7 +205,10 @@ export class CartsOrdService {
         quantity: number;
     }) {
         const productFound = await this.productsService.getProduct({
-            filterQueries: { _id: productId, variations: { $elemMatch: { sku } } },
+            filterQueries: {
+                _id: convertToObjectId(productId),
+                variations: { $elemMatch: { sku } },
+            },
         });
 
         productFound.variations.forEach((variation) => {

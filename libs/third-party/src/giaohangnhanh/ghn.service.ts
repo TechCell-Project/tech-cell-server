@@ -20,16 +20,27 @@ export class GhnService extends GhnCoreService {
     }) {
         const { selectedDistrict, selectedWard } = await this.getSelectedAddress(address);
 
+        const integerItems = items.map((item) => ({
+            ...item,
+            weight: Math.floor(item.weight),
+            height: Math.floor(item.height),
+            length: Math.floor(item.length),
+            width: Math.floor(item.width),
+            quantity: Math.floor(item.quantity),
+        }));
+        const totalWeight = integerItems.reduce((total, item) => {
+            return total + item.weight * item.quantity;
+        }, 0);
         const dataFee = new GetShippingFeeDTO({
             service_type_id: 2,
             to_district_id: selectedDistrict.district_id,
             to_ward_code: selectedWard.ward_code,
-            weight: 1000,
-            items: items,
+            weight: totalWeight,
+            items: integerItems,
+            province_id: selectedDistrict.province_id,
         });
         const fee = await this.getShippingFee(dataFee).catch((error) => {
-            this.logger.error(error);
-            throw new Error(error);
+            throw error;
         });
 
         return fee;
@@ -40,10 +51,11 @@ export class GhnService extends GhnCoreService {
         const provinceData = await this.getProvinces().catch((error) => {
             throw error;
         });
-        const selectedProvince = provinceData.find((province) =>
-            province.name_extension.some((name) =>
-                generateRegexQuery(address.provinceLevel.province_name).test(name),
-            ),
+        const selectedProvince = provinceData.find(
+            (province) =>
+                province.name_extension?.some((name) =>
+                    generateRegexQuery(address.provinceLevel.province_name).test(name),
+                ),
         );
 
         const districtData = await this.getDistricts(selectedProvince.province_id).catch(
@@ -51,19 +63,21 @@ export class GhnService extends GhnCoreService {
                 throw error;
             },
         );
-        const selectedDistrict = districtData.find((district) =>
-            district.name_extension.some((name) =>
-                generateRegexQuery(address.districtLevel.district_name).test(name),
-            ),
+        const selectedDistrict = districtData.find(
+            (district) =>
+                district.name_extension?.some((name) =>
+                    generateRegexQuery(address.districtLevel.district_name).test(name),
+                ),
         );
 
         const wardData = await this.getWards(selectedDistrict.district_id).catch((error) => {
             throw error;
         });
-        const selectedWard = wardData.find((ward) =>
-            ward.name_extension.some((name) =>
-                generateRegexQuery(address.wardLevel.ward_name).test(name),
-            ),
+        const selectedWard = wardData.find(
+            (ward) =>
+                ward.name_extension?.some((name) =>
+                    generateRegexQuery(address.wardLevel.ward_name).test(name),
+                ),
         );
 
         return { selectedProvince, selectedDistrict, selectedWard };

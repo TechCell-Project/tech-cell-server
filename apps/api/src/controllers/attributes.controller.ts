@@ -3,6 +3,7 @@ import {
     Controller,
     Get,
     Inject,
+    Headers,
     Param,
     Post,
     Query,
@@ -12,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~libs/common/constants';
-import { AdminGuard, catchException } from '~libs/common';
+import { AdminGuard } from '~libs/common';
 import {
     AttributesSearchMessagePattern,
     GetAttributeByIdRequestDTO,
@@ -37,6 +38,8 @@ import {
     ApiTooManyRequestsResponse,
 } from '@nestjs/swagger';
 import { AttributeDTO } from '~libs/resource/attributes/dtos';
+import { sendMessagePipeException } from '~libs/common/RabbitMQ/rmq.util';
+import { THeaders } from '~libs/common/types/common.type';
 
 @ApiBadRequestResponse({
     description: 'Invalid request, please check your request data!',
@@ -68,10 +71,16 @@ export class AttributesController {
     })
     @ApiNotFoundResponse({ description: 'Attributes not found!' })
     @Get('/')
-    async getAttributes(@Query() requestQuery: GetAttributesRequestDTO) {
-        return this.searchService
-            .send(AttributesSearchMessagePattern.getAttributes, { ...requestQuery })
-            .pipe(catchException());
+    async getAttributes(
+        @Headers() headers: THeaders,
+        @Query() requestQuery: GetAttributesRequestDTO,
+    ) {
+        return sendMessagePipeException<GetAttributesRequestDTO>({
+            client: this.searchService,
+            pattern: AttributesSearchMessagePattern.getAttributes,
+            data: requestQuery,
+            headers,
+        });
     }
 
     @ApiOperation({
@@ -81,10 +90,16 @@ export class AttributesController {
     @ApiOkResponse({ description: 'Get attribute by id successfully!', type: AttributeDTO })
     @ApiNotFoundResponse({ description: 'Attribute not found!' })
     @Get('/:attributeId')
-    async getAttributeById(@Param() { attributeId }: GetAttributeByIdRequestDTO) {
-        return this.searchService
-            .send(AttributesSearchMessagePattern.getAttributeById, { attributeId })
-            .pipe(catchException());
+    async getAttributeById(
+        @Headers() headers: THeaders,
+        @Param() { attributeId }: GetAttributeByIdRequestDTO,
+    ) {
+        return sendMessagePipeException<GetAttributeByIdRequestDTO>({
+            client: this.searchService,
+            pattern: AttributesSearchMessagePattern.getAttributeById,
+            data: { attributeId },
+            headers,
+        });
     }
 
     @ApiOperation({
@@ -94,10 +109,16 @@ export class AttributesController {
     @ApiOkResponse({ description: 'Get attribute by label successfully!' })
     @ApiNotFoundResponse({ description: 'Attribute not found!' })
     @Get('/label/:label')
-    async getAttributesByLabel(@Param() { label }: GetAttributeByLabelRequestDTO) {
-        return this.searchService
-            .send(AttributesSearchMessagePattern.getAttributeByLabel, { label })
-            .pipe(catchException());
+    async getAttributesByLabel(
+        @Headers() headers: THeaders,
+        @Param() { label }: GetAttributeByLabelRequestDTO,
+    ) {
+        return sendMessagePipeException<GetAttributeByLabelRequestDTO>({
+            client: this.searchService,
+            pattern: AttributesSearchMessagePattern.getAttributeByLabel,
+            data: { label },
+            headers,
+        });
     }
 
     @ApiOperation({
@@ -108,10 +129,16 @@ export class AttributesController {
     @ApiBadRequestResponse({ description: 'Something wrong, re-check your input.' })
     @UseGuards(AdminGuard)
     @Post('/')
-    async createAttribute(@Body() { label, name, description }: CreateAttributeRequestDTO) {
-        return this.managementsService
-            .send(AttributesMntMessagePattern.createAttribute, { label, name, description })
-            .pipe(catchException());
+    async createAttribute(
+        @Headers() headers: THeaders,
+        @Body() { label, name, description }: CreateAttributeRequestDTO,
+    ) {
+        return sendMessagePipeException<CreateAttributeRequestDTO>({
+            client: this.managementsService,
+            pattern: AttributesMntMessagePattern.createAttribute,
+            data: { label, name, description },
+            headers,
+        });
     }
 
     @ApiOperation({
@@ -123,17 +150,16 @@ export class AttributesController {
     @UseGuards(AdminGuard)
     @Patch('/:attributeId')
     async updateAttributeInfo(
+        @Headers() headers: THeaders,
         @Param('attributeId') attributeId: string,
         @Body() { label, name, description }: UpdateAttributeRequestDTO,
     ) {
-        return this.managementsService
-            .send(AttributesMntMessagePattern.updateAttributeInfo, {
-                attributeId,
-                label,
-                name,
-                description,
-            })
-            .pipe(catchException());
+        return sendMessagePipeException<UpdateAttributeRequestDTO & { attributeId: string }>({
+            client: this.managementsService,
+            pattern: AttributesMntMessagePattern.updateAttributeInfo,
+            data: { attributeId, label, name, description },
+            headers,
+        });
     }
 
     @ApiOperation({
@@ -144,9 +170,15 @@ export class AttributesController {
     @ApiBadRequestResponse({ description: 'Something wrong, re-check your input.' })
     @UseGuards(AdminGuard)
     @Delete('/:attributeId')
-    async deleteAttribute(@Param() { attributeId }: DeleteAttributeByIdRequestDTO) {
-        return this.managementsService
-            .send(AttributesMntMessagePattern.deleteAttribute, { attributeId })
-            .pipe(catchException());
+    async deleteAttribute(
+        @Headers() headers: THeaders,
+        @Param() { attributeId }: DeleteAttributeByIdRequestDTO,
+    ) {
+        return sendMessagePipeException<DeleteAttributeByIdRequestDTO>({
+            client: this.managementsService,
+            pattern: AttributesMntMessagePattern.deleteAttribute,
+            data: { attributeId },
+            headers,
+        });
     }
 }

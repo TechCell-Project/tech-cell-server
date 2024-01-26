@@ -8,21 +8,22 @@ import {
     ProductsService,
     VariationDTO,
 } from '~libs/resource';
-import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import {
     allowToAction,
     compareTwoObjectAndGetDifferent,
-    delStartWith,
     findDuplicates,
     replaceWhitespaceTo,
 } from '~libs/common/utils';
-import { REDIS_CACHE, PRODUCTS_CACHE_PREFIX } from '~libs/common/constants';
-import { Store } from 'cache-manager';
+import { PRODUCTS_CACHE_PREFIX } from '~libs/common/constants';
 import { AttributeDTO, CreateProductRequestDTO } from './dtos';
 import { RpcException } from '@nestjs/microservices';
 import { CloudinaryService } from '~libs/third-party/cloudinary.com';
 import { UpdateProductRequestDTO } from './dtos/update-product-request.dto';
 import { ProductStatus } from '~libs/resource/products/enums';
+import { RedisService } from '~libs/common/Redis/services';
+import { I18n, I18nService } from 'nestjs-i18n';
+import { I18nTranslations } from '~libs/common/i18n/generated/i18n.generated';
 
 @Injectable()
 export class ProductsMntUtilService {
@@ -32,8 +33,9 @@ export class ProductsMntUtilService {
         protected readonly productsService: ProductsService,
         protected readonly categoriesService: CategoriesService,
         protected readonly attributesService: AttributesService,
-        @Inject(REDIS_CACHE) protected cacheManager: Store,
+        protected redisService: RedisService,
         private readonly cloudinaryService: CloudinaryService,
+        @I18n() protected readonly i18n: I18nService<I18nTranslations>,
     ) {}
 
     /**
@@ -80,7 +82,11 @@ export class ProductsMntUtilService {
         if (invalidImages.length > 0) {
             throw new RpcException(
                 new BadRequestException(
-                    `Images with publicIds '${invalidImages.join(', ')}' not found`,
+                    this.i18n.t('errorMessage.IMAGE_WITH_IDs_NOT_FOUND', {
+                        args: {
+                            id: invalidImages.join(', '),
+                        },
+                    }),
                 ),
             );
         }
@@ -161,7 +167,7 @@ export class ProductsMntUtilService {
      * @returns remove all products cache
      */
     protected async delCacheProducts() {
-        return await delStartWith(PRODUCTS_CACHE_PREFIX, this.cacheManager);
+        return this.redisService.delWithPrefix(PRODUCTS_CACHE_PREFIX);
     }
 
     /**
@@ -188,9 +194,12 @@ export class ProductsMntUtilService {
             if (duplicateAttributes.length > 0) {
                 throw new RpcException(
                     new BadRequestException(
-                        `Duplicate attributes in variation ${index}: ${duplicateAttributes.join(
-                            ', ',
-                        )}`,
+                        this.i18n.t('errorMessage.DUPLICATE_ATTRIBUTE_IN_VARIATIONS', {
+                            args: {
+                                index,
+                                duplicateAttributes: duplicateAttributes.join(', '),
+                            },
+                        }),
                     ),
                 );
             }
@@ -214,7 +223,13 @@ export class ProductsMntUtilService {
         const duplicateAttributes = [...findDuplicates(allAttributesUserImport)];
         if (duplicateAttributes.length > 0) {
             throw new RpcException(
-                new BadRequestException(`Duplicate attributes: ${duplicateAttributes.join(', ')}`),
+                new BadRequestException(
+                    this.i18n.t('errorMessage.DUPLICATE_ATTRIBUTE', {
+                        args: {
+                            duplicateAttributes: duplicateAttributes.join(', '),
+                        },
+                    }),
+                ),
             );
         }
 
@@ -225,7 +240,11 @@ export class ProductsMntUtilService {
         if (missingAttributes.length > 0) {
             throw new RpcException(
                 new BadRequestException(
-                    `Missing required attributes: ${missingAttributes.join(', ')}`,
+                    this.i18n.t('errorMessage.MISSING_REQUIRED_ATTRIBUTE', {
+                        args: {
+                            missingAttributes: missingAttributes.join(', '),
+                        },
+                    }),
                 ),
             );
         }
@@ -297,7 +316,13 @@ export class ProductsMntUtilService {
         const duplicateSkus = [...findDuplicates(variationsNew.map((v) => v.sku))];
         if (duplicateSkus.length > 0) {
             throw new RpcException(
-                new BadRequestException(`Duplicate skus: ${duplicateSkus.join(', ')}`),
+                new BadRequestException(
+                    this.i18n.t('errorMessage.DUPLICATE_SKUS', {
+                        args: {
+                            duplicateSkus: duplicateSkus.join(', '),
+                        },
+                    }),
+                ),
             );
         }
 

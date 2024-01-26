@@ -65,7 +65,7 @@ export class ProductsSearchService extends ProductsSearchUtilService {
         ...query
     }: { id: string | Types.ObjectId } & GetProductByIdQueryDTO) {
         const resultFromDb = await this.productsService.getProduct({
-            filterQueries: { _id: id },
+            filterQueries: { _id: new Types.ObjectId(id) },
             queryOptions: { lean: false },
         });
         let prodReturn = resultFromDb;

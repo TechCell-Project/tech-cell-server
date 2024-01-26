@@ -1,20 +1,20 @@
 import { isTrueSet } from '~libs/common';
 import { Transform } from 'class-transformer';
-import { IsBoolean, IsEnum, IsString } from 'class-validator';
 import { PaymentStatusEnum } from '../enums';
 import { ApiProperty } from '@nestjs/swagger';
+import { IsBooleanI18n, IsEnumI18n, IsStringI18n } from '~libs/common/i18n';
 
 export class PaymentResult {
     @ApiProperty({ type: Boolean, example: true })
-    @IsBoolean()
+    @IsBooleanI18n()
     @Transform(({ value }) => isTrueSet(value))
     isSuccess: boolean;
 
     @ApiProperty({ type: String, example: PaymentStatusEnum.SUCCESS, enum: PaymentStatusEnum })
-    @IsEnum(PaymentStatusEnum)
+    @IsEnumI18n(PaymentStatusEnum)
     paymentStatus: string;
 
     @ApiProperty({ type: String, example: 'Payment success' })
-    @IsString()
+    @IsStringI18n()
     message: string;
 }

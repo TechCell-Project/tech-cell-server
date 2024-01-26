@@ -8,6 +8,7 @@ import { NotificationsMessageSubscribe } from '../constants/notifications.messag
 import { NotificationsCallGateway } from '../gateways/notifications.call.gateway';
 import { ICreateNotificationQueue } from '../interfaces';
 import { cleanUserBeforeResponse } from '~libs/resource/users/utils/user.util';
+import { Types } from 'mongoose';
 
 @Injectable()
 // The @Processor decorator marks the class as a job processor.
@@ -20,7 +21,7 @@ import { cleanUserBeforeResponse } from '~libs/resource/users/utils/user.util';
     // In this case, the processor can handle a maximum of 100 jobs per 10,000 milliseconds (or 10 seconds).
     limiter: {
         max: 200,
-        duration: 10000,
+        duration: 5000,
     },
 })
 export class CreateNotificationProcessor extends WorkerHost {
@@ -40,16 +41,19 @@ export class CreateNotificationProcessor extends WorkerHost {
 
         try {
             const notifications = await this.notificationService.createNotification({
-                recipientId: userToNotify._id.toString(),
+                recipientId:
+                    typeof userToNotify._id === 'string'
+                        ? new Types.ObjectId(userToNotify._id)
+                        : userToNotify._id,
                 notificationType: NotificationType.newOrder,
-                content: `${customer?.userName} đã đặt đơn hàng mới #${order?._id}`,
+                content: `${customer.userName ?? order.userId} đã đặt đơn hàng mới #${order?._id}`,
                 data: {
                     order,
                     customer: cleanUserBeforeResponse(customer),
                 },
             });
 
-            return this.notificationsCallGateway.server
+            return this.notificationsCallGateway.socketServer
                 .to([`user_id_${userToNotify._id}`])
                 .emit(NotificationsMessageSubscribe.NewOrderAdmin, {
                     time: Date.now().toString(),

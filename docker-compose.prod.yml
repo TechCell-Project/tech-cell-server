@@ -3,10 +3,11 @@ version: '3'
 services:
     compodoc-techcell:
         container_name: compodoc-techcell
+        hostname: compodoc-techcell
         build:
             context: ./
             dockerfile: ./containers/compodoc-techcell/Dockerfile
-        image: lehuygiang28/compodoc-techcell
+        image: lehuygiang28/compodoc-techcell:${COMPOSE_TAG:-latest}
         ports:
             - 9001:${COMPODOC_PORT:-9001}
         networks:
@@ -15,10 +16,11 @@ services:
 
     api:
         container_name: api
+        hostname: api
         build:
             context: ./
             dockerfile: ./apps/api/Dockerfile
-        image: lehuygiang28/techcell_api
+        image: lehuygiang28/techcell_api:${COMPOSE_TAG:-latest}
         env_file:
             - .env
         ports:
@@ -29,10 +31,11 @@ services:
 
     auth:
         container_name: auth
+        hostname: auth
         build:
             context: ./
             dockerfile: ./apps/auth/Dockerfile
-        image: lehuygiang28/techcell_auth
+        image: lehuygiang28/techcell_auth:${COMPOSE_TAG:-latest}
         env_file:
             - .env
         networks:
@@ -41,10 +44,11 @@ services:
 
     communications:
         container_name: communications
+        hostname: communications
         build:
             context: ./
             dockerfile: ./apps/communications/Dockerfile
-        image: lehuygiang28/techcell_communications
+        image: lehuygiang28/techcell_communications:${COMPOSE_TAG:-latest}
         env_file:
             - .env
         ports:
@@ -55,10 +59,11 @@ services:
 
     search:
         container_name: search
+        hostname: search
         build:
             context: ./
             dockerfile: ./apps/search/Dockerfile
-        image: lehuygiang28/techcell_search
+        image: lehuygiang28/techcell_search:${COMPOSE_TAG:-latest}
         env_file:
             - .env
         networks:
@@ -67,10 +72,11 @@ services:
 
     utility:
         container_name: utility
+        hostname: utility
         build:
             context: ./
             dockerfile: ./apps/utility/Dockerfile
-        image: lehuygiang28/techcell_utility
+        image: lehuygiang28/techcell_utility:${COMPOSE_TAG:-latest}
         env_file:
             - .env
         networks:
@@ -79,10 +85,11 @@ services:
 
     managements:
         container_name: managements
+        hostname: managements
         build:
             context: ./
             dockerfile: ./apps/managements/Dockerfile
-        image: lehuygiang28/techcell_managements
+        image: lehuygiang28/techcell_managements:${COMPOSE_TAG:-latest}
         env_file:
             - .env
         networks:
@@ -91,10 +98,11 @@ services:
 
     order:
         container_name: order
+        hostname: order
         build:
             context: ./
             dockerfile: ./apps/order/Dockerfile
-        image: lehuygiang28/techcell_order
+        image: lehuygiang28/techcell_order:${COMPOSE_TAG:-latest}
         env_file:
             - .env
         networks:
@@ -103,10 +111,11 @@ services:
 
     task:
         container_name: task
+        hostname: task
         build:
             context: ./
             dockerfile: ./apps/task/Dockerfile
-        image: lehuygiang28/techcell_task
+        image: lehuygiang28/techcell_task:${COMPOSE_TAG:-latest}
         env_file:
             - .env
         networks:
@@ -116,11 +125,3 @@ services:
 networks:
     techcell_backend:
         driver: bridge
-
-volumes:
-    nginx_conf_ssl:
-        driver: local
-    letsencrypt_certs:
-        driver: local
-    certbot_acme_challenge:
-        driver: local

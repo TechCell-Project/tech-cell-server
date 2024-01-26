@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
 import { CartsOrdController } from './carts-ord.controller';
 import { CartsOrdService } from './carts-ord.service';
-import { RedisCacheModule } from '~libs/common/RedisCache';
+import { RedisModule } from '~libs/common/Redis';
 import { RabbitMQService } from '~libs/common/RabbitMQ';
 import { CartsModule } from '~libs/resource/carts';
 import { ProductsModule } from '~libs/resource';
 
 @Module({
-    imports: [RedisCacheModule, CartsModule, ProductsModule],
+    imports: [RedisModule, CartsModule, ProductsModule],
     controllers: [CartsOrdController],
     providers: [CartsOrdService, RabbitMQService],
 })

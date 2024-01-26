@@ -1,10 +1,9 @@
 import { of } from 'rxjs';
 import { TestBed } from '@automock/jest';
-import { ClientRMQ } from '@nestjs/microservices';
+import { ClientRMQ, RmqRecord, RmqRecordBuilder } from '@nestjs/microservices';
 import { CartsController } from '../carts.controller';
 import { ORDER_SERVICE } from '~libs/common/constants';
-import { TCurrentUser } from '~libs/common/types';
-import { PaginationQuery } from '~libs/common/dtos';
+import { TCurrentUser, THeaders } from '~libs/common/types';
 import {
     CartsOrdMessagePattern,
     AddCartRequestDTO,
@@ -16,6 +15,8 @@ describe(CartsController, () => {
     let cartsController: CartsController;
     let orderService: jest.Mocked<ClientRMQ>;
     let mockCurrentUser: TCurrentUser;
+    let mockHeaders: jest.Mocked<THeaders>;
+    let mockRmqRecord: (data: Record<string, any>) => jest.Mocked<RmqRecord>;
 
     beforeAll(async () => {
         const { unit, unitRef } = TestBed.create(CartsController)
@@ -32,6 +33,11 @@ describe(CartsController, () => {
         mockCurrentUser = {
             _id: new Types.ObjectId(),
         };
+        mockHeaders = {
+            lang: 'en',
+        };
+        mockRmqRecord = (data: Record<string, any>) =>
+            new RmqRecordBuilder().setOptions({ headers: mockHeaders }).setData(data).build();
     });
 
     afterAll(() => {
@@ -48,12 +54,13 @@ describe(CartsController, () => {
     describe('getCarts', () => {
         const message = CartsOrdMessagePattern.getCarts;
         test(`should called orderService.send with ${JSON.stringify(message)}`, async () => {
-            const query: PaginationQuery = {
-                page: 1,
-                pageSize: 10,
-            };
-            await cartsController.getCarts(query, mockCurrentUser);
-            expect(orderService.send).toBeCalledWith(message, { query, user: mockCurrentUser });
+            await cartsController.getCarts(mockHeaders, mockCurrentUser);
+            expect(orderService.send).toHaveBeenCalledWith(
+                message,
+                mockRmqRecord({
+                    user: mockCurrentUser,
+                }),
+            );
         });
     });
 
@@ -65,11 +72,14 @@ describe(CartsController, () => {
                 sku: 'sku',
                 quantity: 1,
             };
-            await cartsController.addCart(cartData, mockCurrentUser);
-            expect(orderService.send).toBeCalledWith(message, {
-                cartData,
-                user: mockCurrentUser,
-            });
+            await cartsController.addCart(mockHeaders, cartData, mockCurrentUser);
+            expect(orderService.send).toHaveBeenCalledWith(
+                message,
+                mockRmqRecord({
+                    cartData,
+                    user: mockCurrentUser,
+                }),
+            );
         });
     });
 
@@ -79,11 +89,14 @@ describe(CartsController, () => {
             const cartsData: DeleteProductsCartRequestDTO = {
                 isAll: false,
             };
-            await cartsController.deleteProductsCart(cartsData, mockCurrentUser);
-            expect(orderService.send).toBeCalledWith(message, {
-                cartsData,
-                user: mockCurrentUser,
-            });
+            await cartsController.deleteProductsCart(mockHeaders, cartsData, mockCurrentUser);
+            expect(orderService.send).toHaveBeenCalledWith(
+                message,
+                mockRmqRecord({
+                    cartsData,
+                    user: mockCurrentUser,
+                }),
+            );
         });
     });
 });

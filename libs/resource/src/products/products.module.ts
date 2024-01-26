@@ -5,9 +5,11 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Product, ProductSchema } from './schemas/product.schema';
 import { ProductsRepository } from './products.repository';
 import { RedisModule } from '~libs/common/Redis';
+import { I18nModule } from '~libs/common/i18n';
 
 @Module({
     imports: [
+        I18nModule,
         MongodbModule,
         MongooseModule.forFeature([{ name: Product.name, schema: ProductSchema }]),
         RedisModule.register({

@@ -12,6 +12,8 @@ import {
 } from 'mongoose';
 import { AbstractDocument } from './abstract.schema';
 import { RpcException } from '@nestjs/microservices';
+import { I18nContext } from 'nestjs-i18n';
+import { I18nTranslations } from '~libs/common/i18n/generated/i18n.generated';
 
 export abstract class AbstractRepository<TDocument extends AbstractDocument> {
     protected abstract readonly logger: Logger;
@@ -27,8 +29,8 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
         session?: ClientSession,
     ): Promise<TDocument> {
         const createdDocument = new this.model({
-            ...document,
             _id: new Types.ObjectId(),
+            ...document,
         });
         return (
             await createdDocument.save({ ...options, session })
@@ -48,7 +50,31 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
 
         if (!document) {
             this.logger.warn(`${this.model.modelName} not found with filterQuery`, filterQuery);
-            throw new RpcException(new NotFoundException(`${this.model.modelName} not found.`));
+            throw new RpcException(
+                new NotFoundException(
+                    I18nContext.current<I18nTranslations>().t('errorMessage.MODEL_NOT_FOUND', {
+                        args: { modelName: this.model.modelName },
+                    }),
+                ),
+            );
+        }
+
+        return document as unknown as TDocument;
+    }
+
+    async findOneOrNull(
+        filterQuery: FilterQuery<TDocument>,
+        options?: Partial<QueryOptions<TDocument>>,
+        projection?: ProjectionType<TDocument>,
+    ): Promise<TDocument | null> {
+        const document = await this.model
+            .findOne(filterQuery, projection, {
+                ...options,
+            })
+            .lean(options?.lean ?? true);
+
+        if (!document) {
+            return null;
         }
 
         return document as unknown as TDocument;
@@ -69,7 +95,13 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
             .session(session);
         if (!document) {
             this.logger.warn(`${this.model.modelName} not found with filterQuery:`, filterQuery);
-            throw new RpcException(new NotFoundException(`${this.model.modelName} not found.`));
+            throw new RpcException(
+                new NotFoundException(
+                    I18nContext.current<I18nTranslations>().t('errorMessage.MODEL_NOT_FOUND', {
+                        args: { modelName: this.model.modelName },
+                    }),
+                ),
+            );
         }
         return document;
     }
@@ -105,7 +137,13 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
                     filterQuery,
                 );
             }
-            throw new RpcException(new NotFoundException(`${this.model.modelName}s not found.`));
+            throw new RpcException(
+                new NotFoundException(
+                    I18nContext.current<I18nTranslations>().t('errorMessage.MODEL_NOT_FOUND', {
+                        args: { modelName: this.model.modelName },
+                    }),
+                ),
+            );
         }
 
         return document;
@@ -118,8 +156,7 @@ export abstract class AbstractRepository<TDocument extends AbstractDocument> {
     }
 
     async count(filterQuery: FilterQuery<TDocument>) {
-        const countNum = await this.model.countDocuments(filterQuery);
-        return countNum;
+        return this.model.countDocuments(filterQuery);
     }
 
     async updateOne(

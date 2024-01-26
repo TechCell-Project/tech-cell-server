@@ -9,10 +9,11 @@ import {
     Put,
     UseGuards,
     Delete,
+    Headers,
 } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~libs/common/constants';
-import { ModGuard, SuperAdminGuard, catchException } from '~libs/common';
+import { ModGuard, SuperAdminGuard } from '~libs/common';
 import {
     ApiBody,
     ApiNotFoundResponse,
@@ -37,9 +38,11 @@ import {
     CreateProductRequestDTO,
     UpdateProductRequestDTO,
     ProductIdParamsDTO,
-    ProductSkuParamsDTO,
+    ProductSkuQueryDTO,
 } from '~apps/managements/products-mnt/dtos';
 import { ProductDTO } from '~libs/resource/products/dtos/product.dto';
+import { sendMessagePipeException } from '~libs/common/RabbitMQ/rmq.util';
+import { THeaders } from '~libs/common/types/common.type';
 
 @ApiBadRequestResponse({
     description: 'Invalid request, please check your request data!',
@@ -68,10 +71,13 @@ export class ProductsController {
     @ApiOkResponse({ description: 'Get products successfully!', type: ListProductResponseDTO })
     @ApiNotFoundResponse({ description: 'Products not found.' })
     @Get('/')
-    async getProducts(@Query() requestQuery: GetProductsDTO) {
-        return this.searchService
-            .send(ProductsSearchMessagePattern.getProducts, { ...requestQuery })
-            .pipe(catchException());
+    async getProducts(@Headers() headers: THeaders, @Query() requestQuery: GetProductsDTO) {
+        return sendMessagePipeException<GetProductsDTO>({
+            client: this.searchService,
+            pattern: ProductsSearchMessagePattern.getProducts,
+            data: { ...requestQuery },
+            headers,
+        });
     }
 
     @ApiOperation({
@@ -86,12 +92,16 @@ export class ProductsController {
     })
     @Post('/')
     @UseGuards(ModGuard)
-    async createProduct(@Body() { ...data }: CreateProductRequestDTO) {
-        return this.managementsService
-            .send(ProductsMntMessagePattern.createProduct, {
-                ...data,
-            })
-            .pipe(catchException());
+    async createProduct(
+        @Headers() headers: THeaders,
+        @Body() { ...data }: CreateProductRequestDTO,
+    ) {
+        return sendMessagePipeException<CreateProductRequestDTO>({
+            client: this.managementsService,
+            pattern: ProductsMntMessagePattern.createProduct,
+            data: { ...data },
+            headers,
+        });
     }
 
     @ApiOperation({
@@ -103,12 +113,16 @@ export class ProductsController {
     })
     @Get('/:productId')
     async getProductById(
+        @Headers() headers: THeaders,
         @Param() { productId }: ProductIdParamsDTO,
         @Query() { ...query }: GetProductByIdQueryDTO,
     ) {
-        return this.searchService
-            .send(ProductsSearchMessagePattern.getProductById, { productId, ...query })
-            .pipe(catchException());
+        return sendMessagePipeException({
+            client: this.searchService,
+            pattern: ProductsSearchMessagePattern.getProductById,
+            data: { productId, ...query },
+            headers,
+        });
     }
 
     @ApiOperation({
@@ -120,24 +134,28 @@ export class ProductsController {
     @Put('/:productId')
     @UseGuards(ModGuard)
     async updateProduct(
+        @Headers() headers: THeaders,
         @Param() { productId }: ProductIdParamsDTO,
         @Body() { ...productData }: UpdateProductRequestDTO,
     ) {
-        return this.managementsService
-            .send(ProductsMntMessagePattern.updateProductPutMethod, {
-                productId,
-                ...productData,
-            })
-            .pipe(catchException());
+        return sendMessagePipeException({
+            client: this.managementsService,
+            pattern: ProductsMntMessagePattern.updateProductPutMethod,
+            data: { productId, ...productData },
+            headers,
+        });
     }
 
     @ApiExcludeEndpoint(true)
     @UseGuards(SuperAdminGuard)
     @Post('/gen-clone')
-    async gen(@Query() { num }: { num: number }) {
-        return this.managementsService
-            .send(ProductsMntMessagePattern.generateProducts, { num })
-            .pipe(catchException());
+    async gen(@Headers() headers: THeaders, @Query() { num }: { num: number }) {
+        return sendMessagePipeException({
+            client: this.managementsService,
+            pattern: ProductsMntMessagePattern.generateProducts,
+            data: { num },
+            headers,
+        });
     }
 
     @ApiOperation({
@@ -148,10 +166,13 @@ export class ProductsController {
     })
     @Delete('/:productId')
     @UseGuards(ModGuard)
-    async deleteProduct(@Param() { productId }: ProductIdParamsDTO) {
-        return this.managementsService
-            .send(ProductsMntMessagePattern.deleteProduct, { productId })
-            .pipe(catchException());
+    async deleteProduct(@Headers() headers: THeaders, @Param() { productId }: ProductIdParamsDTO) {
+        return sendMessagePipeException({
+            client: this.managementsService,
+            pattern: ProductsMntMessagePattern.deleteProduct,
+            data: { productId },
+            headers,
+        });
     }
 
     @ApiOperation({
@@ -160,14 +181,18 @@ export class ProductsController {
     @ApiOkResponse({
         description: 'Delete product variation successfully!',
     })
-    @Delete('/:productId/:sku')
+    @Delete('/:productId')
     @UseGuards(ModGuard)
     async deleteProductVariation(
+        @Headers() headers: THeaders,
         @Param() { productId }: ProductIdParamsDTO,
-        @Param() { sku }: ProductSkuParamsDTO,
+        @Query() { sku }: ProductSkuQueryDTO,
     ) {
-        return this.managementsService
-            .send(ProductsMntMessagePattern.deleteProductVariation, { productId, sku })
-            .pipe(catchException());
+        return sendMessagePipeException({
+            client: this.managementsService,
+            pattern: ProductsMntMessagePattern.deleteProductVariation,
+            data: { productId, sku },
+            headers,
+        });
     }
 }

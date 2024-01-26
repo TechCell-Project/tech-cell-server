@@ -7,4 +7,5 @@ export const UtilityMessagePattern = {
 export const UtilityEventPattern = {
     writeLogsToDiscord: { event: 'utility.writeLogsToDiscord' },
     writeLogsToFile: { event: 'utility.writeLogsToFile' },
+    writeLogsBashToDiscord: { event: 'utility.writeLogsBashToDiscord' },
 };

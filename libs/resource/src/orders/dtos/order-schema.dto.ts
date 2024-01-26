@@ -8,8 +8,7 @@ import {
 } from '../schemas/sub-order.schema';
 import { ApiProperty } from '@nestjs/swagger';
 import { AddressSchemaDTO } from '~libs/resource/users/dtos/user-schema.dto';
-import { PaymentMethodEnum } from '~apps/order/checkout-ord/enums';
-import { OrderStatusEnum, PaymentStatusEnum } from '../enums';
+import { OrderStatusEnum, PaymentMethodEnum, PaymentStatusEnum } from '../enums';
 
 export class ProductOrderSchemaDTO implements ProductOrderSchema {
     @ApiProperty({ type: String, example: '5f9d7a9b9b3f3b1b1c9f9b3f' })
@@ -54,11 +53,21 @@ export class ShippingOrderSchemaDTO implements ShippingOrderSchema {
 }
 
 export class PaymentOrderDTO implements PaymentOrder {
-    @ApiProperty({ type: String, enum: PaymentMethodEnum })
+    @ApiProperty({ type: String, enum: PaymentMethodEnum, example: PaymentMethodEnum.VNPAY })
     method: string;
 
-    @ApiProperty({ type: String, enum: PaymentStatusEnum })
+    @ApiProperty({
+        type: String,
+        enum: PaymentStatusEnum,
+        example: PaymentStatusEnum.WAIT_FOR_PAYMENT,
+    })
     status: string;
+
+    @ApiProperty({ type: String, required: false, example: 'https://vnpay.vn/' })
+    paymentUrl?: string;
+
+    @ApiProperty({ type: Object, required: false, default: {} })
+    orderData?: object;
 }
 
 export class OrderSchemaDTO implements Order {

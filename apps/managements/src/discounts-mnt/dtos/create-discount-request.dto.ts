@@ -2,7 +2,8 @@ import { Discount } from '~libs/resource/discounts';
 import { ApplyDiscountTo, DiscountType } from '~libs/resource/discounts/enums';
 import { SelectProduct } from '~libs/resource/products/dtos/select-product.dto';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDate, IsEnum, IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { IsOptional, ValidateNested } from 'class-validator';
+import { IsDateI18n, IsEnumI18n, IsNotEmptyI18n, IsStringI18n } from '~libs/common/i18n';
 
 export class CreateDiscountRequestDTO
     implements Omit<Discount, '_id' | 'discountUsesCount' | 'discountUserUsed'>
@@ -11,16 +12,16 @@ export class CreateDiscountRequestDTO
         description: 'Discount name',
         example: 'Discount 1',
     })
-    @IsNotEmpty()
-    @IsString()
+    @IsNotEmptyI18n()
+    @IsStringI18n()
     discountName: string;
 
     @ApiProperty({
         description: 'Discount description',
         example: 'Discount 1',
     })
-    @IsNotEmpty()
-    @IsString()
+    @IsNotEmptyI18n()
+    @IsStringI18n()
     discountDescription: string;
 
     /**
@@ -32,8 +33,8 @@ export class CreateDiscountRequestDTO
         example: 'PERCENT',
         enum: DiscountType,
     })
-    @IsNotEmpty()
-    @IsEnum(DiscountType)
+    @IsNotEmptyI18n()
+    @IsEnumI18n(DiscountType)
     discountType: string;
 
     @ApiProperty({
@@ -49,13 +50,13 @@ export class CreateDiscountRequestDTO
     /**
      * @default new Date()
      */
-    @IsDate()
+    @IsDateI18n()
     discountStartDate: Date;
 
     /**
      * @default new Date()
      */
-    @IsDate()
+    @IsDateI18n()
     discountEndDate: Date;
 
     /**
@@ -85,7 +86,7 @@ export class CreateDiscountRequestDTO
     /**
      * @enum {ApplyDiscountTo}
      */
-    @IsEnum(ApplyDiscountTo)
+    @IsEnumI18n(ApplyDiscountTo)
     discountAppliesTo: string;
 
     @IsOptional()

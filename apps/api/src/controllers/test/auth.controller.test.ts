@@ -1,5 +1,5 @@
 import { TestBed } from '@automock/jest';
-import { ClientRMQ } from '@nestjs/microservices';
+import { ClientRMQ, RmqRecord, RmqRecordBuilder } from '@nestjs/microservices';
 import { AuthController } from '../auth.controller';
 import { AUTH_SERVICE } from '~libs/common/constants';
 import { of } from 'rxjs';
@@ -15,12 +15,14 @@ import {
     ChangePasswordRequestDTO,
     GoogleLoginRequestDTO,
 } from '~apps/auth/dtos';
-import { TCurrentUser } from '~libs/common/types';
+import { TCurrentUser, THeaders } from '~libs/common/types';
 
 describe(AuthController, () => {
     let authController: AuthController;
     let authService: jest.Mocked<ClientRMQ>;
     let mockCurrentUser: TCurrentUser;
+    let mockHeaders: jest.Mocked<THeaders>;
+    let mockRmqRecord: (data: Record<string, any>) => jest.Mocked<RmqRecord>;
 
     beforeAll(async () => {
         const { unit, unitRef } = TestBed.create(AuthController)
@@ -37,6 +39,11 @@ describe(AuthController, () => {
         mockCurrentUser = {
             _id: '60f0c9b9e6b3f3b3e8c9b0a1',
         };
+        mockHeaders = {
+            lang: 'en',
+        };
+        mockRmqRecord = (data: Record<string, any>) =>
+            new RmqRecordBuilder().setOptions({ headers: mockHeaders }).setData(data).build();
     });
 
     afterAll(() => {
@@ -57,8 +64,8 @@ describe(AuthController, () => {
                 emailOrUsername: 'username',
                 password: 'password',
             };
-            await authController.login(data);
-            expect(authService.send).toBeCalledWith(message, data);
+            await authController.login(mockHeaders, data);
+            expect(authService.send).toHaveBeenCalledWith(message, mockRmqRecord(data));
         });
     });
 
@@ -68,8 +75,8 @@ describe(AuthController, () => {
             const data: EmailRequestDTO = {
                 email: 'email@gmail.com',
             };
-            await authController.checkEmail(data);
-            expect(authService.send).toBeCalledWith(message, data);
+            await authController.checkEmail(mockHeaders, data);
+            expect(authService.send).toHaveBeenCalledWith(message, mockRmqRecord(data));
         });
     });
 
@@ -84,8 +91,8 @@ describe(AuthController, () => {
                 re_password: 'password',
                 userName: 'username',
             };
-            await authController.register(data);
-            expect(authService.send).toBeCalledWith(message, data);
+            await authController.register(mockHeaders, data);
+            expect(authService.send).toHaveBeenCalledWith(message, mockRmqRecord(data));
         });
     });
 
@@ -96,8 +103,8 @@ describe(AuthController, () => {
                 email: 'email@gmail.com',
                 otpCode: '123456',
             };
-            await authController.verifyEmail(data);
-            expect(authService.send).toBeCalledWith(message, data);
+            await authController.verifyEmail(mockHeaders, data);
+            expect(authService.send).toHaveBeenCalledWith(message, mockRmqRecord(data));
         });
     });
 
@@ -107,8 +114,8 @@ describe(AuthController, () => {
             const data: EmailRequestDTO = {
                 email: 'email@gmail.com',
             };
-            await authController.resendVerifyEmailOtp(data);
-            expect(authService.send).toBeCalledWith(message, data);
+            await authController.resendVerifyEmailOtp(mockHeaders, data);
+            expect(authService.send).toHaveBeenCalledWith(message, mockRmqRecord(data));
         });
     });
 
@@ -118,8 +125,8 @@ describe(AuthController, () => {
             const data: NewTokenRequestDTO = {
                 refreshToken: 'refreshToken',
             };
-            await authController.getNewToken(data);
-            expect(authService.send).toBeCalledWith(message, data);
+            await authController.getNewToken(mockHeaders, data);
+            expect(authService.send).toHaveBeenCalledWith(message, mockRmqRecord(data));
         });
     });
 
@@ -129,8 +136,8 @@ describe(AuthController, () => {
             const data: ForgotPasswordDTO = {
                 email: '',
             };
-            await authController.forgotPassword(data);
-            expect(authService.send).toBeCalledWith(message, data);
+            await authController.forgotPassword(mockHeaders, data);
+            expect(authService.send).toHaveBeenCalledWith(message, mockRmqRecord(data));
         });
     });
 
@@ -143,8 +150,8 @@ describe(AuthController, () => {
                 password: 'password',
                 re_password: 'password',
             };
-            await authController.verifyForgotPassword(data);
-            expect(authService.send).toBeCalledWith(message, data);
+            await authController.verifyForgotPassword(mockHeaders, data);
+            expect(authService.send).toHaveBeenCalledWith(message, mockRmqRecord(data));
         });
     });
 
@@ -156,11 +163,14 @@ describe(AuthController, () => {
                 newPassword: 'newPassword',
                 reNewPassword: 'newPassword',
             };
-            await authController.changePassword(changePwData, mockCurrentUser);
-            expect(authService.send).toBeCalledWith(message, {
-                changePwData,
-                user: mockCurrentUser,
-            });
+            await authController.changePassword(mockHeaders, changePwData, mockCurrentUser);
+            expect(authService.send).toHaveBeenCalledWith(
+                message,
+                mockRmqRecord({
+                    changePwData,
+                    user: mockCurrentUser,
+                }),
+            );
         });
     });
 
@@ -170,8 +180,8 @@ describe(AuthController, () => {
             const data: GoogleLoginRequestDTO = {
                 idToken: 'tokenId',
             };
-            await authController.google(data);
-            expect(authService.send).toBeCalledWith(message, data);
+            await authController.google(mockHeaders, data);
+            expect(authService.send).toHaveBeenCalledWith(message, mockRmqRecord(data));
         });
     });
 });

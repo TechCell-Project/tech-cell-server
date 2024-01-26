@@ -2,6 +2,7 @@ import { AbstractDocument } from '~libs/resource/abstract';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { NotificationType } from '../enums';
 import { SYSTEM_ISSUER } from '../notifications.constant';
+import { Types } from 'mongoose';
 
 export class NotifyData {
     [key: string]: any;
@@ -12,8 +13,8 @@ export class Notification extends AbstractDocument {
     @Prop({ required: true, enum: NotificationType, type: String })
     notificationType: string;
 
-    @Prop({ required: false, default: null })
-    recipientId?: string;
+    @Prop({ required: false, default: null, ref: 'User' })
+    recipientId?: Types.ObjectId | null;
 
     @Prop({ required: false, default: SYSTEM_ISSUER })
     issuerId?: string;

@@ -1,7 +1,6 @@
-import { AuthGuard, catchException } from '~libs/common';
+import { AuthGuard } from '~libs/common/guards';
 import { CurrentUser } from '~libs/common/decorators';
-import { PaginationQuery } from '~libs/common/dtos';
-import { TCurrentUser } from '~libs/common/types';
+import { TCurrentUser, THeaders } from '~libs/common/types';
 import {
     Body,
     Controller,
@@ -10,7 +9,7 @@ import {
     HttpCode,
     Inject,
     Post,
-    Query,
+    Headers,
     UseGuards,
 } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
@@ -31,6 +30,8 @@ import {
 } from '~apps/order/carts-ord';
 import { ACCESS_TOKEN_NAME } from '~libs/common/constants/api.constant';
 import { ORDER_SERVICE } from '~libs/common/constants/services.constant';
+import { sendMessagePipeException } from '~libs/common/RabbitMQ/rmq.util';
+import { CartDTO } from '~libs/resource/carts/dtos';
 
 @ApiBadRequestResponse({
     description: 'Invalid request, please check your request data!',
@@ -55,15 +56,15 @@ export class CartsController {
         summary: 'Get list of carts',
         description: 'Get list of carts',
     })
-    @ApiOkResponse({ description: 'Carts found!' })
+    @ApiOkResponse({ description: 'Carts found!', type: CartDTO })
     @Get('/')
-    async getCarts(@Query() query: PaginationQuery, @CurrentUser() user: TCurrentUser) {
-        return this.orderService
-            .send<{
-                query: PaginationQuery;
-                user: TCurrentUser;
-            }>(CartsOrdMessagePattern.getCarts, { query, user })
-            .pipe(catchException());
+    async getCarts(@Headers() headers: THeaders, @CurrentUser() user: TCurrentUser) {
+        return sendMessagePipeException({
+            client: this.orderService,
+            pattern: CartsOrdMessagePattern.getCarts,
+            data: { user },
+            headers,
+        });
     }
 
     @ApiOperation({
@@ -74,13 +75,17 @@ export class CartsController {
     @ApiOkResponse({ description: 'Cart added!' })
     @HttpCode(200)
     @Post('/')
-    async addCart(@Body() { ...cartData }: AddCartRequestDTO, @CurrentUser() user: TCurrentUser) {
-        return this.orderService
-            .send<{
-                cartData: AddCartRequestDTO;
-                user: TCurrentUser;
-            }>(CartsOrdMessagePattern.addCart, { cartData, user })
-            .pipe(catchException());
+    async addCart(
+        @Headers() headers: THeaders,
+        @Body() { ...cartData }: AddCartRequestDTO,
+        @CurrentUser() user: TCurrentUser,
+    ) {
+        return sendMessagePipeException({
+            client: this.orderService,
+            pattern: CartsOrdMessagePattern.addCart,
+            data: { cartData, user },
+            headers,
+        });
     }
 
     @ApiOperation({
@@ -91,14 +96,15 @@ export class CartsController {
     @HttpCode(200)
     @Delete('/')
     async deleteProductsCart(
+        @Headers() headers: THeaders,
         @Body() { ...cartsData }: DeleteProductsCartRequestDTO,
         @CurrentUser() user: TCurrentUser,
     ) {
-        return this.orderService
-            .send<{
-                cartsData: DeleteProductsCartRequestDTO;
-                user: TCurrentUser;
-            }>(CartsOrdMessagePattern.deleteProductsCart, { cartsData, user })
-            .pipe(catchException());
+        return sendMessagePipeException({
+            client: this.orderService,
+            pattern: CartsOrdMessagePattern.deleteProductsCart,
+            data: { cartsData, user },
+            headers,
+        });
     }
 }
