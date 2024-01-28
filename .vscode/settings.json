@@ -111,6 +111,7 @@
         "seeder",
         "search",
         "resources",
-        "managements"
+        "managements",
+        "ssl/tls"
     ]
 }
