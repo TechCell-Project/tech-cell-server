@@ -1,0 +1,61 @@
+version: '3'
+
+services:
+    prometheus:
+        container_name: prometheus
+        hostname: prometheus
+        build:
+            context: ./containers/prometheus/
+            dockerfile: Dockerfile
+        environment:
+            - STATS_USER=${STATS_USER}
+            - STATS_PASSWORD=${STATS_PASSWORD}
+        ports:
+            - ${PROMETHEUS_PORT:-9090}
+        networks:
+            techcell_backend:
+        restart: unless-stopped
+
+    grafana:
+        container_name: grafana
+        hostname: grafana
+        build:
+            context: ./containers/grafana/
+            dockerfile: Dockerfile
+        ports:
+            - ${GRAFANA_PORT:-9091}
+        volumes:
+            - grafana-storage:/var/lib/grafana
+        environment:
+            - GF_SERVER_HTTP_PORT=${GRAFANA_PORT:-9091}
+            - GF_DATABASE_TYPE=${GRAFANA_DATABASE_TYPE:-sqlite3}
+        networks:
+            techcell_backend:
+        restart: unless-stopped
+
+    node_exporter:
+        container_name: node_exporter
+        hostname: node_exporter
+        image: prom/node-exporter:v1.7.0
+        ports:
+            - ${GRAFANA_NODE_EXPORTER:-9092}
+        volumes:
+            - /proc:/host/proc:ro
+            - /sys:/host/sys:ro
+            - /:/rootfs:ro
+        command:
+            - '--path.procfs=/host/proc'
+            - '--path.sysfs=/host/sys'
+            - '--path.rootfs=/rootfs'
+            - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
+            - '--web.listen-address=0.0.0.0:${GRAFANA_NODE_EXPORTER:-9092}'
+        networks:
+            - techcell_backend
+        restart: unless-stopped
+
+networks:
+    techcell_backend:
+        driver: bridge
+
+volumes:
+    grafana-storage:

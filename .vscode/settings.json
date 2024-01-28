@@ -77,7 +77,9 @@
         "xteam",
         "yarnrc",
         "yýỳỷỹỵ",
-        "zerossl"
+        "zerossl",
+        "rootfs",
+        "sysfs"
     ],
     "sonarlint.connectedMode.project": {
         "connectionId": "techcell-project",
