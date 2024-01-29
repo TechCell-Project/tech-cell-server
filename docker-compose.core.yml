@@ -171,21 +171,6 @@ services:
         networks:
             techcell_backend:
 
-    redis-insight:
-        container_name: redis-insight
-        hostname: redis-insight
-        image: redislabs/redisinsight:latest
-        environment:
-            - RIPORT=8001
-            - RITRUSTEDORIGINS = http://localhost:80,http://localhost:443,http://swag:80,http://swag:443
-        ports:
-            - 8001
-        volumes:
-            - redis-insight_data:/db
-        restart: unless-stopped
-        networks:
-            techcell_backend:
-
 networks:
     techcell_backend:
         driver: bridge
@@ -194,6 +179,4 @@ volumes:
     mongodb_master_data:
         driver: local
     redis_data:
-        driver: local
-    redis-insight_data:
         driver: local

@@ -41,6 +41,7 @@
         "necord",
         "Noti",
         "Nums",
+        "oblakstudio",
         "oóòỏõọôốồổỗộơớờởỡợ",
         "openapi",
         "openapitools",
@@ -60,6 +61,7 @@
         "rimraf",
         "RIPORT",
         "RITRUSTEDORIGINS",
+        "rootfs",
         "roundrobin",
         "sendgrid",
         "setnx",
@@ -67,6 +69,7 @@
         "Skus",
         "streamifier",
         "superadmin",
+        "sysfs",
         "tcplog",
         "TMNCODE",
         "unmock",
@@ -77,9 +80,7 @@
         "xteam",
         "yarnrc",
         "yýỳỷỹỵ",
-        "zerossl",
-        "rootfs",
-        "sysfs"
+        "zerossl"
     ],
     "sonarlint.connectedMode.project": {
         "connectionId": "techcell-project",
@@ -110,6 +111,7 @@
         "seeder",
         "search",
         "resources",
-        "managements"
+        "managements",
+        "ssl/tls"
     ]
 }

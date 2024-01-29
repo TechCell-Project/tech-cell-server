@@ -13,7 +13,7 @@ services:
         ports:
             - ${PROMETHEUS_PORT:-9090}
         networks:
-            techcell_backend:
+            - techcell_backend
         restart: unless-stopped
 
     grafana:
@@ -30,7 +30,7 @@ services:
             - GF_SERVER_HTTP_PORT=${GRAFANA_PORT:-9091}
             - GF_DATABASE_TYPE=${GRAFANA_DATABASE_TYPE:-sqlite3}
         networks:
-            techcell_backend:
+            - techcell_backend
         restart: unless-stopped
 
     node_exporter:
@@ -53,9 +53,22 @@ services:
             - techcell_backend
         restart: unless-stopped
 
+    redisinsight:
+        container_name: redisinsight
+        hostname: redisinsight
+        image: oblakstudio/redisinsight:2.4.4
+        environment:
+            - API_PORT=${RI_PORT:-6380}
+        ports:
+            - ${RI_PORT:-6380}
+        networks:
+            - techcell_backend
+        restart: unless-stopped
+
 networks:
     techcell_backend:
         driver: bridge
 
 volumes:
     grafana-storage:
+        driver: local
