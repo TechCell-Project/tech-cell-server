@@ -4,7 +4,8 @@ import { RabbitMQService } from '~libs/common/RabbitMQ';
 import { Ctx, Payload, RmqContext, EventPattern } from '@nestjs/microservices';
 import { ConfirmEmailRegisterDTO, ForgotPasswordEmailDTO } from './dtos';
 import { MailEventPattern } from './mail.pattern';
-import { RESEND_TRANSPORT, SENDGRID_TRANSPORT } from './constants';
+import { SENDGRID_TRANSPORT } from './constants';
+import { SupportedLanguage } from '~libs/common/i18n';
 
 @Controller()
 export class MailController {
@@ -21,10 +22,16 @@ export class MailController {
             email,
             emailContext,
             transporter = SENDGRID_TRANSPORT,
-        }: { email: string; emailContext: ConfirmEmailRegisterDTO; transporter?: string },
+            lang,
+        }: {
+            email: string;
+            emailContext: ConfirmEmailRegisterDTO;
+            transporter?: string;
+            lang: SupportedLanguage;
+        },
     ) {
         this.rabbitMqService.acknowledgeMessage(context);
-        return this.mailService.sendConfirmMail(email, emailContext, transporter);
+        return this.mailService.sendConfirmMail(email, emailContext, lang, transporter);
     }
 
     @EventPattern(MailEventPattern.sendMailForgotPassword)
@@ -35,9 +42,11 @@ export class MailController {
             userEmail,
             firstName,
             otpCode,
-            transporter = RESEND_TRANSPORT,
+            transporter = SENDGRID_TRANSPORT,
+            lang,
         }: ForgotPasswordEmailDTO & {
             transporter?: string;
+            lang: SupportedLanguage;
         },
     ) {
         this.rabbitMqService.acknowledgeMessage(context);
@@ -47,6 +56,7 @@ export class MailController {
                 firstName,
                 otpCode,
             },
+            lang,
             transporter,
         );
     }

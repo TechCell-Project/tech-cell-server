@@ -1,0 +1,13 @@
+{
+    "GREETING": "Xin chào {username},",
+    "EXPIRED_TIME_OTP_TEXT": "Mã này sẽ hết hạn trong {time} phút. Nếu bạn không yêu cầu mã này, vui lòng bỏ qua email này.",
+    "REGISTRATION_SUBJECT": "Xác nhận đăng ký tài khoản",
+    "RESET_PASSWORD_SUBJECT": "Xác nhận đặt lại mật khẩu",
+    "VERIFY_ACCOUNT_TEXT_1": "Bạn nhận được email này vì bạn đã yêu cầu một Mật khẩu một lần (OTP) để xác minh tài khoản của bạn.",
+    "INSTRUCTIONS": "Hướng dẫn",
+    "INSTRUCTIONS_TEXT_ENTER_OTP_VERIFY_ACCOUNT": "Nhập mã OTP để xác minh tài khoản của bạn.",
+    "INSTRUCTIONS_TEXT_ENTER_OTP_RESET_PASSWORD": "Nhập mã OTP để đặt lại mật khẩu của bạn.",
+    "EMAIL_CREDIT": "© 2023, được tạo với ❤️ bởi",
+    "YOUR_OTP_CODE_TEXT": "Mã OTP của bạn",
+    "FORGOT_PASSWORD_TEXT_1": "Bạn nhận được email này vì bạn đã yêu cầu một Mật khẩu một lần (OTP) để đặt lại mật khẩu của bạn."
+}
