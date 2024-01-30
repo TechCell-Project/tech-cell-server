@@ -4,10 +4,16 @@ import { ConfirmEmailRegisterDTO, ForgotPasswordEmailDTO } from './dtos';
 import { GMAIL_TRANSPORT, RESEND_TRANSPORT, SENDGRID_TRANSPORT } from './constants';
 import { MailerConfig } from './mail.config';
 import { join } from 'path';
+import { I18n, I18nService, I18nContext } from 'nestjs-i18n';
+import { I18nTranslations } from '~libs/common/i18n/generated';
+import { SupportedLanguage } from '~libs/common/i18n';
 
 @Injectable()
 export class MailService {
-    constructor(private mailerService: MailerService) {
+    constructor(
+        private mailerService: MailerService,
+        @I18n() private readonly i18n: I18nService<I18nTranslations>,
+    ) {
         const mailConfig = new MailerConfig();
         this.mailerService.addTransporter(SENDGRID_TRANSPORT, mailConfig.SendGridTransport);
         this.mailerService.addTransporter(RESEND_TRANSPORT, mailConfig.ResendTransport);
@@ -16,7 +22,7 @@ export class MailService {
 
     private readonly logger = new Logger(MailService.name);
     private readonly TEMPLATES_PATH = join(__dirname, 'mail/templates');
-    private readonly TRANSPORTERS = [GMAIL_TRANSPORT, SENDGRID_TRANSPORT, RESEND_TRANSPORT];
+    private readonly TRANSPORTERS = [SENDGRID_TRANSPORT, RESEND_TRANSPORT, GMAIL_TRANSPORT];
     private readonly MAX_RETRIES = this.TRANSPORTERS.length;
 
     async sendMail(email: string, name: string, transporter?: string, retryCount = 0) {
@@ -57,11 +63,13 @@ export class MailService {
     async sendConfirmMail(
         email: string,
         emailContext: ConfirmEmailRegisterDTO,
+        lang: SupportedLanguage,
         transporter?: string,
         retryCount = 0,
     ) {
+        const i18Context = new I18nContext(lang, this.i18n);
         if (retryCount > this.MAX_RETRIES) {
-            this.logger.error(`Send mail failed: too many retries`);
+            this.logger.debug(`Send mail failed: too many retries`);
             return {
                 message: 'Failed to send email',
             };
@@ -69,80 +77,51 @@ export class MailService {
 
         const transporterName = this.resolveTransporter(transporter);
         const message = `Mail sent: ${email}`;
-        return await this.mailerService
+        this.logger.debug(`Sending confirm mail to ${email} with transporter: ${transporterName}`);
+        this.logger.log(emailContext);
+        return this.mailerService
             .sendMail({
                 transporterName,
                 to: email,
-                subject: 'Confirm your registration',
+                subject: i18Context.t('emailMessage.REGISTRATION_SUBJECT'),
                 template: 'confirm-register',
-                context: emailContext,
-            })
-            .then(() => {
-                this.logger.log(`Mail sent: ${email}`);
-                return {
-                    message: message,
-                };
-            })
-            .catch(async (error) => {
-                this.logger.error(`Send mail failed: ${error.message}`);
-
-                transporter = this.getNextTransporter(transporterName);
-                this.logger.log(`Retry send mail with transporter: ${transporter}`);
-                return await this.sendConfirmMail(email, emailContext, transporter, retryCount + 1);
-            })
-            .finally(() => {
-                return {
-                    message: message,
-                };
-            });
-    }
-
-    async sendForgotPasswordMail(
-        { userEmail, firstName, otpCode }: ForgotPasswordEmailDTO,
-        transporter?: string,
-        retryCount = 0,
-    ) {
-        if (retryCount > this.MAX_RETRIES) {
-            this.logger.error(`Send mail failed: too many retries`);
-            return {
-                message: 'Failed to send email',
-            };
-        }
-
-        const transporterName = this.resolveTransporter(transporter);
-        const message = `Mail sent: ${userEmail}`;
-        return await this.mailerService
-            .sendMail({
-                transporterName,
-                to: userEmail,
-                subject: 'Confirm your reset password',
-                template: 'forgot-password',
                 context: {
-                    userEmail,
-                    firstName,
-                    otpCode,
+                    VERIFY_ACCOUNT_TEXT_1: i18Context.t('emailMessage.VERIFY_ACCOUNT_TEXT_1'),
+                    YOUR_OTP_CODE_TEXT: i18Context.t('emailMessage.YOUR_OTP_CODE_TEXT'),
+                    EXPIRED_TIME_OTP_TEXT: i18Context.t('emailMessage.EXPIRED_TIME_OTP_TEXT', {
+                        args: {
+                            time: '5',
+                        },
+                    }),
+                    INSTRUCTIONS: i18Context.t('emailMessage.INSTRUCTIONS'),
+                    INSTRUCTIONS_TEXT_ENTER_OTP_VERIFY_ACCOUNT: i18Context.t(
+                        'emailMessage.INSTRUCTIONS_TEXT_ENTER_OTP_VERIFY_ACCOUNT',
+                    ),
+                    EMAIL_CREDIT: i18Context.t('emailMessage.EMAIL_CREDIT'),
+                    otpCode: emailContext.otpCode,
                 },
                 attachments: [
                     {
-                        filename: 'image-1.png',
-                        path: join(this.TEMPLATES_PATH, 'images/image-1.png'),
-                        cid: 'image1',
+                        filename: 'logo-red.png',
+                        path: join(this.TEMPLATES_PATH, 'images/logo-red.png'),
+                        cid: 'logo_red',
                     },
                 ],
             })
             .then(() => {
-                this.logger.log(`Mail sent: ${userEmail}`);
+                this.logger.debug(`Mail sent: ${email}`);
                 return {
                     message: message,
                 };
             })
             .catch(async (error) => {
-                this.logger.error(`Send mail failed: ${error.message}`);
-
+                this.logger.debug(`Send mail failed: ${error.message}`);
                 transporter = this.getNextTransporter(transporterName);
-                this.logger.log(`Retry send mail with transporter: ${transporter}`);
-                return await this.sendForgotPasswordMail(
-                    { userEmail, firstName, otpCode },
+                this.logger.debug(`Retry send mail with transporter: ${transporter}`);
+                return await this.sendConfirmMail(
+                    email,
+                    emailContext,
+                    lang,
                     transporter,
                     retryCount + 1,
                 );
@@ -154,9 +133,83 @@ export class MailService {
             });
     }
 
-    private resolveTransporter(transporter = GMAIL_TRANSPORT) {
+    async sendForgotPasswordMail(
+        { userEmail, firstName, otpCode }: ForgotPasswordEmailDTO,
+        lang,
+        transporter?: string,
+        retryCount = 0,
+    ) {
+        const i18Context = new I18nContext(lang, this.i18n);
+        if (retryCount > this.MAX_RETRIES) {
+            this.logger.debug(`Send mail failed: too many retries`);
+            return {
+                message: 'Failed to send email',
+            };
+        }
+
+        const transporterName = this.resolveTransporter(transporter);
+        const message = `Mail sent: ${userEmail}`;
+        this.logger.debug(
+            `Sending forgot password mail to ${userEmail} with transporter: ${transporterName}`,
+        );
+        return this.mailerService
+            .sendMail({
+                transporterName,
+                to: userEmail,
+                subject: i18Context.t('emailMessage.RESET_PASSWORD_SUBJECT'),
+                template: 'forgot-password',
+                context: {
+                    userEmail,
+                    firstName,
+                    otpCode,
+                    FORGOT_PASSWORD_TEXT_1: i18Context.t('emailMessage.FORGOT_PASSWORD_TEXT_1'),
+                    YOUR_OTP_CODE_TEXT: i18Context.t('emailMessage.YOUR_OTP_CODE_TEXT'),
+                    EXPIRED_TIME_OTP_TEXT: i18Context.t('emailMessage.EXPIRED_TIME_OTP_TEXT', {
+                        args: {
+                            time: '5',
+                        },
+                    }),
+                    INSTRUCTIONS: i18Context.t('emailMessage.INSTRUCTIONS'),
+                    INSTRUCTIONS_TEXT_ENTER_OTP_RESET_PASSWORD: i18Context.t(
+                        'emailMessage.INSTRUCTIONS_TEXT_ENTER_OTP_RESET_PASSWORD',
+                    ),
+                    EMAIL_CREDIT: i18Context.t('emailMessage.EMAIL_CREDIT'),
+                },
+                attachments: [
+                    {
+                        filename: 'logo-red.png',
+                        path: join(this.TEMPLATES_PATH, 'images/logo-red.png'),
+                        cid: 'logo_red',
+                    },
+                ],
+            })
+            .then(() => {
+                this.logger.debug(`Mail sent: ${userEmail}`);
+                return {
+                    message: message,
+                };
+            })
+            .catch(async (error) => {
+                this.logger.debug(`Send mail failed: ${error.message}`);
+                transporter = this.getNextTransporter(transporterName);
+                this.logger.debug(`Retry send mail with transporter: ${transporter}`);
+                return await this.sendForgotPasswordMail(
+                    { userEmail, firstName, otpCode },
+                    lang,
+                    transporter,
+                    retryCount + 1,
+                );
+            })
+            .finally(() => {
+                return {
+                    message: message,
+                };
+            });
+    }
+
+    private resolveTransporter(transporter = SENDGRID_TRANSPORT) {
         if (!this.TRANSPORTERS.includes(transporter)) {
-            transporter = GMAIL_TRANSPORT;
+            transporter = SENDGRID_TRANSPORT;
         }
 
         return transporter;
