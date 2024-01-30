@@ -112,6 +112,7 @@
         "search",
         "resources",
         "managements",
-        "ssl/tls"
+        "ssl/tls",
+        "mail"
     ]
 }

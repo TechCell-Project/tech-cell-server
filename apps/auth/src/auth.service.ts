@@ -35,6 +35,7 @@ import { TCurrentUser } from '~libs/common/types';
 import { Types } from 'mongoose';
 import { LoginTicket, OAuth2Client, OAuth2ClientOptions } from 'google-auth-library';
 import { cleanUserBeforeResponse } from '~libs/resource/users/utils/user.util';
+import { I18nContext } from 'nestjs-i18n';
 
 @Injectable()
 export class AuthService extends AuthUtilService {
@@ -150,6 +151,7 @@ export class AuthService extends AuthUtilService {
         this.communicationsService.emit(MailEventPattern.sendMailConfirm, {
             email: userCreated.email,
             emailContext,
+            lang: I18nContext.current().lang,
         });
 
         return {
@@ -209,6 +211,7 @@ export class AuthService extends AuthUtilService {
         this.communicationsService.emit(MailEventPattern.sendMailConfirm, {
             email: user.email,
             emailContext,
+            lang: I18nContext.current().lang,
         });
 
         return {
@@ -263,6 +266,7 @@ export class AuthService extends AuthUtilService {
 
         this.communicationsService.emit(MailEventPattern.sendMailForgotPassword, {
             ...emailContext,
+            lang: I18nContext.current().lang,
         });
 
         return {

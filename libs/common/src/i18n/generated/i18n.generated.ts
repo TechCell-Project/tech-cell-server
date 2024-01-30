@@ -19,6 +19,19 @@ export type I18nTranslations = {
             "description": string;
         };
     };
+    "emailMessage": {
+        "GREETING": string;
+        "EXPIRED_TIME_OTP_TEXT": string;
+        "REGISTRATION_SUBJECT": string;
+        "RESET_PASSWORD_SUBJECT": string;
+        "VERIFY_ACCOUNT_TEXT_1": string;
+        "INSTRUCTIONS": string;
+        "INSTRUCTIONS_TEXT_ENTER_OTP_VERIFY_ACCOUNT": string;
+        "INSTRUCTIONS_TEXT_ENTER_OTP_RESET_PASSWORD": string;
+        "EMAIL_CREDIT": string;
+        "YOUR_OTP_CODE_TEXT": string;
+        "FORGOT_PASSWORD_TEXT_1": string;
+    };
     "errorMessage": {
         "MODEL_NOT_FOUND": string;
         "PROPERTY_ID_INVALID": string;
