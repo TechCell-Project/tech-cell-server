@@ -2,46 +2,47 @@
 const { spawn } = require('child_process');
 const { existsSync } = require('fs');
 
-function dockerComposeAction(env, action, services = []) {
-    if (!env || env === undefined || env === null || env === '') {
+function validateInputs(env, action) {
+    if (!env) {
         throw new Error(
             'Environment (postfix of docker compose file) argument is missing. (core/prod/metric/...)',
         );
     }
-
-    if (!action || action === '' || action === undefined || action === null) {
-        throw new Error('Action argument is missing (up/down/restart/...)');
-    }
     const composeFile = `./docker-compose.${env?.toString().toLowerCase()}.yml`;
     if (!existsSync(composeFile)) {
-        console.error(`File ${composeFile} not found!`);
-        process.exit(1);
+        throw new Error(`File ${composeFile} not found!`);
     }
 
-    let command = '';
+    if (!action) {
+        throw new Error('Action argument is missing (up/down/restart/...)');
+    }
+}
+
+function getCommand(env, action, services) {
+    const composeFile = `./docker-compose.${env?.toString().toLowerCase()}.yml`;
     const serviceNames = services.join(' ');
     const upAction = `docker compose -f ${composeFile} up -d ${serviceNames}`;
     const downAction = `docker compose -f ${composeFile} down ${serviceNames}`;
+
     switch (action) {
         case 'up':
         case 'run':
-            command = upAction;
-            break;
+            return upAction;
         case 'down':
         case 'stop':
-            command = downAction;
-            break;
+            return downAction;
         case 'restart':
-            command = `${downAction} && ${upAction}`;
-            break;
+            return `${downAction} && ${upAction}`;
         case 'update':
-            command = `docker compose -f ${composeFile} pull ${serviceNames} && ${upAction}`;
-            break;
+            return `docker compose -f ${composeFile} pull ${serviceNames} && ${upAction}`;
         default:
             throw new Error(
                 `Action ${action} is not supported. Use one of: up/down/restart/update`,
             );
     }
+}
+
+function runCommand(command) {
     console.log(`Running command: ${command}`);
     const deployProcess = spawn(command, {
         stdio: 'inherit',
@@ -56,6 +57,13 @@ function dockerComposeAction(env, action, services = []) {
         console.log('Deployed successfully!');
     });
 }
+
+function dockerComposeAction(env, action, services = []) {
+    validateInputs(env, action);
+    const command = getCommand(env, action, services);
+    runCommand(command);
+}
+
 module.exports = dockerComposeAction;
 
 const [env, action, ...serviceNames] = process.argv.slice(2);
