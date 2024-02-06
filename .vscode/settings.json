@@ -113,6 +113,8 @@
         "resources",
         "managements",
         "ssl/tls",
-        "mail"
+        "mail",
+        "constants",
+        "styles"
     ]
 }
