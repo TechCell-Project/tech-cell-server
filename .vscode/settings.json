@@ -114,6 +114,7 @@
         "managements",
         "ssl/tls",
         "mail",
-        "constants"
+        "constants",
+        "styles"
     ]
 }
