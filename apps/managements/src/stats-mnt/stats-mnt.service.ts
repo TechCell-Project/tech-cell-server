@@ -145,6 +145,7 @@ export class StatsMntService {
                 break;
             case StatsSplitBy.year:
                 dateIncrementFunction = (date) => date.setFullYear(date.getFullYear() + 1);
+                break;
             case StatsSplitBy.month:
             default:
                 dateIncrementFunction = (date) => date.setMonth(date.getMonth() + 1);
