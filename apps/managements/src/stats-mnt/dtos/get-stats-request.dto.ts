@@ -1,11 +1,13 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, IntersectionType } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsOptional } from 'class-validator';
 import { IsBooleanI18n, IsEnumI18n, IsNotEmptyI18n, IsDateStringI18n } from '~libs/common/i18n';
 import { StatsSplitBy } from '../stats-mnt.enum';
 import { isTrueSet } from '~libs/common';
+import { StatsType } from '../enums';
+import { GetStatsOrdersRequestDTO } from './get-stats-orders-request.dto';
 
-export class GetStatsRequestDTO {
+export class GetStatsRequestDTO extends IntersectionType(GetStatsOrdersRequestDTO) {
     @ApiProperty({
         required: true,
         description: 'From date to calculate revenue',
@@ -35,6 +37,16 @@ export class GetStatsRequestDTO {
     @IsOptional()
     @IsEnumI18n(StatsSplitBy)
     splitBy?: string;
+
+    @ApiProperty({
+        required: true,
+        description: 'Type of stats',
+        enum: StatsType,
+        example: StatsType.Revenue,
+    })
+    @IsNotEmptyI18n()
+    @IsEnumI18n(StatsType)
+    type: StatsType;
 
     @ApiProperty({
         required: false,

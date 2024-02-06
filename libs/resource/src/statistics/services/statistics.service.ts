@@ -2,10 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { RedisService } from '~libs/common/Redis';
 import { Order, OrdersService, OrderStatusEnum } from '~libs/resource/orders';
 import { ProductsService } from '~libs/resource/products';
-import { REVENUE_DAY, REVENUE_MONTH, REVENUE_YEAR } from '~libs/common/constants/cache.constant';
+import {
+    STAT_REVENUE_DAY,
+    STAT_REVENUE_MONTH,
+    STAT_REVENUE_YEAR,
+} from '~libs/common/constants/cache.constant';
 import { isCurrentTime } from '~libs/common/utils/shared.util';
 import { convertTimeString } from 'convert-time-string';
 import { TCalculate } from '../types';
+import { StatsGetBy } from '~apps/managements/stats-mnt/enums';
+import { FilterQuery } from 'mongoose';
 
 @Injectable()
 export class StatisticsService {
@@ -22,7 +28,7 @@ export class StatisticsService {
     }
 
     async calculateRevenueYear(year: number): Promise<TCalculate> {
-        const cacheKey = `${REVENUE_YEAR}_${year}`;
+        const cacheKey = `${STAT_REVENUE_YEAR}_${year}`;
         const isCurrent = isCurrentTime(year);
         if (!isCurrent) {
             const cached = await this.redisService.get<TCalculate>(cacheKey);
@@ -56,7 +62,7 @@ export class StatisticsService {
     }
 
     async calculateRevenueMonth(month: number, year: number): Promise<TCalculate> {
-        const cacheKey = `${REVENUE_MONTH}_${year}_${month}`;
+        const cacheKey = `${STAT_REVENUE_MONTH}_${year}_${month}`;
         const isCurrent = isCurrentTime(year, month);
         if (!isCurrent) {
             const cached = await this.redisService.get<TCalculate>(cacheKey);
@@ -87,7 +93,7 @@ export class StatisticsService {
     }
 
     async calculateRevenueDay(day: number, month: number, year: number): Promise<TCalculate> {
-        const cacheKey = `${REVENUE_DAY}_${year}_${month}_${day}`;
+        const cacheKey = `${STAT_REVENUE_DAY}_${year}_${month}_${day}`;
         const isCurrent = isCurrentTime(year, month, day);
         if (!isCurrent) {
             const cached = await this.redisService.get<TCalculate>(cacheKey);
@@ -123,7 +129,7 @@ export class StatisticsService {
         month: number,
         year: number,
     ): Promise<TCalculate> {
-        const cacheKey = `${REVENUE_DAY}_${year}_${month}_${day}_${hour}`;
+        const cacheKey = `${STAT_REVENUE_DAY}_${year}_${month}_${day}_${hour}`;
         const isCurrent = isCurrentTime(year, month, day, hour);
         if (!isCurrent) {
             const cached = await this.redisService.get<TCalculate>(cacheKey);
@@ -151,5 +157,71 @@ export class StatisticsService {
         const result: TCalculate = { revenue, orders: orders?.length ?? 0 };
         await this.redisService.set(cacheKey, result, ttl);
         return result;
+    }
+
+    async calculateOrders(data: {
+        year: number;
+        month?: number;
+        day?: number;
+        orderStatus?: string;
+        paymentStatus?: string;
+        getBy?: string;
+    }): Promise<number> {
+        // const cacheKey = `${STAT_ORDER_YEAR}_${status}_${year}`;
+        // const isCurrent = isCurrentTime(year);
+        // if (!isCurrent) {
+        //     const cached = await this.redisService.get<any>(cacheKey);
+        //     if (cached !== null) {
+        //         return cached;
+        //     }
+        // }
+
+        const greaterThanOrEqual = new Date(
+            data.year,
+            data?.month ? data.month - 1 : 0,
+            data?.day ? data.day : 1,
+        );
+        let lessThanOrEqual: Date;
+        if (data?.day) {
+            // End of the day
+            lessThanOrEqual = new Date(greaterThanOrEqual);
+            lessThanOrEqual.setHours(23, 59, 59, 999);
+        } else if (data?.month) {
+            // End of the month
+            lessThanOrEqual = new Date(
+                greaterThanOrEqual.getFullYear(),
+                greaterThanOrEqual.getMonth() + 1,
+                0,
+                23,
+                59,
+                59,
+                999,
+            );
+        } else {
+            // End of the year
+            lessThanOrEqual = new Date(greaterThanOrEqual.getFullYear(), 11, 31, 23, 59, 59, 999);
+        }
+
+        const filter: FilterQuery<Order> = {
+            ...(data?.orderStatus ? { orderStatus: data.orderStatus } : {}),
+            ...(data?.paymentStatus ? { 'paymentOrder.status': data.paymentStatus } : {}),
+            $and: [
+                {
+                    [data?.getBy === StatsGetBy.updatedAt ? 'updatedAt' : 'createdAt']: {
+                        $gte: greaterThanOrEqual.toISOString(),
+                    },
+                },
+                {
+                    [data?.getBy === StatsGetBy.updatedAt ? 'updatedAt' : 'createdAt']: {
+                        $lte: lessThanOrEqual.toISOString(),
+                    },
+                },
+            ],
+        };
+        const totalOrder = await this.ordersService.countOrders(filter);
+
+        // const ttl = isCurrent ? convertTimeString('1h') : convertTimeString('3d');
+        // await this.redisService.set(cacheKey, result, ttl);
+        return totalOrder;
     }
 }

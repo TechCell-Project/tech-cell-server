@@ -33,26 +33,43 @@ class GetStatsDataDTO implements TCalculate {
 }
 
 export class GetStatsResponseDTO extends IntersectionType(
-    PickType(GetStatsRequestDTO, ['fromDate', 'toDate']),
+    PickType(GetStatsRequestDTO, ['fromDate']),
 ) {
+    @ApiProperty({
+        required: true,
+        description: 'To date to calculate revenue, default is today',
+        default: new Date(),
+        format: 'date-time',
+        type: String,
+    })
+    toDate: string;
+
     @ApiProperty({
         required: false,
         description: 'Total of orders in range of time',
         example: 3,
     })
-    totalOrders: number;
+    totalOrders?: number;
 
     @ApiProperty({
         required: false,
         description: 'Total revenue in range of time',
         example: 1000000,
     })
-    totalRevenue: number;
+    totalRevenue?: number;
+
+    @ApiProperty({
+        required: false,
+        description: 'Total of results',
+        example: 3,
+    })
+    totalResults?: number;
+
     @ApiProperty({
         required: false,
         description: 'Data of statistics',
         type: [GetStatsDataDTO],
         example: GetStatsDataDTO,
     })
-    data: GetStatsDataDTO[];
+    data?: GetStatsDataDTO[];
 }
