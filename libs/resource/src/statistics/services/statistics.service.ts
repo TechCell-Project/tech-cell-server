@@ -175,18 +175,15 @@ export class StatisticsService {
         //         return cached;
         //     }
         // }
+        const { year, month, day, orderStatus, paymentStatus, getBy } = data;
 
-        const greaterThanOrEqual = new Date(
-            data.year,
-            data?.month ? data.month - 1 : 0,
-            data?.day ? data.day : 1,
-        );
+        const greaterThanOrEqual = new Date(year, month ? month - 1 : 0, day ? day : 1);
         let lessThanOrEqual: Date;
-        if (data?.day) {
+        if (day) {
             // End of the day
             lessThanOrEqual = new Date(greaterThanOrEqual);
             lessThanOrEqual.setHours(23, 59, 59, 999);
-        } else if (data?.month) {
+        } else if (month) {
             // End of the month
             lessThanOrEqual = new Date(
                 greaterThanOrEqual.getFullYear(),
@@ -203,16 +200,16 @@ export class StatisticsService {
         }
 
         const filter: FilterQuery<Order> = {
-            ...(data?.orderStatus ? { orderStatus: data.orderStatus } : {}),
-            ...(data?.paymentStatus ? { 'paymentOrder.status': data.paymentStatus } : {}),
+            ...(orderStatus ? { orderStatus: orderStatus } : {}),
+            ...(paymentStatus ? { 'paymentOrder.status': paymentStatus } : {}),
             $and: [
                 {
-                    [data?.getBy === StatsGetBy.updatedAt ? 'updatedAt' : 'createdAt']: {
+                    [getBy === StatsGetBy.updatedAt ? 'updatedAt' : 'createdAt']: {
                         $gte: greaterThanOrEqual.toISOString(),
                     },
                 },
                 {
-                    [data?.getBy === StatsGetBy.updatedAt ? 'updatedAt' : 'createdAt']: {
+                    [getBy === StatsGetBy.updatedAt ? 'updatedAt' : 'createdAt']: {
                         $lte: lessThanOrEqual.toISOString(),
                     },
                 },

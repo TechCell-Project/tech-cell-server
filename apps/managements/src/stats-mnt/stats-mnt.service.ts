@@ -24,16 +24,18 @@ export class StatsMntService {
 
     public async getStats(data: GetStatsRequestDTO): Promise<GetStatsResponseDTO> {
         const {
+            type,
+            fromDate,
             toDate = new Date().toString(),
             splitBy = StatsSplitBy.month,
             refreshCache = false,
         } = data;
         const result: GetStatsResponseDTO = {
-            fromDate: data.fromDate,
+            fromDate: fromDate,
             toDate,
         };
 
-        switch (data?.type?.toLowerCase()) {
+        switch (type) {
             case StatsType.Revenue.toLowerCase(): {
                 Object.assign(result, {
                     ...(await this.getRevenueStats({
