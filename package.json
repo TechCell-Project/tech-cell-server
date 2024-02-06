@@ -84,7 +84,7 @@
         "nestjs-i18n": "^10.3.7",
         "nestjs-seeder": "^0.3.2",
         "nestjs-throttler-storage-redis": "^0.3.3",
-        "nodemailer": "^6.9.3",
+        "nodemailer": "^6.9.9",
         "otp-generator": "^4.0.1",
         "passport": "^0.6.0",
         "passport-facebook": "^3.0.0",
