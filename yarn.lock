@@ -12194,10 +12194,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nodemailer@npm:^6.9.2, nodemailer@npm:^6.9.3":
+"nodemailer@npm:^6.9.2":
   version: 6.9.7
   resolution: "nodemailer@npm:6.9.7"
   checksum: 5ea7f781782361890d4492dc2412496e89fb04c498814e6c4fe7b168a27d7491a00f725cf90c26768907506e8afb76e8cfe6f6300def9940bc7f7e323405eaa6
+  languageName: node
+  linkType: hard
+
+"nodemailer@npm:^6.9.9":
+  version: 6.9.9
+  resolution: "nodemailer@npm:6.9.9"
+  checksum: ba72da4ca8a003921c86f3d132d64d9bb86c1a3d79d248664b3de28f6a7a621f0476273ad7cf3ecc48d3b78a66ae4ec62b7c4c8ab6f07d9ca26d4bad4d08802e
   languageName: node
   linkType: hard
 
@@ -15039,7 +15046,7 @@ __metadata:
     nestjs-seeder: "npm:^0.3.2"
     nestjs-throttler-storage-redis: "npm:^0.3.3"
     node-clipboardy: "npm:^1.0.3"
-    nodemailer: "npm:^6.9.3"
+    nodemailer: "npm:^6.9.9"
     otp-generator: "npm:^4.0.1"
     passport: "npm:^0.6.0"
     passport-facebook: "npm:^3.0.0"
