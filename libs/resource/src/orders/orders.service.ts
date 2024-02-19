@@ -11,6 +11,7 @@ import {
 } from 'mongoose';
 import { Order } from './schemas';
 import { RedlockService } from '~libs/common/Redis/services';
+import { convertToObjectId } from '~libs/common';
 
 @Injectable()
 export class OrdersService {
@@ -83,14 +84,14 @@ export class OrdersService {
 
     async getOrderById(id: Types.ObjectId) {
         return this.orderRepository.findOne({
-            _id: new Types.ObjectId(id),
+            _id: convertToObjectId(id),
         });
     }
 
     async getOrderByIdPopulate(id: Types.ObjectId) {
         return this.orderRepository.findOne(
             {
-                _id: new Types.ObjectId(id),
+                _id: convertToObjectId(id),
             },
             { lean: false },
         );
@@ -99,7 +100,7 @@ export class OrdersService {
     async getOrderByIdOrNull(id: Types.ObjectId) {
         try {
             const order = await this.orderRepository.findOne({
-                _id: new Types.ObjectId(id),
+                _id: convertToObjectId(id),
             });
             return order;
         } catch (error) {
@@ -109,8 +110,8 @@ export class OrdersService {
 
     async getUserOrderById(orderId: Types.ObjectId, userId: Types.ObjectId) {
         return this.orderRepository.findOne({
-            _id: new Types.ObjectId(orderId),
-            userId: new Types.ObjectId(userId),
+            _id: convertToObjectId(orderId),
+            userId: convertToObjectId(userId),
         });
     }
 
@@ -126,7 +127,7 @@ export class OrdersService {
         try {
             result = await this.orderRepository.findOneAndUpdate(
                 {
-                    _id: new Types.ObjectId(orderId),
+                    _id: convertToObjectId(orderId),
                 },
                 dataUpdate,
                 null,
@@ -142,7 +143,7 @@ export class OrdersService {
     async getAllUserOrders(userId: Types.ObjectId, options?: QueryOptions<Order>) {
         return this.orderRepository.find({
             filterQuery: {
-                userId: new Types.ObjectId(userId),
+                userId: convertToObjectId(userId),
             },
             queryOptions: {
                 sort: {
