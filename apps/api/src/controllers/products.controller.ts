@@ -181,7 +181,7 @@ export class ProductsController {
     @ApiOkResponse({
         description: 'Delete product variation successfully!',
     })
-    @Delete('/:productId')
+    @Delete('/:productId/variation')
     @UseGuards(ModGuard)
     async deleteProductVariation(
         @Headers() headers: THeaders,
