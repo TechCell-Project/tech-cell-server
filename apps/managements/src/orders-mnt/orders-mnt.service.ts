@@ -9,6 +9,7 @@ import { Product, ProductsService } from '~libs/resource';
 import { COMMUNICATIONS_SERVICE } from '~libs/common/constants/services.constant';
 import { ClientRMQ } from '@nestjs/microservices';
 import { NotifyEventPattern } from '~apps/communications/notifications';
+import { SelectType } from '~apps/search/enums/select-type.enum';
 
 @Injectable()
 export class OrdersMntService {
@@ -26,6 +27,7 @@ export class OrdersMntService {
                     filterQueries: {
                         _id: convertToObjectId(prod.productId),
                     },
+                    selectType: SelectType.both,
                 }),
             ),
         );
