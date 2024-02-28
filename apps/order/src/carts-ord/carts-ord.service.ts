@@ -19,7 +19,7 @@ export class CartsOrdService {
 
     async getCarts({ user }: { user: TCurrentUser }): Promise<CartDTO> {
         const cart = await this.cartsService.getCartByUserId({
-            userId: new Types.ObjectId(user._id),
+            userId: convertToObjectId(user._id),
         });
         return cart;
     }
@@ -31,7 +31,7 @@ export class CartsOrdService {
         cartData: AddCartRequestDTO;
         user: TCurrentUser;
     }) {
-        const userId = new Types.ObjectId(user._id);
+        const userId = convertToObjectId(user._id);
         const { productId, sku, quantity } = new AddCartRequestDTO(cartData);
 
         // Check if product exists
@@ -58,7 +58,7 @@ export class CartsOrdService {
         cartsData: DeleteProductsCartRequestDTO;
         user: TCurrentUser;
     }) {
-        const userId = new Types.ObjectId(user._id);
+        const userId = convertToObjectId(user._id);
         const { selectProducts, isAll } = new DeleteProductsCartRequestDTO(cartsData);
         console.log({ selectProducts, isAll });
 

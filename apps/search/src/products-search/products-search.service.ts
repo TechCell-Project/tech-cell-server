@@ -4,7 +4,7 @@ import { GetProductByIdQueryDTO, GetProductsDTO } from './dtos';
 import { FilterQuery, QueryOptions, Types } from 'mongoose';
 import { Product } from '~libs/resource';
 import { ListDataResponseDTO } from '~libs/common/dtos';
-import { isTrueSet } from '~libs/common/utils/shared.util';
+import { convertToObjectId, isTrueSet } from '~libs/common/utils/shared.util';
 import { generateRegexQuery } from 'regex-vietnamese';
 
 @Injectable()
@@ -65,7 +65,7 @@ export class ProductsSearchService extends ProductsSearchUtilService {
         ...query
     }: { id: string | Types.ObjectId } & GetProductByIdQueryDTO) {
         const resultFromDb = await this.productsService.getProduct({
-            filterQueries: { _id: new Types.ObjectId(id) },
+            filterQueries: { _id: convertToObjectId(id) },
             queryOptions: { lean: false },
         });
         let prodReturn = resultFromDb;

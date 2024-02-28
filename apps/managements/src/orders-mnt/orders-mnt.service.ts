@@ -78,7 +78,7 @@ export class OrdersMntService {
         }
 
         if (userId) {
-            filter.userId = new Types.ObjectId(userId);
+            filter.userId = convertToObjectId(userId);
         }
 
         if (productId) {

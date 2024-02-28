@@ -2,10 +2,11 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { Types } from 'mongoose';
 import { IsMongoIdI18n, IsNotEmptyI18n, IsNumberI18n, IsStringI18n } from '~libs/common/i18n';
+import { convertToObjectId } from '~libs/common/utils';
 
 export class AddCartRequestDTO {
     constructor(cartData: AddCartRequestDTO) {
-        this.productId = new Types.ObjectId(cartData?.productId);
+        this.productId = convertToObjectId(cartData?.productId);
         this.sku = cartData?.sku;
         this.quantity = cartData?.quantity ? Number(cartData?.quantity) : 0;
     }

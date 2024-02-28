@@ -19,7 +19,7 @@ import { ImageSchema } from '../schemas/image.schema';
 import { CreateProductRequestDTO } from '~apps/managements/products-mnt/dtos';
 import { ApiProperty } from '@nestjs/swagger';
 import { Types } from 'mongoose';
-import { isTrueSet } from '~libs/common/utils/shared.util';
+import { convertToObjectId, isTrueSet } from '~libs/common/utils/shared.util';
 
 class AttributeDTO implements AttributeSchema {
     @ApiProperty({
@@ -171,7 +171,7 @@ export class CreateProductDTO {
     constructor(data: CreateProductRequestDTO) {
         this.name = data.name;
         this.description = data.description;
-        this.category = new Types.ObjectId(data.category._id);
+        this.category = convertToObjectId(data.category._id);
         this.status = data.status;
         this.generalAttributes = data.generalAttributes;
         this.generalImages = [];

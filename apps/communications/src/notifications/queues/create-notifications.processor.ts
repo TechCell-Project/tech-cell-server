@@ -9,6 +9,7 @@ import { NotificationsCallGateway } from '../gateways/notifications.call.gateway
 import { ICreateNotificationQueue } from '../interfaces';
 import { cleanUserBeforeResponse } from '~libs/resource/users/utils/user.util';
 import { Types } from 'mongoose';
+import { convertToObjectId } from '~libs/common/utils';
 
 @Injectable()
 // The @Processor decorator marks the class as a job processor.
@@ -43,7 +44,7 @@ export class CreateNotificationProcessor extends WorkerHost {
             const notifications = await this.notificationService.createNotification({
                 recipientId:
                     typeof userToNotify._id === 'string'
-                        ? new Types.ObjectId(userToNotify._id)
+                        ? convertToObjectId(userToNotify._id)
                         : userToNotify._id,
                 notificationType: NotificationType.newOrder,
                 content: `${customer.userName ?? order.userId} đã đặt đơn hàng mới #${order?._id}`,

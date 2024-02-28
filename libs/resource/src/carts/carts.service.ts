@@ -6,6 +6,7 @@ import { IGetCartByProduct } from './interfaces';
 import { Cart } from './schemas';
 import { CartState } from './enums';
 import { RedlockService } from '~libs/common/Redis/services';
+import { convertToObjectId } from '~libs/common/utils';
 
 @Injectable()
 export class CartsService {
@@ -45,7 +46,7 @@ export class CartsService {
     }
 
     async countCartUser(userId: Types.ObjectId) {
-        return this.cartRepository.count({ userId: new Types.ObjectId(userId) });
+        return this.cartRepository.count({ userId: convertToObjectId(userId) });
     }
 
     async getCartByUserId({

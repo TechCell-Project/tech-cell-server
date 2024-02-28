@@ -70,7 +70,7 @@ export class CheckoutService {
         // Get user address for shipping
         const userAddress = (
             await this.userService.getUser({
-                _id: new Types.ObjectId(user._id),
+                _id: convertToObjectId(user._id),
             })
         ).address;
         if (!userAddress) {
@@ -90,7 +90,7 @@ export class CheckoutService {
         const products = await Promise.all(
             Array.from(productIdSet).map((productId) =>
                 this.productService.getProduct({
-                    filterQueries: { _id: new Types.ObjectId(productId) },
+                    filterQueries: { _id: convertToObjectId(productId) },
                 }),
             ),
         );
@@ -158,7 +158,7 @@ export class CheckoutService {
                 );
             }
 
-            productUserSelected.productId = new Types.ObjectId(productUserSelected.productId);
+            productUserSelected.productId = convertToObjectId(productUserSelected.productId);
             const price = productWithSku.price.base;
             return total + price * productUserSelected.quantity;
         }, 0);
@@ -205,7 +205,7 @@ export class CheckoutService {
 
         // Get buyer info
         const userFound = await this.userService.getUser({
-            _id: new Types.ObjectId(user._id),
+            _id: convertToObjectId(user._id),
         });
 
         // Build a new order data
@@ -341,7 +341,7 @@ export class CheckoutService {
             }
 
             const order = await this.orderService.getOrderByIdOrNull(
-                new Types.ObjectId(query.vnp_TxnRef),
+                convertToObjectId(query.vnp_TxnRef),
             );
             if (!order) {
                 return {
@@ -507,7 +507,7 @@ export class CheckoutService {
         return Promise.all(
             productSelected.map(async (product) => {
                 const productInfo = await this.productService.getProduct({
-                    filterQueries: { _id: new Types.ObjectId(product.productId) },
+                    filterQueries: { _id: convertToObjectId(product.productId) },
                 });
                 const skuIndex = productInfo.variations.findIndex((p) => p.sku === product.sku);
                 if (skuIndex < 0) {
@@ -527,7 +527,7 @@ export class CheckoutService {
                 }
                 productInfo.variations[skuIndex].stock -= product.quantity;
                 return this.productService.updateProductByIdLockSession(
-                    new Types.ObjectId(product.productId),
+                    convertToObjectId(product.productId),
                     productInfo,
                     session,
                 );

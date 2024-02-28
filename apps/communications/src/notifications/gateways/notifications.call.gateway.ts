@@ -12,6 +12,7 @@ import { ICreateNotificationQueue, IPushNotifyToAllUserQueue } from '../interfac
 import { RedisService } from '~libs/common/Redis/services/redis.service';
 import { NotificationsMessageSubscribe } from '../constants/notifications.message';
 import { Types } from 'mongoose';
+import { convertToObjectId } from '~libs/common';
 
 @Injectable()
 export class NotificationsCallGateway extends NotificationsGateway {
@@ -94,7 +95,7 @@ export class NotificationsCallGateway extends NotificationsGateway {
 
     public async orderStatusChanged({ order }: { order: Order }) {
         const notifications = await this.notificationService.createNotification({
-            recipientId: new Types.ObjectId(order.userId),
+            recipientId: convertToObjectId(order.userId),
             notificationType: NotificationType.orderStatusChanged,
             content: `Đơn hàng của bạn ${order._id} vừa được cập nhật.`,
             data: {

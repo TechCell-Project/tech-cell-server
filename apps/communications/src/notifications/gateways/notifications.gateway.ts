@@ -24,6 +24,7 @@ import { instrument, RedisStore } from '@socket.io/admin-ui';
 import { RedisService } from '~libs/common/Redis/services/redis.service';
 import { AuthCoreGuard } from '~libs/common/guards/auth.core.guard';
 import { NotificationId } from '../dtos';
+import { convertToObjectId } from '~libs/common/utils';
 
 @WebSocketGateway({
     cors: {
@@ -141,8 +142,8 @@ export class NotificationsGateway
         }
 
         const notification = await this.notificationService.markNotificationAsRead({
-            _id: new Types.ObjectId(notificationId),
-            recipientId: new Types.ObjectId(client.handshake.auth.user._id),
+            _id: convertToObjectId(notificationId),
+            recipientId: convertToObjectId(client.handshake.auth.user._id),
         });
         if (notification === null) {
             this.logger.debug(`Client ${client.id} notification not found`);

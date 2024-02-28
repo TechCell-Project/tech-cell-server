@@ -8,6 +8,7 @@ import { ProductStatus } from './enums';
 import { SelectType } from '~apps/search/enums';
 import { SelectTypeDTO } from '~apps/search/dtos';
 import { RedlockService } from '~libs/common/Redis/services';
+import { convertToObjectId } from '~libs/common/utils';
 
 @Injectable()
 export class ProductsService {
@@ -120,7 +121,7 @@ export class ProductsService {
         session: ClientSession = null,
     ) {
         return await this.productsRepository.findOneAndUpdate(
-            new Types.ObjectId(productId),
+            convertToObjectId(productId),
             updateQueries,
             {},
             session,
@@ -157,7 +158,7 @@ export class ProductsService {
 
     async deleteProductById(productId: Types.ObjectId) {
         const product = await this.productsRepository.findOneAndUpdate(
-            { _id: new Types.ObjectId(productId) },
+            { _id: convertToObjectId(productId) },
             {
                 $set: {
                     status: ProductStatus.Deleted,
@@ -182,7 +183,7 @@ export class ProductsService {
 
         try {
             result = await this.productsRepository.findOneAndUpdate(
-                { _id: new Types.ObjectId(productId) },
+                { _id: convertToObjectId(productId) },
                 updateQueries,
                 {},
                 session,

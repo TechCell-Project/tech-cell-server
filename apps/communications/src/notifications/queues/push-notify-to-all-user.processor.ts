@@ -8,6 +8,7 @@ import { NotificationsMessageSubscribe } from '../constants/notifications.messag
 import { NotificationsCallGateway } from '../gateways/notifications.call.gateway';
 import { IPushNotifyToAllUserQueue } from '../interfaces';
 import { Types } from 'mongoose';
+import { convertToObjectId } from '~libs/common/utils';
 
 @Injectable()
 @Processor(NOTIFICATIONS_JOB_PUSH_ALL, {
@@ -38,7 +39,7 @@ export class PushNotifyToAllUserProcessor extends WorkerHost {
 
         try {
             const notifications = await this.notificationService.createNotification({
-                recipientId: new Types.ObjectId(userToNotify._id),
+                recipientId: convertToObjectId(userToNotify._id),
                 notificationType: NotificationType.newOrder,
                 content: body,
                 data: {

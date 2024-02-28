@@ -1,7 +1,6 @@
 import { PartialType } from '@nestjs/swagger';
 import { AttributeDTO, CreateProductRequestDTO } from './create-product-request.dto';
-import { Types } from 'mongoose';
-import { sanitizeHtmlString } from '~libs/common/utils';
+import { convertToObjectId, sanitizeHtmlString } from '~libs/common/utils';
 
 export class UpdateProductRequestDTO extends PartialType(CreateProductRequestDTO) {
     constructor(data: UpdateProductRequestDTO) {
@@ -24,7 +23,7 @@ export class UpdateProductRequestDTO extends PartialType(CreateProductRequestDTO
         }
 
         if (data?.category !== undefined && data?.category !== null) {
-            this.category = new Types.ObjectId(data.category._id);
+            this.category = convertToObjectId(data.category._id);
         }
 
         if (data?.status !== undefined && data?.status !== null) {

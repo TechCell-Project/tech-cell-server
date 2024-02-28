@@ -29,10 +29,13 @@ import {
 } from '~apps/communications/mail';
 import { OtpType } from '~libs/resource/otp';
 import { IUserFacebookResponse, IUserGoogleResponse, ITokenVerifiedResponse } from './interfaces';
-import { buildUniqueUserNameFromEmail, generateRandomString } from '~libs/common';
+import {
+    buildUniqueUserNameFromEmail,
+    convertToObjectId,
+    generateRandomString,
+} from '~libs/common';
 import { PASSWORD_MAX_LENGTH, USERS_CACHE_PREFIX } from '~libs/common/constants';
 import { TCurrentUser } from '~libs/common/types';
-import { Types } from 'mongoose';
 import { LoginTicket, OAuth2Client, OAuth2ClientOptions } from 'google-auth-library';
 import { cleanUserBeforeResponse } from '~libs/resource/users/utils/user.util';
 import { I18nContext } from 'nestjs-i18n';
@@ -291,7 +294,7 @@ export class AuthService extends AuthUtilService {
             );
         }
 
-        const userFound = await this.usersService.getUser({ _id: new Types.ObjectId(user._id) });
+        const userFound = await this.usersService.getUser({ _id: convertToObjectId(user._id) });
         const validateLogin = await this.validateUserLogin(userFound.email, oldPassword);
         if (!validateLogin) {
             throw new RpcException(

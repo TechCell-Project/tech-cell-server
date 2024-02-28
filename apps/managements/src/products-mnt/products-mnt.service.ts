@@ -188,7 +188,7 @@ export class ProductsMntService extends ProductsMntUtilService {
 
     async deleteProduct({ productId }: ProductIdParamsDTO) {
         try {
-            productId = new Types.ObjectId(productId);
+            productId = convertToObjectId(productId);
         } catch (error) {
             throw new RpcException(
                 new BadRequestException(
@@ -214,7 +214,7 @@ export class ProductsMntService extends ProductsMntUtilService {
 
     async deleteProductVariation({ productId, sku }: ProductIdParamsDTO & ProductSkuQueryDTO) {
         try {
-            productId = new Types.ObjectId(productId);
+            productId = convertToObjectId(productId);
         } catch (error) {
             throw new RpcException(
                 new BadRequestException(

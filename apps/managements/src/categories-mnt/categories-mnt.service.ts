@@ -1,6 +1,7 @@
 import { CreateCategoryRequestDTO, UpdateCategoryRequestDTO } from './dtos';
 import { CategoriesMntUtilService } from './categories-mnt.util.service';
 import { Types } from 'mongoose';
+import { convertToObjectId } from '~libs/common/utils';
 
 export class CategoriesMntService extends CategoriesMntUtilService {
     async createCategory({
@@ -40,7 +41,7 @@ export class CategoriesMntService extends CategoriesMntUtilService {
         }
 
         return await this.categoriesService.updateCategory({
-            filterQueries: { _id: new Types.ObjectId(categoryId) },
+            filterQueries: { _id: convertToObjectId(categoryId) },
             updateData: { ...newCategory },
         });
     }

@@ -4,6 +4,7 @@ import { GetCategoriesRequestDTO } from './dtos';
 import { FilterQuery, QueryOptions, Types } from 'mongoose';
 import { ListDataResponseDTO } from '~libs/common/dtos';
 import { generateRegexQuery } from 'regex-vietnamese';
+import { convertToObjectId } from '~libs/common/utils';
 
 @Injectable()
 export class CategoriesSearchService {
@@ -59,7 +60,7 @@ export class CategoriesSearchService {
 
     async getCategoryById({ categoryId }: CategoryIdParam) {
         return await this.categoriesService.getCategory({
-            filterQueries: { _id: new Types.ObjectId(categoryId) },
+            filterQueries: { _id: convertToObjectId(categoryId) },
         });
     }
 }
