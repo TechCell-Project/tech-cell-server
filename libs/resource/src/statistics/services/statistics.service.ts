@@ -221,4 +221,33 @@ export class StatisticsService {
         // await this.redisService.set(cacheKey, result, ttl);
         return totalOrder;
     }
+
+    public countOrdersByStatusInTimeRange({
+        fromDate,
+        toDate,
+        orderStatus,
+        getBy,
+    }: {
+        fromDate: Date;
+        toDate: Date;
+        orderStatus: OrderStatusEnum;
+        getBy: StatsGetBy;
+    }) {
+        const filter: FilterQuery<Order> = {
+            ...(orderStatus ? { orderStatus: orderStatus } : {}),
+            $and: [
+                {
+                    [getBy === StatsGetBy.updatedAt ? 'updatedAt' : 'createdAt']: {
+                        $gte: fromDate.toISOString(),
+                    },
+                },
+                {
+                    [getBy === StatsGetBy.updatedAt ? 'updatedAt' : 'createdAt']: {
+                        $lte: toDate.toISOString(),
+                    },
+                },
+            ],
+        };
+        return this.ordersService.countOrders(filter);
+    }
 }

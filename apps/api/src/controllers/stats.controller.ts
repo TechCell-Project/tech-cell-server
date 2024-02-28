@@ -19,6 +19,7 @@ import { StatsMntMessagePattern } from '~apps/managements/stats-mnt/stats-mnt.pa
 import { GetStatsRequestDTO, GetStatsResponseDTO } from '~apps/managements/stats-mnt/dtos';
 import { sendMessagePipeException } from '~libs/common/RabbitMQ/rmq.util';
 import { THeaders } from '~libs/common/types/common.type';
+import { GetStatsOrdersApiRequestDTO } from '~apps/managements/stats-mnt/dtos/get-stats-orders-request.2.dto';
 
 @ApiBadRequestResponse({
     description: 'Invalid request, please check your request data!',
@@ -63,6 +64,25 @@ export class StatsController {
         return sendMessagePipeException<GetStatsRequestDTO>({
             client: this.managementsService,
             pattern: StatsMntMessagePattern.getStats,
+            data: { ...requestQuery },
+            headers,
+        });
+    }
+
+    @ApiOperation({
+        summary: 'Get orders stats in a period of time',
+    })
+    @ApiOkResponse({
+        description: 'Get orders stats successfully!',
+    })
+    @Get('/orders')
+    async getStatsOrders(
+        @Headers() headers: THeaders,
+        @Query() requestQuery: GetStatsOrdersApiRequestDTO,
+    ) {
+        return sendMessagePipeException({
+            client: this.managementsService,
+            pattern: StatsMntMessagePattern.getStatsOrders,
             data: { ...requestQuery },
             headers,
         });

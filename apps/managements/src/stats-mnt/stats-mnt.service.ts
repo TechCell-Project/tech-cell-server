@@ -12,8 +12,10 @@ import {
     STAT_REVENUE_YEAR,
 } from '~libs/common/constants/cache.constant';
 import { TCalculate } from '~libs/resource/statistics/types';
-import { StatsType } from './enums';
+import { StatsGetBy, StatsType } from './enums';
 import { GetStatsOrdersRequestDTO } from './dtos/get-stats-orders-request.dto';
+import { GetStatsOrdersApiRequestDTO } from './dtos/get-stats-orders-request.2.dto';
+import { OrderStatusEnum } from '~libs/resource/orders';
 
 @Injectable()
 export class StatsMntService {
@@ -65,6 +67,37 @@ export class StatsMntService {
         }
 
         return result;
+    }
+
+    public async getStatsOrders(data: GetStatsOrdersApiRequestDTO) {
+        const {
+            fromDate,
+            toDate = new Date().toString(),
+            getBy = StatsGetBy.createdAt,
+            refreshCache = false,
+        } = data;
+        const result: GetStatsResponseDTO = {
+            fromDate: fromDate,
+            toDate,
+        };
+        const dataReturn = [];
+
+        for (const [statusKey, statusValue] of Object.entries(OrderStatusEnum)) {
+            dataReturn.push({
+                name: statusKey,
+                value: await this.statisticsService.countOrdersByStatusInTimeRange({
+                    fromDate: new Date(fromDate),
+                    toDate: new Date(toDate),
+                    orderStatus: statusValue,
+                    getBy,
+                }),
+            });
+        }
+
+        return {
+            ...result,
+            data: dataReturn,
+        };
     }
 
     private async getRevenueStats({

@@ -75,6 +75,7 @@
         "unmock",
         "uuidv",
         "uúùủũụưứừửữự",
+        "VNPAY",
         "VNPAYQR",
         "websockets",
         "xteam",
@@ -115,6 +116,7 @@
         "ssl/tls",
         "mail",
         "constants",
-        "styles"
+        "styles",
+        "stats"
     ]
 }
