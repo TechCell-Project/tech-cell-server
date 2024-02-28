@@ -7,7 +7,6 @@ import { UsersService } from '~libs/resource/users';
 import { NotificationsMessageSubscribe } from '../constants/notifications.message';
 import { NotificationsCallGateway } from '../gateways/notifications.call.gateway';
 import { IPushNotifyToAllUserQueue } from '../interfaces';
-import { Types } from 'mongoose';
 import { convertToObjectId } from '~libs/common/utils';
 
 @Injectable()

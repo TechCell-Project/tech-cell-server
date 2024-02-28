@@ -1,7 +1,7 @@
 import { CategoriesService, Category, CategoryIdParam } from '~libs/resource/categories';
 import { Injectable } from '@nestjs/common';
 import { GetCategoriesRequestDTO } from './dtos';
-import { FilterQuery, QueryOptions, Types } from 'mongoose';
+import { FilterQuery, QueryOptions } from 'mongoose';
 import { ListDataResponseDTO } from '~libs/common/dtos';
 import { generateRegexQuery } from 'regex-vietnamese';
 import { convertToObjectId } from '~libs/common/utils';

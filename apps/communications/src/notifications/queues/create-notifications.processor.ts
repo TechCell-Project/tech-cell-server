@@ -8,7 +8,6 @@ import { NotificationsMessageSubscribe } from '../constants/notifications.messag
 import { NotificationsCallGateway } from '../gateways/notifications.call.gateway';
 import { ICreateNotificationQueue } from '../interfaces';
 import { cleanUserBeforeResponse } from '~libs/resource/users/utils/user.util';
-import { Types } from 'mongoose';
 import { convertToObjectId } from '~libs/common/utils';
 
 @Injectable()

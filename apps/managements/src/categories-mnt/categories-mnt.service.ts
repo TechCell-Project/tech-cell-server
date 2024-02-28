@@ -1,6 +1,5 @@
 import { CreateCategoryRequestDTO, UpdateCategoryRequestDTO } from './dtos';
 import { CategoriesMntUtilService } from './categories-mnt.util.service';
-import { Types } from 'mongoose';
 import { convertToObjectId } from '~libs/common/utils';
 
 export class CategoriesMntService extends CategoriesMntUtilService {

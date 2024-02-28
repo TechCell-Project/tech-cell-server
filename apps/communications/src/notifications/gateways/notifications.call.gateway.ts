@@ -11,7 +11,6 @@ import { Queue } from 'bullmq';
 import { ICreateNotificationQueue, IPushNotifyToAllUserQueue } from '../interfaces';
 import { RedisService } from '~libs/common/Redis/services/redis.service';
 import { NotificationsMessageSubscribe } from '../constants/notifications.message';
-import { Types } from 'mongoose';
 import { convertToObjectId } from '~libs/common';
 
 @Injectable()
