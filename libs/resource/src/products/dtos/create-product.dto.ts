@@ -171,7 +171,9 @@ export class CreateProductDTO {
     constructor(data: CreateProductRequestDTO) {
         this.name = data.name;
         this.description = data.description;
-        this.category = convertToObjectId(data.category._id);
+        this.category = data?.category?._id
+            ? convertToObjectId(data.category._id)
+            : new Types.ObjectId();
         this.status = data.status;
         this.generalAttributes = data.generalAttributes;
         this.generalImages = [];

@@ -1,5 +1,5 @@
 import { Cart, CartsService } from '~libs/resource/carts';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { AddCartRequestDTO } from './dtos/create-cart-request.dto';
 import { RpcException } from '@nestjs/microservices';
 import { Types } from 'mongoose';
@@ -9,9 +9,12 @@ import { DeleteProductsCartRequestDTO } from './dtos';
 import { CartState } from '~libs/resource/carts/enums';
 import { CartDTO } from '~libs/resource/carts/dtos';
 import { convertToObjectId } from '~libs/common';
+import { ProductStatus } from '~libs/resource/products/enums';
+import { SelectType } from '~apps/search/enums';
 
 @Injectable()
 export class CartsOrdService {
+    private readonly logger = new Logger(CartsOrdService.name);
     constructor(
         private readonly cartsService: CartsService,
         private readonly productsService: ProductsService,
@@ -21,6 +24,26 @@ export class CartsOrdService {
         const cart = await this.cartsService.getCartByUserId({
             userId: convertToObjectId(user._id),
         });
+        const productIdList = Array.from(
+            new Set(cart.products.map((product) => product.productId)),
+        );
+        for (const productId of productIdList) {
+            try {
+                const product = await this.productsService.getProduct({
+                    filterQueries: { _id: convertToObjectId(productId) },
+                    selectType: SelectType.both,
+                });
+                if (!product || product.status === ProductStatus.Deleted) {
+                    cart.products = cart.products.filter((p) => !p.productId.equals(productId));
+                    this.logger.debug(`Product ${productId} not found or deleted`);
+                }
+            } catch (error) {
+                this.logger.error(error);
+                cart.products = cart.products.filter((p) => !p.productId.equals(productId));
+            }
+        }
+        await this.cartsService.updateCart(cart);
+
         return cart;
     }
 

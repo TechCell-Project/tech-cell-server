@@ -31,6 +31,7 @@ export class CartsService {
      * @returns updated cart
      */
     async updateCart({ userId, products, cartCountProducts }: Cart) {
+        cartCountProducts = products?.length ?? 0;
         return this.cartRepository.upsert({ userId }, { products, cartCountProducts });
     }
 

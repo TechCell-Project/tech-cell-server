@@ -6,7 +6,9 @@ import { convertToObjectId } from '~libs/common/utils';
 
 export class AddCartRequestDTO {
     constructor(cartData: AddCartRequestDTO) {
-        this.productId = convertToObjectId(cartData?.productId);
+        this.productId = cartData?.productId
+            ? convertToObjectId(cartData.productId)
+            : new Types.ObjectId();
         this.sku = cartData?.sku;
         this.quantity = cartData?.quantity ? Number(cartData?.quantity) : 0;
     }

@@ -161,7 +161,7 @@ export function convertToObjectId(
     id: string | number | Types.ObjectId | ObjectIdLike | Uint8Array,
 ) {
     try {
-        return new Types.ObjectId(id.toString());
+        return new Types.ObjectId(id);
     } catch (error) {
         logger.error(error);
         throw new Error('Invalid ObjectId');
