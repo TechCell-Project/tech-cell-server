@@ -5,7 +5,6 @@ import { RpcException } from '@nestjs/microservices';
 import { CreateProductDTO } from '~libs/resource';
 import { UpdateProductRequestDTO } from './dtos/update-product-request.dto';
 import { ProductIdParamsDTO, ProductSkuQueryDTO } from './dtos/params.dto';
-import { Types } from 'mongoose';
 import { ProductStatus } from '~libs/resource/products/enums';
 import { convertToObjectId } from '~libs/common';
 

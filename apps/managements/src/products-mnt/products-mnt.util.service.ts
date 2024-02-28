@@ -12,6 +12,7 @@ import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import {
     allowToAction,
     compareTwoObjectAndGetDifferent,
+    convertToObjectId,
     findDuplicates,
     replaceWhitespaceTo,
 } from '~libs/common/utils';
@@ -180,7 +181,7 @@ export class ProductsMntUtilService {
         const { category, variations, generalAttributes } = product;
         const foundCategories = await this.categoriesService.getCategory({
             filterQueries: {
-                _id: category,
+                _id: convertToObjectId(category._id),
             },
         });
 
