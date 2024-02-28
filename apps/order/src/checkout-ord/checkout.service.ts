@@ -420,7 +420,10 @@ export class CheckoutService {
         ip: string;
         paymentReturnUrl?: string;
     }) {
-        const order = await this.getUserOrderById({ id: data.orderId, user: { _id: data.userId } });
+        const order = await this.getUserOrderById({
+            id: data.orderId,
+            user: { _id: convertToObjectId(data.userId) },
+        });
         const paymentUrl = await this.getPaymentUrl(
             order.paymentOrder.method,
             order,

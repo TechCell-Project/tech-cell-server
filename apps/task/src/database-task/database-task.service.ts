@@ -3,7 +3,7 @@ import { InjectConnection } from '@nestjs/mongoose';
 import { Cron } from '@nestjs/schedule';
 import { Connection } from 'mongoose';
 import { DB_TASK_CONSTANT } from './database-task.constant';
-import { isTrueSet } from '~libs/common';
+import { convertToObjectId, isTrueSet } from '~libs/common';
 
 @Injectable()
 export class DatabaseTaskService {
@@ -61,8 +61,8 @@ export class DatabaseTaskService {
             for (const doc of data) {
                 // Delete any existing documents with the same ID in the backup collections
                 await Promise.all([
-                    backupCollection.deleteMany({ _id: doc._id }),
-                    backupCollection2.deleteMany({ _id: doc._id }),
+                    backupCollection.deleteMany({ _id: convertToObjectId(doc._id) }),
+                    backupCollection2.deleteMany({ _id: convertToObjectId(doc._id) }),
                 ]);
 
                 // Insert the document into the backup collections
