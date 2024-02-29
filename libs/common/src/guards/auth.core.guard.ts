@@ -139,7 +139,7 @@ export class AuthCoreGuard implements CanActivate {
         }
     }
 
-    private resolveSkipAuth(context: ExecutionContext): boolean {
+    protected resolveSkipAuth(context: ExecutionContext): boolean {
         try {
             if (
                 this.reflector.getAllAndOverride<boolean>(SKIP_AUTH_GUARD, [
@@ -201,7 +201,7 @@ export class AuthCoreGuard implements CanActivate {
      * @param context The execution context of the current call
      * @returns The authorization header and the type of request
      */
-    private getAccessToken(
+    protected getAccessToken(
         context: ExecutionContext,
         i18n: I18nContext<I18nTranslations>,
     ): {
@@ -249,7 +249,7 @@ export class AuthCoreGuard implements CanActivate {
      * @param error The error to throw
      * @param requestType Type of request
      */
-    private throwException(error: any, requestType: RequestType): void {
+    protected throwException(error: any, requestType: RequestType): void {
         switch (requestType) {
             case RequestType.Ws:
                 throw new WsException(error);

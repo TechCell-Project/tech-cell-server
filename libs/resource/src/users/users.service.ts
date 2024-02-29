@@ -4,9 +4,11 @@ import { UsersRepository } from './users.repository';
 import { CreateUserDTO } from './dtos';
 import { User } from './schemas/user.schema';
 import { RpcException } from '@nestjs/microservices';
-import { FilterQuery, ProjectionType, QueryOptions } from 'mongoose';
+import { FilterQuery, ProjectionType, QueryOptions, Types } from 'mongoose';
 import { I18nContext } from 'nestjs-i18n';
 import { I18nTranslations } from '~libs/common/i18n/generated/i18n.generated';
+import { convertToObjectId } from '~libs/common';
+import { UserRole } from './enums';
 
 @Injectable()
 export class UsersService {
@@ -117,5 +119,27 @@ export class UsersService {
 
     public async isImageInUse(publicId: string): Promise<boolean> {
         return (await this.usersRepository.count({ 'avatar.publicId': publicId })) > 0;
+    }
+
+    public async isAdminOrHigher(userId: string | Types.ObjectId) {
+        return (
+            (await this.usersRepository.count({
+                _id: convertToObjectId(userId),
+                $or: [{ role: UserRole.Admin }, { role: UserRole.SuperAdmin }],
+            })) > 0
+        );
+    }
+
+    public async isModeratorOrHigher(userId: string | Types.ObjectId) {
+        return (
+            (await this.usersRepository.count({
+                _id: convertToObjectId(userId),
+                $or: [
+                    { role: UserRole.Mod },
+                    { role: UserRole.Admin },
+                    { role: UserRole.SuperAdmin },
+                ],
+            })) > 0
+        );
     }
 }

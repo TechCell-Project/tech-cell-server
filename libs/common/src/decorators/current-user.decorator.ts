@@ -5,15 +5,15 @@ export const getCurrentUserByContext = (context: ExecutionContext): TCurrentUser
     switch (context.getType()?.toLowerCase()) {
         case RequestType.Http: {
             const request = context.switchToHttp().getRequest();
-            return request.user;
+            return request?.user ?? null;
         }
         case RequestType.Rpc: {
             const ctx = context.switchToRpc().getData();
-            return ctx.user;
+            return ctx?.user ?? null;
         }
         case RequestType.Ws: {
             const client = context.switchToWs().getClient();
-            return client.handshake.auth.user;
+            return client?.handshake?.auth?.user ?? null;
         }
         default:
             return null;

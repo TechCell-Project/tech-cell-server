@@ -82,6 +82,7 @@ describe(ProductsController, () => {
                 message,
                 mockRmqRecord({
                     productId: params.productId,
+                    user: null,
                     ...query,
                 }),
             );

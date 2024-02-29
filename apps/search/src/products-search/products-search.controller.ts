@@ -5,6 +5,7 @@ import { ProductsSearchMessagePattern } from './products-search.pattern';
 import { ProductsSearchService } from './products-search.service';
 import { GetProductByIdQueryDTO, GetProductsDTO } from './dtos';
 import { ProductIdParamsDTO } from '~apps/managements/products-mnt/dtos/params.dto';
+import { TCurrentUser } from '~libs/common/types';
 
 @Controller('products-search')
 export class ProductsSearchController {
@@ -22,9 +23,14 @@ export class ProductsSearchController {
     @MessagePattern(ProductsSearchMessagePattern.getProductById)
     async getProductById(
         @Ctx() context: RmqContext,
-        @Payload() { productId, ...query }: ProductIdParamsDTO & GetProductByIdQueryDTO,
+        @Payload()
+        {
+            productId,
+            user,
+            ...query
+        }: ProductIdParamsDTO & GetProductByIdQueryDTO & { user?: TCurrentUser },
     ) {
         this.rabbitMqService.acknowledgeMessage(context);
-        return await this.productsSearchService.getProductById({ id: productId, ...query });
+        return await this.productsSearchService.getProductById({ id: productId, user, ...query });
     }
 }

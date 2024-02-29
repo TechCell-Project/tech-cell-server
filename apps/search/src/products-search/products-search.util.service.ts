@@ -1,4 +1,10 @@
-import { AttributesService, CategoriesService, Product, ProductsService } from '~libs/resource';
+import {
+    AttributesService,
+    CategoriesService,
+    Product,
+    ProductsService,
+    UsersService,
+} from '~libs/resource';
 import { Injectable } from '@nestjs/common';
 import {
     PRODUCTS_CACHE_PREFIX,
@@ -15,6 +21,7 @@ export class ProductsSearchUtilService {
         protected redisService: RedisService,
         protected readonly attributesService: AttributesService,
         protected readonly categoriesService: CategoriesService,
+        protected readonly usersService: UsersService,
     ) {}
 
     protected buildCacheKeyProducts({

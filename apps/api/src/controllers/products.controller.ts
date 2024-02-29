@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~libs/common/constants';
-import { ModGuard, SuperAdminGuard } from '~libs/common';
+import { ModGuard, OptionalAuthGuard, SuperAdminGuard } from '~libs/common';
 import {
     ApiBody,
     ApiNotFoundResponse,
@@ -43,6 +43,8 @@ import {
 import { ProductDTO } from '~libs/resource/products/dtos/product.dto';
 import { sendMessagePipeException } from '~libs/common/RabbitMQ/rmq.util';
 import { THeaders } from '~libs/common/types/common.type';
+import { CurrentUser } from '~libs/common/decorators';
+import { TCurrentUser } from '~libs/common/types';
 
 @ApiBadRequestResponse({
     description: 'Invalid request, please check your request data!',
@@ -104,6 +106,7 @@ export class ProductsController {
         });
     }
 
+    @UseGuards(OptionalAuthGuard)
     @ApiOperation({
         summary: 'Get product by id',
     })
@@ -116,11 +119,12 @@ export class ProductsController {
         @Headers() headers: THeaders,
         @Param() { productId }: ProductIdParamsDTO,
         @Query() { ...query }: GetProductByIdQueryDTO,
+        @CurrentUser() user: TCurrentUser | null = null,
     ) {
         return sendMessagePipeException({
             client: this.searchService,
             pattern: ProductsSearchMessagePattern.getProductById,
-            data: { productId, ...query },
+            data: { productId, ...query, user },
             headers,
         });
     }

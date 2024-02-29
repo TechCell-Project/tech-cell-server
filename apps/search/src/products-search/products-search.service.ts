@@ -6,6 +6,10 @@ import { Product } from '~libs/resource';
 import { ListDataResponseDTO } from '~libs/common/dtos';
 import { convertToObjectId, isTrueSet } from '~libs/common/utils/shared.util';
 import { generateRegexQuery } from 'regex-vietnamese';
+import { TCurrentUser } from '~libs/common/types';
+import { SelectType } from '../enums';
+import { IBaseQuery } from '~libs/resource/interfaces';
+import { SelectTypeDTO } from '../dtos/select-type.dto';
 
 @Injectable()
 export class ProductsSearchService extends ProductsSearchUtilService {
@@ -62,12 +66,23 @@ export class ProductsSearchService extends ProductsSearchUtilService {
 
     async getProductById({
         id,
+        user,
         ...query
-    }: { id: string | Types.ObjectId } & GetProductByIdQueryDTO) {
-        const resultFromDb = await this.productsService.getProduct({
+    }: { id: string | Types.ObjectId } & GetProductByIdQueryDTO & { user?: TCurrentUser }) {
+        const optionObject: IBaseQuery<Product> & SelectTypeDTO = {
             filterQueries: { _id: convertToObjectId(id) },
             queryOptions: { lean: false },
-        });
+        };
+
+        if (user && (await this.usersService.isModeratorOrHigher(user._id))) {
+            optionObject.selectType = SelectType.both;
+        }
+
+        if (query.select_type) {
+            optionObject.selectType = query.select_type;
+        }
+
+        const resultFromDb = await this.productsService.getProduct(optionObject);
         let prodReturn = resultFromDb;
 
         if (isTrueSet(query.detail)) {
