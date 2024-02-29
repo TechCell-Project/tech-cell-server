@@ -118,6 +118,7 @@
         "constants",
         "styles",
         "stats",
-        "utils"
+        "utils",
+        "carts"
     ]
 }

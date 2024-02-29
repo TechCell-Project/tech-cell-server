@@ -21,7 +21,7 @@ export class CartsOrdService {
     ) {}
 
     async getCarts({ user }: { user: TCurrentUser }): Promise<CartDTO> {
-        const cart = await this.cartsService.getCartByUserId({
+        let cart = await this.cartsService.getCartByUserId({
             userId: convertToObjectId(user._id),
         });
         const productIdList = Array.from(
@@ -42,7 +42,7 @@ export class CartsOrdService {
                 cart.products = cart.products.filter((p) => !p.productId.equals(productId));
             }
         }
-        await this.cartsService.updateCart(cart);
+        cart = await this.cartsService.updateCart(cart);
 
         return cart;
     }
