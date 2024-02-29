@@ -123,16 +123,22 @@ export class AuthCoreGuard implements CanActivate {
     protected addUserToRequest(user: TCurrentUser, context: ExecutionContext) {
         switch (context.getType()?.toLowerCase()) {
             case RequestType.Http:
-                const request: Request = context.switchToHttp().getRequest();
-                request.user = user;
+                {
+                    const request: Request = context.switchToHttp().getRequest();
+                    request.user = user;
+                }
                 break;
             case RequestType.Rpc:
-                const ctx = context.switchToRpc().getData();
-                ctx.user = user;
+                {
+                    const ctx = context.switchToRpc().getData();
+                    ctx.user = user;
+                }
                 break;
             case RequestType.Ws:
-                const client: Socket = context.switchToWs().getClient();
-                client.handshake.auth.user = user;
+                {
+                    const client: Socket = context.switchToWs().getClient();
+                    client.handshake.auth.user = user;
+                }
                 break;
             default:
                 break;
