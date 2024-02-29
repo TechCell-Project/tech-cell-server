@@ -59,9 +59,12 @@ export class OptionalAuthGuard extends AuthCoreGuard {
                 throw new Error();
             }
             this.addUserToRequest(dataVerified, context);
+            this.logger.debug(
+                `Auth in OptionalAuthCoreGuard for user: ${dataVerified._id} - ${dataVerified.email}`,
+            );
             return isJwtValid;
         } catch (error) {
-            this.logger.log('Not auth in OptionalAuthCoreGuard');
+            this.logger.debug('Not auth in OptionalAuthCoreGuard');
             return true;
         }
     }
