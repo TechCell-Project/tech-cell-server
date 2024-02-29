@@ -21,30 +21,60 @@ export class CartsOrdService {
     ) {}
 
     async getCarts({ user }: { user: TCurrentUser }): Promise<CartDTO> {
-        let cart = await this.cartsService.getCartByUserId({
+        this.logger.log(`Get carts of user ${user._id}`);
+        const cart = await this.cartsService.getCartByUserId({
             userId: convertToObjectId(user._id),
         });
-        const productIdList = Array.from(
-            new Set(cart.products.map((product) => product.productId)),
+        const productSelectList = Array.from(
+            new Set(
+                cart.products.map((product) => {
+                    return {
+                        id: product.productId,
+                        sku: product.sku,
+                    };
+                }),
+            ),
         );
-        for (const productId of productIdList) {
+
+        let cartUpdate = cart;
+        for (let i = 0; i < productSelectList.length; i++) {
             try {
                 const product = await this.productsService.getProduct({
-                    filterQueries: { _id: convertToObjectId(productId) },
+                    filterQueries: { _id: convertToObjectId(productSelectList[i].id) },
                     selectType: SelectType.both,
                 });
-                if (!product || product.status === ProductStatus.Deleted) {
-                    cart.products = cart.products.filter((p) => !p.productId.equals(productId));
-                    this.logger.debug(`Product ${productId} not found or deleted`);
+                const selectSku = product.variations.find(
+                    (variation) =>
+                        variation.sku === productSelectList[i].sku &&
+                        variation.status !== ProductStatus.Deleted,
+                );
+                if (!product || product.status === ProductStatus.Deleted || !selectSku) {
+                    this.logger.debug(
+                        `Removing product ${productSelectList[i].id} from cart of user ${user._id}`,
+                    );
+                    cartUpdate.products = cartUpdate.products.filter(
+                        (p) =>
+                            !p.productId.equals(productSelectList[i].id) &&
+                            p.sku !== productSelectList[i].sku,
+                    );
                 }
             } catch (error) {
-                this.logger.error(error);
-                cart.products = cart.products.filter((p) => !p.productId.equals(productId));
+                this.logger.debug(
+                    `Removing product ${productSelectList[i].id} from cart of user ${user._id}`,
+                );
+                cartUpdate.products = cartUpdate.products.filter(
+                    (p) =>
+                        !p.productId.equals(productSelectList[i].id) &&
+                        p.sku !== productSelectList[i].sku,
+                );
             }
         }
-        cart = await this.cartsService.updateCart(cart);
 
-        return cart;
+        if (cart.products.length !== cartUpdate.products.length) {
+            cartUpdate = await this.cartsService.updateCart(cartUpdate);
+        }
+
+        return cartUpdate;
     }
 
     public async addProductToCart({
