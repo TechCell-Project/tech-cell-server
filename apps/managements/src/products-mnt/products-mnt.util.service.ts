@@ -387,6 +387,9 @@ export class ProductsMntUtilService {
                     'variations.#.images.#.publicId',
                     'variations.#.images.#.isThumbnail',
                     'variations.#.stock',
+                    'variations.#.price',
+                    'variations.#.price.base',
+                    'variations.#.price.special',
                 ],
             },
             {
