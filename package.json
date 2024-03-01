@@ -96,7 +96,7 @@
         "reflect-metadata": "^0.1.13",
         "regex-vietnamese": "^2.0.1",
         "rxjs": "^7.8.1",
-        "sanitize-html": "^2.11.0",
+        "sanitize-html": "^2.12.1",
         "slugify": "^1.6.6",
         "socket.io": "^4.7.2",
         "socket.io-adapter": "^2.5.2",
