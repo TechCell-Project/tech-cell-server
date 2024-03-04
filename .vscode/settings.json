@@ -119,6 +119,7 @@
         "styles",
         "stats",
         "utils",
-        "carts"
+        "carts",
+        "logger"
     ]
 }

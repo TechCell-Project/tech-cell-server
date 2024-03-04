@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { StatisticsService } from '~libs/resource/statistics/';
 import { GetStatsRequestDTO, GetStatsResponseDTO } from './dtos';
 import { StatsSplitBy } from './stats-mnt.enum';
@@ -19,6 +19,7 @@ import { OrderStatusEnum } from '~libs/resource/orders';
 
 @Injectable()
 export class StatsMntService {
+    private readonly logger = new Logger(StatsMntService.name);
     constructor(
         private readonly redisService: RedisService,
         private readonly statisticsService: StatisticsService,
