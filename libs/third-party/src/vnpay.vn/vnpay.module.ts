@@ -1,10 +1,10 @@
 import { DynamicModule, Module } from '@nestjs/common';
-import { ConfigVnpaySchema } from 'vnpay';
+import { ConfigVnpay } from 'vnpay';
 import { VnpayService } from './vnpay.service';
 
 @Module({})
 export class VnpayModule {
-    static forRoot(config: ConfigVnpaySchema): DynamicModule {
+    static forRoot(config: ConfigVnpay): DynamicModule {
         return {
             module: VnpayModule,
             providers: [
