@@ -1,8 +1,11 @@
 import { CreateCategoryRequestDTO, UpdateCategoryRequestDTO } from './dtos';
 import { CategoriesMntUtilService } from './categories-mnt.util.service';
 import { convertToObjectId } from '~libs/common/utils';
+import { Logger } from '@nestjs/common';
 
 export class CategoriesMntService extends CategoriesMntUtilService {
+    private readonly logger = new Logger(CategoriesMntService.name);
+
     async createCategory({
         label,
         name,
@@ -17,7 +20,7 @@ export class CategoriesMntService extends CategoriesMntUtilService {
             listAttribute = this.sortAttributes(listAttribute);
         }
 
-        return await this.categoriesService.createCategory({
+        return this.categoriesService.createCategory({
             label,
             name,
             description,
@@ -39,7 +42,7 @@ export class CategoriesMntService extends CategoriesMntUtilService {
             newCategory.requireAttributes = this.sortAttributes(newCategory.requireAttributes);
         }
 
-        return await this.categoriesService.updateCategory({
+        return this.categoriesService.updateCategory({
             filterQueries: { _id: convertToObjectId(categoryId) },
             updateData: { ...newCategory },
         });

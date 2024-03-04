@@ -49,7 +49,11 @@ export class CategoriesService {
         filterQueries,
         updateData,
     }: IBaseQuery<Category> & { updateData: UpdateCategoryDTO }) {
-        return await this.categoriesRepository.findOneAndUpdate(filterQueries, updateData);
+        if (updateData['_id']!) {
+            delete updateData['_id'];
+        }
+
+        return this.categoriesRepository.findOneAndUpdate(filterQueries, updateData);
     }
 
     async isExistCategory({ filterQueries }: IBaseQuery<Category>) {
