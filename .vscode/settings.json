@@ -120,6 +120,7 @@
         "stats",
         "utils",
         "carts",
-        "logger"
+        "logger",
+        "third-party"
     ]
 }

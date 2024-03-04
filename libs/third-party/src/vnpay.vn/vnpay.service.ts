@@ -1,21 +1,19 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { CreateVnpayUrlDTO } from './dtos';
-import { VNPay, ConfigVnpaySchema, ReturnQueryFromVNPaySchema, QueryDrSchema } from 'vnpay';
+import { VNPay, ConfigVnpay, ReturnQueryFromVNPay, QueryDr } from 'vnpay';
 
 @Injectable()
 export class VnpayService {
     private readonly logger = new Logger(VnpayService.name);
     private readonly vnpayInstance: VNPay;
 
-    constructor(@Inject('VNPAY_INIT_OPTIONS') private readonly config: ConfigVnpaySchema) {
+    constructor(@Inject('VNPAY_INIT_OPTIONS') private readonly config: ConfigVnpay) {
         this.vnpayInstance = new VNPay(this.config);
     }
 
     async createPaymentUrl(data?: CreateVnpayUrlDTO) {
         try {
-            const url = await this.vnpayInstance.buildPaymentUrl({
-                ...data,
-            });
+            const url = await this.vnpayInstance.buildPaymentUrl(data);
             return url;
         } catch (error) {
             this.logger.error(error);
@@ -23,7 +21,7 @@ export class VnpayService {
         }
     }
 
-    async verifyReturnUrl(query: ReturnQueryFromVNPaySchema) {
+    async verifyReturnUrl(query: ReturnQueryFromVNPay) {
         try {
             const isValid = await this.vnpayInstance.verifyReturnUrl(query);
             return isValid;
@@ -33,11 +31,17 @@ export class VnpayService {
         }
     }
 
-    async verifyReturnUrlFromIPN(query: ReturnQueryFromVNPaySchema) {
-        return this.verifyReturnUrl(query);
+    async verifyIpnCall(query: ReturnQueryFromVNPay) {
+        try {
+            const isValid = await this.vnpayInstance.verifyIpnCall(query);
+            return isValid;
+        } catch (error) {
+            this.logger.error(error);
+            return null;
+        }
     }
 
-    async queryDr(data: QueryDrSchema) {
+    async queryDr(data: QueryDr) {
         try {
             const result = await this.vnpayInstance.queryDr(data);
             return result;

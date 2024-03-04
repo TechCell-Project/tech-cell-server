@@ -1,6 +1,6 @@
 import { TCurrentUser } from '~libs/common/types';
 import { UsersService } from '~libs/resource/users';
-import { GhnService } from '~libs/third-party/giaohangnhanh';
+import { GhnService, ItemShipping } from '~libs/third-party/giaohangnhanh';
 import {
     BadRequestException,
     Inject,
@@ -16,29 +16,42 @@ import {
     ReviewOrderRequestDTO,
     ReviewedOrderResponseDTO,
     VnpayIpnUrlDTO,
+    CreateOrderRequestDTO,
+    ResponseForVnpayDTO,
 } from './dtos';
 import { Product, ProductsService } from '~libs/resource';
 import { TProductDimensions } from './types';
-import { ItemShipping } from '~libs/third-party/giaohangnhanh/dtos';
-import { CreateOrderDTO } from '~libs/resource/orders/dtos/create-order.dto';
-import { OrderStatusEnum, PaymentMethodEnum, PaymentStatusEnum } from '~libs/resource/orders/enums';
-import { AddressSchema } from '~libs/resource/users/schemas/address.schema';
-import { Order, OrdersService } from '~libs/resource/orders';
-import { ProductCartDTO } from '~libs/resource/carts/dtos/product-cart.dto';
-import { CartsService } from '~libs/resource/carts/carts.service';
+import { AddressSchema, cleanUserBeforeResponse } from '~libs/resource/users';
+import {
+    Order,
+    OrdersService,
+    CreateOrderDTO,
+    OrderStatusEnum,
+    PaymentMethodEnum,
+    PaymentStatusEnum,
+} from '~libs/resource/orders';
+import { CartsService, ProductCartDTO } from '~libs/resource/carts';
 import { RedlockService } from '~libs/common/Redis/services/redlock.service';
-import { CreateOrderRequestDTO } from './dtos/create-order-request.dto';
-import { VnpayService } from '~libs/third-party/vnpay.vn';
-import { ProductCode } from '~libs/third-party/vnpay.vn/enums';
-import { ResponseForVnpayDTO } from './dtos/response-for-vnpay.dto';
-import { COMMUNICATIONS_SERVICE } from '~libs/common/constants/services.constant';
+import { VnpayService, ProductCode } from '~libs/third-party/vnpay.vn';
 import { NotifyEventPattern } from '~apps/communications/notifications';
-import { cleanUserBeforeResponse } from '~libs/resource/users/utils';
 import { Lock } from 'redlock';
 import { I18n, I18nService } from 'nestjs-i18n';
 import { I18nTranslations } from '~libs/common/i18n/generated/i18n.generated';
-import { convertPageQueryToMongoose, convertToObjectId } from '~libs/common';
+import {
+    convertPageQueryToMongoose,
+    convertToObjectId,
+    COMMUNICATIONS_SERVICE,
+} from '~libs/common';
 import { ListDataResponseDTO, ObjectIdParamDTO, PaginationQuery } from '~libs/common/dtos';
+import {
+    IpnSuccess,
+    IpnInvalidAmount,
+    IpnFailChecksum,
+    IpnOrderNotFound,
+    IpnUnknownError,
+    InpOrderAlreadyConfirmed,
+    IpnResponse,
+} from 'vnpay';
 
 @Injectable()
 export class CheckoutService {
@@ -330,31 +343,24 @@ export class CheckoutService {
     /**
      * @description Vnpay ipn url, Vnpay will call this url to verify payment
      */
-    public async vnpayIpnUrl({ ...query }: VnpayIpnUrlDTO): Promise<ResponseForVnpayDTO> {
+    public async vnpayIpnUrl({
+        ...query
+    }: VnpayIpnUrlDTO): Promise<IpnResponse | ResponseForVnpayDTO> {
         try {
             const isVerified = await this.vnpayService.verifyReturnUrl({ ...query });
             if (!isVerified.isSuccess) {
-                return {
-                    RspCode: '97',
-                    Message: 'Invalid signature',
-                };
+                return IpnFailChecksum;
             }
 
             const order = await this.orderService.getOrderByIdOrNull(
                 convertToObjectId(query.vnp_TxnRef),
             );
             if (!order) {
-                return {
-                    RspCode: '01',
-                    Message: 'Order not found',
-                };
+                return IpnOrderNotFound;
             }
 
             if (order.checkoutOrder.totalPrice !== Number(query.vnp_Amount) / 100) {
-                return {
-                    RspCode: '04',
-                    Message: 'Invalid amount',
-                };
+                return IpnInvalidAmount;
             }
 
             // If payment, or order is completed, or canceled, return error
@@ -363,10 +369,7 @@ export class CheckoutService {
                 order.paymentOrder.status === PaymentStatusEnum.COMPLETED ||
                 order.orderStatus === OrderStatusEnum.CANCELLED
             ) {
-                return {
-                    RspCode: '02',
-                    Message: 'Order already confirmed',
-                };
+                return InpOrderAlreadyConfirmed;
             }
 
             order.paymentOrder.method = PaymentMethodEnum.VNPAY;
@@ -385,16 +388,10 @@ export class CheckoutService {
             order.paymentOrder.orderData = vnpayQueryData;
             this.logger.debug({ order });
             await this.orderService.updateOrderById(convertToObjectId(order._id), order);
-            return {
-                RspCode: '00',
-                Message: 'Confirm success',
-            };
+            return IpnSuccess;
         } catch (error) {
             this.logger.error(error);
-            return {
-                RspCode: '99',
-                Message: 'Unknown error',
-            };
+            return IpnUnknownError;
         }
     }
 
