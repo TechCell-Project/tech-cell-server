@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { RedisService } from '~libs/common/Redis';
-import { Order, OrdersService, OrderStatusEnum } from '~libs/resource/orders';
-import { ProductsService } from '~libs/resource/products';
+import { Order, OrdersService, OrderStatusEnum, PaymentStatusEnum } from '~libs/resource/orders';
 import {
     STAT_REVENUE_DAY,
     STAT_REVENUE_MONTH,
@@ -18,7 +17,6 @@ export class StatisticsService {
     constructor(
         private readonly redisService: RedisService,
         private readonly ordersService: OrdersService,
-        private readonly productsService: ProductsService,
     ) {}
 
     private calculateRevenue(orders: Order[]): number {
@@ -40,6 +38,7 @@ export class StatisticsService {
 
         const orders = await this.ordersService.getOrdersOrNull({
             orderStatus: OrderStatusEnum.COMPLETED,
+            'paymentOrder.status': PaymentStatusEnum.COMPLETED,
             $and: [
                 {
                     createdAt: {
@@ -53,7 +52,7 @@ export class StatisticsService {
                 },
             ],
         });
-        const ttl = isCurrent ? convertTimeString('1h') : convertTimeString('3d');
+        const ttl = isCurrent ? convertTimeString('5m') : convertTimeString('30m');
 
         const revenue = this.calculateRevenue(orders);
         const result: TCalculate = { revenue, orders: orders?.length ?? 0 };
@@ -71,20 +70,21 @@ export class StatisticsService {
 
         const orders = await this.ordersService.getOrdersOrNull({
             orderStatus: OrderStatusEnum.COMPLETED,
+            'paymentOrder.status': PaymentStatusEnum.COMPLETED,
             $and: [
                 {
                     createdAt: {
-                        $gte: new Date(year, month - 1, 1).toISOString(),
+                        $gte: new Date(year, month, 1).toISOString(),
                     },
                 },
                 {
                     createdAt: {
-                        $lte: new Date(year, month - 1, 31).toISOString(),
+                        $lte: new Date(year, month, 31).toISOString(),
                     },
                 },
             ],
         });
-        const ttl = isCurrent ? convertTimeString('5m') : convertTimeString('3h');
+        const ttl = isCurrent ? convertTimeString('5m') : convertTimeString('30m');
 
         const revenue = this.calculateRevenue(orders);
         const result: TCalculate = { revenue, orders: orders?.length ?? 0 };
@@ -102,20 +102,21 @@ export class StatisticsService {
 
         const orders = await this.ordersService.getOrdersOrNull({
             orderStatus: OrderStatusEnum.COMPLETED,
+            'paymentOrder.status': PaymentStatusEnum.COMPLETED,
             $and: [
                 {
                     createdAt: {
-                        $gte: new Date(year, month - 1, day).toISOString(),
+                        $gte: new Date(year, month, day).toISOString(),
                     },
                 },
                 {
                     createdAt: {
-                        $lt: new Date(year, month - 1, day + 1).toISOString(),
+                        $lt: new Date(year, month, day + 1).toISOString(),
                     },
                 },
             ],
         });
-        const ttl = isCurrent ? convertTimeString('5m') : convertTimeString('3h');
+        const ttl = isCurrent ? convertTimeString('5m') : convertTimeString('30m');
 
         const revenue = this.calculateRevenue(orders);
         const result: TCalculate = { revenue, orders: orders?.length ?? 0 };
@@ -138,20 +139,21 @@ export class StatisticsService {
 
         const orders = await this.ordersService.getOrders({
             orderStatus: OrderStatusEnum.COMPLETED,
+            'paymentOrder.status': PaymentStatusEnum.COMPLETED,
             $and: [
                 {
                     createdAt: {
-                        $gte: new Date(year, month - 1, day, hour).toISOString(),
+                        $gte: new Date(year, month, day, hour).toISOString(),
                     },
                 },
                 {
                     createdAt: {
-                        $lt: new Date(year, month - 1, day, hour + 1).toISOString(),
+                        $lt: new Date(year, month, day, hour + 1).toISOString(),
                     },
                 },
             ],
         });
-        const ttl = isCurrent ? convertTimeString('1m') : convertTimeString('3h');
+        const ttl = isCurrent ? convertTimeString('1m') : convertTimeString('30m');
 
         const revenue = this.calculateRevenue(orders);
         const result: TCalculate = { revenue, orders: orders?.length ?? 0 };
@@ -217,7 +219,7 @@ export class StatisticsService {
         };
         const totalOrder = await this.ordersService.countOrders(filter);
 
-        // const ttl = isCurrent ? convertTimeString('1h') : convertTimeString('3d');
+        // const ttl = isCurrent ? convertTimeString('1h') : convertTimeString('30m');
         // await this.redisService.set(cacheKey, result, ttl);
         return totalOrder;
     }
