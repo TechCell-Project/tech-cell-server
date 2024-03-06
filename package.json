@@ -31,6 +31,7 @@
         "get-logs": "docker cp swag:/config/log/. ./logs && docker cp utility:/usr/src/app/logs .",
         "generate:swagger-yaml": "node ./scripts/swagger-json-to-yaml.js",
         "generate:asyncapi-yaml": "node ./scripts/asyncapi-json-to-yaml.js",
+        "generate:sdk": "npx @openapitools/openapi-generator-cli generate",
         "env": "node ./scripts/convert-base64.js",
         "compose": "node ./scripts/docker-compose-helper.js"
     },

@@ -220,27 +220,27 @@ jobs:
               env:
                   GIT_TOKEN: ${{secrets.GIAANG_SDK_REPO_SECRET}}
 
-            - name: Check exist node-sdk version on GitHub Packages
-              id: check_version
-              run: |
-                  cd ./generated/node
-                  version=$(node -p "require('./package.json').version")
-                  if npm view --registry https://npm.pkg.github.com/ @techcell-project/tech-cell-server-node-sdk@$version version; then
-                    echo "Version $version already exists, skipping publish..."
-                    echo "skip_publish_node_sdk=true" >> $GITHUB_OUTPUT
-                  else
-                    echo "Version $version does not exist, proceeding with publish..."
-                  fi
-              env:
-                  NODE_AUTH_TOKEN: ${{secrets.GIAANG_PACKAGE_TOKEN}}
+            # - name: Check exist node-sdk version on GitHub Packages
+            #   id: check_version
+            #   run: |
+            #       cd ./generated/node
+            #       version=$(node -p "require('./package.json').version")
+            #       if npm view --registry https://npm.pkg.github.com/ @techcell-project/tech-cell-server-node-sdk@$version version; then
+            #         echo "Version $version already exists, skipping publish..."
+            #         echo "skip_publish_node_sdk=true" >> $GITHUB_OUTPUT
+            #       else
+            #         echo "Version $version does not exist, proceeding with publish..."
+            #       fi
+            #   env:
+            #       NODE_AUTH_TOKEN: ${{secrets.GIAANG_PACKAGE_TOKEN}}
 
-            - name: Publish node-sdk package to GitHub Packages
-              if: ${{ steps.check_version.outputs.skip_publish_node_sdk != 'true' }}
-              run: |
-                  cd ./generated/node
-                  npm publish
-              env:
-                  NODE_AUTH_TOKEN: ${{secrets.GIAANG_PACKAGE_TOKEN}}
+            # - name: Publish node-sdk package to GitHub Packages
+            #   if: ${{ steps.check_version.outputs.skip_publish_node_sdk != 'true' }}
+            #   run: |
+            #       cd ./generated/node
+            #       npm publish
+            #   env:
+            #       NODE_AUTH_TOKEN: ${{secrets.GIAANG_PACKAGE_TOKEN}}
 
     build-and-push-to-dockerhub:
         needs: [check-skip-ci, automation-tests]
