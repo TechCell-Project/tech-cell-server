@@ -9,8 +9,10 @@
         "bson",
         "bullmq",
         "CERTPROVIDER",
+        "clipboardy",
         "clitcpka",
         "Cloudinary",
+        "commitlint",
         "confs",
         "dhparams",
         "DNSPLUGIN",
@@ -121,6 +123,7 @@
         "utils",
         "carts",
         "logger",
-        "third-party"
+        "third-party",
+        "typos"
     ]
 }
