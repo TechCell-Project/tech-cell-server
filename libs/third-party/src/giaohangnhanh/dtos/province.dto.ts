@@ -1,10 +1,10 @@
 import { IsArray, IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { StatusEnum } from '../enums';
-import { TGhnProvince } from '../types';
 import { ApiProperty } from '@nestjs/swagger';
+import { GhnProvince } from 'giaohangnhanh';
 
 export class GhnProvinceDTO {
-    constructor(data: TGhnProvince) {
+    constructor(data: GhnProvince) {
         this.province_id = Number(data.ProvinceID);
         this.province_name = data.ProvinceName;
         this.country_id = Number(data.CountryID);

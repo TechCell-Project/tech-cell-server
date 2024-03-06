@@ -1,10 +1,10 @@
 import { IsEnum } from 'class-validator';
 import { SupportTypeEnum, StatusEnum } from '../enums';
-import { TGhnDistrict } from '../types';
 import { ApiProperty } from '@nestjs/swagger';
+import { GhnDistrict } from 'giaohangnhanh';
 
 export class GhnDistrictDTO {
-    constructor(data: TGhnDistrict) {
+    constructor(data: GhnDistrict) {
         this.district_id = Number(data.DistrictID);
         this.district_name = data.DistrictName;
         this.support_type = Number(data.SupportType);

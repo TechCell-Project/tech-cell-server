@@ -52,10 +52,10 @@ export class GetShippingFeeDTO {
     @IsString()
     to_ward_code: string;
 
-    height?: number;
-    weight?: number;
-    width?: number;
-    length?: number;
+    height: number;
+    weight: number;
+    width: number;
+    length: number;
 
     insurance_value?: number;
     items: ItemShipping[];

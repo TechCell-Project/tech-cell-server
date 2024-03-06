@@ -14,7 +14,12 @@ import { COMMUNICATIONS_SERVICE } from '~libs/common/constants/services.constant
 @Module({
     imports: [
         HttpModule,
-        GhnModule,
+        GhnModule.forRoot({
+            host: process.env.GHN_URL,
+            token: process.env.GHN_API_TOKEN,
+            shopId: +process.env.GHN_SHOP_ID,
+            testMode: true,
+        }),
         UsersModule,
         VnpayModule.forRoot({
             api_Host: process.env.VNPAY_PAYMENT_URL,

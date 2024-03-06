@@ -1,10 +1,20 @@
-import { Module } from '@nestjs/common';
+import { DynamicModule, Module } from '@nestjs/common';
 import { GhnService } from './ghn.service';
-import { HttpModule } from '@nestjs/axios';
+import { GhnConfig } from 'giaohangnhanh';
 
-@Module({
-    imports: [HttpModule],
-    providers: [GhnService],
-    exports: [GhnModule, GhnService],
-})
-export class GhnModule {}
+@Module({})
+export class GhnModule {
+    static forRoot(config: GhnConfig): DynamicModule {
+        return {
+            module: GhnModule,
+            providers: [
+                {
+                    provide: 'GHN_INIT_OPTIONS',
+                    useValue: config,
+                },
+                GhnService,
+            ],
+            exports: [GhnService],
+        };
+    }
+}

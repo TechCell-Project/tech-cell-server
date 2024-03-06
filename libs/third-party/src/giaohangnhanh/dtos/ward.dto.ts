@@ -1,10 +1,10 @@
 import { IsEnum } from 'class-validator';
 import { StatusEnum, SupportTypeEnum } from '../enums';
-import { TGhnWard } from '../types';
 import { ApiProperty } from '@nestjs/swagger';
+import { GhnWard } from 'giaohangnhanh';
 
 export class GhnWardDTO {
-    constructor(data: TGhnWard) {
+    constructor(data: GhnWard) {
         this.district_id = Number(data.DistrictID);
         this.ward_code = data.WardCode;
         this.ward_name = data.WardName;
