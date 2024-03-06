@@ -41,9 +41,9 @@ export class GhnService {
         const integerItems = items.map((item) => ({
             ...item,
             weight: Math.floor(item.weight),
-            height: Math.floor(item.height),
-            length: Math.floor(item.length),
-            width: Math.floor(item.width),
+            height: Math.floor(item.height / 10),
+            length: Math.floor(item.length / 10),
+            width: Math.floor(item.width / 10),
             quantity: Math.floor(item.quantity),
         }));
         const [weight, height, length, width] = integerItems.reduce(
