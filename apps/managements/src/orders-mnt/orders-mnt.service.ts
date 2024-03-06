@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Order, OrdersService } from '~libs/resource/orders';
+import { Order, OrderStatusEnum, OrdersService, PaymentMethodEnum } from '~libs/resource/orders';
 import { GetOrdersRequestDTO } from './dtos/get-orders-request.dto';
 import { convertPageQueryToMongoose, convertToObjectId } from '~libs/common/utils';
 import { FilterQuery, Types } from 'mongoose';
@@ -121,6 +121,14 @@ export class OrdersMntService {
 
     async updateOrderStatus(orderId: Types.ObjectId, orderStatus: string) {
         const order = await this.ordersService.getOrderById(orderId);
+
+        if (
+            order?.paymentOrder.method === PaymentMethodEnum.COD &&
+            orderStatus === OrderStatusEnum.COMPLETED
+        ) {
+            order.paymentOrder.status = OrderStatusEnum.COMPLETED;
+        }
+
         order.orderStatus = orderStatus;
         const orderUpdated = await this.ordersService.updateOrderById(orderId, order);
         this.communicationsService.emit(NotifyEventPattern.orderStatusChanged, { order });
