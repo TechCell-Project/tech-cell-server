@@ -172,7 +172,7 @@ export class CheckoutService {
             }
 
             productUserSelected.productId = convertToObjectId(productUserSelected.productId);
-            const price = productWithSku.price.base;
+            const price = productWithSku.price?.special || productWithSku.price.base; // If special is 0 or not available, use base price
             return total + price * productUserSelected.quantity;
         }, 0);
 
@@ -180,14 +180,13 @@ export class CheckoutService {
             address: addressSelected,
             items: listItemShipping,
         });
-        const giaohangnhanh = { total, service_fee };
 
         return new ReviewedOrderResponseDTO({
             paymentMethod: dataReview.paymentMethod,
             addressSelected: dataReview.addressSelected,
             productSelected,
             totalProductPrice,
-            shipping: { giaohangnhanh },
+            shipping: { giaohangnhanh: { total, service_fee } },
         });
     }
 
