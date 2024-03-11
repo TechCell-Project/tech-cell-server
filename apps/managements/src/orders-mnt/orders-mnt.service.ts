@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Order, OrderStatusEnum, OrdersService, PaymentMethodEnum } from '~libs/resource/orders';
 import { GetOrdersRequestDTO } from './dtos/get-orders-request.dto';
 import { convertPageQueryToMongoose, convertToObjectId } from '~libs/common/utils';
-import { FilterQuery, Types } from 'mongoose';
+import { FilterQuery, QueryOptions, Types } from 'mongoose';
 import { ListDataResponseDTO } from '~libs/common/dtos';
 import { AllEnum } from '~libs/common/base/enums';
 import { Product, ProductsService } from '~libs/resource';
@@ -10,6 +10,7 @@ import { COMMUNICATIONS_SERVICE } from '~libs/common/constants/services.constant
 import { ClientRMQ } from '@nestjs/microservices';
 import { NotifyEventPattern } from '~apps/communications/notifications';
 import { SelectType } from '~apps/search/enums/select-type.enum';
+import { OrderByEnum, OrderTypeEnum } from './enums';
 
 @Injectable()
 export class OrdersMntService {
@@ -66,6 +67,8 @@ export class OrdersMntService {
             paymentMethod,
             paymentStatus,
             trackingCode,
+            orderBy = OrderByEnum.createdAt,
+            orderType = OrderTypeEnum.newest,
         } = data;
         const filter: FilterQuery<Order> = {};
 
@@ -101,13 +104,25 @@ export class OrdersMntService {
             Object.assign(filter, { 'paymentOrder.status': paymentStatus });
         }
 
-        const queryOptions = {
+        const queryOptions: QueryOptions = {
             ...convertPageQueryToMongoose({ page, pageSize }),
         };
 
+        if (orderType) {
+            switch (orderType) {
+                case OrderTypeEnum.oldest:
+                    Object.assign(queryOptions, { sort: { [orderBy]: 'ascending' } });
+                    break;
+                case OrderTypeEnum.newest:
+                default:
+                    Object.assign(queryOptions, { sort: { [orderBy]: 'descending' } });
+                    break;
+            }
+        }
+
         const [orders, totalRecord] = await Promise.all([
-            this.ordersService.getOrders({ ...filter }, queryOptions),
-            this.ordersService.countOrders({ ...filter }),
+            this.ordersService.getOrders(filter, queryOptions),
+            this.ordersService.countOrders(filter),
         ]);
         const totalPage = Math.ceil(totalRecord / pageSize);
         return new ListDataResponseDTO<Order>({

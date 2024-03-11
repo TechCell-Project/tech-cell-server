@@ -6,6 +6,7 @@ import { Type } from 'class-transformer';
 import { IsOptional } from 'class-validator';
 import { Types } from 'mongoose';
 import { IsEnumI18n, IsMongoIdI18n, IsStringI18n } from '~libs/common/i18n';
+import { OrderByEnum, OrderTypeEnum } from '../enums';
 
 export class GetOrdersRequestDTO extends IntersectionType(PaginationQuery) {
     @ApiProperty({
@@ -82,4 +83,24 @@ export class GetOrdersRequestDTO extends IntersectionType(PaginationQuery) {
     @IsOptional()
     @IsEnumI18n({ ...AllEnum, ...OrderStatusEnum })
     orderStatus?: string;
+
+    @ApiProperty({
+        required: false,
+        description: 'Order by to filter orders by order by',
+        enum: OrderByEnum,
+        default: OrderByEnum.createdAt,
+    })
+    @IsOptional()
+    @IsEnumI18n(OrderByEnum)
+    orderBy?: string;
+
+    @ApiProperty({
+        required: false,
+        description: 'Order type to filter orders by order type',
+        enum: OrderTypeEnum,
+        default: OrderTypeEnum.newest,
+    })
+    @IsOptional()
+    @IsEnumI18n(OrderTypeEnum)
+    orderType?: string;
 }
