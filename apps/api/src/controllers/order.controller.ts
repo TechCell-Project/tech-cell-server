@@ -10,6 +10,7 @@ import {
     Ip,
     Headers,
     Param,
+    Put,
 } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import { ACCESS_TOKEN_NAME, ORDER_SERVICE } from '~libs/common/constants';
@@ -30,6 +31,7 @@ import { AuthGuard } from '~libs/common';
 import { CurrentUser } from '~libs/common/decorators';
 import { TCurrentUser } from '~libs/common/types';
 import {
+    CancelOrderRequestDTO,
     GetPaymentUrlRequestDTO,
     GetUserOrdersRequestDTO,
     ListUserOrderResponseDTO,
@@ -153,6 +155,24 @@ export class OrderController {
             client: this.orderService,
             pattern: CheckoutMessagePattern.getPaymentUrl,
             data: { id, user, ip, paymentReturnUrl },
+            headers,
+        });
+    }
+
+    @UseGuards(AuthGuard)
+    @ApiOperation({ summary: 'Cancel user order' })
+    @ApiOkResponse({ description: 'Cancel user order success' })
+    @Put('/:id/cancel')
+    async cancelOrder(
+        @Headers() headers: THeaders,
+        @CurrentUser() user: TCurrentUser,
+        @Param() { id }: ObjectIdParamDTO,
+        @Body() { cancelReason }: CancelOrderRequestDTO,
+    ) {
+        return sendMessagePipeException({
+            client: this.orderService,
+            pattern: CheckoutMessagePattern.cancelUserOrder,
+            data: { orderId: id, user, cancelReason },
             headers,
         });
     }

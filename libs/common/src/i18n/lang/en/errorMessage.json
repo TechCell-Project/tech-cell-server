@@ -56,5 +56,8 @@
     "NOT_SUPPORT_SHIP": "Not support ship to this address yet.",
     "CAN_NOT_CREATE_ORDER": "Can not create order, please try again later.",
     "RETURN_URL_REQUIRED": "Return url is required for '{method}'",
-    "CAN_NOT_GET_PAYMENT_URL": "Can not get payment url for '{method}'"
+    "CAN_NOT_GET_PAYMENT_URL": "Can not get payment url for '{method}'",
+    "NOT_ALLOW_TO_CANCEL_ORDER": "You can not cancel this order.",
+    "CAN_NOT_CANCEL_ORDER_WITH_STATUS": "You can not cancel this order with status '{status}'",
+    "CAN_NOT_CANCEL_ORDER_WHEN_PAYMENT_COMPLETED": "You can not cancel this order when payment completed."
 }

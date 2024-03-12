@@ -120,11 +120,14 @@ export class OrdersService {
         dataUpdate: UpdateQuery<Order>,
         session?: ClientSession,
     ) {
-        if (!orderId) throw new Error('Order id is required');
         const lockKey = `${this.UPDATE_ORDER_LOCK_KEY_PREFIX}:${orderId?.toString()}`;
         const lock = await this.redLock.lock([lockKey], 1000);
         let result: Order;
         try {
+            if (dataUpdate['_id']) {
+                delete dataUpdate['_id'];
+            }
+
             result = await this.orderRepository.findOneAndUpdate(
                 {
                     _id: convertToObjectId(orderId),

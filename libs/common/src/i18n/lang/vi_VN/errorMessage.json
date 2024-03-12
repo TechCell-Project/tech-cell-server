@@ -56,5 +56,8 @@
     "NOT_SUPPORT_SHIP": "Chưa hỗ trợ vận chuyển đến địa chỉ này.",
     "CAN_NOT_CREATE_ORDER": "Không thể tạo đơn hàng, vui lòng thử lại sau.",
     "RETURN_URL_REQUIRED": "Địa chỉ trả về là bắt buộc cho phương thức thanh toán '{method}'",
-    "CAN_NOT_GET_PAYMENT_URL": "Không thể trả về địa chỉ thanh toán cho phương thức thanh toán '{method}'"
+    "CAN_NOT_GET_PAYMENT_URL": "Không thể trả về địa chỉ thanh toán cho phương thức thanh toán '{method}'",
+    "NOT_ALLOW_TO_CANCEL_ORDER": "Bạn không được phép hủy đơn hàng này.",
+    "CAN_NOT_CANCEL_ORDER_WITH_STATUS": "Bạn không thể hủy đơn hàng khi trạng thái là: '{status}'",
+    "CAN_NOT_CANCEL_ORDER_WHEN_PAYMENT_COMPLETED": "Bạn không thể hủy đơn hàng khi thanh toán đã hoàn tất."
 }

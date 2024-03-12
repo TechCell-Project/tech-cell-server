@@ -91,6 +91,9 @@ export type I18nTranslations = {
         "CAN_NOT_CREATE_ORDER": string;
         "RETURN_URL_REQUIRED": string;
         "CAN_NOT_GET_PAYMENT_URL": string;
+        "NOT_ALLOW_TO_CANCEL_ORDER": string;
+        "CAN_NOT_CANCEL_ORDER_WITH_STATUS": string;
+        "CAN_NOT_CANCEL_ORDER_WHEN_PAYMENT_COMPLETED": string;
     };
     "exception": {
         "InternalServerException": string;

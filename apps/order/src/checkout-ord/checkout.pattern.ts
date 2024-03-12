@@ -7,4 +7,5 @@ export const CheckoutMessagePattern = {
     getUserOrders: { cmd: 'checkout_get_user_orders' },
     getUserOrderById: { cmd: 'checkout_get_user_order_by_id' },
     getPaymentUrl: { cmd: 'checkout_get_payment_url' },
+    cancelUserOrder: { cmd: 'checkout_cancel_user_order' },
 };

@@ -102,4 +102,18 @@ export class CheckoutController {
             paymentReturnUrl: data?.paymentReturnUrl,
         });
     }
+
+    @MessagePattern(CheckoutMessagePattern.cancelUserOrder)
+    async cancelOrder(
+        @Ctx() context: RmqContext,
+        @Payload()
+        {
+            orderId,
+            cancelReason,
+            user,
+        }: { user: TCurrentUser; orderId: string; cancelReason: string },
+    ) {
+        this.rabbitmqService.acknowledgeMessage(context);
+        return this.checkoutService.cancelOrder(user, orderId, cancelReason);
+    }
 }

@@ -31,6 +31,9 @@ export class Order extends AbstractDocument {
 
     @Prop({ required: true, type: String, enum: OrderStatusEnum, default: OrderStatusEnum.PENDING })
     orderStatus: string;
+
+    @Prop({ required: false, type: String, default: '' })
+    cancelReason?: string;
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);

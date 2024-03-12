@@ -3,6 +3,7 @@ import { UsersService } from '~libs/resource/users';
 import { GhnService, ItemShipping } from '~libs/third-party/giaohangnhanh';
 import {
     BadRequestException,
+    ForbiddenException,
     Inject,
     Injectable,
     InternalServerErrorException,
@@ -446,6 +447,41 @@ export class CheckoutService {
         });
 
         return newOrder;
+    }
+
+    async cancelOrder(user: TCurrentUser, orderId: Types.ObjectId | string, cancelReason: string) {
+        const orderFound = await this.orderService.getOrderById(convertToObjectId(orderId));
+        const userFound = await this.userService.getUser({
+            _id: convertToObjectId(user._id),
+        });
+
+        if (orderFound.userId.toString() !== userFound._id.toString()) {
+            throw new ForbiddenException(this.i18n.t('errorMessage.NOT_ALLOW_TO_CANCEL_ORDER'));
+        }
+
+        if (orderFound?.paymentOrder.status === PaymentStatusEnum.COMPLETED) {
+            throw new UnprocessableEntityException(
+                this.i18n.t('errorMessage.CAN_NOT_CANCEL_ORDER_WHEN_PAYMENT_COMPLETED'),
+            );
+        }
+
+        switch (orderFound.orderStatus) {
+            case OrderStatusEnum.PROCESSING:
+            case OrderStatusEnum.PENDING:
+                Object.assign(orderFound, {
+                    orderStatus: OrderStatusEnum.CANCELLED,
+                    cancelReason: cancelReason ?? '',
+                });
+                return this.orderService.updateOrderById(orderFound._id, orderFound);
+            default:
+                throw new BadRequestException(
+                    this.i18n.t('errorMessage.CAN_NOT_CANCEL_ORDER_WITH_STATUS', {
+                        args: {
+                            status: orderFound.orderStatus,
+                        },
+                    }),
+                );
+        }
     }
 
     /// PRIVATE METHOD
