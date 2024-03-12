@@ -124,6 +124,7 @@
         "carts",
         "logger",
         "third-party",
-        "typos"
+        "typos",
+        "ci/cd"
     ]
 }
