@@ -29,16 +29,15 @@ import { RequiredRoles, getCurrentUserByContext } from '../decorators';
 @Injectable()
 export class AuthGuard implements CanActivate {
     @Inject(AUTH_SERVICE) protected readonly authService: ClientRMQ;
-    public readonly _acceptRoles: string[] = [];
     protected logger: Logger = new Logger(AuthGuard.name);
     protected _reflector: Reflector;
 
     constructor(private reflector: Reflector) {
         this._reflector = this.reflector;
-        this._acceptRoles = [];
     }
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
+        const acceptRoles: string[] = [];
         const i18n = I18nContext.current<I18nTranslations>();
 
         const requiredRoles = this._reflector.getAllAndOverride<UserRole[]>(RequiredRoles.name, [
@@ -46,11 +45,11 @@ export class AuthGuard implements CanActivate {
             context.getClass(),
         ]);
         if (requiredRoles) {
-            this._acceptRoles.push(...requiredRoles);
+            acceptRoles.push(...requiredRoles);
         }
 
         const userFromRequest = this.getUserFromContext(context) ?? null;
-        if (userFromRequest && this._acceptRoles.includes(userFromRequest.role)) {
+        if (userFromRequest && acceptRoles.includes(userFromRequest.role)) {
             return true;
         }
 
@@ -92,7 +91,7 @@ export class AuthGuard implements CanActivate {
             ),
         );
 
-        if (!dataVerified.role || !this._acceptRoles.includes(dataVerified.role)) {
+        if (!dataVerified.role || !acceptRoles.includes(dataVerified.role)) {
             this.throwException(
                 new ForbiddenException(i18n.t('errorMessage.FORBIDDEN_ROLE')),
                 requestType,
