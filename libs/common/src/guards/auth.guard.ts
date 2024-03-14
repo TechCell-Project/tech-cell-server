@@ -21,7 +21,7 @@ import { WsException } from '@nestjs/websockets';
 import { RequestType } from '../types/current-request-type';
 import { I18nContext } from 'nestjs-i18n';
 import { I18nTranslations } from '../i18n/generated/i18n.generated';
-import { RequiredRoles } from '../decorators';
+import { RequiredRoles, getCurrentUserByContext } from '../decorators';
 
 /**
  * @description Base Auth Guard, verify jwt token from request and add user to request if login success
@@ -149,22 +149,7 @@ export class AuthGuard implements CanActivate {
     }
 
     protected getUserFromContext = (context: ExecutionContext): TCurrentUser | null => {
-        switch (context.getType()?.toLowerCase()) {
-            case RequestType.Http: {
-                const request = context.switchToHttp().getRequest();
-                return request?.user ?? null;
-            }
-            case RequestType.Rpc: {
-                const ctx = context.switchToRpc().getData();
-                return ctx?.user ?? null;
-            }
-            case RequestType.Ws: {
-                const client = context.switchToWs().getClient();
-                return client?.handshake?.auth?.user ?? null;
-            }
-            default:
-                return null;
-        }
+        return getCurrentUserByContext(context);
     };
 
     /**
