@@ -22,7 +22,6 @@ import { NotificationService } from '~libs/resource';
 import { Types } from 'mongoose';
 import { instrument, RedisStore } from '@socket.io/admin-ui';
 import { RedisService } from '~libs/common/Redis/services/redis.service';
-import { AuthGuard } from '~libs/common/guards/auth.guard';
 import { NotificationId } from '../dtos';
 import { convertToObjectId } from '~libs/common/utils';
 
@@ -64,7 +63,11 @@ export class NotificationsGateway
      * @description Handle connection from client and join to room base on user role and user id
      */
     async handleConnection(client: Socket) {
-        const userVerified: ITokenVerifiedResponse | null = await this.authenticateClient(client);
+        const userVerified: ITokenVerifiedResponse | null = await this.authenticateClient(client, [
+            UserRole.User,
+            UserRole.Manager,
+            UserRole.Staff,
+        ]);
         if (!userVerified) {
             this.logger.debug(`Client ${client.id} connected to server as guest`);
             return;
@@ -183,7 +186,7 @@ export class NotificationsGateway
      */
     private async authenticateClient(
         client: Socket,
-        guard?: AuthGuard,
+        roles: string[] = [],
     ): Promise<ITokenVerifiedResponse> | null {
         let authHeaderParts = client.handshake?.headers?.authorization?.split(' ');
         if (!authHeaderParts) {
@@ -213,7 +216,7 @@ export class NotificationsGateway
             return null;
         }
 
-        if (guard && !guard._acceptRoles.includes(userVerified.role)) {
+        if (roles && !roles.includes(userVerified.role)) {
             return null;
         }
 
