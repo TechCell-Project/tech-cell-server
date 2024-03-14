@@ -16,11 +16,11 @@ export class OptionalAuthGuard extends AuthGuard {
     constructor(reflector: Reflector) {
         super(reflector);
         this.logger = new Logger(OptionalAuthGuard.name);
-        this._acceptRoles.push(UserRole.Manager, UserRole.Staff, UserRole.User);
     }
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
         try {
+            const acceptRoles: string[] = [UserRole.Manager, UserRole.Staff, UserRole.User];
             const i18n = I18nContext.current<I18nTranslations>();
 
             const { authHeader } = this.getAccessToken(context, i18n);
@@ -45,7 +45,7 @@ export class OptionalAuthGuard extends AuthGuard {
                 ),
             );
 
-            if (!dataVerified.role || !this._acceptRoles.includes(dataVerified.role)) {
+            if (!dataVerified.role || !acceptRoles.includes(dataVerified.role)) {
                 throw new Error('Role not accept!');
             }
 
