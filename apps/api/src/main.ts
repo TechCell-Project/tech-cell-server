@@ -19,6 +19,7 @@ import { firstValueFrom } from 'rxjs';
 import { UserDataResponseDTO } from '~apps/auth/dtos';
 import { I18nValidationExceptionFilter, I18nValidationPipe } from 'nestjs-i18n';
 import { SupportedLanguage } from '~libs/common/i18n/lang.enum';
+import { UserRole } from '~libs/resource/users/enums';
 
 async function bootstrap() {
     const port = process.env.API_PORT || 8000;
@@ -124,9 +125,8 @@ async function bootstrap() {
                 }
 
                 if (
-                    user.role.toString().toLowerCase() !== 'superadmin' &&
-                    user.role.toString().toLowerCase() !== 'admin' &&
-                    user.role.toString().toLowerCase() !== 'mod'
+                    user.role.toString() !== UserRole.Manager &&
+                    user.role.toString() !== UserRole.Staff
                 ) {
                     throw new Error('You are not allowed to access this resource.');
                 }
