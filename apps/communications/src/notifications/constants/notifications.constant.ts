@@ -1,11 +1,10 @@
 import { UserRole } from '~libs/resource/users/enums';
 
 export const NotifyRoom = {
-    AdminRoom: `${UserRole.Admin}_room`,
-    ModRoom: `${UserRole.Mod}_room`,
-    UserRoom: `${UserRole.User}_room`,
-    SuperAdminRoom: `${UserRole.SuperAdmin}_room`,
     AllUserRoom: `all_${UserRole.User}_room`,
+    ManagerRoom: `${UserRole.Manager}_room`,
+    StaffRoom: `${UserRole.Staff}_room`,
+    UserRoom: `${UserRole.User}_room`,
 };
 
 export const NOTIFICATIONS_PREFIX = 'notifications';

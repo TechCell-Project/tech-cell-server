@@ -22,7 +22,7 @@ import { NotificationService } from '~libs/resource';
 import { Types } from 'mongoose';
 import { instrument, RedisStore } from '@socket.io/admin-ui';
 import { RedisService } from '~libs/common/Redis/services/redis.service';
-import { AuthCoreGuard } from '~libs/common/guards/auth.core.guard';
+import { AuthGuard } from '~libs/common/guards/auth.guard';
 import { NotificationId } from '../dtos';
 import { convertToObjectId } from '~libs/common/utils';
 
@@ -73,14 +73,11 @@ export class NotificationsGateway
         const rooms = [NotifyRoom.AllUserRoom, `user_id_${userVerified._id}`];
 
         switch (userVerified.role) {
-            case UserRole.SuperAdmin:
-                rooms.push(NotifyRoom.SuperAdminRoom);
+            case UserRole.Manager:
+                rooms.push(NotifyRoom.ManagerRoom);
                 break;
-            case UserRole.Admin:
-                rooms.push(NotifyRoom.AdminRoom);
-                break;
-            case UserRole.Mod:
-                rooms.push(NotifyRoom.ModRoom);
+            case UserRole.Staff:
+                rooms.push(NotifyRoom.StaffRoom);
                 break;
             case UserRole.User:
                 rooms.push(NotifyRoom.UserRoom);
@@ -186,7 +183,7 @@ export class NotificationsGateway
      */
     private async authenticateClient(
         client: Socket,
-        guard?: AuthCoreGuard,
+        guard?: AuthGuard,
     ): Promise<ITokenVerifiedResponse> | null {
         let authHeaderParts = client.handshake?.headers?.authorization?.split(' ');
         if (!authHeaderParts) {

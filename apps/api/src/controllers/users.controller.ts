@@ -1,18 +1,6 @@
-import {
-    Controller,
-    Get,
-    Inject,
-    UseGuards,
-    Patch,
-    Body,
-    Query,
-    Param,
-    Post,
-    Headers,
-} from '@nestjs/common';
+import { Controller, Get, Inject, Patch, Body, Query, Param, Post, Headers } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~libs/common/constants';
-import { ModGuard, SuperAdminGuard } from '~libs/common/guards';
 import {
     ApiBadRequestResponse,
     ApiBearerAuth,
@@ -28,19 +16,19 @@ import {
     ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import {
-    ChangeRoleRequestDTO,
     UsersMntMessagePattern,
     BlockUnblockRequestDTO,
     CreateUserRequestDto,
 } from '~apps/managements/users-mnt';
 import { UserMntResponseDTO } from '~libs/resource/users/dtos';
-import { CurrentUser } from '~libs/common/decorators';
+import { Auth, CurrentUser } from '~libs/common/decorators';
 import { TCurrentUser } from '~libs/common/types';
 import { UsersSearchMessagePattern } from '~apps/search/users-search';
 import { GetUsersQueryDTO, ListUserResponseDTO } from '~apps/search/users-search/dtos';
 import { ACCESS_TOKEN_NAME } from '~libs/common/constants/api.constant';
 import { sendMessagePipeException } from '~libs/common/RabbitMQ/rmq.util';
 import { THeaders } from '~libs/common/types/common.type';
+import { UserRole } from '~libs/resource/users/enums';
 
 @ApiBadRequestResponse({
     description: 'Invalid request, please check your request data!',
@@ -62,6 +50,7 @@ import { THeaders } from '~libs/common/types/common.type';
 })
 @ApiTags('users management')
 @ApiBearerAuth(ACCESS_TOKEN_NAME)
+@Auth(UserRole.Manager)
 @Controller('users')
 export class UsersController {
     constructor(
@@ -74,7 +63,6 @@ export class UsersController {
         description: 'Create new user',
     })
     @ApiCreatedResponse({ description: 'Create user success', type: UserMntResponseDTO })
-    @UseGuards(SuperAdminGuard)
     @Post('/')
     async createUser(
         @Headers() headers: THeaders,
@@ -97,7 +85,6 @@ export class UsersController {
         type: ListUserResponseDTO,
     })
     @ApiNotFoundResponse({ description: 'No users found' })
-    @UseGuards(ModGuard)
     @Get('/')
     async getUsers(@Headers() headers: THeaders, @Query() requestQuery: GetUsersQueryDTO) {
         return sendMessagePipeException<GetUsersQueryDTO>({
@@ -114,7 +101,6 @@ export class UsersController {
     })
     @ApiOkResponse({ description: 'Get users success', type: UserMntResponseDTO })
     @ApiNotFoundResponse({ description: 'No users found' })
-    @UseGuards(ModGuard)
     @Get('/:id')
     async getUserById(@Headers() headers: THeaders, @Param('id') id: string) {
         return sendMessagePipeException({
@@ -133,7 +119,6 @@ export class UsersController {
     @ApiBadRequestResponse({
         description: 'Invalid request',
     })
-    @UseGuards(ModGuard)
     @Patch('/:id/block')
     async blockUser(
         @Headers() headers: THeaders,
@@ -162,7 +147,6 @@ export class UsersController {
     @ApiBadRequestResponse({
         description: 'Invalid request',
     })
-    @UseGuards(ModGuard)
     @Patch('/:id/unblock')
     async unblockUser(
         @Headers() headers: THeaders,
@@ -183,6 +167,7 @@ export class UsersController {
         });
     }
 
+    @ApiExcludeEndpoint(true)
     @ApiOperation({
         summary: 'Change role user',
         description: 'Change role user',
@@ -191,28 +176,25 @@ export class UsersController {
     @ApiBadRequestResponse({
         description: 'Invalid request',
     })
-    @UseGuards(ModGuard)
     @Patch('/:id/change-role')
-    async changeRoleUser(
-        @Headers() headers: THeaders,
-        @Param('id') idParam: string,
-        @Body() { role }: ChangeRoleRequestDTO,
-        @CurrentUser() user: TCurrentUser,
-    ) {
-        return sendMessagePipeException({
-            client: this.managementsService,
-            pattern: UsersMntMessagePattern.changeRoleUser,
-            data: {
-                victimId: idParam,
-                actorId: user._id,
-                role,
-            },
-            headers,
-        });
+    async changeRoleUser() {
+        // @Headers() headers: THeaders, @Param('id') idParam: string,@Body() { role }: ChangeRoleRequestDTO,@CurrentUser() user: TCurrentUser,
+        return {
+            message: 'Endpoint excluded',
+        };
+        // return sendMessagePipeException({
+        //     client: this.managementsService,
+        //     pattern: UsersMntMessagePattern.changeRoleUser,
+        //     data: {
+        //         victimId: idParam,
+        //         actorId: user._id,
+        //         role,
+        //     },
+        //     headers,
+        // });
     }
 
     @ApiExcludeEndpoint(true)
-    @UseGuards(SuperAdminGuard)
     @Post('/gen-clone')
     async gen(@Headers() headers: THeaders, @Query() { num }: { num: number }) {
         return sendMessagePipeException({

@@ -8,6 +8,7 @@ import { GetUserOrdersRequestDTO, ReviewOrderRequestDTO, VnpayIpnUrlDTO } from '
 import { CreateOrderRequestDTO } from './dtos/create-order-request.dto';
 import { ObjectIdParamDTO } from '~libs/common/dtos';
 import { CurrentUserDTO } from '~libs/common/dtos/current-user.dto';
+import { convertToObjectId } from '~libs/common';
 
 @Controller('checkout')
 export class CheckoutController {
@@ -70,7 +71,7 @@ export class CheckoutController {
 
     @MessagePattern(CheckoutMessagePattern.getUserOrderById)
     async getUserOrderById({ user, id }: { user: TCurrentUser } & ObjectIdParamDTO) {
-        return this.checkoutService.getUserOrderById({ user, id });
+        return this.checkoutService.getUserOrderById({ userId: convertToObjectId(user._id), id });
     }
 
     @MessagePattern(CheckoutMessagePattern.vnpayIpnUrl)

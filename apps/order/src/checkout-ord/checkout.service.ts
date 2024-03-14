@@ -336,8 +336,8 @@ export class CheckoutService {
         });
     }
 
-    public async getUserOrderById({ user, id }: { user: TCurrentUser } & ObjectIdParamDTO) {
-        return await this.orderService.getUserOrderById(id, convertToObjectId(user._id));
+    public async getUserOrderById({ userId, id }: { userId: Types.ObjectId } & ObjectIdParamDTO) {
+        return await this.orderService.getUserOrderById(id, convertToObjectId(userId));
     }
 
     /**
@@ -419,7 +419,7 @@ export class CheckoutService {
     }) {
         const order = await this.getUserOrderById({
             id: data.orderId,
-            user: { _id: convertToObjectId(data.userId) },
+            userId: convertToObjectId(data.userId),
         });
         const paymentUrl = await this.getPaymentUrl(
             order.paymentOrder.method,
@@ -496,17 +496,22 @@ export class CheckoutService {
         const attributeArray = Array.from(new Set([...generalAttributes]));
         let height: number, width: number, length: number, weight: number;
         attributeArray.forEach((attribute) => {
+            let value = Number(attribute.v.replace(',', '.'));
+            if (isNaN(value)) {
+                value = null;
+            }
+
             if (attribute.k === 'height') {
-                height = Number(attribute.v);
+                height = value;
             }
             if (attribute.k === 'width') {
-                width = Number(attribute.v);
+                width = value;
             }
             if (attribute.k === 'length') {
-                length = Number(attribute.v);
+                length = value;
             }
             if (attribute.k === 'weight') {
-                weight = Number(attribute.v);
+                weight = value;
             }
         });
 

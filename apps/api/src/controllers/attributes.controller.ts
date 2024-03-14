@@ -8,12 +8,10 @@ import {
     Post,
     Query,
     Patch,
-    UseGuards,
     Delete,
 } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~libs/common/constants';
-import { AdminGuard } from '~libs/common';
 import {
     AttributesSearchMessagePattern,
     GetAttributeByIdRequestDTO,
@@ -40,6 +38,8 @@ import {
 import { AttributeDTO } from '~libs/resource/attributes/dtos';
 import { sendMessagePipeException } from '~libs/common/RabbitMQ/rmq.util';
 import { THeaders } from '~libs/common/types/common.type';
+import { Auth } from '~libs/common/decorators';
+import { UserRole } from '~libs/resource/users/enums';
 
 @ApiBadRequestResponse({
     description: 'Invalid request, please check your request data!',
@@ -127,7 +127,7 @@ export class AttributesController {
     })
     @ApiCreatedResponse({ description: 'The attribute has been successfully created.' })
     @ApiBadRequestResponse({ description: 'Something wrong, re-check your input.' })
-    @UseGuards(AdminGuard)
+    @Auth(UserRole.Staff)
     @Post('/')
     async createAttribute(
         @Headers() headers: THeaders,
@@ -147,7 +147,7 @@ export class AttributesController {
     })
     @ApiOkResponse({ description: 'Update attribute description successfully!' })
     @ApiBadRequestResponse({ description: 'Something wrong, re-check your input.' })
-    @UseGuards(AdminGuard)
+    @Auth(UserRole.Staff)
     @Patch('/:attributeId')
     async updateAttributeInfo(
         @Headers() headers: THeaders,
@@ -168,7 +168,7 @@ export class AttributesController {
     })
     @ApiOkResponse({ description: 'Delete attribute successfully!' })
     @ApiBadRequestResponse({ description: 'Something wrong, re-check your input.' })
-    @UseGuards(AdminGuard)
+    @Auth(UserRole.Staff)
     @Delete('/:attributeId')
     async deleteAttribute(
         @Headers() headers: THeaders,

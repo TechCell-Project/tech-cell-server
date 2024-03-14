@@ -10,6 +10,7 @@ import {
     DeleteProductsCartRequestDTO,
 } from '~apps/order/carts-ord';
 import { Types } from 'mongoose';
+import { UserRole } from '~libs/resource/users/enums';
 
 describe(CartsController, () => {
     let cartsController: CartsController;
@@ -32,6 +33,7 @@ describe(CartsController, () => {
         orderService = unitRef.get<ClientRMQ>(ORDER_SERVICE);
         mockCurrentUser = {
             _id: new Types.ObjectId(),
+            role: UserRole.User,
         };
         mockHeaders = {
             lang: 'en',

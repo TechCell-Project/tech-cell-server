@@ -5,7 +5,7 @@ import { IsEnumI18n, IsNotEmptyI18n, IsStringI18n } from '~libs/common/i18n';
 export class ChangeRoleRequestDTO {
     @ApiProperty({
         description: 'User role',
-        example: 'Admin',
+        example: 'Staff',
         type: 'string',
         enum: UserRole,
     })

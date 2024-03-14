@@ -1,7 +1,6 @@
 import {
     Controller,
     Inject,
-    UseGuards,
     Post,
     Body,
     HttpCode,
@@ -27,8 +26,7 @@ import {
     ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { CheckoutMessagePattern } from '~apps/order/checkout-ord/checkout.pattern';
-import { AuthGuard } from '~libs/common';
-import { CurrentUser } from '~libs/common/decorators';
+import { Auth, CurrentUser } from '~libs/common/decorators';
 import { TCurrentUser } from '~libs/common/types';
 import {
     CancelOrderRequestDTO,
@@ -43,6 +41,7 @@ import { OrderSchemaDTO } from '~libs/resource/orders/dtos/order-schema.dto';
 import { sendMessagePipeException } from '~libs/common/RabbitMQ/rmq.util';
 import { THeaders } from '~libs/common/types/common.type';
 import { ObjectIdParamDTO } from '~libs/common/dtos';
+import { UserRole } from '~libs/resource/users/enums';
 
 @ApiBadRequestResponse({
     description: 'Invalid request, please check your request data!',
@@ -60,12 +59,12 @@ import { ObjectIdParamDTO } from '~libs/common/dtos';
     description: 'Internal server error, please try again later!',
 })
 @ApiBearerAuth(ACCESS_TOKEN_NAME)
-@ApiTags('order')
-@Controller('order')
-export class OrderController {
+@ApiTags('orders')
+@Controller('orders')
+@Auth(UserRole.User)
+export class OrdersController {
     constructor(@Inject(ORDER_SERVICE) private readonly orderService: ClientRMQ) {}
 
-    @UseGuards(AuthGuard)
     @ApiOperation({ summary: "Get order's user" })
     @ApiResponse({ description: 'Get user orders', type: ListUserOrderResponseDTO })
     @Get('/')
@@ -82,7 +81,6 @@ export class OrderController {
         });
     }
 
-    @UseGuards(AuthGuard)
     @ApiOperation({ summary: "Get user's order by id" })
     @ApiResponse({ description: "Get user's order by id", type: OrderSchemaDTO })
     @Get('/:id')
@@ -99,7 +97,6 @@ export class OrderController {
         });
     }
 
-    @UseGuards(AuthGuard)
     @ApiResponse({
         status: 200,
         description: 'Review order before create (for getting the shipping fee, etc...)',
@@ -121,7 +118,6 @@ export class OrderController {
         });
     }
 
-    @UseGuards(AuthGuard)
     @ApiOperation({ summary: 'Create a order' })
     @ApiResponse({ status: 200, description: 'Review order', type: OrderSchemaDTO })
     @HttpCode(200)
@@ -140,7 +136,6 @@ export class OrderController {
         });
     }
 
-    @UseGuards(AuthGuard)
     @ApiOperation({ summary: 'Get order with the newer payment url' })
     @ApiOkResponse({ description: 'Get order with the newer payment url', type: OrderSchemaDTO })
     @Get('/:id/payment-url')
@@ -159,7 +154,6 @@ export class OrderController {
         });
     }
 
-    @UseGuards(AuthGuard)
     @ApiOperation({ summary: 'Cancel user order' })
     @ApiOkResponse({ description: 'Cancel user order success' })
     @Put('/:id/cancel')

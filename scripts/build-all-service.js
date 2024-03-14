@@ -8,7 +8,7 @@ async function buildApps() {
     const appsDir = './apps';
     const appDirs = await fs.readdir(appsDir, { withFileTypes: true });
 
-    const concurrencyLimit = Math.ceil(os.cpus()?.length / 4) || 1; // Set concurrency limit to the number of CPU cores
+    const concurrencyLimit = process.argv[2] ?? (Math.ceil(os.cpus()?.length / 4) || 1); // Set concurrency limit to the number of CPU cores
     const buildPromises = [];
 
     for (const dirent of appDirs) {

@@ -16,6 +16,7 @@ import {
     GoogleLoginRequestDTO,
 } from '~apps/auth/dtos';
 import { TCurrentUser, THeaders } from '~libs/common/types';
+import { UserRole } from '~libs/resource/users/enums';
 
 describe(AuthController, () => {
     let authController: AuthController;
@@ -38,6 +39,7 @@ describe(AuthController, () => {
         authService = unitRef.get<ClientRMQ>(AUTH_SERVICE);
         mockCurrentUser = {
             _id: '60f0c9b9e6b3f3b3e8c9b0a1',
+            role: UserRole.User,
         };
         mockHeaders = {
             lang: 'en',

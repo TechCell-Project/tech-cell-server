@@ -25,6 +25,8 @@ import {
 import { CategoryDTO, CategoryIdParam } from '~libs/resource/categories/dtos';
 import { sendMessagePipeException } from '~libs/common/RabbitMQ/rmq.util';
 import { THeaders } from '~libs/common/types/common.type';
+import { Auth } from '~libs/common/decorators';
+import { UserRole } from '~libs/resource/users/enums';
 
 @ApiBadRequestResponse({
     description: 'Invalid request, please check your request data!',
@@ -117,6 +119,7 @@ export class CategoriesController {
         summary: 'Update category',
         description: 'Update category',
     })
+    @Auth(UserRole.Staff)
     @Patch('/:categoryId')
     async updateCategory(
         @Headers() headers: THeaders,
