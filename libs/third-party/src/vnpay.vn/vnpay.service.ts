@@ -1,13 +1,13 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { CreateVnpayUrlDTO } from './dtos';
-import { VNPay, ConfigVnpay, ReturnQueryFromVNPay, QueryDr } from 'vnpay';
+import { VNPay, VNPayConfig, ReturnQueryFromVNPay, QueryDr } from 'vnpay';
 
 @Injectable()
 export class VnpayService {
     private readonly logger = new Logger(VnpayService.name);
     private readonly vnpayInstance: VNPay;
 
-    constructor(@Inject('VNPAY_INIT_OPTIONS') private readonly config: ConfigVnpay) {
+    constructor(@Inject('VNPAY_INIT_OPTIONS') private readonly config: VNPayConfig) {
         this.vnpayInstance = new VNPay(this.config);
     }
 

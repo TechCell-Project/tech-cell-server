@@ -126,6 +126,7 @@
         "third-party",
         "typos",
         "ci/cd",
-        "permissions"
+        "permissions",
+        "deps"
     ]
 }

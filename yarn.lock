@@ -15080,7 +15080,7 @@ __metadata:
     ts-node: "npm:^10.9.1"
     tsconfig-paths: "npm:^4.2.0"
     typescript: "npm:^5.2.2"
-    vnpay: "npm:^0.6.0"
+    vnpay: "npm:^0.9.5"
     webpack: "npm:^5.89.0"
   languageName: unknown
   linkType: soft
@@ -15906,13 +15906,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vnpay@npm:^0.6.0":
-  version: 0.6.0
-  resolution: "vnpay@npm:0.6.0"
+"vnpay@npm:^0.9.5":
+  version: 0.9.5
+  resolution: "vnpay@npm:0.9.5"
   dependencies:
     moment-timezone: "npm:^0.5.43"
-    zod: "npm:^3.22.4"
-  checksum: 10c0/3a1b003a69789a65deb256bba0a804ed6b2bba760c7592236f89cef3a030ae59da450b69c96e3328b4799ab3795e08c43e248bd800f7a94cd3b86e21341a9e69
+  checksum: 10c0/93f4f9e33999410af932a4e870135829b5e699640dddb542863770efea0e82513c7d43d29d656f2ff7e4d014754166bc8eb33dd8c6bba3686692e25ddcdf285c
   languageName: node
   linkType: hard
 
@@ -16366,12 +16365,5 @@ __metadata:
   version: 1.2.0
   resolution: "zepto@npm:1.2.0"
   checksum: 10c0/e17e4d47ee27e79ea86ccad9d35a67ebeb7715adf5ae6f7c9b92ede8aa4d04a33ae40949c9931c15b95a8aec0d675d510da2b097c866a325771f9d3efbcf658d
-  languageName: node
-  linkType: hard
-
-"zod@npm:^3.22.4":
-  version: 3.22.4
-  resolution: "zod@npm:3.22.4"
-  checksum: 10c0/7578ab283dac0eee66a0ad0fc4a7f28c43e6745aadb3a529f59a4b851aa10872b3890398b3160f257f4b6817b4ce643debdda4fb21a2c040adda7862cab0a587
   languageName: node
   linkType: hard

@@ -25,7 +25,6 @@ import { COMMUNICATIONS_SERVICE } from '~libs/common/constants/services.constant
             api_Host: process.env.VNPAY_PAYMENT_URL,
             secureSecret: process.env.VNPAY_SECRET_KEY,
             tmnCode: process.env.VNPAY_TMN_CODE,
-            returnUrl: process.env.VNPAY_RETURN_URL,
         }),
         ProductsModule,
         OrdersModule,
