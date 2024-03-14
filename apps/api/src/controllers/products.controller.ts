@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~libs/common/constants';
-import { ModGuard, OptionalAuthGuard, SuperAdminGuard } from '~libs/common';
+import { StaffGuard, OptionalAuthGuard, ManagerGuard } from '~libs/common';
 import {
     ApiBody,
     ApiNotFoundResponse,
@@ -93,7 +93,7 @@ export class ProductsController {
         description: 'Create product successfully!',
     })
     @Post('/')
-    @UseGuards(ModGuard)
+    @UseGuards(StaffGuard)
     async createProduct(
         @Headers() headers: THeaders,
         @Body() { ...data }: CreateProductRequestDTO,
@@ -136,7 +136,7 @@ export class ProductsController {
         description: 'Update product information',
     })
     @Put('/:productId')
-    @UseGuards(ModGuard)
+    @UseGuards(StaffGuard)
     async updateProduct(
         @Headers() headers: THeaders,
         @Param() { productId }: ProductIdParamsDTO,
@@ -151,7 +151,7 @@ export class ProductsController {
     }
 
     @ApiExcludeEndpoint(true)
-    @UseGuards(SuperAdminGuard)
+    @UseGuards(ManagerGuard)
     @Post('/gen-clone')
     async gen(@Headers() headers: THeaders, @Query() { num }: { num: number }) {
         return sendMessagePipeException({
@@ -169,7 +169,7 @@ export class ProductsController {
         description: 'Delete product successfully!',
     })
     @Delete('/:productId')
-    @UseGuards(ModGuard)
+    @UseGuards(StaffGuard)
     async deleteProduct(@Headers() headers: THeaders, @Param() { productId }: ProductIdParamsDTO) {
         return sendMessagePipeException({
             client: this.managementsService,
@@ -186,7 +186,7 @@ export class ProductsController {
         description: 'Delete product variation successfully!',
     })
     @Delete('/:productId/variation')
-    @UseGuards(ModGuard)
+    @UseGuards(StaffGuard)
     async deleteProductVariation(
         @Headers() headers: THeaders,
         @Param() { productId }: ProductIdParamsDTO,

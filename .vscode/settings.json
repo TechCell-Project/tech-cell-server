@@ -125,6 +125,7 @@
         "logger",
         "third-party",
         "typos",
-        "ci/cd"
+        "ci/cd",
+        "permissions"
     ]
 }

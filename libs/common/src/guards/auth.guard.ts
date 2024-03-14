@@ -10,6 +10,6 @@ import { Reflector } from '@nestjs/core';
 export class AuthGuard extends AuthCoreGuard implements CanActivate {
     constructor() {
         super(new Reflector(), AuthGuard.name);
-        this._acceptRoles.push(UserRole.SuperAdmin, UserRole.Admin, UserRole.Mod, UserRole.User);
+        this._acceptRoles.push(UserRole.Manager, UserRole.Staff, UserRole.User);
     }
 }

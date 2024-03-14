@@ -65,7 +65,7 @@ export class NotificationsCallGateway extends NotificationsGateway {
 
     public async newOrderCreated({ order, customer }: { order: Order; customer: User }) {
         const adminUsers = await this.usersService.getUsers({
-            $or: [{ role: UserRole.SuperAdmin }, { role: UserRole.Admin }],
+            $or: [{ role: UserRole.Manager }, { role: UserRole.Staff }],
         });
 
         const [notifies] = await Promise.all(

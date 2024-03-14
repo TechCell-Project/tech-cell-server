@@ -73,14 +73,11 @@ export class NotificationsGateway
         const rooms = [NotifyRoom.AllUserRoom, `user_id_${userVerified._id}`];
 
         switch (userVerified.role) {
-            case UserRole.SuperAdmin:
+            case UserRole.Manager:
                 rooms.push(NotifyRoom.SuperAdminRoom);
                 break;
-            case UserRole.Admin:
+            case UserRole.Staff:
                 rooms.push(NotifyRoom.AdminRoom);
-                break;
-            case UserRole.Mod:
-                rooms.push(NotifyRoom.ModRoom);
                 break;
             case UserRole.User:
                 rooms.push(NotifyRoom.UserRoom);

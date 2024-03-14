@@ -14,7 +14,7 @@ import {
     ApiTooManyRequestsResponse,
     ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { ModGuard } from '~libs/common';
+import { StaffGuard } from '~libs/common';
 import { StatsMntMessagePattern } from '~apps/managements/stats-mnt/stats-mnt.pattern';
 import { GetStatsRequestDTO, GetStatsResponseDTO } from '~apps/managements/stats-mnt/dtos';
 import { sendMessagePipeException } from '~libs/common/RabbitMQ/rmq.util';
@@ -40,7 +40,7 @@ import { GetStatsOrdersApiRequestDTO } from '~apps/managements/stats-mnt/dtos/ge
     description: 'Internal server error, please try again later!',
 })
 @ApiBearerAuth(ACCESS_TOKEN_NAME)
-@UseGuards(ModGuard)
+@UseGuards(StaffGuard)
 @ApiTags('stats')
 @Controller('stats')
 export class StatsController {

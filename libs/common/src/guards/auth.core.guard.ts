@@ -51,6 +51,10 @@ export class AuthCoreGuard implements CanActivate {
             return true;
         }
 
+        if (this.getUserFromContext(context)._id) {
+            return true;
+        }
+
         const { authHeader, requestType } = this.getAccessToken(context, i18n);
 
         const authHeaderParts = authHeader?.split(' ');
@@ -145,6 +149,25 @@ export class AuthCoreGuard implements CanActivate {
         }
     }
 
+    protected getUserFromContext = (context: ExecutionContext): TCurrentUser | null => {
+        switch (context.getType()?.toLowerCase()) {
+            case RequestType.Http: {
+                const request = context.switchToHttp().getRequest();
+                return request?.user ?? null;
+            }
+            case RequestType.Rpc: {
+                const ctx = context.switchToRpc().getData();
+                return ctx?.user ?? null;
+            }
+            case RequestType.Ws: {
+                const client = context.switchToWs().getClient();
+                return client?.handshake?.auth?.user ?? null;
+            }
+            default:
+                return null;
+        }
+    };
+
     protected resolveSkipAuth(context: ExecutionContext): boolean {
         try {
             if (
@@ -165,7 +188,7 @@ export class AuthCoreGuard implements CanActivate {
                 this._acceptRoles.splice(
                     0,
                     this._acceptRoles.length,
-                    ...this._acceptRoles.filter((role) => role !== UserRole.SuperAdmin),
+                    ...this._acceptRoles.filter((role) => role !== UserRole.Manager),
                 );
             }
 
@@ -178,20 +201,7 @@ export class AuthCoreGuard implements CanActivate {
                 this._acceptRoles.splice(
                     0,
                     this._acceptRoles.length,
-                    ...this._acceptRoles.filter((role) => role !== UserRole.Admin),
-                );
-            }
-
-            if (
-                this.reflector.getAllAndOverride<boolean>(SKIP_AUTH_MOD_GUARD, [
-                    context.getHandler(),
-                    context.getClass(),
-                ])
-            ) {
-                this._acceptRoles.splice(
-                    0,
-                    this._acceptRoles.length,
-                    ...this._acceptRoles.filter((role) => role !== UserRole.Mod),
+                    ...this._acceptRoles.filter((role) => role !== UserRole.Staff),
                 );
             }
 

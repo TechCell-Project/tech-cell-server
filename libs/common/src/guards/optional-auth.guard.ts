@@ -15,7 +15,7 @@ import { UserRole } from '~libs/resource/users/enums/UserRole.enum';
 export class OptionalAuthGuard extends AuthCoreGuard {
     constructor(reflector: Reflector) {
         super(reflector, OptionalAuthGuard.name);
-        this._acceptRoles.push(UserRole.SuperAdmin, UserRole.Admin, UserRole.Mod, UserRole.User);
+        this._acceptRoles.push(UserRole.Manager, UserRole.Staff, UserRole.User);
     }
 
     async canActivate(context: ExecutionContext): Promise<boolean> {

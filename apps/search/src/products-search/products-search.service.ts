@@ -74,7 +74,7 @@ export class ProductsSearchService extends ProductsSearchUtilService {
             queryOptions: { lean: false },
         };
 
-        if (user && (await this.usersService.isModeratorOrHigher(user._id))) {
+        if (user && (await this.usersService.isStaffOrManager(user._id))) {
             optionObject.selectType = SelectType.both;
         }
 

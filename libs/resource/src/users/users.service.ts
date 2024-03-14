@@ -125,20 +125,16 @@ export class UsersService {
         return (
             (await this.usersRepository.count({
                 _id: convertToObjectId(userId),
-                $or: [{ role: UserRole.Admin }, { role: UserRole.SuperAdmin }],
+                $or: [{ role: UserRole.Staff }, { role: UserRole.Manager }],
             })) > 0
         );
     }
 
-    public async isModeratorOrHigher(userId: string | Types.ObjectId) {
+    public async isStaffOrManager(userId: string | Types.ObjectId) {
         return (
             (await this.usersRepository.count({
                 _id: convertToObjectId(userId),
-                $or: [
-                    { role: UserRole.Mod },
-                    { role: UserRole.Admin },
-                    { role: UserRole.SuperAdmin },
-                ],
+                $or: [{ role: UserRole.Staff }, { role: UserRole.Manager }],
             })) > 0
         );
     }

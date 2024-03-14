@@ -9,7 +9,7 @@ import {
     UseGuards,
     Headers,
 } from '@nestjs/common';
-import { ACCESS_TOKEN_NAME, MANAGEMENTS_SERVICE, ModGuard } from '~libs/common';
+import { ACCESS_TOKEN_NAME, MANAGEMENTS_SERVICE, StaffGuard } from '~libs/common';
 import { ObjectIdParamDTO } from '~libs/common/dtos';
 import { ClientRMQ } from '@nestjs/microservices';
 import {
@@ -46,7 +46,7 @@ import { THeaders } from '~libs/common/types/common.type';
     description: 'Internal server error, please try again later!',
 })
 @ApiBearerAuth(ACCESS_TOKEN_NAME)
-@UseGuards(ModGuard)
+@UseGuards(StaffGuard)
 @ApiTags('orders management')
 @Controller('/orders-mnt')
 export class OrdersManagementController {

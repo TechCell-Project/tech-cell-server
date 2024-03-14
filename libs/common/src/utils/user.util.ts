@@ -1,9 +1,8 @@
 import { UserRole } from '~libs/resource/users/enums';
 import { generateRandomString } from './shared.util';
 
-export const isSuperAdmin = (user: any) => user.role === UserRole.SuperAdmin;
-export const isAdmin = (user: any) => user.role === UserRole.Admin;
-export const isMod = (user: any) => user.role === UserRole.Mod;
+export const isSuperAdmin = (user: any) => user.role === UserRole.Manager;
+export const isAdmin = (user: any) => user.role === UserRole.Staff;
 export const isUser = (user: any) => user.role === UserRole.User;
 
 export const buildUniqueUserNameFromEmail = (email: string) =>

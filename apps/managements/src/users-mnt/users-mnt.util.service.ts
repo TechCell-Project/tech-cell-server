@@ -1,6 +1,6 @@
 import { UsersService } from '~libs/resource';
 import { Injectable, Logger } from '@nestjs/common';
-import { isAdmin, isMod, isSuperAdmin, isUser } from '~libs/common/utils';
+import { isAdmin, isSuperAdmin, isUser } from '~libs/common/utils';
 import { RpcException } from '@nestjs/microservices';
 import { User } from '~libs/resource/users/schemas';
 import { REQUIRE_USER_REFRESH } from '~libs/common/constants';
@@ -96,11 +96,11 @@ export class UsersMntUtilService {
             throw new RpcException(UsersMntExceptions.cantChangeSuperAdminRole);
         }
 
-        if (roleToChange === UserRole.SuperAdmin) {
+        if (roleToChange === UserRole.Manager) {
             throw new RpcException(UsersMntExceptions.cantGrantSuperAdminRole);
         }
 
-        if (actorUser.role === UserRole.Admin && roleToChange === UserRole.Admin) {
+        if (actorUser.role === UserRole.Staff && roleToChange === UserRole.Staff) {
             throw new RpcException(UsersMntExceptions.notHavePermissionToGrantAdminRole);
         }
 
@@ -125,16 +125,11 @@ export class UsersMntUtilService {
             return false;
         }
 
-        if (isMod(victimUser) && !isSuperAdmin(actorUser) && !isAdmin(actorUser)) {
+        if (!isSuperAdmin(actorUser) && !isAdmin(actorUser)) {
             return false;
         }
 
-        if (
-            isUser(victimUser) &&
-            !isSuperAdmin(actorUser) &&
-            !isAdmin(actorUser) &&
-            !isMod(actorUser)
-        ) {
+        if (isUser(victimUser) && !isSuperAdmin(actorUser) && !isAdmin(actorUser)) {
             return false;
         }
 

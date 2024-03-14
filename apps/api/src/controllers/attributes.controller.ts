@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~libs/common/constants';
-import { AdminGuard } from '~libs/common';
+import { StaffGuard } from '~libs/common';
 import {
     AttributesSearchMessagePattern,
     GetAttributeByIdRequestDTO,
@@ -127,7 +127,7 @@ export class AttributesController {
     })
     @ApiCreatedResponse({ description: 'The attribute has been successfully created.' })
     @ApiBadRequestResponse({ description: 'Something wrong, re-check your input.' })
-    @UseGuards(AdminGuard)
+    @UseGuards(StaffGuard)
     @Post('/')
     async createAttribute(
         @Headers() headers: THeaders,
@@ -147,7 +147,7 @@ export class AttributesController {
     })
     @ApiOkResponse({ description: 'Update attribute description successfully!' })
     @ApiBadRequestResponse({ description: 'Something wrong, re-check your input.' })
-    @UseGuards(AdminGuard)
+    @UseGuards(StaffGuard)
     @Patch('/:attributeId')
     async updateAttributeInfo(
         @Headers() headers: THeaders,
@@ -168,7 +168,7 @@ export class AttributesController {
     })
     @ApiOkResponse({ description: 'Delete attribute successfully!' })
     @ApiBadRequestResponse({ description: 'Something wrong, re-check your input.' })
-    @UseGuards(AdminGuard)
+    @UseGuards(StaffGuard)
     @Delete('/:attributeId')
     async deleteAttribute(
         @Headers() headers: THeaders,

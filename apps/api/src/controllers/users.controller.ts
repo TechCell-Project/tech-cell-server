@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~libs/common/constants';
-import { ModGuard, SuperAdminGuard } from '~libs/common/guards';
+import { StaffGuard, ManagerGuard } from '~libs/common/guards';
 import {
     ApiBadRequestResponse,
     ApiBearerAuth,
@@ -74,7 +74,7 @@ export class UsersController {
         description: 'Create new user',
     })
     @ApiCreatedResponse({ description: 'Create user success', type: UserMntResponseDTO })
-    @UseGuards(SuperAdminGuard)
+    @UseGuards(ManagerGuard)
     @Post('/')
     async createUser(
         @Headers() headers: THeaders,
@@ -97,7 +97,7 @@ export class UsersController {
         type: ListUserResponseDTO,
     })
     @ApiNotFoundResponse({ description: 'No users found' })
-    @UseGuards(ModGuard)
+    @UseGuards(StaffGuard)
     @Get('/')
     async getUsers(@Headers() headers: THeaders, @Query() requestQuery: GetUsersQueryDTO) {
         return sendMessagePipeException<GetUsersQueryDTO>({
@@ -114,7 +114,7 @@ export class UsersController {
     })
     @ApiOkResponse({ description: 'Get users success', type: UserMntResponseDTO })
     @ApiNotFoundResponse({ description: 'No users found' })
-    @UseGuards(ModGuard)
+    @UseGuards(StaffGuard)
     @Get('/:id')
     async getUserById(@Headers() headers: THeaders, @Param('id') id: string) {
         return sendMessagePipeException({
@@ -133,7 +133,7 @@ export class UsersController {
     @ApiBadRequestResponse({
         description: 'Invalid request',
     })
-    @UseGuards(ModGuard)
+    @UseGuards(StaffGuard)
     @Patch('/:id/block')
     async blockUser(
         @Headers() headers: THeaders,
@@ -162,7 +162,7 @@ export class UsersController {
     @ApiBadRequestResponse({
         description: 'Invalid request',
     })
-    @UseGuards(ModGuard)
+    @UseGuards(StaffGuard)
     @Patch('/:id/unblock')
     async unblockUser(
         @Headers() headers: THeaders,
@@ -191,7 +191,7 @@ export class UsersController {
     @ApiBadRequestResponse({
         description: 'Invalid request',
     })
-    @UseGuards(ModGuard)
+    @UseGuards(StaffGuard)
     @Patch('/:id/change-role')
     async changeRoleUser(
         @Headers() headers: THeaders,
@@ -212,7 +212,7 @@ export class UsersController {
     }
 
     @ApiExcludeEndpoint(true)
-    @UseGuards(SuperAdminGuard)
+    @UseGuards(ManagerGuard)
     @Post('/gen-clone')
     async gen(@Headers() headers: THeaders, @Query() { num }: { num: number }) {
         return sendMessagePipeException({
