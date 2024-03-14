@@ -74,10 +74,10 @@ export class NotificationsGateway
 
         switch (userVerified.role) {
             case UserRole.Manager:
-                rooms.push(NotifyRoom.SuperAdminRoom);
+                rooms.push(NotifyRoom.ManagerRoom);
                 break;
             case UserRole.Staff:
-                rooms.push(NotifyRoom.AdminRoom);
+                rooms.push(NotifyRoom.StaffRoom);
                 break;
             case UserRole.User:
                 rooms.push(NotifyRoom.UserRoom);
