@@ -121,15 +121,6 @@ export class UsersService {
         return (await this.usersRepository.count({ 'avatar.publicId': publicId })) > 0;
     }
 
-    public async isAdminOrHigher(userId: string | Types.ObjectId) {
-        return (
-            (await this.usersRepository.count({
-                _id: convertToObjectId(userId),
-                $or: [{ role: UserRole.Staff }, { role: UserRole.Manager }],
-            })) > 0
-        );
-    }
-
     public async isStaffOrManager(userId: string | Types.ObjectId) {
         return (
             (await this.usersRepository.count({
