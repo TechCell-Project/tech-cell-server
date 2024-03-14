@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Inject, Patch, UseGuards, Headers } from '@nestjs/common';
+import { Body, Controller, Get, Inject, Patch, Headers } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~libs/common/constants';
 import {
@@ -14,8 +14,7 @@ import {
     ApiTooManyRequestsResponse,
     ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { AuthGuard } from '~libs/common';
-import { CurrentUser } from '~libs/common/decorators';
+import { Auth, CurrentUser } from '~libs/common/decorators';
 import { TCurrentUser } from '~libs/common/types';
 import { UserMntResponseDTO } from '~libs/resource/users/dtos';
 import { UsersSearchMessagePattern } from '~apps/search/users-search';
@@ -27,6 +26,7 @@ import {
 } from '~apps/managements/users-mnt';
 import { sendMessagePipeException } from '~libs/common/RabbitMQ/rmq.util';
 import { THeaders } from '~libs/common/types/common.type';
+import { UserRole } from '~libs/resource/users/enums';
 
 @ApiBadRequestResponse({
     description: 'Invalid request, please check your request data!',
@@ -47,7 +47,7 @@ import { THeaders } from '~libs/common/types/common.type';
     description: 'Internal server error, please try again later!',
 })
 @ApiBearerAuth(ACCESS_TOKEN_NAME)
-@UseGuards(AuthGuard)
+@Auth(UserRole.Manager, UserRole.Staff, UserRole.User)
 @ApiTags('profile')
 @Controller('/profile')
 export class ProfileController {

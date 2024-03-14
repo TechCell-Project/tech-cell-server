@@ -1,4 +1,3 @@
-import { AuthGuard } from '~libs/common';
 import {
     BadRequestException,
     Controller,
@@ -11,7 +10,6 @@ import {
     PayloadTooLargeException,
     Post,
     UploadedFile,
-    UseGuards,
     UseInterceptors,
     UploadedFiles,
     Req,
@@ -50,6 +48,8 @@ import { I18nContext } from 'nestjs-i18n';
 import { I18nTranslations } from '~libs/common/i18n/generated/i18n.generated';
 import { sendMessagePipeException } from '~libs/common/RabbitMQ/rmq.util';
 import { THeaders } from '~libs/common/types/common.type';
+import { Auth } from '~libs/common/decorators';
+import { UserRole } from '~libs/resource/users/enums';
 
 @ApiBadRequestResponse({
     description: 'Invalid request, please check your request data!',
@@ -159,7 +159,7 @@ export class ImagesController {
         },
     })
     @Post('/')
-    @UseGuards(AuthGuard)
+    @Auth(UserRole.Manager, UserRole.Staff, UserRole.User)
     async uploadSingleImage(
         @Headers() headers: THeaders,
         @UploadedFile(
@@ -254,7 +254,7 @@ export class ImagesController {
         }),
     )
     @Post('/array')
-    @UseGuards(AuthGuard)
+    @Auth(UserRole.Manager, UserRole.Staff, UserRole.User)
     async uploadArrayImages(
         @Headers() headers: THeaders,
         @UploadedFiles(

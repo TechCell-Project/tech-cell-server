@@ -51,11 +51,11 @@ import {
     IUserGoogleResponse,
     AuthMessagePattern,
 } from '~apps/auth';
-import { CurrentUser } from '~libs/common/decorators';
+import { Auth, CurrentUser } from '~libs/common/decorators';
 import { TCurrentUser, THeaders } from '~libs/common/types';
-import { AuthGuard } from '~libs/common/guards';
 import { ACCESS_TOKEN_NAME } from '~libs/common/constants/api.constant';
 import { sendMessagePipeException } from '~libs/common/RabbitMQ/rmq.util';
+import { UserRole } from '~libs/resource/users/enums';
 
 @ApiBadRequestResponse({
     description: 'Invalid request, please check your request data!',
@@ -281,7 +281,7 @@ export class AuthController {
     @ApiNotFoundResponse({ description: 'Your information is not found' })
     @ApiBadRequestResponse({ description: 'Your information is invalid' })
     @ApiBearerAuth(ACCESS_TOKEN_NAME)
-    @UseGuards(AuthGuard)
+    @Auth(UserRole.Manager, UserRole.Staff, UserRole.User)
     @HttpCode(HttpStatus.OK)
     @Post('change-password')
     async changePassword(
