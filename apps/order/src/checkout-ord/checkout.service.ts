@@ -496,17 +496,22 @@ export class CheckoutService {
         const attributeArray = Array.from(new Set([...generalAttributes]));
         let height: number, width: number, length: number, weight: number;
         attributeArray.forEach((attribute) => {
+            let value = Number(attribute.v.replace(',', '.'));
+            if (isNaN(value)) {
+                value = null;
+            }
+
             if (attribute.k === 'height') {
-                height = Number(attribute.v);
+                height = value;
             }
             if (attribute.k === 'width') {
-                width = Number(attribute.v);
+                width = value;
             }
             if (attribute.k === 'length') {
-                length = Number(attribute.v);
+                length = value;
             }
             if (attribute.k === 'weight') {
-                weight = Number(attribute.v);
+                weight = value;
             }
         });
 
