@@ -14,9 +14,9 @@ class UsersMntException extends HttpException {
 }
 
 export const UsersMntExceptions = {
-    cantCreateSuperAdmin: new UsersMntException(
-        'USERS_MNT_CANT_CREATE_SUPER_ADMIN',
-        'Cannot create Super Admin',
+    cannotCreateManager: new UsersMntException(
+        'USERS_MNT_CAN_NOT_CREATE_MANAGER',
+        'Cannot create Manager',
         HttpStatus.BAD_REQUEST,
     ),
     cantBlockYourself: new UsersMntException(

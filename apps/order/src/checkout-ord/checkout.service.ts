@@ -336,8 +336,8 @@ export class CheckoutService {
         });
     }
 
-    public async getUserOrderById({ user, id }: { user: TCurrentUser } & ObjectIdParamDTO) {
-        return await this.orderService.getUserOrderById(id, convertToObjectId(user._id));
+    public async getUserOrderById({ userId, id }: { userId: Types.ObjectId } & ObjectIdParamDTO) {
+        return await this.orderService.getUserOrderById(id, convertToObjectId(userId));
     }
 
     /**
@@ -419,7 +419,7 @@ export class CheckoutService {
     }) {
         const order = await this.getUserOrderById({
             id: data.orderId,
-            user: { _id: convertToObjectId(data.userId) },
+            userId: convertToObjectId(data.userId),
         });
         const paymentUrl = await this.getPaymentUrl(
             order.paymentOrder.method,

@@ -36,7 +36,7 @@ export class UsersMntService extends UsersMntUtilService {
         const newUser = new CreateUserDTO(createUserRequestDto);
 
         if (createUserRequestDto.role === UserRole.Manager) {
-            throw new RpcException(UsersMntExceptions.cantCreateSuperAdmin);
+            throw new RpcException(UsersMntExceptions.cannotCreateManager);
         }
 
         const [userCreated] = await Promise.all([

@@ -1,6 +1,5 @@
 export * from './api.constant';
 export * from './attribute.constant';
-export * from './auth.constant';
 export * from './cache.constant';
 export * from './category.constant';
 export * from './common.constant';

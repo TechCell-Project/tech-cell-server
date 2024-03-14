@@ -1,12 +1,14 @@
-import { Controller, Get, Inject, UseGuards } from '@nestjs/common';
+import { Controller, Get, Inject } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import { TASK_SERVICE } from '~libs/common/constants';
 import { ApiExcludeController } from '@nestjs/swagger';
-import { ManagerGuard, catchException } from '~libs/common';
+import { catchException } from '~libs/common';
 import { DatabaseTaskEventPattern } from '~apps/task/database-task';
+import { Auth } from '~libs/common/decorators';
+import { UserRole } from '~libs/resource/users/enums';
 
 @ApiExcludeController()
-@UseGuards(ManagerGuard)
+@Auth(UserRole.Manager)
 @Controller('/admin')
 export class AdminController {
     constructor(@Inject(TASK_SERVICE) private readonly taskService: ClientRMQ) {}

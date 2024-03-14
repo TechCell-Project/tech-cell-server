@@ -1,15 +1,5 @@
-import {
-    Controller,
-    Get,
-    Inject,
-    Patch,
-    Query,
-    Param,
-    Body,
-    UseGuards,
-    Headers,
-} from '@nestjs/common';
-import { ACCESS_TOKEN_NAME, MANAGEMENTS_SERVICE, StaffGuard } from '~libs/common';
+import { Controller, Get, Inject, Patch, Query, Param, Body, Headers } from '@nestjs/common';
+import { ACCESS_TOKEN_NAME, MANAGEMENTS_SERVICE } from '~libs/common';
 import { ObjectIdParamDTO } from '~libs/common/dtos';
 import { ClientRMQ } from '@nestjs/microservices';
 import {
@@ -32,6 +22,8 @@ import { OrderSchemaDTO } from '~libs/resource/orders/dtos/order-schema.dto';
 import { GetOrderByIdResponseDTO } from '~apps/managements/orders-mnt/dtos/get-order-by-id-response.dto';
 import { sendMessagePipeException } from '~libs/common/RabbitMQ/rmq.util';
 import { THeaders } from '~libs/common/types/common.type';
+import { Auth } from '~libs/common/decorators';
+import { UserRole } from '~libs/resource/users/enums';
 
 @ApiBadRequestResponse({
     description: 'Invalid request, please check your request data!',
@@ -46,7 +38,7 @@ import { THeaders } from '~libs/common/types/common.type';
     description: 'Internal server error, please try again later!',
 })
 @ApiBearerAuth(ACCESS_TOKEN_NAME)
-@UseGuards(StaffGuard)
+@Auth(UserRole.Staff)
 @ApiTags('orders management')
 @Controller('/orders-mnt')
 export class OrdersManagementController {

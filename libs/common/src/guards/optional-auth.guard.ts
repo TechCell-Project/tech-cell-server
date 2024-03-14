@@ -1,6 +1,6 @@
-import { ExecutionContext, HttpStatus, Injectable } from '@nestjs/common';
+import { ExecutionContext, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { AuthCoreGuard } from './auth.core.guard';
+import { AuthGuard } from './auth.guard';
 import { I18nContext } from 'nestjs-i18n';
 import { I18nTranslations } from '../i18n/generated/i18n.generated';
 import { ITokenVerifiedResponse } from '~apps/auth/interfaces/token-verified-response.interface';
@@ -12,18 +12,16 @@ import { UserRole } from '~libs/resource/users/enums/UserRole.enum';
  * @description Optional Auth Guard, verify jwt token from request and add user to request if login success
  */
 @Injectable()
-export class OptionalAuthGuard extends AuthCoreGuard {
+export class OptionalAuthGuard extends AuthGuard {
     constructor(reflector: Reflector) {
-        super(reflector, OptionalAuthGuard.name);
+        super(reflector);
+        this.logger = new Logger(OptionalAuthGuard.name);
         this._acceptRoles.push(UserRole.Manager, UserRole.Staff, UserRole.User);
     }
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
         try {
             const i18n = I18nContext.current<I18nTranslations>();
-            if (this.resolveSkipAuth(context)) {
-                throw new Error('Skipped');
-            }
 
             const { authHeader } = this.getAccessToken(context, i18n);
 
@@ -61,12 +59,8 @@ export class OptionalAuthGuard extends AuthCoreGuard {
                 throw new Error('Token expired!');
             }
             this.addUserToRequest(dataVerified, context);
-            this.logger.debug(
-                `Auth in OptionalAuthCoreGuard for user: ${dataVerified._id} - ${dataVerified.email}`,
-            );
             return isJwtValid;
         } catch (error) {
-            this.logger.debug(`Not auth in OptionalAuthCoreGuard: ${error.message}`);
             return true;
         }
     }

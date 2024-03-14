@@ -1,13 +1,11 @@
-import { Controller, Get, Inject } from '@nestjs/common';
-import { ClientRMQ } from '@nestjs/microservices';
-import { UTILITY_SERVICE } from '~libs/common/constants';
+import { Controller, Get } from '@nestjs/common';
 import { ApiExcludeController, ApiTags } from '@nestjs/swagger';
 
 @ApiExcludeController()
 @ApiTags('commons')
 @Controller('/')
 export class AppController {
-    constructor(@Inject(UTILITY_SERVICE) private readonly utilityService: ClientRMQ) {}
+    constructor() {}
 
     @Get('ping')
     async getPing() {

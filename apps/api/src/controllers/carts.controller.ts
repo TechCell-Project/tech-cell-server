@@ -1,17 +1,6 @@
-import { AuthGuard } from '~libs/common/guards';
-import { CurrentUser } from '~libs/common/decorators';
+import { Auth, CurrentUser } from '~libs/common/decorators';
 import { TCurrentUser, THeaders } from '~libs/common/types';
-import {
-    Body,
-    Controller,
-    Delete,
-    Get,
-    HttpCode,
-    Inject,
-    Post,
-    Headers,
-    UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Inject, Post, Headers } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import {
     ApiBadRequestResponse,
@@ -32,6 +21,7 @@ import { ACCESS_TOKEN_NAME } from '~libs/common/constants/api.constant';
 import { ORDER_SERVICE } from '~libs/common/constants/services.constant';
 import { sendMessagePipeException } from '~libs/common/RabbitMQ/rmq.util';
 import { CartDTO } from '~libs/resource/carts/dtos';
+import { UserRole } from '~libs/resource/users/enums';
 
 @ApiBadRequestResponse({
     description: 'Invalid request, please check your request data!',
@@ -48,7 +38,7 @@ import { CartDTO } from '~libs/resource/carts/dtos';
 @ApiBearerAuth(ACCESS_TOKEN_NAME)
 @ApiTags('carts')
 @Controller('carts')
-@UseGuards(AuthGuard)
+@Auth(UserRole.User)
 export class CartsController {
     constructor(@Inject(ORDER_SERVICE) private readonly orderService: ClientRMQ) {}
 

@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~libs/common/constants';
-import { StaffGuard, OptionalAuthGuard, ManagerGuard } from '~libs/common';
+import { OptionalAuthGuard } from '~libs/common';
 import {
     ApiBody,
     ApiNotFoundResponse,
@@ -43,8 +43,9 @@ import {
 import { ProductDTO } from '~libs/resource/products/dtos/product.dto';
 import { sendMessagePipeException } from '~libs/common/RabbitMQ/rmq.util';
 import { THeaders } from '~libs/common/types/common.type';
-import { CurrentUser } from '~libs/common/decorators';
+import { Auth, CurrentUser } from '~libs/common/decorators';
 import { TCurrentUser } from '~libs/common/types';
+import { UserRole } from '~libs/resource/users/enums';
 
 @ApiBadRequestResponse({
     description: 'Invalid request, please check your request data!',
@@ -93,7 +94,7 @@ export class ProductsController {
         description: 'Create product successfully!',
     })
     @Post('/')
-    @UseGuards(StaffGuard)
+    @Auth(UserRole.Staff)
     async createProduct(
         @Headers() headers: THeaders,
         @Body() { ...data }: CreateProductRequestDTO,
@@ -136,7 +137,7 @@ export class ProductsController {
         description: 'Update product information',
     })
     @Put('/:productId')
-    @UseGuards(StaffGuard)
+    @Auth(UserRole.Staff)
     async updateProduct(
         @Headers() headers: THeaders,
         @Param() { productId }: ProductIdParamsDTO,
@@ -151,7 +152,7 @@ export class ProductsController {
     }
 
     @ApiExcludeEndpoint(true)
-    @UseGuards(ManagerGuard)
+    @Auth(UserRole.Manager)
     @Post('/gen-clone')
     async gen(@Headers() headers: THeaders, @Query() { num }: { num: number }) {
         return sendMessagePipeException({
@@ -169,7 +170,7 @@ export class ProductsController {
         description: 'Delete product successfully!',
     })
     @Delete('/:productId')
-    @UseGuards(StaffGuard)
+    @Auth(UserRole.Staff)
     async deleteProduct(@Headers() headers: THeaders, @Param() { productId }: ProductIdParamsDTO) {
         return sendMessagePipeException({
             client: this.managementsService,
@@ -186,7 +187,7 @@ export class ProductsController {
         description: 'Delete product variation successfully!',
     })
     @Delete('/:productId/variation')
-    @UseGuards(StaffGuard)
+    @Auth(UserRole.Staff)
     async deleteProductVariation(
         @Headers() headers: THeaders,
         @Param() { productId }: ProductIdParamsDTO,

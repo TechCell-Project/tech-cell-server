@@ -22,7 +22,7 @@ import { NotificationService } from '~libs/resource';
 import { Types } from 'mongoose';
 import { instrument, RedisStore } from '@socket.io/admin-ui';
 import { RedisService } from '~libs/common/Redis/services/redis.service';
-import { AuthCoreGuard } from '~libs/common/guards/auth.core.guard';
+import { AuthGuard } from '~libs/common/guards/auth.guard';
 import { NotificationId } from '../dtos';
 import { convertToObjectId } from '~libs/common/utils';
 
@@ -183,7 +183,7 @@ export class NotificationsGateway
      */
     private async authenticateClient(
         client: Socket,
-        guard?: AuthCoreGuard,
+        guard?: AuthGuard,
     ): Promise<ITokenVerifiedResponse> | null {
         let authHeaderParts = client.handshake?.headers?.authorization?.split(' ');
         if (!authHeaderParts) {
