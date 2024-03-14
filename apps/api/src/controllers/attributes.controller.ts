@@ -8,12 +8,10 @@ import {
     Post,
     Query,
     Patch,
-    UseGuards,
     Delete,
 } from '@nestjs/common';
 import { ClientRMQ } from '@nestjs/microservices';
 import { MANAGEMENTS_SERVICE, SEARCH_SERVICE } from '~libs/common/constants';
-import { AuthGuard } from '~libs/common';
 import {
     AttributesSearchMessagePattern,
     GetAttributeByIdRequestDTO,
