@@ -1,6 +1,6 @@
 import { UsersService } from '~libs/resource';
 import { Injectable, Logger } from '@nestjs/common';
-import { isAdmin, isSuperAdmin, isUser } from '~libs/common/utils';
+import { isStaff, isManager, isUser } from '~libs/common/utils';
 import { RpcException } from '@nestjs/microservices';
 import { User } from '~libs/resource/users/schemas';
 import { REQUIRE_USER_REFRESH } from '~libs/common/constants';
@@ -84,7 +84,7 @@ export class UsersMntUtilService {
         actorUser: User;
         roleToChange: string;
     }) {
-        if (!isSuperAdmin(actorUser) && !isAdmin(actorUser)) {
+        if (!isManager(actorUser) && !isStaff(actorUser)) {
             throw new RpcException(UsersMntExceptions.notHavePermissionToChangeRole);
         }
 
@@ -92,7 +92,7 @@ export class UsersMntUtilService {
             throw new RpcException(UsersMntExceptions.cantChangeYourOwnRole);
         }
 
-        if (isSuperAdmin(victimUser) && !isSuperAdmin(actorUser)) {
+        if (isManager(victimUser) && !isManager(actorUser)) {
             throw new RpcException(UsersMntExceptions.cantChangeSuperAdminRole);
         }
 
@@ -117,19 +117,19 @@ export class UsersMntUtilService {
             return false;
         }
 
-        if (isSuperAdmin(victimUser)) {
+        if (isManager(victimUser)) {
             return false;
         }
 
-        if (isAdmin(victimUser) && !isSuperAdmin(actorUser)) {
+        if (isStaff(victimUser) && !isManager(actorUser)) {
             return false;
         }
 
-        if (!isSuperAdmin(actorUser) && !isAdmin(actorUser)) {
+        if (!isManager(actorUser) && !isStaff(actorUser)) {
             return false;
         }
 
-        if (isUser(victimUser) && !isSuperAdmin(actorUser) && !isAdmin(actorUser)) {
+        if (isUser(victimUser) && !isManager(actorUser) && !isStaff(actorUser)) {
             return false;
         }
 
@@ -142,7 +142,7 @@ export class UsersMntUtilService {
      * @returns return true if actorUser is Admin or Super Admin, otherwise return false
      */
     private requiredAdminOrHigherRole({ actorUser }: { actorUser: User }) {
-        if (!isAdmin(actorUser) && !isSuperAdmin(actorUser)) {
+        if (!isStaff(actorUser) && !isManager(actorUser)) {
             return false;
         }
 
@@ -155,7 +155,7 @@ export class UsersMntUtilService {
      * @returns return true if actorUser is Super Admin, otherwise return false
      */
     private requiredSuperAdminRole({ actorUser }: { actorUser: User }) {
-        if (!isSuperAdmin(actorUser)) {
+        if (!isManager(actorUser)) {
             return false;
         }
 

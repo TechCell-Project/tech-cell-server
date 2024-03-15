@@ -59,7 +59,7 @@ export class UsersSearchUtilService {
             }
         }
 
-        if (payload?.role && payload.role !== UserSearchRole.ALL) {
+        if (payload?.role && payload.role !== UserSearchRole.All) {
             Object.assign(filterQuery, {
                 role: payload.role,
             });

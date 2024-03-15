@@ -11,11 +11,10 @@ export enum UserSearchEmailVerified {
 }
 
 export enum UserSearchRole {
-    SUPER_ADMIN = 'SuperAdmin',
-    ADMIN = 'Admin',
-    MOD = 'Mod',
-    USER = 'User',
-    ALL = 'all_role',
+    Manager = 'Manager',
+    Staff = 'Staff',
+    User = 'User',
+    All = 'all_role',
 }
 
 export enum UserSearchSortOrder {

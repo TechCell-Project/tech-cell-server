@@ -86,7 +86,7 @@ export class GetUsersQueryDTO {
         enum: UserSearchRole,
         description: 'Role of users to be returned',
         required: false,
-        default: UserSearchRole.ALL,
+        default: UserSearchRole.All,
     })
     @IsOptional()
     @IsEnumI18n(UserSearchRole)
