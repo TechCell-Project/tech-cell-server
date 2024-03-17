@@ -16,12 +16,12 @@ import { RabbitMQHeaderResolver, SocketHeaderResolver } from './resolvers';
             useFactory: (configService: ConfigService) => ({
                 fallbackLanguage: configService.getOrThrow('FALLBACK_LANGUAGE'),
                 loaderOptions: {
-                    path: path.join(__dirname, '../../../libs/common/src/i18n/lang/'),
+                    path: path.join(process.cwd(), './libs/common/src/i18n/lang/'),
                     watch: true,
                 },
                 typesOutputPath: path.join(
-                    __dirname,
-                    '../../../libs/common/src/i18n/generated/i18n.generated.ts',
+                    process.cwd(),
+                    './libs/common/src/i18n/generated/i18n.generated.ts',
                 ),
             }),
             resolvers: [

@@ -59,7 +59,7 @@ export class AddressSearchService {
         i18n: I18nContext<I18nTranslations>,
         provinceId: number,
     ): Promise<GhnDistrictDTO[]> {
-        if (!provinceId) {
+        if (!provinceId || provinceId === undefined || provinceId === null) {
             throw new RpcException(
                 new BadRequestException(
                     i18n.t('errorMessage.PROPERTY_IS_REQUIRED', {
@@ -97,12 +97,12 @@ export class AddressSearchService {
     }
 
     async getWards(i18n: I18nContext<I18nTranslations>, districtId: number): Promise<GhnWardDTO[]> {
-        if (!districtId) {
+        if (!districtId || districtId === undefined || districtId === null) {
             throw new RpcException(
                 new BadRequestException(
-                    i18n.t('errorMessage.PROPERTY_IS_NOT_FOUND', {
+                    i18n.t('errorMessage.PROPERTY_IS_REQUIRED', {
                         args: {
-                            property: 'districts',
+                            property: 'districtId',
                         },
                     }),
                 ),

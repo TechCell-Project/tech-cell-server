@@ -24,7 +24,7 @@
         "test:watch": "jest --watch",
         "test:cov": "jest --coverage",
         "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-        "test:e2e": "jest --config ./apps/back-end/test/jest-e2e.json",
+        "test:e2e": "jest --config ./jest-e2e.json",
         "compodoc": "node ./scripts/run-compodoc.js",
         "quick:start": "./scripts/quick-start-local.ps1",
         "quick:dev": "./scripts/quick-dev-local.ps1",
