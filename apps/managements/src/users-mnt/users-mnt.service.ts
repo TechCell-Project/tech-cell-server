@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common';
 import {
     BlockUnblockRequestDTO,
     ChangeRoleRequestDTO,
@@ -7,18 +7,25 @@ import {
     UpdateUserExecDTO,
     UpdateUserRequestDTO,
 } from './dtos';
-import { RpcException } from '@nestjs/microservices';
+import { ClientRMQ, RpcException } from '@nestjs/microservices';
 import { BlockActivity, UserRole } from '~libs/resource/users/enums';
 import { UsersMntUtilService } from './users-mnt.util.service';
 import { convertToObjectId, generateRandomString } from '~libs/common';
 import { AddressSchemaDTO, CreateUserDTO, ImageSchemaDTO } from '~libs/resource/users/dtos';
-import { USERS_CACHE_PREFIX } from '~libs/common/constants';
+import {
+    COMMUNICATIONS_SERVICE,
+    DEFAULT_EMAIL_DOMAIN,
+    USERS_CACHE_PREFIX,
+} from '~libs/common/constants';
 import { cleanUserBeforeResponse } from '~libs/resource/users/utils';
 import { TCurrentUser } from '~libs/common/types';
 import { UsersService } from '~libs/resource/users';
 import { CloudinaryService } from '~libs/third-party/cloudinary.com';
 import { UsersMntExceptions } from './users-mnt.exception';
 import { RedisService } from '~libs/common/Redis/services';
+import { OtpService, OtpType } from '~libs/resource';
+import { ConfirmEmailRegisterDTO, MailEventPattern } from '~apps/communications/mail';
+import { I18nContext } from 'nestjs-i18n';
 
 @Injectable()
 export class UsersMntService extends UsersMntUtilService {
@@ -27,6 +34,8 @@ export class UsersMntService extends UsersMntUtilService {
         protected readonly usersService: UsersService,
         protected redisService: RedisService,
         private readonly cloudinaryService: CloudinaryService,
+        private readonly otpService: OtpService,
+        @Inject(COMMUNICATIONS_SERVICE) protected communicationsService: ClientRMQ,
     ) {
         super(usersService, redisService);
         this.logger = new Logger(UsersMntService.name);
@@ -43,6 +52,21 @@ export class UsersMntService extends UsersMntUtilService {
             this.usersService.createUser(newUser),
             this.redisService.delWithPrefix(USERS_CACHE_PREFIX), // remove users cache
         ]);
+
+        if (!userCreated.email.endsWith(DEFAULT_EMAIL_DOMAIN)) {
+            const otp = await this.otpService.createOrRenewOtp({
+                email: userCreated.email,
+                otpType: OtpType.VerifyEmail,
+            });
+            const emailContext: ConfirmEmailRegisterDTO = {
+                otpCode: otp.otpCode,
+            };
+            this.communicationsService.emit(MailEventPattern.sendMailConfirm, {
+                email: userCreated.email,
+                emailContext,
+                lang: I18nContext.current().lang,
+            });
+        }
 
         return userCreated;
     }

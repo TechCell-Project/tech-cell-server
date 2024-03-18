@@ -3,6 +3,7 @@ import { CreateUserRequestDto } from '~apps/managements/users-mnt/dtos';
 import { UserRole } from '../enums';
 import { Transform } from 'class-transformer';
 import { isTrueSet } from '~libs/common/utils/shared.util';
+import { DEFAULT_EMAIL_DOMAIN } from '~libs/common/constants';
 
 export class CreateUserDTO {
     constructor(data: CreateUserRequestDto) {
@@ -12,9 +13,10 @@ export class CreateUserDTO {
         this.firstName = data?.firstName ?? 'systemF';
         this.lastName = data?.lastName ?? 'systemL';
 
+        this.email = data?.email ?? `${this.userName}${DEFAULT_EMAIL_DOMAIN}`;
+
         // If email is default, then this email is verified
-        this.email = data?.email ?? `${this.userName}_default@techcell.cloud`;
-        this.emailVerified = !data?.email;
+        this.emailVerified = this.email.endsWith(DEFAULT_EMAIL_DOMAIN) ? true : false;
     }
 
     @IsEmail()

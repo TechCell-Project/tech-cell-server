@@ -21,10 +21,37 @@ export function isEmail(email: string): boolean {
 export const catchException = () =>
     catchError((error) => throwError(() => new RpcException(error?.response ?? error?.error)));
 
-// create a function to generate random string
-export function generateRandomString(length: number) {
+/**
+ *
+ * @param length The length of the random string
+ * @param typeOfStr The type of the random string
+ * @returns The random string generated
+ */
+export function generateRandomString(
+    length: number,
+    typeOfStr: 'numeric' | 'alphabet' | 'alphabetLower' | 'alphabetUpper' | 'both' = 'both',
+) {
     let result = '';
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let characters = '';
+
+    switch (typeOfStr) {
+        case 'numeric':
+            characters = '0123456789';
+            break;
+        case 'alphabet':
+            characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+            break;
+        case 'alphabetLower':
+            characters = 'abcdefghijklmnopqrstuvwxyz';
+            break;
+        case 'alphabetUpper':
+            characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            break;
+        case 'both':
+            characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        default:
+    }
+
     const charactersLength = characters.length;
     for (let i = 0; i < length; i++) {
         result += `${characters[(Math.random() * charactersLength) | 0]}`;
