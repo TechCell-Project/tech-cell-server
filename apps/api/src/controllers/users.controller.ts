@@ -95,6 +95,7 @@ export class UsersController {
         });
     }
 
+    @Auth(UserRole.Staff, UserRole.User)
     @ApiOperation({
         summary: 'Get user by id',
         description: 'Get user by id',
