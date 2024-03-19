@@ -15080,7 +15080,7 @@ __metadata:
     ts-node: "npm:^10.9.1"
     tsconfig-paths: "npm:^4.2.0"
     typescript: "npm:^5.2.2"
-    vnpay: "npm:^0.9.5"
+    vnpay: "npm:^0.9.6"
     webpack: "npm:^5.89.0"
   languageName: unknown
   linkType: soft
@@ -15906,12 +15906,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vnpay@npm:^0.9.5":
-  version: 0.9.5
-  resolution: "vnpay@npm:0.9.5"
+"vnpay@npm:^0.9.6":
+  version: 0.9.6
+  resolution: "vnpay@npm:0.9.6"
   dependencies:
     moment-timezone: "npm:^0.5.43"
-  checksum: 10c0/93f4f9e33999410af932a4e870135829b5e699640dddb542863770efea0e82513c7d43d29d656f2ff7e4d014754166bc8eb33dd8c6bba3686692e25ddcdf285c
+  checksum: 10c0/681580e0b193230d7590f24e51d7512afa70098faebb701fa1fa4636f79e67de39f7065f0d6d2a9b782f509cb7ddb1fe4409db2939adcc83ea536742bf065b81
   languageName: node
   linkType: hard
 
