@@ -50,7 +50,6 @@ import { UserRole } from '~libs/resource/users/enums';
 })
 @ApiTags('users management')
 @ApiBearerAuth(ACCESS_TOKEN_NAME)
-@Auth(UserRole.Manager)
 @Controller('users')
 export class UsersController {
     constructor(
@@ -58,6 +57,7 @@ export class UsersController {
         @Inject(MANAGEMENTS_SERVICE) private readonly managementsService: ClientRMQ,
     ) {}
 
+    @Auth(UserRole.Manager)
     @ApiOperation({
         summary: 'Create new user',
         description: 'Create new user',
@@ -76,6 +76,7 @@ export class UsersController {
         });
     }
 
+    @Auth(UserRole.Manager)
     @ApiOperation({
         summary: 'Get list of users',
         description: 'Get list of users',
@@ -94,8 +95,7 @@ export class UsersController {
             headers,
         });
     }
-
-    @Auth(UserRole.Staff, UserRole.User)
+    @Auth(UserRole.Manager, UserRole.Staff, UserRole.User)
     @ApiOperation({
         summary: 'Get user by id',
         description: 'Get user by id',
@@ -112,6 +112,7 @@ export class UsersController {
         });
     }
 
+    @Auth(UserRole.Manager)
     @ApiOperation({
         summary: 'Block user',
         description: 'Block user',
@@ -140,6 +141,7 @@ export class UsersController {
         });
     }
 
+    @Auth(UserRole.Manager)
     @ApiOperation({
         summary: 'Unblock user',
         description: 'Unblock user',
@@ -168,6 +170,7 @@ export class UsersController {
         });
     }
 
+    @Auth(UserRole.Manager)
     @ApiExcludeEndpoint(true)
     @ApiOperation({
         summary: 'Change role user',
@@ -195,6 +198,7 @@ export class UsersController {
         // });
     }
 
+    @Auth(UserRole.Manager)
     @ApiExcludeEndpoint(true)
     @Post('/gen-clone')
     async gen(@Headers() headers: THeaders, @Query() { num }: { num: number }) {
