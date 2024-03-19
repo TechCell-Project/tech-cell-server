@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { ProductsSearchUtilService } from './products-search.util.service';
 import { GetProductByIdQueryDTO, GetProductsDTO } from './dtos';
-import { FilterQuery, QueryOptions, Types } from 'mongoose';
+import { FilterQuery, QueryOptions, Types, isObjectIdOrHexString } from 'mongoose';
 import { Product } from '~libs/resource';
 import { ListDataResponseDTO } from '~libs/common/dtos';
 import { convertToObjectId, isTrueSet } from '~libs/common/utils/shared.util';
@@ -18,13 +18,12 @@ export class ProductsSearchService extends ProductsSearchUtilService {
         const { page, pageSize, detail } = searchQuery;
 
         const filterOpt: FilterQuery<Product> = {};
-        if (searchQuery.keyword) {
+        if (searchQuery?.keyword) {
             const keywordRegex = generateRegexQuery(searchQuery.keyword);
             Object.assign(filterOpt, {
                 $or: [
                     { name: keywordRegex },
                     { description: keywordRegex },
-                    { categories: keywordRegex },
                     {
                         'variations.k': keywordRegex,
                     },
@@ -36,6 +35,34 @@ export class ProductsSearchService extends ProductsSearchUtilService {
                     },
                 ],
             });
+        }
+
+        if (searchQuery?.category) {
+            if (isObjectIdOrHexString(searchQuery.category)) {
+                Object.assign(filterOpt, { category: convertToObjectId(searchQuery.category) });
+            } else {
+                try {
+                    const cate = await this.categoriesService.getCategory({
+                        filterQueries: {
+                            label: generateRegexQuery(searchQuery.category.toString(), {
+                                ignoreAccentedVietnamese: true,
+                                sensitive: false,
+                            }),
+                        },
+                    });
+                    if (cate) {
+                        Object.assign(filterOpt, {
+                            category: convertToObjectId(cate._id),
+                        });
+                    }
+                } catch (error) {
+                    throw new NotFoundException(
+                        this.i18nService.t('errorMessage.MODEL_NOT_FOUND', {
+                            args: { modelName: `Category '${searchQuery?.category}'` },
+                        }),
+                    );
+                }
+            }
         }
 
         const queryOpt: QueryOptions<Product> = {

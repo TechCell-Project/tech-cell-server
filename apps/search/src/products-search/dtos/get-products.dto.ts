@@ -3,7 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { MAX_PRODUCTS_PER_PAGE } from '~libs/common/constants/product.constant';
 import { Transform, Type } from 'class-transformer';
 import { SelectType } from '~apps/search/enums';
-import { isTrueSet } from '~libs/common';
+import { convertToObjectId, isTrueSet } from '~libs/common';
 import {
     IsBooleanI18n,
     IsEnumI18n,
@@ -12,6 +12,7 @@ import {
     MaxI18n,
     MinI18n,
 } from '~libs/common/i18n/class-validator-i18n';
+import { Types, isObjectIdOrHexString } from 'mongoose';
 
 export class GetProductsDTO {
     constructor(data: GetProductsDTO) {
@@ -20,6 +21,13 @@ export class GetProductsDTO {
         this.detail = isTrueSet(data?.detail ?? false);
         this.select_type = data?.select_type ?? SelectType.onlyActive;
         this.keyword = data?.keyword ?? undefined;
+        if (data?.category) {
+            this.category = isObjectIdOrHexString(data.category)
+                ? convertToObjectId(data.category)
+                : data.category;
+        } else {
+            this.category = undefined;
+        }
     }
 
     @ApiProperty({
@@ -76,4 +84,13 @@ export class GetProductsDTO {
     @IsOptional()
     @IsStringI18n()
     keyword?: string;
+
+    @ApiProperty({
+        type: String,
+        description: 'Label or id of category to search',
+        required: false,
+    })
+    @IsOptional()
+    @IsStringI18n()
+    category?: string | Types.ObjectId;
 }

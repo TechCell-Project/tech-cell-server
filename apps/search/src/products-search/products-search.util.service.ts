@@ -13,6 +13,8 @@ import {
     PRODUCTS_PAGE,
 } from '~libs/common/constants';
 import { RedisService } from '~libs/common/Redis/services';
+import { I18n, I18nService } from 'nestjs-i18n';
+import { I18nTranslations } from '~libs/common/i18n/generated';
 
 @Injectable()
 export class ProductsSearchUtilService {
@@ -22,6 +24,7 @@ export class ProductsSearchUtilService {
         protected readonly attributesService: AttributesService,
         protected readonly categoriesService: CategoriesService,
         protected readonly usersService: UsersService,
+        @I18n() protected readonly i18nService: I18nService<I18nTranslations>,
     ) {}
 
     protected buildCacheKeyProducts({
