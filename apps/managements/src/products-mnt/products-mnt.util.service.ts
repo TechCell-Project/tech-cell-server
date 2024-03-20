@@ -353,6 +353,7 @@ export class ProductsMntUtilService {
                 'variations.#.images.#.url',
                 'variations.#.sku',
                 'variations.#.status',
+                'generalAttributes.#.name',
             ],
         });
 
@@ -374,8 +375,8 @@ export class ProductsMntUtilService {
                 paths: [
                     'description',
                     'status',
-                    'generalAttributes',
                     'descriptionImages',
+                    'generalAttributes',
                     'generalAttributes.#.k',
                     'generalAttributes.#.v',
                     'generalAttributes.#.u',
