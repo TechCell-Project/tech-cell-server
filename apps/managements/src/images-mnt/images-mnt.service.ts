@@ -87,25 +87,24 @@ export class ImagesMntService {
         images: Express.Multer.File[];
         imageUrls: string[];
     }) {
-        const resolve = [];
+        const uploadedImages = [];
         const uploadedFilenames = new Set();
         const uploadedUrls = new Set();
 
         for (let i = 0; i < Math.max(images.length, imageUrls.length); i++) {
             if (!uploadedFilenames.has(images[i].filename) && !uploadedUrls.has(imageUrls[i])) {
-                resolve.push(
-                    this.uploadSingleImage({
-                        image: images[i],
-                        imageUrl: imageUrls[i],
-                    }),
-                );
+                const uploadedImage = await this.uploadSingleImage({
+                    image: images[i],
+                    imageUrl: imageUrls[i],
+                });
                 uploadedFilenames.add(images[i].filename);
                 uploadedUrls.add(imageUrls[i]);
+                uploadedImages.push(uploadedImage);
             }
         }
-        const imagesUploaded = await Promise.all(resolve);
+
         return {
-            data: imagesUploaded,
+            data: uploadedImages,
         };
     }
 }
