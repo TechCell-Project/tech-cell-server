@@ -71,7 +71,7 @@ export class ImagesMntService {
                 buffer: fileBuffer,
             });
             const uploadedImage = await this.cloudinaryService.uploadImage(image);
-            return { ...new ImageUploadedResponseDTO(uploadedImage) };
+            return new ImageUploadedResponseDTO(uploadedImage);
         } catch (error) {
             this.logger.error(error);
             throw new RpcException(
@@ -88,17 +88,24 @@ export class ImagesMntService {
         imageUrls: string[];
     }) {
         const resolve = [];
-        for (let i = 0; i < images.length && i < imageUrls.length; i++) {
-            resolve.push(
-                this.uploadSingleImage({
-                    image: images[i],
-                    imageUrl: imageUrls[i],
-                }),
-            );
+        const uploadedFilenames = new Set();
+        const uploadedUrls = new Set();
+
+        for (let i = 0; i < Math.max(images.length, imageUrls.length); i++) {
+            if (!uploadedFilenames.has(images[i].filename) && !uploadedUrls.has(imageUrls[i])) {
+                resolve.push(
+                    this.uploadSingleImage({
+                        image: images[i],
+                        imageUrl: imageUrls[i],
+                    }),
+                );
+                uploadedFilenames.add(images[i].filename);
+                uploadedUrls.add(imageUrls[i]);
+            }
         }
-        const uploadedImages = await Promise.all(resolve);
+        const imagesUploaded = await Promise.all(resolve);
         return {
-            data: uploadedImages,
+            data: imagesUploaded,
         };
     }
 }

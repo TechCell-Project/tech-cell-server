@@ -127,6 +127,7 @@
         "typos",
         "ci/cd",
         "permissions",
-        "deps"
+        "deps",
+        "images"
     ]
 }
