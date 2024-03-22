@@ -85,10 +85,7 @@ export class GhnService {
             throw error;
         });
         const selectedProvince = provinceData.find(
-            (province) =>
-                province.name_extension?.some((name) =>
-                    generateRegexQuery(address.provinceLevel.province_name).test(name),
-                ),
+            (province) => province.province_id === address.provinceLevel.province_id,
         );
 
         const districtData = await this.getDistricts(selectedProvince.province_id).catch(
@@ -97,20 +94,14 @@ export class GhnService {
             },
         );
         const selectedDistrict = districtData.find(
-            (district) =>
-                district.name_extension?.some((name) =>
-                    generateRegexQuery(address.districtLevel.district_name).test(name),
-                ),
+            (district) => district.district_id === address.districtLevel.district_id,
         );
 
         const wardData = await this.getWards(selectedDistrict.district_id).catch((error) => {
             throw error;
         });
         const selectedWard = wardData.find(
-            (ward) =>
-                ward.name_extension?.some((name) =>
-                    generateRegexQuery(address.wardLevel.ward_name).test(name),
-                ),
+            (ward) => ward.ward_code === address.wardLevel.ward_code,
         );
 
         return { selectedProvince, selectedDistrict, selectedWard };
